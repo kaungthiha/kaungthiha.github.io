@@ -1,5 +1,19 @@
-title: Kaung Thiha's Portfolio
-description: Place for me to showcase my professional journey 
-remote_theme: pages-themes/minimal@v0.2.0
+title: Hi
+description: Showcasing my professional(ish) journey
+author: Kaung
+remote_theme: pages-themes/minimal
 plugins:
-- jekyll-remote-theme
+  - jekyll-remote-theme
+  - jekyll-seo-tag # Optional for better SEO
+
+# Navigation
+menu:
+  - title: Home
+    url: /
+  - title: About
+    url: /about/
+
+# Social Media
+social:
+  LinkedIn: https://www.linkedin.com/in/kaungthiha/
+  github: kaungthiha
