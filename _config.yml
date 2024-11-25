@@ -1,18 +1,27 @@
+# Site Settings
 title: "Affiliates"
-email: wowthemesnet@gmail.com
+email: your@email.com
 timezone: UTC
-baseurl: "/affiliates-jekyll-theme"
+baseurl: ""  
+url: "https://kaungthiha.github.io"  # Add this line with your actual username
 permalink: "/:title/"
+
+# Design
 logo: 'assets/images/logo.png'
 favicon: 'assets/images/favicon.ico'
-author: Sal
+
+# Content Settings
 paginate: 30
-disqus: 'demowebsite'
+paginate_path: /page:num/
 locale: en_us
 lang: en_us
+
+# Feed Settings
 feed_items: 10
 feed_update_period: daily
 feed_update_frequency: 1
+
+# Build Settings
 markdown: kramdown
 kramdown:
   syntax_highlighter_opts:
@@ -20,37 +29,23 @@ kramdown:
 sass:
   sass_dir: _sass
   style: :compressed
+
+# Analytics
 ganalytics: UA-113961478-1
 
-# Authors
-authors:
-  sal:
-    name: Sal
-    display_name: Sal
-    avatar: 'assets/images/sal.png'
-    email: wowthemesnet@gmail.com
-    web: https://www.wowthemes.net/category/jekyll-themes/
-    twitter: https://twitter.com/wowthemesnet
-    description: "Author of Affiliates, a template available for WordPress, HTML, Ghost and Jekyll. You are currently previewing Jekyll template demo."
-  john:
-    name: John
-    display_name: John
-    avatar: 'assets/images/john.png'
-    email: wowthemesnet@gmail.com
-    web: https://www.wowthemes.net/category/jekyll-themes/
-    twitter: https://twitter.com/wowthemesnet
-    description: "This is the author box. Write a short description of the author here. You are currently previewing Affiliates theme demo, a Jekyll template compatible with Github pages."
+# Author Settings
+author:
+  name: Your Name
+  email: your@email.com
 
 # Social
 social:
-  instagram: https://www.instagram.com/bootstrapstarter/
-  facebook: https://www.facebook.com/bootstrapstartercom-346329609045284
-  twitter: https://twitter.com/bstartercom
+  LinkedIn: https://www.linkedin.com/in/kaungthiha/
+  github: https://github.com/kaungthiha
 
-# Plugins
+# Plugins (supported by GitHub Pages)
 plugins: 
-- jekyll-paginate
-- jekyll-sitemap
-- jekyll-feed
-- jekyll-seo-tag
-- jekyll-archives
+  - jekyll-paginate
+  - jekyll-sitemap
+  - jekyll-feed
+  - jekyll-seo-tag
