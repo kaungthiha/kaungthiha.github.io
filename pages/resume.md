@@ -12,6 +12,35 @@ Here's a much more comprehensive version of my resume, akin to the master doc I 
 
 ---
 
+---
+layout: default
+title: Portfolio
+---
+
+<style>
+/* Custom styling for wider text and smaller font */
+body {
+  max-width: 80%; /* Wider margins */
+  margin: 0 auto;
+  font-size: 15px; /* Decreased font size */
+  line-height: 1.6;
+}
+h2, h3, h4 {
+  margin-top: 1.5em;
+}
+</style>
+
+# Portfolio
+
+## Table of Contents
+- [Education](#education)
+- [Skills & Certifications](#skills--certifications)
+- [Work Experience](#work-experience)
+- [Leadership Experience](#leadership-experience)
+- [Projects](#projects)
+
+---
+
 ## Education
 
 **COOP Careers** - *Data Analytics Fellow*  
@@ -19,7 +48,7 @@ _Aug 2024 - Dec 2024_
 - 16-week fellowship on SQL, Python, and Tableau  
 
 **University of San Francisco**  
-*Bachelor of Science (B.S.) in Business Analytics* (GPA: 3.81)  
+*Bachelor of Science (B.S.) in Business Analytics, Computer Science* (GPA: 3.81)  
 _Aug 2021 - May 2024_  
 
 ---
@@ -70,15 +99,15 @@ _Aug 2021 - May 2024_
 
 ## Projects
 
-### **Retailer Performance Analysis**  
+### **📊 Retailer Performance Analysis**  
 - Analyzed 500,000+ transactions using R, employing time series forecasting to predict seasonality  
 - Created an R Shiny dashboard for stakeholders to visualize seasonal trends and improve inventory strategies  
 
-### **CFA Institute Research Challenge**  
+### **📈 CFA Institute Research Challenge**  
 - Built financial models (DCF, market multiples) and presented to CFA charterholders, placing 5th in NorCal  
 - Conducted Monte Carlo simulations in Python with 10,000 trials to stress-test assumptions  
 
-### **Airbnb Location Analysis**  
+### **🏠 Airbnb Location Analysis**  
 - Analyzed 13,000+ Airbnb properties using Python (PyTorch, matplotlib) to evaluate rental prices and occupancy  
 - Applied NLP to customer reviews, identifying key factors influencing property ratings  
 
