@@ -3,12 +3,12 @@ title: "KT's Portfolio"
 email: kaungthiha.3@gmail.com
 timezone: UTC
 baseurl: ""  
-url: "https://kaungthiha.github.io"  # Add this line with your actual username
+url: "https://kaungthiha.github.io"
 permalink: "/:title/"
 
 # Design
 logo: 'assets/images/logo.png'
-favicon: 'assets/images/favicon.ico'
+favicon: 'assets/images/logo.png'
 
 # Content Settings
 paginate: 30
@@ -24,8 +24,15 @@ feed_update_frequency: 1
 # Build Settings
 markdown: kramdown
 kramdown:
+  input: GFM
+  syntax_highlighter: rouge
   syntax_highlighter_opts:
-    disable: true
+    css_class: 'highlight'
+  parse_block_html: true
+  auto_ids: true
+  toc_levels: 1..6
+  smart_quotes: lsquo,rsquo,ldquo,rdquo
+  
 sass:
   sass_dir: _sass
   style: :compressed

@@ -9,6 +9,10 @@ layout: default
 {% endif %}
 <!-- End Featured Image -->
 
+{% if page.custom_css %}
+  <link rel="stylesheet" href="{{ site.baseurl }}/assets/css/{{ page.custom_css }}">
+{% endif %}
+
 <div class="col-lg-8 mx-auto">
 
   <div class="mainheading">

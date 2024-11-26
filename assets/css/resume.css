@@ -1,0 +1,54 @@
+/* My custom CSS for the resume page*/
+.resume-container {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+details {
+    margin: 10px 0;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+}
+
+summary {
+    cursor: pointer;
+    padding: 8px;
+    font-weight: bold;
+}
+
+details[open] summary {
+    margin-bottom: 10px;
+}
+
+h1, h2, h3 {
+    color: #333;
+    margin-top: 1em;
+}
+
+hr {
+    border: 0;
+    height: 1px;
+    background: #ddd;
+    margin: 20px 0;
+}
+
+/* Email and location styling */
+p {
+    margin: 8px 0;
+}
+
+/* Work experience styling */
+.experience-item {
+    margin-bottom: 20px;
+}
+
+/* List styling */
+ul {
+    padding-left: 20px;
+}
+
+li {
+    margin: 5px 0;
+}
