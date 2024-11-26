@@ -2,7 +2,7 @@
 layout: page
 title: Resume
 permalink: "/resume/"
-custom_css: assets/css/resume.css
+custom_css: resume.css
 
 ---
 
