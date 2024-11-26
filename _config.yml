@@ -29,6 +29,7 @@ kramdown:
   syntax_highlighter_opts:
     css_class: 'highlight'
   parse_block_html: true
+  hard_wrap: false
   auto_ids: true
   toc_levels: 1..6
   smart_quotes: lsquo,rsquo,ldquo,rdquo
