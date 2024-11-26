@@ -1,6 +1,6 @@
 # Site Settings
-title: "Affiliates"
-email: your@email.com
+title: "KT's Portfolio"
+email: kaungthiha.3@gmail.com
 timezone: UTC
 baseurl: ""  
 url: "https://kaungthiha.github.io"  # Add this line with your actual username
@@ -35,8 +35,8 @@ ganalytics: UA-113961478-1
 
 # Author Settings
 author:
-  name: Your Name
-  email: your@email.com
+  name: Kaung Thiha
+  email: kaungthiha.3@gmail.com
 
 # Social
 social:
