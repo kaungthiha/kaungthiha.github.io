@@ -54,7 +54,7 @@ Here's a much more comprehensive version of my resume, akin to the master doc I 
   **Product Management Intern, Venture Capital Summer Analyst**  
   _Los Angeles, CA | June 2023 - Oct 2023_  
   - Delivered MVP leveraging OpenAI LLM API for SEC EDGAR data analysis  
-  - Implemented vector database for faster similarity search, doubling retrieval speeds  
+  - Implemented vector database for faster similarity search, doubling retrieval speeds  i
   - Conducted market research and transaction analysis for 12 pre-IPO firms, influencing $1.5M in investments  
 
   ### **USF Information Technology Services**  
