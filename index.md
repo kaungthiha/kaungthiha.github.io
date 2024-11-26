@@ -6,19 +6,30 @@ comments: false
 
 
 # Hi.
+{% if page.url == "/" %} 
+<div class="rounded mb-5 hero">
+  <div class="row align-items-center justify-content-between">
+    <div class="col-md-6">
+      <h1 class="font-weight-bold mb-4 serif-font">Hi</h1>
+      <p class="lead mb-4">My name is Kaung and this is my digital portfolio.</p>
+      <a href="{{site.baseurl}}/about" class="btn btn-dark text-white px-5 btn-lg">A little about me</a>
+    </div>
+    <div class="col-md-6 text-right pl-0 pl-lg-4">
+      <img class="intro" height="500" src="{{site.baseurl}}/assets/images/intro.svg">      
+    </div>
+  </div>
+</div>
+{% endif %}
 
-Here are some of my projects:
+================================================== -->
+<section class="row">
+  {% for post in site.projects %}
+      {% if post.featured == true %}
+          <div class="col-md-4 mb-5">
+          {% include postbox.html %}
+          </div>
+      {% endif %}
+  {% endfor %}
+  </div>
+</section>
 
-{% raw %}
-<a href="/projects/telecom-dashboard">
-  <img src="/assets/images/telecom-dashboard.png" alt="Telecom Dashboard Project">
-  <h3>Telecommunications Ad Campaign Dashboard</h3>
-  <p>An interactive R Shiny dashboard analyzing a telecommunications ad campaign dataset.</p>
-</a>
-
-<a href="/projects/stroke-classifier">
-  <img src="/assets/images/stroke-classifier.png" alt="Stroke Classifier Model">
-  <h3>Stroke Classifier Model</h3>
-  <p>A machine learning model in R predicting stroke risk using patient health data.</p>
-</a>
-{% endraw %}
