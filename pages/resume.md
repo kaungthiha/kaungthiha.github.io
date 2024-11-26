@@ -14,7 +14,7 @@ Here's a much more comprehensive version of my resume, akin to the master doc I 
 
 ---
 
-<details>
+<details markdown= "1">
   <summary><strong>Education</strong></summary>
 
   **COOP Careers** - *Data Analytics Fellow*  
@@ -40,7 +40,7 @@ Here's a much more comprehensive version of my resume, akin to the master doc I 
 
 ---
 
-<details>
+<details markdown= "1">
   <summary><strong>Work Experience</strong></summary>
 
   ### **Wefunder**  
@@ -69,7 +69,7 @@ Here's a much more comprehensive version of my resume, akin to the master doc I 
 
 ---
 
-<details>
+<details markdown= "1">
   <summary><strong>Leadership Experience</strong></summary>
 
   ### **Alpha Phi Omega Service Fraternity**  
@@ -82,7 +82,7 @@ Here's a much more comprehensive version of my resume, akin to the master doc I 
 
 ---
 
-<details>
+<details markdown= "1">
   <summary><strong>Projects</strong></summary>
 
   ### **Retailer Performance Analysis**  
