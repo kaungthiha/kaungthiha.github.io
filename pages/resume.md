@@ -6,8 +6,8 @@ permalink: "/resume/"
 
 ---
 
-Here's a much more comprehensive version of my resume, akin to the master doc I use when customizing resumes for applications. Toggles are cool.
-#
+Here's a much more comprehensive version of my resume, akin to the master doc I use when customizing resumes for applications. 
+
 📧 **kaungthiha.3@gmail.com** | 📍 San Francisco, CA  
 
 ---
