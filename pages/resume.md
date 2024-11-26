@@ -5,31 +5,41 @@ permalink: "/resume/"
 
 ---
 
+Here's a much more comprehensive version of my resume, akin to the master doc I use when customizing resumes for applications. Toggles are cool.
 
-# Kaung Thiha  
-📧 **kaungthiha.3@gmail.com** | 🌐 [LinkedIn](https://www.linkedin.com/in/kaungthiha) | 📱 757-969-9628 | 📍 San Francisco, CA  
+#
+📧 **kaungthiha.3@gmail.com** | 📍 San Francisco, CA  
 
 ---
 
-## Education  
+<details>
+  <summary><strong>Education</strong></summary>
+
 **COOP Careers** - *Data Analytics Fellow*  
 _Aug 2024 - Dec 2024_  
 - 16-week fellowship on SQL, Python, and Tableau  
 
 **University of San Francisco**  
 *Bachelor of Science (B.S.) in Business Analytics* (GPA: 3.81)  
-_Aug 2021 - May 2024_
+_Aug 2021 - May 2024_  
+
+</details>
 
 ---
 
-## Skills & Certifications  
+<details>
+  <summary><strong>Skills & Certifications</strong></summary>
+
 - **Skills:** Python (Pandas, NumPy, Sklearn, matplotlib, plotly), SQL, R, Java, Excel  
 - **Tools:** BigQuery, Tableau, Salesforce, Machine Learning Frameworks, Product Management, Market Research  
 - **Certifications:** Google Data Analytics Professional Certificate, Data Visualization in Tableau  
 
+</details>
+
 ---
 
-## Work Experience  
+<details>
+  <summary><strong>Work Experience</strong></summary>
 
 ### **Wefunder**  
 **Closing and Compliance Product Analyst**  
@@ -53,9 +63,12 @@ _San Francisco, CA | May 2022 - Dec 2023_
 - Reduced license costs by 33% by optimizing access permissions for large datasets  
 - Facilitated Agile workflows as Scrum Master for a 10-person team, refining user stories and managing backlogs  
 
+</details>
+
 ---
 
-## Leadership Experience  
+<details>
+  <summary><strong>Leadership Experience</strong></summary>
 
 ### **Alpha Phi Omega Service Fraternity**  
 **Finance Chair, Pledge Trainer**  
@@ -63,9 +76,12 @@ _Aug 2021 - May 2024_
 - Organized fundraising campaigns, raising over $2,000 for charity with local business partnerships  
 - Increased international student participation by 30% through targeted recruitment and engagement efforts  
 
+</details>
+
 ---
 
-## Projects  
+<details>
+  <summary><strong>Projects</strong></summary>
 
 ### **Retailer Performance Analysis**  
 - Analyzed 500,000+ transactions using R, employing time series forecasting to predict seasonality  
@@ -78,5 +94,7 @@ _Aug 2021 - May 2024_
 ### **Airbnb Location Analysis**  
 - Analyzed 13,000+ Airbnb properties using Python (PyTorch, matplotlib) to evaluate rental prices and occupancy  
 - Applied NLP to customer reviews, identifying key factors influencing property ratings  
+
+</details>
 
 ---

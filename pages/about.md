@@ -6,7 +6,7 @@ image: assets/images/about.jpg
 ---
 
 
-## I'm Kaung Thiha (ကောင်းသီဟ) but please call me Kaung.
+### I'm Kaung Thiha (ကောင်းသီဟ) but please call me Kaung.
 
 I graduated from USF- the University of San Francisco _not_ the University of South Florida 😭 - studying Business Analytics & Computer Science.
 
