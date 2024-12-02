@@ -2,7 +2,7 @@
 layout: post
 title:  "Retailer Performance Analysis"
 categories: [ R ]
-image: assets/images/2.jpg
+image: assets/images/retail.jpg
 ---
 
 
@@ -93,20 +93,20 @@ head(online_retail)
 hist(online_retail$Quantity, main="Histogram of Quantity", xlab="Quantity", col="blue", breaks=50)
 ```
 
-![plot of chunk unnamed-chunk-2](assets/images/retailerCase/unnamed-chunk-2-1.png)
+![plot of chunk unnamed-chunk-2](/assets/images/retailerCase/1.png)
 
 ``` r
 country_count <- table(online_retail$Country)
 barplot(country_count, main="Bar Plot of Countries", xlab="Country", ylab="Count", col="red", las=2, cex.names=0.7)
 ```
 
-![plot of chunk unnamed-chunk-2](assets/images/retailerCase/unnamed-chunk-2-2.png)
+![plot of chunk unnamed-chunk-2](/assets/images/retailerCase/unnamed-chunk-2-2.png)
 
 ``` r
 boxplot(Quantity ~ Country, data=online_retail, main="Boxplot of Quantity by Country", xlab="Country", ylab="Quantity", las=2, cex.axis=0.7, outline=FALSE)
 ```
 
-![plot of chunk unnamed-chunk-2](assets/images/retailerCase/unnamed-chunk-2-3.png)
+![plot of chunk unnamed-chunk-2](/assets/images/retailerCase/unnamed-chunk-2-3.png)
 Right off the bat, I'm seeing that quantity is not going to be the most useful metric for my exploration unless I make some edits to it. It's basically aggregating ALL the items but we want to get into specific seasonal behavior. A note on as.POSIXct, a base R function that allowed me to convert the InvoiceDate column into the standard date-time format used in R. I think I did this on in one of my earlier run throughs and altered the dataset that way but I'll keep the step in since I think it's a useful tidbit!
 We know the UK is overrepresented here, as evident by Dante's analysis as well. To help narrow my focus, I'm going to ignore geographic behavior and instead just focus on seasonality. I ended up also playing around with time based exploration to see if I could garner anything useful but Kylie's visualizations are much more thorough in that regard. Onwards!
 
@@ -119,7 +119,7 @@ ggplot(online_retail, aes(x = InvoiceDate, y = UnitPrice)) +
   labs(title="Unit Price Over Time", x="Time", y="Unit Price")
 ```
 
-![plot of chunk unnamed-chunk-3](assets/images/retailerCase/unnamed-chunk-3-1.png)
+![plot of chunk unnamed-chunk-3](/assets/images/retailerCase/unnamed-chunk-3-1.png)
 I started by removing the non-numeric columns. Initially, I thought that it'd be easy to split the stockcode into items using as numeric but I realized that some of the stockcode had letters at the end that still represented goods.Thus, I needed to find a way to only exclude rows that started with non-numerics while keeping those that end with non-numerics. I then dealt with the negatives in the Quantity column. I'm guessing that we won't need them to predict seasonality especially since we're not really sure what these negatives represent. Perhaps returns? Some descriptions note it as accounting items though, like debt.  
 
 ``` r
@@ -176,7 +176,7 @@ ggplot(head(top_selling_items,10), aes(x = reorder(Description, TotalQuantity), 
   coord_flip() # Flipping coordinates for better readability
 ```
 
-![plot of chunk unnamed-chunk-5](assets/images/retailerCase/unnamed-chunk-5-1.png)
+![plot of chunk unnamed-chunk-5](/assets/images/retailerCase/unnamed-chunk-5-1.png)
 Seasonality might be a bit challenging. A way to do this might be to partition the dates into four different seasons. Even though this company sells to a bunch of places around the world that might not have the same seasonal procession, let's do Spring, Summer, Fall, Winter . The data set runs from 12/1/2010 to 12/9/2011. So we'll partition accordingly- I did a quick Google search to determine what the seasonal splits by month should be. As follow: Spring-> March to June; Summer -> June to September, Fall -> September to December, Winter-> December to March. I thought I'd have to use lubridate here to do some magic to return the corresponding string but I ended up just writing a function get_season that gets the job done. We have a series of vectors that represent the date partitions outlined above, and then perform a series of checks on the month to determine which vector-and associated season- it will fall in. 
 
 ``` r
@@ -299,25 +299,25 @@ graph_winter <- create_season_graph(top_items_winter, "Winter")
 graph_spring
 ```
 
-![plot of chunk unnamed-chunk-7](assets/images/retailerCase/unnamed-chunk-7-1.png)
+![plot of chunk unnamed-chunk-7](/assets/images/retailerCase/unnamed-chunk-7-1.png)
 
 ``` r
 graph_summer
 ```
 
-![plot of chunk unnamed-chunk-7](assets/images/retailerCase/unnamed-chunk-7-2.png)
+![plot of chunk unnamed-chunk-7](/assets/images/retailerCase/unnamed-chunk-7-2.png)
 
 ``` r
 graph_fall
 ```
 
-![plot of chunk unnamed-chunk-7](assets/images/retailerCase/unnamed-chunk-7-3.png)
+![plot of chunk unnamed-chunk-7](/assets/images/retailerCase/unnamed-chunk-7-3.png)
 
 ``` r
 graph_winter
 ```
 
-![plot of chunk unnamed-chunk-7](assets/images/retailerCase/unnamed-chunk-7-4.png)
+![plot of chunk unnamed-chunk-7](/assets/images/retailerCase/unnamed-chunk-7-4.png)
 But here's another useful insight. Now that we know the seasonality of items, we can also look at the performance of the seasons themselves. Looking at the plots above, it's pretty clear that some seasons just have more goods sold then others. I decided to visualize this through a bar chart and a pie graph. The bar chart was way more useful as it highlighted the numbers pretty clearly while the pie graph was effective at highlighting which were the busier seasons, did not do as good at job at directly comparing the quantities sold.
 We see that Fall and Winter are, by a huge margin, the busiest seasons for the firm with significantly more goods sold. Our hypothesis is actually proven to be incorrect as Fall was the busiest season for the business. I believe that this is because the business is a wholesaler as opposed to something oriented to the general consumer. Since direct consumer gift shops would likely forecast their demand in the season(s) before and then purchase accordingly, winter would not be the prime period for this business. It's still a busy season though, just not as much as fall is- smaller shops or the occasional late requisition might come through. This perspective supports why Spring and Summer aren't as busy as well since most purchasers are probably in their demand forecasting stages. With this information, the business can think about workforce requirements as well as securing additional logisitical support or whatnot for the seasons that are the busiest!
 
@@ -340,7 +340,7 @@ ggplot(seasonal_sales, aes(x = Season, y = TotalQuantity, fill = Season)) +
   labs(x = "Season", y = "Total Goods Sold", title = "Total Sales Quantity by Season")
 ```
 
-![plot of chunk unnamed-chunk-8](assets/images/retailerCase/unnamed-chunk-8-1.png)
+![plot of chunk unnamed-chunk-8](/assets/images/retailerCase/unnamed-chunk-8-1.png)
 
 ``` r
 ggplot(seasonal_sales, aes(x = "", y = TotalQuantity, fill = Season)) +
@@ -359,7 +359,7 @@ ggplot(seasonal_sales, aes(x = "", y = TotalQuantity, fill = Season)) +
   labs(fill = "Season", title = "Total Sales Quantity by Season", x = NULL, y = NULL)
 ```
 
-![plot of chunk unnamed-chunk-8](assets/images/retailerCase/unnamed-chunk-8-2.png)
+![plot of chunk unnamed-chunk-8](/assets/images/retailerCase/unnamed-chunk-8-2.png)
 
 ``` r
 # A pie chart isn't at good as highlighting the values
@@ -407,4 +407,4 @@ full_ts <- ts(full_ma, start = c(2010, 12), frequency = 12)
 plot(full_ts, main = "Extended Moving Average Forecast", xlab = "Time", ylab = "Total Quantity", col = "blue")
 ```
 
-![plot of chunk unnamed-chunk-9](assets/images/retailerCase/unnamed-chunk-9-1.png)
+![plot of chunk unnamed-chunk-9](/assets/images/retailerCase/unnamed-chunk-9-1.png)
