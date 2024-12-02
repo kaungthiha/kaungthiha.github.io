@@ -3,6 +3,11 @@ title: "Categories"
 layout: default
 permalink: "/projects.html"
 ---
+<div class="content-area">
+    <h1></h1>
+    <p>
+      A bunch of my projects!
+    </p>
 {% for category in site.categories %}
 <h4 class="mt-5 mb-4 pb-2 border-bottom" id="{{ category[0] | replace: " ","-" }}"><span class="text-capitalize small font-weight-bold">In "{{ category[0] }}"</span></h4>
 <div class="row">

@@ -2,7 +2,7 @@
 layout: post
 title:  "Telecommunications Ad Campaign Study"
 categories: [ Case Study ]
-image: assets/images/5.jpg
+image: assets/images/adcampaign.jpg
 ---
 This project features an interactive R Shiny dashboard designed to analyze and visualize a telecommunications ad campaign dataset. The dashboard allows stakeholders to explore:
 - Key performance metrics
