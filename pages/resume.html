@@ -6,15 +6,15 @@ permalink: "/resume/"
 <style>
     .resume-container {
       max-width: 100%;
-      margin: 0 auto;
+      margin: 0;
       font-size: 16px;
       line-height: 1.6;
-      padding: 2px;
+      padding: 20px;
     }
     
     .resume-content {
-      max-width: 1200px;
-      margin: 0 auto;
+      max-width: 100%;
+      margin: 0;
     }
     
     h2, h3, h4 {
@@ -26,12 +26,12 @@ permalink: "/resume/"
       position: fixed;
       top: 100px;
       left: 20px;
-      width: 280px;
+      width: 260px;
       padding: 1.5rem;
       border: 1px solid #e9ecef;
       border-radius: 12px;
       background-color: #ffffff;
-      font-size: 0.9em;
+      font-size: 0.85em;
       line-height: 1.6;
       z-index: 1000;
       box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
@@ -39,7 +39,7 @@ permalink: "/resume/"
     
     .fixed-easy-nav h3 {
       color: #495057;
-      font-size: 1.1em;
+      font-size: 1em;
       margin-bottom: 1rem;
       border-bottom: 2px solid #007bff;
       padding-bottom: 0.5rem;
@@ -52,7 +52,7 @@ permalink: "/resume/"
     }
     
     .fixed-easy-nav li {
-      margin-bottom: 0.5rem;
+      margin-bottom: 0.4rem;
     }
     
     .fixed-easy-nav a {
@@ -60,7 +60,8 @@ permalink: "/resume/"
       text-decoration: none;
       transition: color 0.3s ease;
       display: block;
-      padding: 0.25rem 0;
+      padding: 0.2rem 0;
+      font-size: 0.9em;
     }
     
     .fixed-easy-nav a:hover {
@@ -69,18 +70,17 @@ permalink: "/resume/"
     }
     
     .content-area {
-      margin-left: 320px;
-      padding: 0 20px;
-      width: calc(100%);
+      margin-left: 280px;
+      padding: 0;
+      width: calc(100% - 300px);
     }
     
     /* Mobile compatibility */
     @media (max-width: 1200px) {
       .fixed-easy-nav {
         position: static;
-        width: auto;
+        width: 100%;
         margin-bottom: 2rem;
-        max-width: 100%;
       }
     
       .content-area {
@@ -99,49 +99,54 @@ permalink: "/resume/"
       justify-content: space-between;
       align-items: flex-start;
       margin-bottom: 2rem;
-      padding: 1.5rem;
+      padding: 2rem;
       background: #ffffff;
       border-radius: 12px;
       box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
       border-left: 4px solid #007bff;
+      width: 100%;
     }
     
     .entry-details {
       flex: 1;
-      margin-right: 1rem;
+      margin-right: 2rem;
+      width: 100%;
     }
     
     .entry-title {
       font-weight: 700;
-      font-size: 1.1em;
+      font-size: 1.2em;
       color: #2c3e50;
-      margin-bottom: 0.25rem;
+      margin-bottom: 0.5rem;
     }
     
     .entry-subtitle {
-      font-size: 0.95em;
+      font-size: 1em;
       color: #6c757d;
-      margin-bottom: 0.5rem;
+      margin-bottom: 1rem;
     }
     
     .entry-dates {
       font-size: 0.9em;
       color: #495057;
       background: #f8f9fa;
-      padding: 0.5rem 1rem;
-      border-radius: 20px;
+      padding: 0.75rem 1.5rem;
+      border-radius: 25px;
       white-space: nowrap;
       font-weight: 500;
+      min-width: 180px;
+      text-align: center;
     }
     
     .section-header {
       background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
       color: white;
-      padding: 1rem 1.5rem;
-      margin: 2rem -20px 1.5rem -20px;
-      border-radius: 0;
-      font-size: 1.3em;
+      padding: 1.5rem 2rem;
+      margin: 3rem 0 2rem 0;
+      border-radius: 12px;
+      font-size: 1.4em;
       font-weight: 600;
+      width: 100%;
     }
     
     .section-header h2 {
@@ -151,48 +156,52 @@ permalink: "/resume/"
     }
     
     .section-icon {
-      margin-right: 0.75rem;
-      font-size: 1.2em;
+      margin-right: 1rem;
+      font-size: 1.3em;
     }
     
     .skills-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-      gap: 1rem;
-      margin: 1.5rem 0;
+      grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+      gap: 1.5rem;
+      margin: 2rem 0;
+      width: 100%;
     }
     
     .skill-item {
       background: #f8f9fa;
-      padding: 1rem;
-      border-radius: 8px;
-      border-left: 3px solid #007bff;
+      padding: 1.5rem;
+      border-radius: 12px;
+      border-left: 4px solid #007bff;
+      width: 100%;
     }
     
     .skill-item strong {
       color: #2c3e50;
       display: block;
-      margin-bottom: 0.5rem;
+      margin-bottom: 0.75rem;
+      font-size: 1.1em;
     }
     
     hr {
       border: none;
-      height: 2px;
+      height: 3px;
       background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      margin: 3rem 0;
-      border-radius: 1px;
+      margin: 4rem 0;
+      border-radius: 2px;
     }
     
     .contact-info {
       background: #f8f9fa;
-      padding: 1.5rem;
-      border-radius: 12px;
-      margin-bottom: 2rem;
+      padding: 2rem;
+      border-radius: 15px;
+      margin-bottom: 3rem;
       text-align: center;
+      width: 100%;
     }
     
     .contact-info p {
-      margin: 0;
+      margin: 0.5rem 0;
       font-size: 1.1em;
       color: #495057;
     }
@@ -323,9 +332,8 @@ permalink: "/resume/"
           <div class="entry-title">USF Information Technology Services</div>
           <div class="entry-subtitle">Salesforce Product Administrator</div>
           <ul class="mt-3">
-            <li>Supervised Salesforce operations for 10,000+ users by creating and monitoring Tableau dashboards and restructuring database objects to ensure data health and track key performance indicators</li>
-            <li>Reconfigured 200 Salesforce accounts, resulting in a 33% decrease in license costs, saving $2000 biannually</li>
-            <li>Established project alignment, leading cross-functional Agile meetings as Scrum master for 10 developers and analysts, refining user stories, driving acceptance testing and managing product backlogs</li>
+            <li>Administered Salesforce for 10,000+ users, optimizing CRM database objects to reduce license costs by 33%</li>
+            <li>Established shared business alignment, leading cross-functional Agile meetings as Scrum master for 10 developers and analysts, refining user stories, driving user acceptance testing and managing backlogs in Jira</li>
           </ul>
         </div>
         <div class="entry-dates">May 2022 - Dec 2023</div>
@@ -343,8 +351,8 @@ permalink: "/resume/"
           <div class="entry-title">Alpha Phi Omega Service Fraternity</div>
           <div class="entry-subtitle">Finance Chair, Pledge Trainer</div>
           <ul class="mt-3">
-            <li>Organized fundraising campaigns, raising over $2,000 for charity with local business partnerships</li>
-            <li>Increased international student participation by 30% through targeted recruitment and engagement efforts</li>
+            <li>Directed fundraising strategy, raising $2000+ for charity in collaboration with Chipotle and other local businesses</li>
+            <li>Spearheaded recruitment and community engagement, increasing international student presence by 30%</li>
           </ul>
         </div>
         <div class="entry-dates">Aug 2021 - May 2024</div>
@@ -372,39 +380,21 @@ permalink: "/resume/"
       <div class="entry">
         <div class="entry-details">
           <div class="entry-title">Retailer Performance Analysis</div>
+          <div class="entry-subtitle">Leveraging R for retailer process improvement and inventory strategy</div>
           <ul class="mt-2">
-            <li>Analyzed 500,000+ transactions using R, employing time series forecasting to predict seasonality</li>
-            <li>Created an R Shiny dashboard for stakeholders to visualize seasonal trends and improve inventory strategies</li>
+            <li>Analyzed 500,000+ transactions using R, implementing time series forecasting to identify and predict seasonality</li>
+            <li>Developed R Shiny dashboard for stakeholders to visualize seasonal trends and adjust inventory strategies</li>
           </ul>
         </div>
       </div>
 
       <div class="entry">
         <div class="entry-details">
-          <div class="entry-title">CFA Institute Research Challenge</div>
+          <div class="entry-title">Airbnb Location Breakdown</div>
+          <div class="entry-subtitle">Data-driven investment strategy for Airbnbs using Python and Tableau</div>
           <ul class="mt-2">
-            <li>Built financial models (DCF, market multiples) and presented to CFA charterholders, placing 5th in NorCal</li>
-            <li>Conducted Monte Carlo simulations in Python with 10,000 trials to stress-test assumptions</li>
-          </ul>
-        </div>
-      </div>
-
-      <div class="entry">
-        <div class="entry-details">
-          <div class="entry-title">Bitcoin Volatility Analysis</div>
-          <ul class="mt-2">
-            <li>Built a GARCH(1,1) model to forecast Bitcoin's 60-day volatility with stationarity tests to ensure validity</li>
-            <li>Calculated 95% Value at Risk (VaR) of -5.92% to better understand portfolio losses during market fluctuations</li>
-          </ul>
-        </div>
-      </div>
-
-      <div class="entry">
-        <div class="entry-details">
-          <div class="entry-title">Airbnb Location Analysis</div>
-          <ul class="mt-2">
-            <li>Analyzed 13,000+ Airbnb properties using Python (PyTorch, matplotlib) to evaluate rental prices and occupancy</li>
-            <li>Applied NLP to customer reviews, identifying key factors influencing property ratings</li>
+            <li>Applied PyTorch Forecasting and matplotlib to explore rental prices and occupancy rates for 13,000+ Airbnbs</li>
+            <li>Implemented NLP techniques to analyze customer reviews and identify factors increasing booking conversion</li>
           </ul>
         </div>
       </div>
