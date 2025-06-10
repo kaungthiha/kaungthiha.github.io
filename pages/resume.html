@@ -4,224 +4,410 @@ title:
 permalink: "/resume/"
 ---
 <style>
-    body {
-      max-width: 85%; 
+    .resume-container {
+      max-width: 100%;
       margin: 0 auto;
-      font-size: 17px; 
+      font-size: 16px;
       line-height: 1.6;
-      padding : 20 20 px;
+      padding: 20px;
     }
+    
+    .resume-content {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+    
     h2, h3, h4 {
-      margin-top: 1em;
+      margin-top: 1.5em;
+      margin-bottom: 1em;
     }
     
     .fixed-easy-nav {
       position: fixed;
-      top: 70px; /* Adjust based on header height */
-      left: 20px; /* Align with margin */
-      width: 300px;
-      padding: 1rem;
-      border: 0px solid #ddd;
-      border-radius: 5px;
+      top: 100px;
+      left: 20px;
+      width: 280px;
+      padding: 1.5rem;
+      border: 1px solid #e9ecef;
+      border-radius: 12px;
       background-color: #ffffff;
       font-size: 0.9em;
       line-height: 1.6;
       z-index: 1000;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
     }
     
-    /* Main content area with padding to avoid overlap */
+    .fixed-easy-nav h3 {
+      color: #495057;
+      font-size: 1.1em;
+      margin-bottom: 1rem;
+      border-bottom: 2px solid #007bff;
+      padding-bottom: 0.5rem;
+    }
+    
+    .fixed-easy-nav ul {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+    
+    .fixed-easy-nav li {
+      margin-bottom: 0.5rem;
+    }
+    
+    .fixed-easy-nav a {
+      color: #6c757d;
+      text-decoration: none;
+      transition: color 0.3s ease;
+      display: block;
+      padding: 0.25rem 0;
+    }
+    
+    .fixed-easy-nav a:hover {
+      color: #007bff;
+      text-decoration: none;
+    }
+    
     .content-area {
-      padding-left: 340px; /* Match Easy Nav width + spacing */
+      margin-left: 320px;
+      padding: 0 20px;
+      max-width: calc(100% - 340px);
     }
     
     /* Mobile compatibility */
-    @media (max-width: 768px) {
+    @media (max-width: 1200px) {
       .fixed-easy-nav {
-        position: static; /* Remove fixed positioning */
+        position: static;
         width: auto;
-        margin-bottom: 1rem;
+        margin-bottom: 2rem;
+        max-width: 100%;
       }
     
       .content-area {
-        margin-left: 0; /* Reset margin for mobile */
+        margin-left: 0;
+        max-width: 100%;
+        padding: 0;
+      }
+      
+      .resume-container {
+        padding: 15px;
       }
     }
-</style>
-
-<div class="fixed-easy-nav">
-  <h3> </h3>
-  <ul>
-    <li><a href="#education">🏫 Education</a></li>
-    <li><a href="#skills-certifications">🥷 Skills & Certifications</a></li>
-    <li><a href="#work-experience">🖥️ Work Experience</a></li>
-    <li><a href="#leadership-experience">🪅 Leadership Experience</a></li>
-    <li><a href="#projects">📊 Projects</a></li>
-  </ul>
-</div>
-
-<style>
+    
     .entry {
       display: flex;
       justify-content: space-between;
       align-items: flex-start;
-      margin-bottom: 1.5rem;
+      margin-bottom: 2rem;
+      padding: 1.5rem;
+      background: #ffffff;
+      border-radius: 12px;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+      border-left: 4px solid #007bff;
     }
     
     .entry-details {
-      max-width: 75%; /* Ensure the title and subtitle take most of the space */
+      flex: 1;
+      margin-right: 1rem;
     }
     
     .entry-title {
-      font-weight: bold;
-      font-size: 1em;
+      font-weight: 700;
+      font-size: 1.1em;
+      color: #2c3e50;
+      margin-bottom: 0.25rem;
     }
     
     .entry-subtitle {
-      font-size: 0.9em;
-      color: #555; /* Optional: lighter color for subtitles */
+      font-size: 0.95em;
+      color: #6c757d;
+      margin-bottom: 0.5rem;
     }
     
     .entry-dates {
       font-size: 0.9em;
-      color: #888; /* Optional: muted color for dates */
-      text-align: right;
-      white-space: nowrap; /* Prevent wrapping */
+      color: #495057;
+      background: #f8f9fa;
+      padding: 0.5rem 1rem;
+      border-radius: 20px;
+      white-space: nowrap;
+      font-weight: 500;
     }
-</style> 
+    
+    .section-header {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      padding: 1rem 1.5rem;
+      margin: 2rem -20px 1.5rem -20px;
+      border-radius: 0;
+      font-size: 1.3em;
+      font-weight: 600;
+    }
+    
+    .section-header h2 {
+      margin: 0;
+      display: flex;
+      align-items: center;
+    }
+    
+    .section-icon {
+      margin-right: 0.75rem;
+      font-size: 1.2em;
+    }
+    
+    .skills-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 1rem;
+      margin: 1.5rem 0;
+    }
+    
+    .skill-item {
+      background: #f8f9fa;
+      padding: 1rem;
+      border-radius: 8px;
+      border-left: 3px solid #007bff;
+    }
+    
+    .skill-item strong {
+      color: #2c3e50;
+      display: block;
+      margin-bottom: 0.5rem;
+    }
+    
+    hr {
+      border: none;
+      height: 2px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      margin: 3rem 0;
+      border-radius: 1px;
+    }
+    
+    .contact-info {
+      background: #f8f9fa;
+      padding: 1.5rem;
+      border-radius: 12px;
+      margin-bottom: 2rem;
+      text-align: center;
+    }
+    
+    .contact-info p {
+      margin: 0;
+      font-size: 1.1em;
+      color: #495057;
+    }
+    
+    .contact-info strong {
+      color: #007bff;
+    }
+</style>
 
-<div class="content-area">
-  <h1></h1>
-  <p>
-    Here's a much more comprehensive version of my resume, akin to the master doc I use when customizing resumes.
-  </p>
-  <p>📧 <strong>kaungthiha.3@gmail.com</strong> | 📍 San Francisco, CA</p>
-
-  <hr>
-
-  <h2 id="education">🏫 Education</h2>
-  <div class="entry">
-    <div class="entry-details">
-      <span class="entry-title">University of San Francisco</span>
-      <span class="entry-subtitle">
-        Bachelor of Science (B.S.) in Business Analytics, Computer Science (GPA: 3.81)
-      </span>
-    </div>
-    <span class="entry-dates">Aug 2021 - May 2024</span>
+<div class="resume-container">
+  <div class="fixed-easy-nav">
+    <h3>📋 Quick Navigation</h3>
+    <ul>
+      <li><a href="#education">🏫 Education</a></li>
+      <li><a href="#skills-certifications">🥷 Skills & Certifications</a></li>
+      <li><a href="#work-experience">🖥️ Work Experience</a></li>
+      <li><a href="#leadership-experience">🪅 Leadership Experience</a></li>
+      <li><a href="#projects">📊 Projects</a></li>
+    </ul>
   </div>
 
-  <div class="entry">
-    <div class="entry-details">
-      <span class="entry-title">COOP Careers</span>
-      <span class="entry-subtitle">Data Analytics Fellow</span>
+  <div class="content-area">
+    <div class="resume-content">
+      <div class="contact-info">
+        <p>
+          📧 <strong>kaungthiha.3@gmail.com</strong> | 🔗 <strong>www.linkedin.com/in/kaungthiha</strong> | 📞 <strong>757-969-9628</strong> | 📍 San Francisco, CA
+        </p>
+        <p class="mt-2 mb-0">
+          Here's a much more comprehensive version of my resume, akin to the master doc I use when customizing resumes.
+        </p>
+      </div>
+
+      <div class="section-header">
+        <h2 id="education">
+          <span class="section-icon">🏫</span>
+          Education
+        </h2>
+      </div>
+      
+      <div class="entry">
+        <div class="entry-details">
+          <div class="entry-title">University of San Francisco</div>
+          <div class="entry-subtitle">
+            Bachelor of Science (B.S.) in Business Analytics (GPA: 3.81)
+          </div>
+        </div>
+        <div class="entry-dates">Aug 2021 - May 2024</div>
+      </div>
+
+      <div class="entry">
+        <div class="entry-details">
+          <div class="entry-title">COOP Careers</div>
+          <div class="entry-subtitle">Data Analytics Fellow - 16-week fellowship on SQL, Python, and Tableau</div>
+        </div>
+        <div class="entry-dates">Aug 2024 - Dec 2024</div>
+      </div>
+
+      <div class="section-header">
+        <h2 id="skills-certifications">
+          <span class="section-icon">🥷</span>
+          Skills & Certifications
+        </h2>
+      </div>
+      
+      <div class="skills-grid">
+        <div class="skill-item">
+          <strong>Skills:</strong>
+          Data Analytics, Product Management, Market Research, Cross-Functional Collaboration
+        </div>
+        <div class="skill-item">
+          <strong>Tools:</strong>
+          Python (Pandas, NumPy, matplotlib, plotly), SQL (BigQuery, PostgreSQL), R, Java, Excel, Tableau, Hex
+        </div>
+        <div class="skill-item">
+          <strong>Certifications:</strong>
+          Google Data Analytics Professional Certificate, Data Visualization in Tableau
+        </div>
+      </div>
+
+      <div class="section-header">
+        <h2 id="work-experience">
+          <span class="section-icon">🖥️</span>
+          Work Experience
+        </h2>
+      </div>
+      
+      <div class="entry">
+        <div class="entry-details">
+          <div class="entry-title">Amazon Web Services (via Keywords Studios)</div>
+          <div class="entry-subtitle">Research Associate 3 (LLM Operations)</div>
+          <ul class="mt-3">
+            <li>Direct a team of 50+ junior research associates in training and evaluating an AI model for content classification</li>
+            <li>Boost QA pass rate by 5% MoM by leveraging Hex dashboards to address knowledge gaps and flag error patterns</li>
+            <li>Wrote Python test cases for SDK versions of LLM-based agent, implementing mocking and stubbing to simulate contributor behavior and improve model evaluation workflows</li>
+          </ul>
+        </div>
+        <div class="entry-dates">Feb 2025 - Present</div>
+      </div>
+      
+      <div class="entry">
+        <div class="entry-details">
+          <div class="entry-title">Wefunder</div>
+          <div class="entry-subtitle">Closing & Compliance Product Operations</div>
+          <ul class="mt-3">
+            <li>Managed transaction flow of $350K per week, designing SQL ETL pipelines that reduced cash flow turnaround by 20%, improving investor trust and transaction efficiency for over 500 active campaigns</li>
+            <li>Ideated development of VIP product, partnering with Engineering, Design, and VP of Operations to grow adoption from 0 to 547 users through data-driven go-to-market strategy, creating $161,365 in new revenue</li>
+            <li>Leveraged market analysis and A/B testing to optimize conversion and retention strategies, resulting in a 10% lift in investor engagement and a 20% improvement in NPS</li>
+          </ul>
+        </div>
+        <div class="entry-dates">Jan 2024 - July 2024</div>
+      </div>
+
+      <div class="entry">
+        <div class="entry-details">
+          <div class="entry-title">AskCyborg (CrossWork)</div>
+          <div class="entry-subtitle">Co-Founder, Product Manager</div>
+          <ul class="mt-3">
+            <li>Shipped an AI-powered MVP, leveraging user feedback loops to improve usability and tailor product roadmap</li>
+            <li>Collaborated with engineers to integrate cloud-based vector databases to enhance data retrieval speeds by 2x</li>
+            <li>Coordinated 3 UI/UX and design contractors to implement Figma demos to overhaul product visual language</li>
+          </ul>
+        </div>
+        <div class="entry-dates">June 2023 - Oct 2023</div>
+      </div>
+
+      <div class="entry">
+        <div class="entry-details">
+          <div class="entry-title">USF Information Technology Services</div>
+          <div class="entry-subtitle">Salesforce Product Administrator</div>
+          <ul class="mt-3">
+            <li>Supervised Salesforce operations for 10,000+ users by creating and monitoring Tableau dashboards and restructuring database objects to ensure data health and track key performance indicators</li>
+            <li>Reconfigured 200 Salesforce accounts, resulting in a 33% decrease in license costs, saving $2000 biannually</li>
+            <li>Established project alignment, leading cross-functional Agile meetings as Scrum master for 10 developers and analysts, refining user stories, driving acceptance testing and managing product backlogs</li>
+          </ul>
+        </div>
+        <div class="entry-dates">May 2022 - Dec 2023</div>
+      </div>
+
+      <div class="section-header">
+        <h2 id="leadership-experience">
+          <span class="section-icon">🪅</span>
+          Leadership Experience
+        </h2>
+      </div>
+      
+      <div class="entry">
+        <div class="entry-details">
+          <div class="entry-title">Alpha Phi Omega Service Fraternity</div>
+          <div class="entry-subtitle">Finance Chair, Pledge Trainer</div>
+          <ul class="mt-3">
+            <li>Organized fundraising campaigns, raising over $2,000 for charity with local business partnerships</li>
+            <li>Increased international student participation by 30% through targeted recruitment and engagement efforts</li>
+          </ul>
+        </div>
+        <div class="entry-dates">Aug 2021 - May 2024</div>
+      </div>
+
+      <div class="entry">
+        <div class="entry-details">
+          <div class="entry-title">Fiscal Affairs Council</div>
+          <div class="entry-subtitle">Chair of Annual Budget, Chair of Investment Task Force</div>
+          <ul class="mt-3">
+            <li>Revised and oversaw a $1.6 million budget for student organizations during COVID-19 and declining enrollment</li>
+            <li>Researched alternative investment vehicles for Fiscal portfolio before adopting money market accounts</li>
+          </ul>
+        </div>
+        <div class="entry-dates">Aug 2021 - May 2022</div>
+      </div>
+
+      <div class="section-header">
+        <h2 id="projects">
+          <span class="section-icon">📊</span>
+          Selected Projects
+        </h2>
+      </div>
+      
+      <div class="entry">
+        <div class="entry-details">
+          <div class="entry-title">Retailer Performance Analysis</div>
+          <ul class="mt-2">
+            <li>Analyzed 500,000+ transactions using R, employing time series forecasting to predict seasonality</li>
+            <li>Created an R Shiny dashboard for stakeholders to visualize seasonal trends and improve inventory strategies</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="entry">
+        <div class="entry-details">
+          <div class="entry-title">CFA Institute Research Challenge</div>
+          <ul class="mt-2">
+            <li>Built financial models (DCF, market multiples) and presented to CFA charterholders, placing 5th in NorCal</li>
+            <li>Conducted Monte Carlo simulations in Python with 10,000 trials to stress-test assumptions</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="entry">
+        <div class="entry-details">
+          <div class="entry-title">Bitcoin Volatility Analysis</div>
+          <ul class="mt-2">
+            <li>Built a GARCH(1,1) model to forecast Bitcoin's 60-day volatility with stationarity tests to ensure validity</li>
+            <li>Calculated 95% Value at Risk (VaR) of -5.92% to better understand portfolio losses during market fluctuations</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="entry">
+        <div class="entry-details">
+          <div class="entry-title">Airbnb Location Analysis</div>
+          <ul class="mt-2">
+            <li>Analyzed 13,000+ Airbnb properties using Python (PyTorch, matplotlib) to evaluate rental prices and occupancy</li>
+            <li>Applied NLP to customer reviews, identifying key factors influencing property ratings</li>
+          </ul>
+        </div>
+      </div>
     </div>
-    <span class="entry-dates">Aug 2024 - Dec 2024</span>
   </div>
-
-  <hr>
-
-  <h2 id="skills-certifications">🥷 Skills & Certifications</h2>
-  <ul>
-    <li><strong>Skills:</strong> Python (Pandas, NumPy, Sklearn, matplotlib, plotly), SQL, R, Java, Excel</li>
-    <li><strong>Tools:</strong> BigQuery, Tableau, Salesforce, Machine Learning Frameworks, Product Management, Market Research</li>
-    <li><strong>Certifications:</strong> Google Data Analytics Professional Certificate, Data Visualization in Tableau</li>
-  </ul>
-
-  <hr>
-
-  <h2 id="work-experience">🖥️ Work Experience</h2>
-  <div class="entry">
-    <div class="entry-details">
-      <span class="entry-title">Wefunder</span>
-      <span class="entry-subtitle">Closing and Compliance Product Analyst</span>
-    </div>
-    <span class="entry-dates">Jan 2024 - July 2024</span>
-  </div>
-  <ul>
-    <li>Assumed full ownership of fintech product with $350,000 in weekly transactions to founders</li>
-    <li>Engineered PostgreSQL ETL processes, resolving bottlenecks to accelerate cash flow turnaround by 20%</li>
-    <li>Led ideation and development of VIP product, partnering with Engineering, Design, and VP of Operations to grow adoption from 0 to 547 users through data-driven go-to-market strategy, creating $161,365 in new revenue</li>
-    <li>Leveraged market analysis and A/B testing to inform product requirements, working cross-functionally with Engineering and Design to deploy, driving 20% improvement in conversion rates and net promoter score (NPS)</li>
-    <li>Ensured organizational compliance by responding to and helping implement SEC and FINRA requests</li>
-  </ul>
-
-  <div class="entry">
-    <div class="entry-details">
-      <span class="entry-title">CrossWork Midas</span>
-      <span class="entry-subtitle">Venture Capital Summer Analyst, Product Manager</span>
-    </div>
-    <span class="entry-dates">June 2023 - Oct 2023</span>
-  </div>
-  <ul>
-    <li>Co-founded internal machine learning startup, coordinating sprints, reviewing wireframes and userflow with designers, refining user flows, and creating Figma mockups</li>
-    <li>Shipped minimum viable product leveraging OpenAI large language model API to analyze SEC EDGAR data</li>
-    <li>Collaborated with engineers to implement vector database for similarity search, boosting retrieval speeds by 2x</li>
-    <li>Conducted market research and transaction analysis for 12 pre-IPO firms, influencing $1.5M in investments</li>
-  </ul>
-
-  <div class="entry">
-    <div class="entry-details">
-      <span class="entry-title">USF Information Technology Services</span>
-      <span class="entry-subtitle">Salesforce Product Administrator</span>
-    </div>
-    <span class="entry-dates">May 2022 - Dec 2023</span>
-  </div>
-  <ul>
-    <li>Supervised Salesforce operations for 10,000+ users by creating and monitoring Tableau dashboards and restructuring database objects to ensure data health and track key performance indicators</li>
-    <li>Reconfigured 200 Salesforce accounts, resulting in a 33% decrease in license costs, saving $2000 biannually</li>
-    <li>Established project alignment, leading cross-functional Agile meetings as Scrum master for 10 developers and analysts, refining user stories, driving acceptance testing and managing product backlogs</li>
-  </ul>
-
-  <hr>
-
-  <h2 id="leadership-experience">🪅 Leadership Experience</h2>
-  <div class="entry">
-    <div class="entry-details">
-      <span class="entry-title">Alpha Phi Omega Service Fraternity</span>
-      <span class="entry-subtitle">Finance Chair, Pledge Trainer</span>
-    </div>
-    <span class="entry-dates">Aug 2021 - May 2024</span>
-  </div>
-  <ul>
-    <li>Organized fundraising campaigns, raising over $2,000 for charity with local business partnerships</li>
-    <li>Increased international student participation by 30% through targeted recruitment and engagement efforts</li>
-  </ul>
-
-  <div class="entry">
-    <div class="entry-details">
-      <span class="entry-title">Fiscal Affairs Council</span>
-      <span class="entry-subtitle">Chair of Annual Budget, Chair of Investment Task Force</span>
-    </div>
-    <span class="entry-dates">Aug 2021 - May 2022</span>
-  </div>
-  <ul>
-    <li>Revised and oversaw a $1.6 million budget for student organizations during COVID-19 and declining enrollment</li>
-    <li>Researched alternative investment vehicles for Fiscal portfolio before adopting money market accounts</li>
-  </ul>
-
-  <hr>
-
-  <h2 id="projects">📊 Selected Projects (I've featured some in the Projects section!)</h2>
-  <h3>Retailer Performance Analysis</h3>
-  <ul>
-    <li>Analyzed 500,000+ transactions using R, employing time series forecasting to predict seasonality</li>
-    <li>Created an R Shiny dashboard for stakeholders to visualize seasonal trends and improve inventory strategies</li>
-  </ul>
-
-  <h3>CFA Institute Research Challenge</h3>
-  <ul>
-    <li>Built financial models (DCF, market multiples) and presented to CFA charterholders, placing 5th in NorCal</li>
-    <li>Conducted Monte Carlo simulations in Python with 10,000 trials to stress-test assumptions</li>
-  </ul>
-
-  <h3>Bitcoin Volatility Analysis</h3>
-  <ul>
-    <li>Built a GARCH(1,1) model to forecast Bitcoin’s 60-day volatility with stationarity tests to ensure validity</li>
-    <li>Calculated 95% Value at Risk (VaR) of -5.92% to better understand portfolio losses during market fluctuations</li>
-  </ul>
-
-  <h3>Airbnb Location Analysis</h3>
-  <ul>
-    <li>Analyzed 13,000+ Airbnb properties using Python (PyTorch, matplotlib) to evaluate rental prices and occupancy</li>
-    <li>Applied NLP to customer reviews, identifying key factors influencing property ratings</li>
-  </ul>
 </div>
