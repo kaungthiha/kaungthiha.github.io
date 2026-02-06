@@ -490,8 +490,9 @@ section {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 10px;
-  max-width: 400px;
+  max-width: 500px;
   margin: 0 auto 2rem;
+  transition: all 0.5s ease;
 }
 
 .cell {
@@ -506,6 +507,19 @@ section {
   font-weight: 700;
   cursor: pointer;
   transition: var(--transition);
+}
+
+/* Adjust cell size for larger grids */
+.game-board:has(.cell:nth-child(16)) .cell {
+  font-size: 2.5rem; /* 4x4 grid */
+}
+
+.game-board:has(.cell:nth-child(25)) .cell {
+  font-size: 2rem; /* 5x5 grid */
+}
+
+.game-container {
+  transition: background-color 0.8s ease;
 }
 
 .cell:hover {
@@ -630,11 +644,19 @@ section {
   }
 
   .game-board {
-    max-width: 300px;
+    max-width: 350px;
   }
 
   .cell {
     font-size: 2rem;
+  }
+
+  .game-board:has(.cell:nth-child(16)) .cell {
+    font-size: 1.5rem; /* 4x4 grid on mobile */
+  }
+
+  .game-board:has(.cell:nth-child(25)) .cell {
+    font-size: 1.2rem; /* 5x5 grid on mobile */
   }
 
   .game-controls {

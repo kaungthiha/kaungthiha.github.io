@@ -7,6 +7,7 @@
   let board = ['', '', '', '', '', '', '', '', ''];
   let currentPlayer = 'X';
   let gameActive = true;
+  let gridSize = 3; // Dynamic grid size (3, 4, or 5)
   let scores = {
     player: 0,
     ai: 0,
@@ -17,9 +18,10 @@
   const playerShapes = ['X', '★', '♦', '●', '■', '▲'];
   const aiShapes = ['O', '○', '◇', '☆', '□', '△'];
   const colors = ['color-purple', 'color-green', 'color-orange', 'color-pink', 'color-teal'];
+  const bgColors = ['#f0f9ff', '#fdf4ff', '#fff7ed', '#f0fdf4', '#fef2f2'];
 
   // DOM Elements
-  const cells = document.querySelectorAll('.cell');
+  const gameBoard = document.getElementById('game-board');
   const turnIndicator = document.getElementById('turn-indicator');
   const gameMessage = document.getElementById('game-message');
   const resetBtn = document.getElementById('reset-btn');
@@ -28,22 +30,99 @@
   const aiScore = document.getElementById('ai-score');
   const drawScore = document.getElementById('draw-score');
 
-  // Winning combinations
-  const winningCombinations = [
-    [0, 1, 2], [3, 4, 5], [6, 7, 8], // Rows
-    [0, 3, 6], [1, 4, 7], [2, 5, 8], // Columns
-    [0, 4, 8], [2, 4, 6]             // Diagonals
-  ];
+  // Winning combinations (will be generated dynamically)
+  let winningCombinations = [];
+
+  // Generate winning combinations based on grid size
+  function generateWinningCombinations(size) {
+    const combinations = [];
+
+    // Rows
+    for (let row = 0; row < size; row++) {
+      const rowCombo = [];
+      for (let col = 0; col < size; col++) {
+        rowCombo.push(row * size + col);
+      }
+      combinations.push(rowCombo);
+    }
+
+    // Columns
+    for (let col = 0; col < size; col++) {
+      const colCombo = [];
+      for (let row = 0; row < size; row++) {
+        colCombo.push(row * size + col);
+      }
+      combinations.push(colCombo);
+    }
+
+    // Diagonal (top-left to bottom-right)
+    const diagonal1 = [];
+    for (let i = 0; i < size; i++) {
+      diagonal1.push(i * size + i);
+    }
+    combinations.push(diagonal1);
+
+    // Diagonal (top-right to bottom-left)
+    const diagonal2 = [];
+    for (let i = 0; i < size; i++) {
+      diagonal2.push(i * size + (size - 1 - i));
+    }
+    combinations.push(diagonal2);
+
+    return combinations;
+  }
+
+  // Create game board dynamically
+  function createBoard(size) {
+    gameBoard.innerHTML = '';
+    gameBoard.style.gridTemplateColumns = `repeat(${size}, 1fr)`;
+
+    const totalCells = size * size;
+    board = new Array(totalCells).fill('');
+
+    for (let i = 0; i < totalCells; i++) {
+      const cell = document.createElement('div');
+      cell.classList.add('cell');
+      cell.dataset.index = i;
+      cell.addEventListener('click', () => handleCellClick(i));
+      gameBoard.appendChild(cell);
+    }
+
+    // Random background color change (20% chance)
+    if (Math.random() < 0.2) {
+      changeBackgroundColor();
+    }
+  }
+
+  // Change background color randomly
+  function changeBackgroundColor() {
+    const randomBgColor = getRandomElement(bgColors);
+    const gameContainer = document.querySelector('.game-container');
+    if (gameContainer) {
+      gameContainer.style.backgroundColor = randomBgColor;
+      gameContainer.style.transition = 'background-color 0.8s ease';
+    }
+  }
 
   // Initialize game
   function init() {
     loadScores();
     updateScoreDisplay();
-    cells.forEach((cell, index) => {
-      cell.addEventListener('click', () => handleCellClick(index));
-    });
     resetBtn.addEventListener('click', resetGame);
     resetScoreBtn.addEventListener('click', resetScores);
+
+    // Random grid size (70% chance 3x3, 20% chance 4x4, 10% chance 5x5)
+    const rand = Math.random();
+    if (rand < 0.7) {
+      gridSize = 3;
+    } else if (rand < 0.9) {
+      gridSize = 4;
+    } else {
+      gridSize = 5;
+    }
+
+    winningCombinations = generateWinningCombinations(gridSize);
+    createBoard(gridSize);
   }
 
   // Get random element from array
@@ -78,9 +157,15 @@
 
   // Make a move
   function makeMove(index, player, shape) {
+    const cells = gameBoard.querySelectorAll('.cell');
     board[index] = player;
     cells[index].textContent = shape;
     cells[index].classList.add(player === 'X' ? 'player-x' : 'player-o');
+
+    // Random chance to change background color (15% chance)
+    if (Math.random() < 0.15) {
+      changeBackgroundColor();
+    }
 
     // Check for two in a row and apply special effects
     if (!checkWin(player)) {
@@ -109,14 +194,17 @@
 
   // Check for two in a row and add visual effects
   function checkTwoInRow(player) {
+    const cells = gameBoard.querySelectorAll('.cell');
+    const threshold = gridSize - 1; // For 3x3: 2, for 4x4: 3, for 5x5: 4
+
     winningCombinations.forEach(combination => {
       const values = combination.map(index => board[index]);
       const playerMoves = values.filter(v => v === player).length;
       const emptySpaces = values.filter(v => v === '').length;
 
-      // If player has 2 in a row with 1 empty space
-      if (playerMoves === 2 && emptySpaces === 1) {
-        // Add random color to the two cells
+      // If player has (gridSize-1) in a row with 1 empty space
+      if (playerMoves === threshold && emptySpaces === 1) {
+        // Add random color to the cells
         const randomColor = getRandomElement(colors);
         combination.forEach(index => {
           if (board[index] === player) {
@@ -128,6 +216,11 @@
             }, 500);
           }
         });
+
+        // Random chance to change background color (30% chance on near-win)
+        if (Math.random() < 0.3) {
+          changeBackgroundColor();
+        }
       }
     });
   }
@@ -141,10 +234,15 @@
 
   // Get best move for AI using minimax algorithm
   function getBestMove() {
+    // For larger boards, use simplified heuristic instead of full minimax
+    if (gridSize > 3) {
+      return getHeuristicMove();
+    }
+
     let bestScore = -Infinity;
     let bestMove = -1;
 
-    for (let i = 0; i < 9; i++) {
+    for (let i = 0; i < board.length; i++) {
       if (board[i] === '') {
         board[i] = 'O';
         const score = minimax(board, 0, false);
@@ -158,6 +256,43 @@
     }
 
     return bestMove;
+  }
+
+  // Heuristic move for larger boards (4x4, 5x5)
+  function getHeuristicMove() {
+    // Try to win
+    for (let i = 0; i < board.length; i++) {
+      if (board[i] === '') {
+        board[i] = 'O';
+        if (checkWin('O')) {
+          board[i] = '';
+          return i;
+        }
+        board[i] = '';
+      }
+    }
+
+    // Block player from winning
+    for (let i = 0; i < board.length; i++) {
+      if (board[i] === '') {
+        board[i] = 'X';
+        if (checkWin('X')) {
+          board[i] = '';
+          return i;
+        }
+        board[i] = '';
+      }
+    }
+
+    // Take center if available
+    const center = Math.floor(board.length / 2);
+    if (board[center] === '') {
+      return center;
+    }
+
+    // Take random empty cell
+    const emptyCells = board.map((cell, index) => cell === '' ? index : -1).filter(i => i !== -1);
+    return emptyCells[Math.floor(Math.random() * emptyCells.length)];
   }
 
   // Minimax algorithm for AI
@@ -201,16 +336,29 @@
 
   // Reset game
   function resetGame() {
-    board = ['', '', '', '', '', '', '', '', ''];
     currentPlayer = 'X';
     gameActive = true;
     gameMessage.classList.remove('show');
     gameMessage.textContent = '';
 
-    cells.forEach(cell => {
-      cell.textContent = '';
-      cell.classList.remove('player-x', 'player-o', ...colors, 'two-in-row');
-    });
+    // Random grid size for new game (70% chance 3x3, 20% chance 4x4, 10% chance 5x5)
+    const rand = Math.random();
+    if (rand < 0.7) {
+      gridSize = 3;
+    } else if (rand < 0.9) {
+      gridSize = 4;
+    } else {
+      gridSize = 5;
+    }
+
+    winningCombinations = generateWinningCombinations(gridSize);
+    createBoard(gridSize);
+
+    // Reset background color
+    const gameContainer = document.querySelector('.game-container');
+    if (gameContainer) {
+      gameContainer.style.backgroundColor = 'white';
+    }
 
     updateTurnIndicator();
   }
