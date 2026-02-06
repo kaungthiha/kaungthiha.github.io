@@ -27,12 +27,12 @@ body {
   color: var(--text-dark);
   line-height: 1.6;
   overflow-x: hidden;
-  background: linear-gradient(135deg, #3b82f6 0%, #1e40af 50%, #60a5fa 100%);
+  background: linear-gradient(135deg, #87CEEB 0%, #4A90E2 50%, #6BB6FF 100%);
   background-size: 400% 400%;
   background-attachment: fixed;
-  animation: gradientShift 15s ease infinite;
   min-height: 100vh;
   padding: 0 0 2rem 0;
+  transition: background 0.8s ease;
 }
 
 @keyframes gradientShift {

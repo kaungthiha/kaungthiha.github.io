@@ -19,6 +19,9 @@
 <!-- Landing Page CSS -->
 <link href="{{ site.baseurl }}/assets/css/landing.css" rel="stylesheet">
 
+<!-- Weather Animation CSS -->
+<link href="{{ site.baseurl }}/assets/css/weather.css" rel="stylesheet">
+
 <!-- Font Awesome Icons -->
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 
@@ -37,6 +40,65 @@ gtag('config', '{{site.ganalytics}}');
 
 {% capture layout %}{% if page.layout %}layout-{{ page.layout }}{% endif %}{% endcapture %}
 <body class="{{ layout }}">
+
+<!-- Weather Animations -->
+<div class="mainAnimContainer active" id="sunny-weather">
+  <div class="mainSunnyContainer">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="-700 -700 1900 1900" shape-rendering="geometricPrecision" text-rendering="geometricPrecision" width="1900" height="1900">
+      <path fill="none" stroke="#b0b0b0" stroke-width="2" d="m250 159 63.64 26.653L340 250l-26.36 64.347L250 341l-63.64-26.653L160 250l26.36-64.347L250 159z" class="sunraysCommon sunray1"></path>
+      <path fill="none" stroke="#b0b0b0" stroke-width="2" d="m250 105 102.53 42.47L395 250l-42.47 102.53L250 395l-102.53-42.47L105 250l42.47-102.53L250 105z" class="sunraysCommon sunray2"></path>
+      <path fill="none" stroke="#b0b0b0" stroke-width="2" d="m250 25 159.099 65.901L475 250l-65.901 159.099L250 475 90.901 409.099 25 250 90.901 90.901 250 25z" class="sunraysCommon sunray3"></path>
+      <path fill="none" stroke="#b0b0b0" stroke-width="2" d="m250-75 229.81 95.19L575 250l-95.19 229.81L250 575 20.19 479.81-75 250 20.19 20.19 250-75z" class="sunraysCommon sunray4"></path>
+      <path fill="none" stroke="#b0b0b0" stroke-width="2" d="m250-250 353.553 146.447L750 250 603.553 603.553 250 750l-353.553-146.447L-250 250l146.447-353.553L250-250z" class="sunraysCommon sunray5"></path>
+      <path fill="none" stroke="#b0b0b0" stroke-width="2" d="m250-600 601.04 248.96L1100 250 851.04 851.04 250 1100l-601.04-248.96L-600 250l248.96-601.04L250-600z" class="sunraysCommon sunray6"></path>
+      <circle transform="translate(250 250)" fill="#ffa600" r="35" class="sunCenter"></circle>
+    </svg>
+  </div>
+</div>
+
+<div class="mainAnimContainer" id="rainy-weather">
+  <div class="backRowToggle splatToggle bodyContainer">
+    <div class="rain frontRow">
+      <div class="drop" style="left: 5%; bottom: 105%; animation-delay: 0.75s; animation-duration: .975s;"><div class="stem" style="animation-delay: 0.75s; animation-duration: .975s;"></div><div class="splat" style="animation-delay: 0.75s; animation-duration: .975s;"></div></div>
+      <div class="drop" style="left: 10%; bottom: 107%; animation-delay: 0.24s; animation-duration: .924s;"><div class="stem" style="animation-delay: 0.24s; animation-duration: .924s;"></div><div class="splat" style="animation-delay: 0.24s; animation-duration: .924s;"></div></div>
+      <div class="drop" style="left: 15%; bottom: 107%; animation-delay: 0.40s; animation-duration: .940s;"><div class="stem" style="animation-delay: 0.40s; animation-duration: .940s;"></div><div class="splat" style="animation-delay: 0.40s; animation-duration: .940s;"></div></div>
+      <div class="drop" style="left: 20%; bottom: 103%; animation-delay: 0.80s; animation-duration: .980s;"><div class="stem" style="animation-delay: 0.80s; animation-duration: .980s;"></div><div class="splat" style="animation-delay: 0.80s; animation-duration: .980s;"></div></div>
+      <div class="drop" style="left: 25%; bottom: 103%; animation-delay: 0.98s; animation-duration: .998s;"><div class="stem" style="animation-delay: 0.98s; animation-duration: .998s;"></div><div class="splat" style="animation-delay: 0.98s; animation-duration: .998s;"></div></div>
+      <div class="drop" style="left: 30%; bottom: 107%; animation-delay: 0.13s; animation-duration: .913s;"><div class="stem" style="animation-delay: 0.13s; animation-duration: .913s;"></div><div class="splat" style="animation-delay: 0.13s; animation-duration: .913s;"></div></div>
+      <div class="drop" style="left: 35%; bottom: 103%; animation-delay: 0.59s; animation-duration: .959s;"><div class="stem" style="animation-delay: 0.59s; animation-duration: .959s;"></div><div class="splat" style="animation-delay: 0.59s; animation-duration: .959s;"></div></div>
+      <div class="drop" style="left: 40%; bottom: 109%; animation-delay: 0.8s; animation-duration: .98s;"><div class="stem" style="animation-delay: 0.8s; animation-duration: .98s;"></div><div class="splat" style="animation-delay: 0.8s; animation-duration: .98s;"></div></div>
+      <div class="drop" style="left: 45%; bottom: 107%; animation-delay: 0.3s; animation-duration: .93s;"><div class="stem" style="animation-delay: 0.3s; animation-duration: .93s;"></div><div class="splat" style="animation-delay: 0.3s; animation-duration: .93s;"></div></div>
+      <div class="drop" style="left: 50%; bottom: 103%; animation-delay: 0.80s; animation-duration: .980s;"><div class="stem" style="animation-delay: 0.80s; animation-duration: .980s;"></div><div class="splat" style="animation-delay: 0.80s; animation-duration: .980s;"></div></div>
+      <div class="drop" style="left: 55%; bottom: 103%; animation-delay: 0.58s; animation-duration: .958s;"><div class="stem" style="animation-delay: 0.58s; animation-duration: .958s;"></div><div class="splat" style="animation-delay: 0.58s; animation-duration: .958s;"></div></div>
+      <div class="drop" style="left: 60%; bottom: 105%; animation-delay: 0.12s; animation-duration: .912s;"><div class="stem" style="animation-delay: 0.12s; animation-duration: .912s;"></div><div class="splat" style="animation-delay: 0.12s; animation-duration: .912s;"></div></div>
+      <div class="drop" style="left: 65%; bottom: 105%; animation-delay: 0.56s; animation-duration: .956s;"><div class="stem" style="animation-delay: 0.56s; animation-duration: .956s;"></div><div class="splat" style="animation-delay: 0.56s; animation-duration: .956s;"></div></div>
+      <div class="drop" style="left: 70%; bottom: 107%; animation-delay: 0.46s; animation-duration: .946s;"><div class="stem" style="animation-delay: 0.46s; animation-duration: .946s;"></div><div class="splat" style="animation-delay: 0.46s; animation-duration: .946s;"></div></div>
+      <div class="drop" style="left: 75%; bottom: 109%; animation-delay: 0.3s; animation-duration: .93s;"><div class="stem" style="animation-delay: 0.3s; animation-duration: .93s;"></div><div class="splat" style="animation-delay: 0.3s; animation-duration: .93s;"></div></div>
+      <div class="drop" style="left: 80%; bottom: 109%; animation-delay: 0.65s; animation-duration: .965s;"><div class="stem" style="animation-delay: 0.65s; animation-duration: .965s;"></div><div class="splat" style="animation-delay: 0.65s; animation-duration: .965s;"></div></div>
+      <div class="drop" style="left: 85%; bottom: 109%; animation-delay: 0.35s; animation-duration: .935s;"><div class="stem" style="animation-delay: 0.35s; animation-duration: .935s;"></div><div class="splat" style="animation-delay: 0.35s; animation-duration: .935s;"></div></div>
+      <div class="drop" style="left: 90%; bottom: 107%; animation-delay: 0.91s; animation-duration: .991s;"><div class="stem" style="animation-delay: 0.91s; animation-duration: .991s;"></div><div class="splat" style="animation-delay: 0.91s; animation-duration: .991s;"></div></div>
+      <div class="drop" style="left: 95%; bottom: 109%; animation-delay: 0.81s; animation-duration: .981s;"><div class="stem" style="animation-delay: 0.81s; animation-duration: .981s;"></div><div class="splat" style="animation-delay: 0.81s; animation-duration: .981s;"></div></div>
+    </div>
+  </div>
+</div>
+
+<div class="mainAnimContainer" id="snowy-weather">
+  <div class="snowOuterMainContainer">
+    <div class="snowMainContainer">
+      <div class="snowflakes">
+        <i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i>
+        <i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i>
+        <i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i>
+        <i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i>
+        <i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i>
+        <i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i>
+        <i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i>
+        <i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i>
+        <i></i><i></i><i></i><i></i>
+      </div>
+    </div>
+  </div>
+</div>
 
 <!-- Simple Header -->
 <header class="site-header">
@@ -63,6 +125,7 @@ gtag('config', '{{site.ganalytics}}');
 
 <!-- JavaScript -->
 <script src="{{ site.baseurl }}/assets/js/theme.js" defer></script>
+<script src="{{ site.baseurl }}/assets/js/weather.js" defer></script>
 <script src="{{ site.baseurl }}/assets/js/tictactoe.js" defer></script>
 
 </body>
