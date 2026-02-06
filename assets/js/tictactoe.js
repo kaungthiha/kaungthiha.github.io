@@ -1,4 +1,4 @@
-// Tic-Tac-Toe Game Logic
+// Enhanced Tic-Tac-Toe Game with Random Elements
 (function() {
   'use strict';
 
@@ -11,6 +11,11 @@
     ai: 0,
     draws: 0
   };
+
+  // Fun random elements
+  const playerShapes = ['X', '★', '♦', '●', '■', '▲'];
+  const aiShapes = ['O', '○', '◇', '☆', '□', '△'];
+  const colors = ['color-purple', 'color-green', 'color-orange', 'color-pink', 'color-teal'];
 
   // DOM Elements
   const cells = document.querySelectorAll('.cell');
@@ -40,30 +45,46 @@
     resetScoreBtn.addEventListener('click', resetScores);
   }
 
+  // Get random element from array
+  function getRandomElement(array) {
+    return array[Math.floor(Math.random() * array.length)];
+  }
+
   // Handle cell click
   function handleCellClick(index) {
     if (board[index] !== '' || !gameActive || currentPlayer === 'O') {
       return;
     }
 
-    makeMove(index, 'X');
+    // Random chance to use a fun shape instead of X
+    const useRandomShape = Math.random() < 0.3; // 30% chance
+    const shape = useRandomShape ? getRandomElement(playerShapes) : 'X';
+
+    makeMove(index, 'X', shape);
 
     if (gameActive) {
       // AI makes a move after a short delay
       setTimeout(() => {
         const aiMove = getBestMove();
         if (aiMove !== -1) {
-          makeMove(aiMove, 'O');
+          const aiUseRandomShape = Math.random() < 0.3;
+          const aiShape = aiUseRandomShape ? getRandomElement(aiShapes) : 'O';
+          makeMove(aiMove, 'O', aiShape);
         }
       }, 500);
     }
   }
 
   // Make a move
-  function makeMove(index, player) {
+  function makeMove(index, player, shape) {
     board[index] = player;
-    cells[index].textContent = player;
+    cells[index].textContent = shape;
     cells[index].classList.add(player === 'X' ? 'player-x' : 'player-o');
+
+    // Check for two in a row and apply special effects
+    if (!checkWin(player)) {
+      checkTwoInRow(player);
+    }
 
     if (checkWin(player)) {
       endGame(player === 'X' ? 'You win! 🎉' : 'AI wins! 🤖');
@@ -83,6 +104,31 @@
       currentPlayer = currentPlayer === 'X' ? 'O' : 'X';
       updateTurnIndicator();
     }
+  }
+
+  // Check for two in a row and add visual effects
+  function checkTwoInRow(player) {
+    winningCombinations.forEach(combination => {
+      const values = combination.map(index => board[index]);
+      const playerMoves = values.filter(v => v === player).length;
+      const emptySpaces = values.filter(v => v === '').length;
+
+      // If player has 2 in a row with 1 empty space
+      if (playerMoves === 2 && emptySpaces === 1) {
+        // Add random color to the two cells
+        const randomColor = getRandomElement(colors);
+        combination.forEach(index => {
+          if (board[index] === player) {
+            cells[index].classList.remove(...colors);
+            cells[index].classList.add(randomColor, 'two-in-row');
+            // Remove animation class after it completes
+            setTimeout(() => {
+              cells[index].classList.remove('two-in-row');
+            }, 500);
+          }
+        });
+      }
+    });
   }
 
   // Check for win
@@ -162,7 +208,7 @@
 
     cells.forEach(cell => {
       cell.textContent = '';
-      cell.classList.remove('player-x', 'player-o');
+      cell.classList.remove('player-x', 'player-o', ...colors, 'two-in-row');
     });
 
     updateTurnIndicator();
