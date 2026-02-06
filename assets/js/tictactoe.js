@@ -2,6 +2,30 @@
 (function() {
   'use strict';
 
+  // Parallax Effect
+  function initParallax() {
+    const profileImage = document.querySelector('.profile-image');
+
+    if (!profileImage) return;
+
+    window.addEventListener('scroll', () => {
+      const scrolled = window.pageYOffset;
+      const rate = scrolled * 0.3;
+
+      // Subtle parallax on profile image
+      if (profileImage) {
+        profileImage.style.transform = `translateY(${rate * 0.5}px) scale(1)`;
+      }
+    });
+  }
+
+  // Initialize parallax when DOM is ready
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initParallax);
+  } else {
+    initParallax();
+  }
+
   // Game State
   let board = ['', '', '', '', '', '', '', '', ''];
   let currentPlayer = 'X';

@@ -29,9 +29,10 @@ body {
   overflow-x: hidden;
   background: linear-gradient(135deg, #3b82f6 0%, #1e40af 50%, #60a5fa 100%);
   background-size: 400% 400%;
+  background-attachment: fixed;
   animation: gradientShift 15s ease infinite;
   min-height: 100vh;
-  padding: 2rem 0;
+  padding: 0 0 2rem 0;
 }
 
 @keyframes gradientShift {
@@ -86,11 +87,12 @@ section {
 /* Main Content Card */
 .main-content-card {
   max-width: 1400px;
-  margin: 0 auto;
+  margin: 2rem auto;
   background: white;
   box-shadow: 0 20px 60px rgba(0,0,0,0.3);
   overflow: hidden;
   padding: 3rem;
+  position: relative;
 }
 
 /* Smooth Scroll Animation */
@@ -130,6 +132,8 @@ section {
   position: relative;
   display: inline-block;
   margin-bottom: 2rem;
+  transform-style: preserve-3d;
+  perspective: 1000px;
 }
 
 .profile-image {
@@ -568,17 +572,18 @@ section {
 
   .main-content-card {
     padding: 2rem 1.5rem;
-    margin: 1rem 0;
+    margin: 2rem auto;
   }
 }
 
 @media (max-width: 768px) {
   body {
-    padding: 1rem 0;
+    padding: 0 0 1rem 0;
   }
 
   .main-content-card {
     padding: 1.5rem 1rem;
+    margin: 1.5rem auto;
   }
 
   .hero-title {
@@ -622,11 +627,11 @@ section {
 
 @media (max-width: 576px) {
   body {
-    padding: 0.5rem 0;
+    padding: 0 0 0.5rem 0;
   }
 
   .main-content-card {
-    margin: 0;
+    margin: 1rem auto;
     padding: 1rem;
   }
 
