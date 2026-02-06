@@ -1,428 +1,244 @@
 ---
 layout: default
-title: Kaung Thiha's Resume
+title: Kaung Thiha
 comments: false
 ---
 
-<!-- Enhanced Hero Section with Animated Elements -->
-{% if page.url == "/" %} 
-<div class="hero-section position-relative overflow-hidden mb-5">
-  <div class="hero-background"></div>
-  <div class="container-fluid px-0">
-    <div class="row align-items-center min-vh-75 g-0">
-      <div class="col-lg-6 col-md-12 px-4 px-lg-5">
-        <div class="hero-content animate-fade-in">
-          <div class="hero-badge mb-3">
-            <span class="badge bg-primary text-white px-3 py-2 rounded-pill">
-              <i class="fas fa-chart-line me-2"></i>Data Analyst & Developer
-            </span>
-          </div>
-          <h1 class="hero-title display-2 font-weight-bold mb-4 serif-font">
-            Hi, I'm <span class="text-primary">Kaung</span>
-          </h1>
-          <p class="hero-subtitle lead mb-4 text-muted">
-            I transform complex data into actionable insights and build solutions that drive business growth. 
-            Welcome to my digital portfolio where data meets creativity.
-          </p>
-          <div class="hero-stats mb-4">
-            <div class="row g-3">
-              <div class="col-4">
-                <div class="stat-item text-center">
-                  <h3 class="stat-number text-primary mb-1">500K+</h3>
-                  <small class="text-muted">Records Analyzed</small>
-                </div>
-              </div>
-              <div class="col-4">
-                <div class="stat-item text-center">
-                  <h3 class="stat-number text-primary mb-1">15+</h3>
-                  <small class="text-muted">Projects Completed</small>
-                </div>
-              </div>
-              <div class="col-4">
-                <div class="stat-item text-center">
-                  <h3 class="stat-number text-primary mb-1">3.8</h3>
-                  <small class="text-muted">GPA Achieved</small>
-                </div>
-              </div>
-            </div>
-          </div>
-          <div class="hero-actions d-flex flex-wrap gap-3">
-            <a href="{{site.baseurl}}/about" class="btn btn-primary btn-lg px-4 py-3 rounded-pill">
-              <i class="fas fa-user me-2"></i>About Me
-            </a>
-            <a href="{{site.baseurl}}/projects" class="btn btn-outline-dark btn-lg px-4 py-3 rounded-pill">
-              <i class="fas fa-briefcase me-2"></i>View Projects
-            </a>
-            <a href="{{site.baseurl}}/resume" class="btn btn-outline-secondary btn-lg px-4 py-3 rounded-pill">
-              <i class="fas fa-download me-2"></i>Resume
-            </a>
-          </div>
-        </div>
-      </div>
-      <div class="col-lg-6 col-md-12 d-flex align-items-center justify-content-center p-4">
-        <div class="hero-image-container position-relative">
-          <div class="floating-elements">
-            <div class="floating-card card-1">
-              <i class="fas fa-chart-bar text-primary"></i>
-              <span>Analytics</span>
-            </div>
-            <div class="floating-card card-2">
-              <i class="fas fa-code text-success"></i>
-              <span>Data Engineering</span>
-            </div>
-            <div class="floating-card card-3">
-              <i class="fas fa-brain text-warning"></i>
-              <span>Making Bad Burmese Food</span>
-            </div>
-          </div>
-          <img class="hero-image img-fluid rounded-lg shadow-lg" 
-               height="500" 
-               src="{{site.baseurl}}/assets/images/intro.jpg"
-               alt="Kaung Thiha - Data Analyst">
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
-{% endif %}
-
-<!-- Skills Showcase Section -->
-<section class="skills-showcase py-5 bg-light">
+<!-- Hero Section -->
+<section class="hero-section">
   <div class="container">
-    <div class="row">
-      <div class="col-12 text-center mb-5">
-        <h2 class="section-title h3 serif-font">Skills & Tools</h2>
-      </div>
-    </div>
-    <div class="row g-4">
-      <div class="col-lg-3 col-md-6">
-        <div class="skill-card text-center p-4 bg-white rounded-lg shadow-sm h-100">
-          <div class="skill-icon mb-3">
-            <i class="fab fa-python text-primary" style="font-size: 2.5rem;"></i>
+    <div class="row align-items-center">
+      <div class="col-lg-5 text-center mb-4 mb-lg-0">
+        <div class="profile-image-wrapper">
+          <img src="{{site.baseurl}}/assets/images/about.jpg"
+               alt="Kaung Thiha - Data Analyst"
+               class="profile-image"
+               loading="lazy">
+          <div class="profile-badge">
+            <i class="fas fa-chart-line"></i>
+            <span>Data Analyst</span>
           </div>
-          <h5 class="skill-title">Python</h5>
-          <p class="skill-desc text-muted small">Pandas, NumPy, Scikit-learn, Matplotlib</p>
         </div>
       </div>
-      <div class="col-lg-3 col-md-6">
-        <div class="skill-card text-center p-4 bg-white rounded-lg shadow-sm h-100">
-          <div class="skill-icon mb-3">
-            <i class="fas fa-database text-success" style="font-size: 2.5rem;"></i>
+      <div class="col-lg-7">
+        <h1 class="hero-title">I'm Kaung Thiha <span class="burmese-name">(ကောင်းသီဟ)</span></h1>
+        <p class="hero-subtitle">but please call me Kaung.</p>
+        <div class="stats-grid">
+          <div class="stat-item">
+            <h3>3.81</h3>
+            <small>GPA</small>
           </div>
-          <h5 class="skill-title">SQL & Databases</h5>
-          <p class="skill-desc text-muted small">PostgreSQL, BigQuery, Data Warehousing</p>
-        </div>
-      </div>
-      <div class="col-lg-3 col-md-6">
-        <div class="skill-card text-center p-4 bg-white rounded-lg shadow-sm h-100">
-          <div class="skill-icon mb-3">
-            <i class="fas fa-chart-line text-warning" style="font-size: 2.5rem;"></i>
+          <div class="stat-item">
+            <h3>2024</h3>
+            <small>Graduate</small>
           </div>
-          <h5 class="skill-title">Data Visualization</h5>
-          <p class="skill-desc text-muted small">Tableau, R Shiny, Plotly</p>
-        </div>
-      </div>
-      <div class="col-lg-3 col-md-6">
-        <div class="skill-card text-center p-4 bg-white rounded-lg shadow-sm h-100">
-          <div class="skill-icon mb-3">
-            <i class="fab fa-java text-danger" style="font-size: 2.5rem;"></i>
+          <div class="stat-item">
+            <h3>SF</h3>
+            <small>Based</small>
           </div>
-          <h5 class="skill-title">Development</h5>
-          <p class="skill-desc text-muted small">Java, R, Web Development</p>
+          <div class="stat-item">
+            <h3>5+</h3>
+            <small>Years Coding</small>
+          </div>
         </div>
       </div>
     </div>
   </div>
 </section>
 
-<!-- Featured Projects Section -->
-<section class="featured-projects py-5">
+<!-- Bio Section -->
+<section class="bio-section">
   <div class="container">
-    <div class="row">
-      <div class="col-12 text-center mb-5">
-        <h2 class="section-title h3 serif-font">Featured Projects</h2>
-        <p class="text-muted">Some stuff I messed around with</p>
-      </div>
-    </div>
-    <div class="row g-4">
-      {% for post in site.projects %}
-        {% if post.featured == true %}
-          <div class="col-lg-4 col-md-6 mb-4">
-            <div class="project-card h-100">
-              {% include postbox.html %}
-            </div>
-          </div>
-        {% endif %}
-      {% endfor %}
-    </div>
-    <div class="row mt-4">
-      <div class="col-12 text-center">
-        <a href="{{site.baseurl}}/projects" class="btn btn-outline-primary btn-lg">
-          <i class="fas fa-arrow-right me-2"></i>View All Projects
-        </a>
-      </div>
-    </div>
-  </div>
-</section>
+    <div class="content-wrapper">
+      <h2>My Journey 🚀</h2>
+      <p>I graduated from <strong>USF</strong> - the University of San Francisco <em>(not the University of South Florida like Google seems to think)</em> - studying <strong>Business Analytics & Computer Science</strong>. It's been quite the adventure from my early days in Myanmar to the tech-filled streets of San Francisco.</p>
 
-<!-- Experience Timeline -->
-<section class="experience-preview py-5 bg-light">
-  <div class="container">
-    <div class="row">
-      <div class="col-lg-8 mx-auto">
-        <div class="text-center mb-5">
-          <h2 class="section-title h3 serif-font">Key Milestones in my career</h2>
-        </div>
+      <h3>The Origin Story 📚</h3>
+      <p>I spent my formative years in Myanmar thinking I'd be a writer or the next Jimmy Neutron (that cowlick was <em>iconic</em>). Half-fittingly, I was initially an English + Philosophy major with law school aspirations. The latter is on the backburner for now (+3 years give or take) but the former still bleeds into my interests and writing style from time to time.</p>
+
+      <div class="journey-timeline">
         <div class="timeline-item">
           <div class="timeline-marker bg-primary"></div>
           <div class="timeline-content">
-            <h5 class="timeline-title">LLM Research @ Amazon Web Services</h5>
-            <span class="timeline-date text-muted">Feb 2025 - June 2025</span>
-            <p class="timeline-desc">Wrote product documentation, tested agentic model SDK & other NDA stuff :) </p>
+            <h4>🇲🇲 Myanmar Beginnings</h4>
+            <p>Started with dreams of writing and, admittedly, becoming Jimmy Neutron</p>
           </div>
-        <div class="timeline">
-          <div class="timeline-item">
-            <div class="timeline-marker bg-primary"></div>
-            <div class="timeline-content">
-              <h5 class="timeline-title">Product Analyst at Wefunder</h5>
-              <span class="timeline-date text-muted">Jan 2024 - July 2024</span>
-              <p class="timeline-desc">Led $350K weekly transactions product, engineered PostgreSQL ETL processes, developed VIP product generating $161K revenue</p>
+        </div>
+        <div class="timeline-item">
+          <div class="timeline-marker bg-success"></div>
+          <div class="timeline-content">
+            <h4>📖 English & Philosophy</h4>
+            <p>Initial academic path focused on liberal arts and law school prep</p>
+          </div>
+        </div>
+        <div class="timeline-item">
+          <div class="timeline-marker bg-warning"></div>
+          <div class="timeline-content">
+            <h4>🔄 The Pivot</h4>
+            <p>Discovered the power of data and fell in love with solving problems through analytics</p>
+          </div>
+        </div>
+        <div class="timeline-item">
+          <div class="timeline-marker bg-info"></div>
+          <div class="timeline-content">
+            <h4>🎓 USF Graduate</h4>
+            <p>Business Analytics & Computer Science - where data meets creativity</p>
+          </div>
+        </div>
+      </div>
+
+      <h2>What I Do Now 💻</h2>
+      <p>Nowadays, I like playing around with data to solve cool problems. I've got a solid understanding of <strong>Python</strong> and <strong>Java</strong> + am pretty handy with <strong>SQL</strong>, <strong>R</strong> and <strong>Tableau</strong>. Been trying to understand the data engineering side of things a bit more as well <em>(Shoutout to Zach Wilson who is putting out some awesome stuff!!)</em></p>
+
+      <div class="skills-grid">
+        <div class="skill-category">
+          <h4><i class="fas fa-code"></i> Programming</h4>
+          <div class="skill-tags">
+            <span class="skill-tag">Python</span>
+            <span class="skill-tag">Java</span>
+            <span class="skill-tag">R</span>
+            <span class="skill-tag">SQL</span>
+            <span class="skill-tag">JavaScript</span>
+          </div>
+        </div>
+        <div class="skill-category">
+          <h4><i class="fas fa-chart-bar"></i> Analytics</h4>
+          <div class="skill-tags">
+            <span class="skill-tag">Pandas</span>
+            <span class="skill-tag">NumPy</span>
+            <span class="skill-tag">Tableau</span>
+            <span class="skill-tag">R Shiny</span>
+            <span class="skill-tag">Plotly</span>
+          </div>
+        </div>
+        <div class="skill-category">
+          <h4><i class="fas fa-database"></i> Data & Tools</h4>
+          <div class="skill-tags">
+            <span class="skill-tag">PostgreSQL</span>
+            <span class="skill-tag">BigQuery</span>
+            <span class="skill-tag">Salesforce</span>
+            <span class="skill-tag">Git</span>
+            <span class="skill-tag">Excel</span>
+          </div>
+        </div>
+        <div class="skill-category">
+          <h4><i class="fas fa-brain"></i> Machine Learning</h4>
+          <div class="skill-tags">
+            <span class="skill-tag">Scikit-learn</span>
+            <span class="skill-tag">PyTorch</span>
+            <span class="skill-tag">TensorFlow</span>
+            <span class="skill-tag">GARCH Models</span>
+            <span class="skill-tag">NLP</span>
+          </div>
+        </div>
+      </div>
+
+      <h2>Fun Facts About Me 🎯</h2>
+      <div class="fun-facts">
+        <div class="fact-card">
+          <div class="fact-icon">
+            <i class="fas fa-globe-asia"></i>
+          </div>
+          <h5>Multilingual</h5>
+          <p>Fluent in English, Burmese, and the universal language of data visualization</p>
+        </div>
+        <div class="fact-card">
+          <div class="fact-icon">
+            <i class="fas fa-hair-dryer"></i>
+          </div>
+          <h5>Jimmy Neutron Aspirations</h5>
+          <p>Sadly, I'm not as cool as Jimmy Neutron yet - I can't rock the cowlick hairstyle 😭</p>
+        </div>
+        <div class="fact-card">
+          <div class="fact-icon">
+            <i class="fas fa-book"></i>
+          </div>
+          <h5>Writer at Heart</h5>
+          <p>My writing background still influences how I communicate complex data insights</p>
+        </div>
+        <div class="fact-card">
+          <div class="fact-icon">
+            <i class="fas fa-hammer"></i>
+          </div>
+          <h5>Continuous Learner</h5>
+          <p>Always exploring new tools and methodologies to stay at the cutting edge</p>
+        </div>
+      </div>
+
+      <h2>What's Next? 🌟</h2>
+      <p>I'll be using this site as a way to showcase my work and interests. It's a little barebones right now but I'm hoping to change that as I reformat old projects and work on new ones, all while improving my technical chops.</p>
+
+      <p><strong>Currently exploring:</strong></p>
+      <ul>
+        <li>Advanced data engineering workflows</li>
+        <li>Real-time analytics and streaming data</li>
+        <li>AI/ML model deployment and productionization</li>
+        <li>The intersection of business strategy and data science</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- Tic-Tac-Toe Game Section -->
+<section class="game-section">
+  <div class="container">
+    <div class="game-wrapper">
+      <h2 class="game-title">Challenge Me to Tic-Tac-Toe! 🎮</h2>
+      <p class="game-subtitle">Think you can beat the algorithm? Give it a try!</p>
+
+      <div class="game-container">
+        <div class="game-info">
+          <div class="player-turn">
+            <span id="turn-indicator">Your Turn (X)</span>
+          </div>
+          <div class="game-score">
+            <div class="score-item">
+              <span class="score-label">You</span>
+              <span class="score-value" id="player-score">0</span>
             </div>
-          </div>
-          <div class="timeline-item">
-            <div class="timeline-marker bg-success"></div>
-            <div class="timeline-content">
-              <h5 class="timeline-title">VC Summer Analyst at CrossWork Midas</h5>
-              <span class="timeline-date text-muted">June 2023 - Oct 2023</span>
-              <p class="timeline-desc">Co-founded internal ML startup, conducted market research for $1.5M investments, shipped MVP with OpenAI integration</p>
+            <div class="score-item">
+              <span class="score-label">Draws</span>
+              <span class="score-value" id="draw-score">0</span>
             </div>
-          </div>
-          <div class="timeline-item">
-            <div class="timeline-marker bg-warning"></div>
-            <div class="timeline-content">
-              <h5 class="timeline-title">Salesforce Administrator at USF</h5>
-              <span class="timeline-date text-muted">May 2022 - Dec 2023</span>
-              <p class="timeline-desc">Managed Salesforce for 10K+ users, created Tableau dashboards, led Agile teams, saved $2000 annually through optimization</p>
+            <div class="score-item">
+              <span class="score-label">AI</span>
+              <span class="score-value" id="ai-score">0</span>
             </div>
           </div>
         </div>
-        <div class="text-center mt-4">
-          <a href="{{site.baseurl}}/resume" class="btn btn-primary">
-            <i class="fas fa-file-alt me-2"></i>Full Resume
-          </a>
+
+        <div class="game-board" id="game-board">
+          <div class="cell" data-index="0"></div>
+          <div class="cell" data-index="1"></div>
+          <div class="cell" data-index="2"></div>
+          <div class="cell" data-index="3"></div>
+          <div class="cell" data-index="4"></div>
+          <div class="cell" data-index="5"></div>
+          <div class="cell" data-index="6"></div>
+          <div class="cell" data-index="7"></div>
+          <div class="cell" data-index="8"></div>
         </div>
+
+        <div class="game-controls">
+          <button class="btn-reset" id="reset-btn">New Game</button>
+          <button class="btn-reset-score" id="reset-score-btn">Reset Score</button>
+        </div>
+
+        <div class="game-message" id="game-message"></div>
       </div>
     </div>
   </div>
 </section>
 
-<!-- Custom Styles -->
-<style>
-.hero-section {
-  min-height: 80vh;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  position: relative;
-}
-
-.hero-background::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grain" width="100" height="100" patternUnits="userSpaceOnUse"><circle cx="50" cy="50" r="1" fill="%23ffffff" opacity="0.1"/></pattern></defs><rect width="100" height="100" fill="url(%23grain)"/></svg>');
-  opacity: 0.3;
-}
-
-.min-vh-75 {
-  min-height: 75vh;
-}
-
-.animate-fade-in {
-  animation: fadeInUp 1s ease-out;
-}
-
-@keyframes fadeInUp {
-  from {
-    opacity: 0;
-    transform: translateY(30px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-.hero-image-container {
-  position: relative;
-  z-index: 2;
-}
-
-.floating-elements {
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  z-index: 1;
-}
-
-.floating-card {
-  position: absolute;
-  background: white;
-  border-radius: 12px;
-  padding: 15px 20px;
-  box-shadow: 0 10px 30px rgba(0,0,0,0.1);
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  font-weight: 500;
-  animation: float 6s ease-in-out infinite;
-}
-
-.floating-card.card-1 {
-  top: 10%;
-  left: -10%;
-  animation-delay: 0s;
-}
-
-.floating-card.card-2 {
-  top: 60%;
-  right: -15%;
-  animation-delay: 2s;
-}
-
-.floating-card.card-3 {
-  bottom: 20%;
-  left: -5%;
-  animation-delay: 4s;
-}
-
-@keyframes float {
-  0%, 100% { transform: translateY(0px); }
-  50% { transform: translateY(-20px); }
-}
-
-.skill-card {
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
-  border: 1px solid #e9ecef;
-}
-
-.skill-card:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 15px 35px rgba(0,0,0,0.1) !important;
-}
-
-.timeline {
-  position: relative;
-  padding-left: 30px;
-}
-
-.timeline::before {
-  content: '';
-  position: absolute;
-  left: 15px;
-  top: 0;
-  bottom: 0;
-  width: 2px;
-  background: #dee2e6;
-}
-
-.timeline-item {
-  position: relative;
-  margin-bottom: 40px;
-}
-
-.timeline-marker {
-  position: absolute;
-  left: -23px;
-  top: 0;
-  width: 16px;
-  height: 16px;
-  border-radius: 50%;
-  border: 3px solid white;
-  box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-}
-
-.timeline-content {
-  background: white;
-  padding: 25px;
-  border-radius: 12px;
-  box-shadow: 0 5px 15px rgba(0,0,0,0.05);
-  border: 1px solid #e9ecef;
-}
-
-.timeline-title {
-  color: #495057;
-  margin-bottom: 5px;
-}
-
-.timeline-date {
-  font-size: 0.9rem;
-  font-weight: 500;
-}
-
-.section-title {
-  position: relative;
-  display: inline-block;
-  margin-bottom: 20px;
-}
-
-.section-title::after {
-  content: '';
-  position: absolute;
-  bottom: -10px;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 50px;
-  height: 3px;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  border-radius: 2px;
-}
-
-.project-card .card {
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
-  border: none;
-  box-shadow: 0 5px 15px rgba(0,0,0,0.08);
-}
-
-.project-card .card:hover {
-  transform: translateY(-8px);
-  box-shadow: 0 15px 35px rgba(0,0,0,0.15);
-}
-
-.rounded-lg {
-  border-radius: 15px !important;
-}
-
-.hero-content {
-  color: white;
-}
-
-.hero-title {
-  font-size: 3.5rem;
-  line-height: 1.2;
-}
-
-@media (max-width: 768px) {
-  .hero-title {
-    font-size: 2.5rem;
-  }
-  
-  .floating-card {
-    display: none;
-  }
-  
-  .timeline {
-    padding-left: 20px;
-  }
-  
-  .timeline-marker {
-    left: -13px;
-  }
-}
-</style>
-
-<!-- Font Awesome Icons -->
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+<!-- Contact CTA -->
+<section class="cta-section">
+  <div class="container">
+    <div class="cta-content">
+      <h3>Let's Build Something Amazing Together</h3>
+      <p>Whether you're looking to collaborate on a project, discuss data insights, or just want to chat about the latest in analytics, I'd love to hear from you!</p>
+      <a href="mailto:kaungthiha.3@gmail.com" class="btn-primary">
+        <i class="fas fa-envelope"></i> Get in Touch
+      </a>
+    </div>
+  </div>
+</section>
