@@ -93,6 +93,7 @@ section {
   overflow: hidden;
   padding: 3rem;
   position: relative;
+  border-radius: 30px;
 }
 
 /* Smooth Scroll Animation */
@@ -132,8 +133,6 @@ section {
   position: relative;
   display: inline-block;
   margin-bottom: 2rem;
-  transform-style: preserve-3d;
-  perspective: 1000px;
 }
 
 .profile-image {
@@ -165,6 +164,33 @@ section {
   font-weight: 400;
   display: inline-block;
   margin-top: 0.5rem;
+}
+
+.hero-social-links {
+  display: flex;
+  justify-content: center;
+  gap: 1.5rem;
+  margin-top: 2rem;
+}
+
+.hero-social-link {
+  color: var(--text-dark);
+  transition: var(--transition);
+  display: inline-flex;
+  align-items: center;
+  padding: 0.5rem;
+}
+
+.hero-social-link:hover {
+  transform: translateY(-3px) scale(1.1);
+}
+
+.hero-social-link:first-child:hover {
+  color: #0077b5; /* LinkedIn blue */
+}
+
+.hero-social-link:last-child:hover {
+  color: #1DB954; /* Spotify green */
 }
 
 .bio-column {
