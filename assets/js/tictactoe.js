@@ -1,4 +1,10 @@
-// Enhanced Tic-Tac-Toe Game with Random Elements
+/*
+ Bad Tic Tac Toe
+Features to add:
+- Moves change background
+- Maybe animations for buttons
+
+*/
 (function() {
   'use strict';
 
@@ -173,7 +179,7 @@
     }
 
     if (checkWin(player)) {
-      endGame(player === 'X' ? 'You win! 🎉' : 'AI wins! 🤖');
+      endGame(player === 'X' ? 'You win! 🎉' : 'I win! 🤖');
       if (player === 'X') {
         scores.player++;
       } else {
@@ -326,7 +332,8 @@
     }
   }
 
-  // End game
+  // End 
+  
   function endGame(message) {
     gameActive = false;
     gameMessage.textContent = message;
@@ -341,7 +348,8 @@
     gameMessage.classList.remove('show');
     gameMessage.textContent = '';
 
-    // Random grid size for new game (70% chance 3x3, 20% chance 4x4, 10% chance 5x5)
+    // Random grid size for new game 
+    // (70% chance 3x3, 20% chance 4x4, 10% chance 5x5)
     const rand = Math.random();
     if (rand < 0.7) {
       gridSize = 3;
@@ -366,7 +374,7 @@
   // Update turn indicator
   function updateTurnIndicator() {
     if (gameActive) {
-      turnIndicator.textContent = currentPlayer === 'X' ? 'Your Turn (X)' : "AI's Turn (O)";
+      turnIndicator.textContent = currentPlayer === 'X' ? 'Your Turn' : "My Turn";
     }
   }
 
