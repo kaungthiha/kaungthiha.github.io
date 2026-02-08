@@ -1,4 +1,8 @@
-// Weather Toggle Functionality
+/*
+ Weather Toggle
+Still need to figure out correct sun placement 
+ */
+
 (function() {
   'use strict';
 
@@ -21,7 +25,6 @@
         const weather = button.dataset.weather;
         setWeather(weather);
 
-        // Save preference
         localStorage.setItem('weather_preference', weather);
       });
     });
@@ -29,8 +32,6 @@
     function setWeather(weather) {
       // Remove active class from all buttons
       weatherButtons.forEach(btn => btn.classList.remove('active'));
-
-      // Add active class to selected button
       const activeButton = document.querySelector(`[data-weather="${weather}"]`);
       if (activeButton) {
         activeButton.classList.add('active');
