@@ -366,6 +366,129 @@ section {
   transform: translateY(-2px);
 }
 
+/* Expandable Sections */
+.expandable-section {
+  margin: 2rem 0;
+  border-radius: 12px;
+  overflow: hidden;
+  border: 2px solid var(--border-color);
+  transition: var(--transition);
+}
+
+.expandable-section:hover {
+  border-color: var(--primary-color);
+  box-shadow: var(--shadow-md);
+}
+
+.expandable-header {
+  width: 100%;
+  background: var(--bg-light);
+  border: none;
+  padding: 1.5rem 2rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  cursor: pointer;
+  transition: var(--transition);
+  font-size: 1.3rem;
+  font-weight: 600;
+  color: var(--text-dark);
+  text-align: left;
+}
+
+.expandable-header:hover {
+  background: linear-gradient(135deg, rgba(59, 130, 246, 0.05) 0%, rgba(30, 64, 175, 0.05) 100%);
+}
+
+.expandable-header.active {
+  background: linear-gradient(135deg, rgba(59, 130, 246, 0.1) 0%, rgba(30, 64, 175, 0.1) 100%);
+}
+
+.expandable-title {
+  flex-grow: 1;
+}
+
+.chevron-icon {
+  transition: transform 0.3s ease;
+  color: var(--primary-color);
+  min-width: 24px;
+}
+
+.expandable-header.active .chevron-icon {
+  transform: rotate(180deg);
+}
+
+.expandable-content {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.5s ease, padding 0.5s ease;
+  background: white;
+  padding: 0 2rem;
+}
+
+.expandable-content.active {
+  max-height: 1000px;
+  padding: 2rem;
+}
+
+/* Learning Grid */
+.learning-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1.5rem;
+}
+
+.learning-category {
+  background: var(--bg-light);
+  padding: 1.5rem;
+  border-radius: 12px;
+  border: 1px solid var(--border-color);
+  transition: var(--transition);
+}
+
+.learning-category:hover {
+  background: white;
+  box-shadow: var(--shadow-md);
+  transform: translateY(-5px);
+}
+
+.learning-category h4 {
+  font-size: 1.1rem;
+  font-weight: 600;
+  margin-bottom: 1rem;
+  color: var(--text-dark);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.learning-category h4 i {
+  font-size: 1.3rem;
+  color: var(--primary-color);
+}
+
+.learning-category ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  font-size: 1rem;
+  color: #495057;
+}
+
+.learning-category ul li {
+  padding: 0.5rem 0;
+  padding-left: 1.5rem;
+  position: relative;
+}
+
+.learning-category ul li::before {
+  content: '•';
+  position: absolute;
+  left: 0;
+  color: var(--primary-color);
+  font-weight: bold;
+}
+
 /* Fun Facts */
 .fun-facts {
   display: grid;
