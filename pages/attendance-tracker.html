@@ -1,0 +1,706 @@
+---
+layout: default
+title: Capital One Attendance Tracker
+permalink: "/tools/attendance-tracker/"
+comments: false
+---
+
+<div id="attendance-tracker-root"></div>
+
+<!-- Load React, ReactDOM, and Babel from CDN -->
+<script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+<script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+<script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+<!-- Tailwind CSS via CDN -->
+<script src="https://cdn.tailwindcss.com"></script>
+
+<!-- Configure Tailwind to avoid conflicts -->
+<script>
+  tailwind.config = {
+    prefix: 'tw-',
+    corePlugins: {
+      preflight: false
+    }
+  }
+</script>
+
+<!-- Attendance Tracker React Component -->
+<script type="text/babel">
+  const { useState, useEffect } = React;
+
+  /* Period data with all 13 periods from 2026 schedule */
+
+  function expandDateRange(startStr, endStr) {
+    const dates = [];
+    const start = new Date(startStr + 'T00:00:00');
+    const end = new Date(endStr + 'T00:00:00');
+    for (let d = new Date(start); d <= end; d.setDate(d.getDate() + 1)) {
+      const dow = d.getDay();
+      if (dow !== 0 && dow !== 6) {
+        dates.push(d.toISOString().split('T')[0]);
+      }
+    }
+    return dates;
+  }
+
+  const PERIODS = [
+    {
+      id: 1,
+      name: "Dec 3 Period",
+      communicationDate: "2025-12-03",
+      windowStart: "2025-08-15",
+      windowEnd: "2025-11-14",
+      holidays: ["2025-09-01", "2025-10-13", "2025-11-11"]
+    },
+    {
+      id: 2,
+      name: "Jan 28 Period",
+      communicationDate: "2026-01-28",
+      windowStart: "2025-10-20",
+      windowEnd: "2026-01-16",
+      holidays: [
+        "2025-11-11",
+        ...expandDateRange("2025-11-24", "2025-11-28"),
+        ...expandDateRange("2025-12-22", "2026-01-02")
+      ]
+    },
+    {
+      id: 3,
+      name: "Feb 25 Period",
+      communicationDate: "2026-02-25",
+      windowStart: "2025-11-17",
+      windowEnd: "2026-02-13",
+      holidays: [
+        ...expandDateRange("2025-11-24", "2025-11-28"),
+        ...expandDateRange("2025-12-22", "2026-01-02"),
+        "2026-01-19"
+      ]
+    },
+    {
+      id: 4,
+      name: "Mar 25 Period",
+      communicationDate: "2026-03-25",
+      windowStart: "2025-12-15",
+      windowEnd: "2026-03-13",
+      holidays: [
+        ...expandDateRange("2025-12-22", "2026-01-02"),
+        "2026-01-19",
+        "2026-02-16"
+      ]
+    },
+    {
+      id: 5,
+      name: "Apr 29 Period",
+      communicationDate: "2026-04-29",
+      windowStart: "2026-01-19",
+      windowEnd: "2026-04-17",
+      holidays: ["2026-01-19", "2026-02-16"]
+    },
+    {
+      id: 6,
+      name: "May 27 Period",
+      communicationDate: "2026-05-27",
+      windowStart: "2026-02-16",
+      windowEnd: "2026-05-15",
+      holidays: ["2026-02-16"]
+    },
+    {
+      id: 7,
+      name: "Jun 24 Period",
+      communicationDate: "2026-06-24",
+      windowStart: "2026-03-16",
+      windowEnd: "2026-06-12",
+      holidays: ["2026-05-25"],
+      hasStrategySessions: true
+    },
+    {
+      id: 8,
+      name: "Jul 29 Period",
+      communicationDate: "2026-07-29",
+      windowStart: "2026-04-20",
+      windowEnd: "2026-07-17",
+      holidays: [
+        "2026-05-25",
+        "2026-06-19",
+        ...expandDateRange("2026-06-29", "2026-07-03")
+      ],
+      hasStrategySessions: true
+    },
+    {
+      id: 9,
+      name: "Aug 26 Period",
+      communicationDate: "2026-08-26",
+      windowStart: "2026-05-18",
+      windowEnd: "2026-08-14",
+      holidays: [
+        "2026-05-25",
+        "2026-06-19",
+        ...expandDateRange("2026-06-29", "2026-07-03")
+      ],
+      hasStrategySessions: true
+    },
+    {
+      id: 10,
+      name: "Sep 30 Period",
+      communicationDate: "2026-09-30",
+      windowStart: "2026-06-22",
+      windowEnd: "2026-09-18",
+      holidays: [
+        ...expandDateRange("2026-06-29", "2026-07-03"),
+        "2026-09-07"
+      ]
+    },
+    {
+      id: 11,
+      name: "Oct 28 Period",
+      communicationDate: "2026-10-28",
+      windowStart: "2026-07-20",
+      windowEnd: "2026-10-16",
+      holidays: ["2026-09-07", "2026-10-12"]
+    },
+    {
+      id: 12,
+      name: "Dec 2 Period",
+      communicationDate: "2026-12-02",
+      windowStart: "2026-08-17",
+      windowEnd: "2026-11-13",
+      holidays: ["2026-09-07", "2026-10-12", "2026-11-11"]
+    },
+    {
+      id: 13,
+      name: "Jan 6 Period",
+      communicationDate: "2027-01-06",
+      windowStart: "2026-09-21",
+      windowEnd: "2026-12-18",
+      holidays: [
+        "2026-10-12",
+        "2026-11-11",
+        ...expandDateRange("2026-11-23", "2026-11-27")
+      ]
+    }
+  ];
+
+  /* Utility functions */
+  function isWeekend(dateStr) {
+    const d = new Date(dateStr + 'T00:00:00');
+    const dow = d.getDay();
+    return dow === 0 || dow === 6;
+  }
+
+  function formatDate(dateStr) {
+    const d = new Date(dateStr + 'T00:00:00');
+    return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+  }
+
+  function formatMonthYear(date) {
+    return date.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+  }
+
+  function calculateProration(period, strategySessions) {
+    const baseEligible = 65;
+    const baseRequirement = 20;
+
+    let allHolidays = [...period.holidays];
+
+    if (period.hasStrategySessions && strategySessions) {
+      const sessionsInPeriod = strategySessions.filter(date =>
+        date >= period.windowStart && date <= period.windowEnd && !isWeekend(date)
+      );
+      allHolidays = [...allHolidays, ...sessionsInPeriod];
+    }
+
+    const uniqueHolidays = [...new Set(allHolidays)];
+    const holidayCount = uniqueHolidays.length;
+
+    const newEligible = baseEligible - holidayCount;
+    const newRequirement = Math.ceil(baseRequirement * (newEligible / baseEligible));
+
+    return {
+      baseEligibleDays: baseEligible,
+      holidays: holidayCount,
+      remoteDays: 0,
+      prorateExceptions: 0,
+      newEligibleDays: newEligible,
+      newRequirement: newRequirement,
+      formula: `ceil(20 × ${newEligible}/65) = ceil(${(20 * newEligible / 65).toFixed(2)}) = ${newRequirement}`
+    };
+  }
+
+  function countAttendance(period, attendedDates, strategySessions) {
+    let allHolidays = [...period.holidays];
+
+    if (period.hasStrategySessions && strategySessions) {
+      const sessionsInPeriod = strategySessions.filter(date =>
+        date >= period.windowStart && date <= period.windowEnd && !isWeekend(date)
+      );
+      allHolidays = [...allHolidays, ...sessionsInPeriod];
+    }
+
+    return attendedDates.filter(date => {
+      const inWindow = date >= period.windowStart && date <= period.windowEnd;
+      const notHoliday = !allHolidays.includes(date);
+      const notWeekend = !isWeekend(date);
+      return inWindow && notHoliday && notWeekend;
+    }).length;
+  }
+
+  function getDayStatus(dateStr, periods, attendedDates, strategySessions) {
+    const isWeekendDay = isWeekend(dateStr);
+
+    let allHolidays = [];
+    periods.forEach(p => {
+      allHolidays.push(...p.holidays);
+      if (p.hasStrategySessions && strategySessions) {
+        const sessionsInPeriod = strategySessions.filter(date =>
+          date >= p.windowStart && date <= p.windowEnd && !isWeekend(date)
+        );
+        allHolidays.push(...sessionsInPeriod);
+      }
+    });
+
+    const isHoliday = allHolidays.includes(dateStr);
+    const isAttended = attendedDates.includes(dateStr);
+    const periodCount = periods.filter(p => dateStr >= p.windowStart && dateStr <= p.windowEnd).length;
+
+    return {
+      type: isWeekendDay ? 'weekend' : isHoliday ? 'holiday' : isAttended ? 'attended' : 'available',
+      periodCount: periodCount,
+      clickable: !isWeekendDay && !isHoliday
+    };
+  }
+
+  /* Main Attendance Tracker Component */
+  function AttendanceTracker() {
+    const [attendedDates, setAttendedDates] = useState([]);
+    const [strategySessions, setStrategySessions] = useState([]);
+    const [currentMonth, setCurrentMonth] = useState(new Date(2025, 7, 1));
+    const [showSettings, setShowSettings] = useState(false);
+
+    // Load from localStorage
+    useEffect(() => {
+      const saved = localStorage.getItem('c1_attendance_tracker');
+      if (saved) {
+        try {
+          const data = JSON.parse(saved);
+          setAttendedDates(data.attendedDates || []);
+          setStrategySessions(data.strategySessions || []);
+        } catch (e) {
+          console.error('Failed to load saved data:', e);
+        }
+      }
+    }, []);
+
+    // Save to localStorage
+    useEffect(() => {
+      const data = {
+        version: "1.0",
+        lastUpdated: new Date().toISOString(),
+        attendedDates,
+        strategySessions
+      };
+      localStorage.setItem('c1_attendance_tracker', JSON.stringify(data));
+    }, [attendedDates, strategySessions]);
+
+    const toggleAttendance = (dateStr) => {
+      setAttendedDates(prev => {
+        if (prev.includes(dateStr)) {
+          return prev.filter(d => d !== dateStr);
+        } else {
+          return [...prev, dateStr].sort();
+        }
+      });
+    };
+
+    const exportData = () => {
+      const data = {
+        version: "1.0",
+        exportDate: new Date().toISOString(),
+        attendedDates,
+        strategySessions
+      };
+      const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `c1-attendance-${new Date().toISOString().split('T')[0]}.json`;
+      a.click();
+      URL.revokeObjectURL(url);
+    };
+
+    const importData = (event) => {
+      const file = event.target.files[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        try {
+          const data = JSON.parse(e.target.result);
+          setAttendedDates(data.attendedDates || []);
+          setStrategySessions(data.strategySessions || []);
+          alert('Data imported successfully!');
+        } catch (error) {
+          alert('Failed to import data. Please check the file format.');
+        }
+      };
+      reader.readAsText(file);
+    };
+
+    const clearAllData = () => {
+      if (confirm('Are you sure you want to clear all attendance data? This cannot be undone.')) {
+        setAttendedDates([]);
+        setStrategySessions([]);
+        localStorage.removeItem('c1_attendance_tracker');
+        alert('All data cleared.');
+      }
+    };
+
+    const addStrategySession = (dateStr) => {
+      if (!strategySessions.includes(dateStr)) {
+        setStrategySessions(prev => [...prev, dateStr].sort());
+      }
+    };
+
+    const removeStrategySession = (dateStr) => {
+      setStrategySessions(prev => prev.filter(d => d !== dateStr));
+    };
+
+    return (
+      <div className="tw-max-w-7xl tw-mx-auto tw-p-4 tw-bg-gray-50 tw-min-h-screen">
+        {/* Disclaimer Banner */}
+        <div className="tw-bg-yellow-50 tw-border-l-4 tw-border-yellow-400 tw-p-4 tw-mb-6 tw-rounded">
+          <div className="tw-flex">
+            <div className="tw-flex-shrink-0">
+              <svg className="tw-h-5 tw-w-5 tw-text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
+                <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+              </svg>
+            </div>
+            <div className="tw-ml-3">
+              <p className="tw-text-sm tw-text-yellow-700">
+                <strong>Disclaimer:</strong> This tool is a personal tracker and does not indicate enterprise attendance compliance. It is not associated with HR.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        {/* Import/Export Bar */}
+        <div className="tw-bg-white tw-rounded-lg tw-shadow tw-p-4 tw-mb-6 tw-flex tw-flex-wrap tw-gap-3 tw-items-center">
+          <button
+            onClick={exportData}
+            className="tw-bg-blue-600 tw-text-white tw-px-4 tw-py-2 tw-rounded tw-font-semibold hover:tw-bg-blue-700 tw-transition"
+          >
+            Export Backup
+          </button>
+          <label className="tw-bg-green-600 tw-text-white tw-px-4 tw-py-2 tw-rounded tw-font-semibold hover:tw-bg-green-700 tw-transition tw-cursor-pointer">
+            Import Backup
+            <input type="file" accept=".json" onChange={importData} className="tw-hidden" />
+          </label>
+          <button
+            onClick={() => setShowSettings(true)}
+            className="tw-bg-gray-600 tw-text-white tw-px-4 tw-py-2 tw-rounded tw-font-semibold hover:tw-bg-gray-700 tw-transition"
+          >
+            Settings
+          </button>
+          <button
+            onClick={clearAllData}
+            className="tw-bg-red-600 tw-text-white tw-px-4 tw-py-2 tw-rounded tw-font-semibold hover:tw-bg-red-700 tw-transition"
+          >
+            Clear All Data
+          </button>
+        </div>
+
+        {/* Period Dashboard */}
+        <PeriodDashboard
+          periods={PERIODS}
+          attendedDates={attendedDates}
+          strategySessions={strategySessions}
+        />
+
+        {/* Calendar View */}
+        <CalendarView
+          currentMonth={currentMonth}
+          setCurrentMonth={setCurrentMonth}
+          periods={PERIODS}
+          attendedDates={attendedDates}
+          strategySessions={strategySessions}
+          toggleAttendance={toggleAttendance}
+        />
+
+        {/* Settings Modal */}
+        {showSettings && (
+          <SettingsModal
+            strategySessions={strategySessions}
+            addStrategySession={addStrategySession}
+            removeStrategySession={removeStrategySession}
+            onClose={() => setShowSettings(false)}
+          />
+        )}
+      </div>
+    );
+  }
+
+  /* Period Dashboard Component */
+  function PeriodDashboard({ periods, attendedDates, strategySessions }) {
+    return (
+      <div className="tw-mb-8">
+        <h2 className="tw-text-2xl tw-font-bold tw-mb-4 tw-text-gray-800">Period Overview</h2>
+        <div className="tw-grid tw-grid-cols-1 md:tw-grid-cols-2 lg:tw-grid-cols-3 tw-gap-4">
+          {periods.map(period => (
+            <PeriodCard
+              key={period.id}
+              period={period}
+              attendedDates={attendedDates}
+              strategySessions={strategySessions}
+            />
+          ))}
+        </div>
+      </div>
+    );
+  }
+
+  /* Period Card Component */
+  function PeriodCard({ period, attendedDates, strategySessions }) {
+    const [showTooltip, setShowTooltip] = useState(false);
+    const proration = calculateProration(period, strategySessions);
+    const attended = countAttendance(period, attendedDates, strategySessions);
+    const remaining = Math.max(0, proration.newRequirement - attended);
+    const progress = (attended / proration.newRequirement) * 100;
+    const isComplete = attended >= proration.newRequirement;
+
+    const today = new Date().toISOString().split('T')[0];
+    const isCurrent = today >= period.windowStart && today <= period.windowEnd;
+
+    return (
+      <div className={`tw-bg-white tw-rounded-lg tw-shadow-md tw-p-4 tw-border-2 ${isCurrent ? 'tw-border-blue-500' : 'tw-border-gray-200'} tw-transition`}>
+        <div className="tw-flex tw-justify-between tw-items-start tw-mb-2">
+          <h3 className="tw-text-lg tw-font-semibold tw-text-gray-800">{period.name}</h3>
+          <div className="tw-relative">
+            <button
+              onMouseEnter={() => setShowTooltip(true)}
+              onMouseLeave={() => setShowTooltip(false)}
+              className="tw-text-blue-600 hover:tw-text-blue-800"
+            >
+              <svg className="tw-w-5 tw-h-5" fill="currentColor" viewBox="0 0 20 20">
+                <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
+              </svg>
+            </button>
+            {showTooltip && (
+              <div className="tw-absolute tw-z-10 tw-bg-gray-900 tw-text-white tw-text-xs tw-rounded tw-p-3 tw-w-64 tw-right-0 tw-top-6">
+                <p className="tw-font-semibold tw-mb-1">Proration Details:</p>
+                <p>Base eligible days: {proration.baseEligibleDays}</p>
+                <p>Holidays: -{proration.holidays}</p>
+                <p>New Eligible Days: {proration.newEligibleDays}</p>
+                <p>New Requirement: {proration.newRequirement}</p>
+                <p className="tw-mt-1 tw-text-yellow-300">{proration.formula}</p>
+              </div>
+            )}
+          </div>
+        </div>
+        <p className="tw-text-sm tw-text-gray-600 tw-mb-3">
+          {formatDate(period.windowStart)} – {formatDate(period.windowEnd)}
+        </p>
+
+        {/* Progress Bar */}
+        <div className="tw-w-full tw-bg-gray-200 tw-rounded-full tw-h-3 tw-mb-2">
+          <div
+            className={`tw-h-3 tw-rounded-full ${isComplete ? 'tw-bg-green-500' : 'tw-bg-blue-500'}`}
+            style={{ width: `${Math.min(progress, 100)}%` }}
+          ></div>
+        </div>
+
+        <div className="tw-flex tw-justify-between tw-items-center">
+          <p className="tw-text-sm tw-font-medium tw-text-gray-700">
+            {attended} / {proration.newRequirement} days {proration.newRequirement !== 20 && <span className="tw-text-gray-500">(was 20)</span>}
+          </p>
+          {isComplete ? (
+            <span className="tw-text-green-600 tw-font-semibold tw-text-sm">✓ Completed</span>
+          ) : (
+            <span className="tw-text-orange-600 tw-font-semibold tw-text-sm">{remaining} remaining</span>
+          )}
+        </div>
+      </div>
+    );
+  }
+
+  /* Calendar View Component */
+  function CalendarView({ currentMonth, setCurrentMonth, periods, attendedDates, strategySessions, toggleAttendance }) {
+    const daysInMonth = new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1, 0).getDate();
+    const firstDayOfMonth = new Date(currentMonth.getFullYear(), currentMonth.getMonth(), 1).getDay();
+
+    const prevMonth = () => {
+      setCurrentMonth(new Date(currentMonth.getFullYear(), currentMonth.getMonth() - 1, 1));
+    };
+
+    const nextMonth = () => {
+      setCurrentMonth(new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1, 1));
+    };
+
+    const goToToday = () => {
+      setCurrentMonth(new Date());
+    };
+
+    const days = [];
+    for (let i = 0; i < firstDayOfMonth; i++) {
+      days.push(<div key={`empty-${i}`} className="tw-p-2"></div>);
+    }
+
+    for (let day = 1; day <= daysInMonth; day++) {
+      const dateStr = `${currentMonth.getFullYear()}-${String(currentMonth.getMonth() + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+      const status = getDayStatus(dateStr, periods, attendedDates, strategySessions);
+
+      let bgColor = 'tw-bg-white';
+      let borderColor = 'tw-border-gray-300';
+      let textColor = 'tw-text-gray-800';
+
+      if (status.type === 'weekend') {
+        bgColor = 'tw-bg-gray-100';
+        textColor = 'tw-text-gray-400';
+      } else if (status.type === 'holiday') {
+        bgColor = 'tw-bg-blue-100';
+        borderColor = 'tw-border-blue-400';
+      } else if (status.type === 'attended') {
+        bgColor = 'tw-bg-green-100';
+        borderColor = 'tw-border-green-500';
+      }
+
+      days.push(
+        <div
+          key={day}
+          onClick={() => status.clickable && toggleAttendance(dateStr)}
+          className={`tw-p-2 tw-border tw-rounded ${bgColor} ${borderColor} ${status.clickable ? 'tw-cursor-pointer hover:tw-shadow-md' : 'tw-cursor-not-allowed'} tw-transition tw-min-h-16 tw-relative`}
+        >
+          <div className={`tw-font-semibold ${textColor}`}>{day}</div>
+          {status.periodCount > 0 && (
+            <div className="tw-text-xs tw-text-gray-500 tw-mt-1">{status.periodCount} period{status.periodCount > 1 ? 's' : ''}</div>
+          )}
+        </div>
+      );
+    }
+
+    return (
+      <div className="tw-bg-white tw-rounded-lg tw-shadow-md tw-p-6">
+        <div className="tw-flex tw-justify-between tw-items-center tw-mb-4">
+          <h2 className="tw-text-2xl tw-font-bold tw-text-gray-800">
+            {formatMonthYear(currentMonth)}
+          </h2>
+          <div className="tw-flex tw-gap-2">
+            <button onClick={prevMonth} className="tw-px-3 tw-py-1 tw-bg-gray-200 tw-rounded hover:tw-bg-gray-300">←</button>
+            <button onClick={goToToday} className="tw-px-3 tw-py-1 tw-bg-blue-600 tw-text-white tw-rounded hover:tw-bg-blue-700">Today</button>
+            <button onClick={nextMonth} className="tw-px-3 tw-py-1 tw-bg-gray-200 tw-rounded hover:tw-bg-gray-300">→</button>
+          </div>
+        </div>
+
+        {/* Day headers */}
+        <div className="tw-grid tw-grid-cols-7 tw-gap-2 tw-mb-2">
+          {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map(day => (
+            <div key={day} className="tw-text-center tw-font-semibold tw-text-gray-600 tw-text-sm">{day}</div>
+          ))}
+        </div>
+
+        {/* Calendar grid */}
+        <div className="tw-grid tw-grid-cols-7 tw-gap-2">
+          {days}
+        </div>
+
+        {/* Legend */}
+        <div className="tw-mt-6 tw-flex tw-flex-wrap tw-gap-4 tw-text-sm">
+          <div className="tw-flex tw-items-center tw-gap-2">
+            <div className="tw-w-4 tw-h-4 tw-bg-green-100 tw-border tw-border-green-500 tw-rounded"></div>
+            <span>Attended</span>
+          </div>
+          <div className="tw-flex tw-items-center tw-gap-2">
+            <div className="tw-w-4 tw-h-4 tw-bg-blue-100 tw-border tw-border-blue-400 tw-rounded"></div>
+            <span>Holiday</span>
+          </div>
+          <div className="tw-flex tw-items-center tw-gap-2">
+            <div className="tw-w-4 tw-h-4 tw-bg-white tw-border tw-border-gray-300 tw-rounded"></div>
+            <span>Available</span>
+          </div>
+          <div className="tw-flex tw-items-center tw-gap-2">
+            <div className="tw-w-4 tw-h-4 tw-bg-gray-100 tw-rounded"></div>
+            <span>Weekend</span>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  /* Settings Modal Component */
+  function SettingsModal({ strategySessions, addStrategySession, removeStrategySession, onClose }) {
+    const [newDate, setNewDate] = useState('');
+
+    const handleAdd = () => {
+      if (newDate && !strategySessions.includes(newDate)) {
+        addStrategySession(newDate);
+        setNewDate('');
+      }
+    };
+
+    return (
+      <div className="tw-fixed tw-inset-0 tw-bg-black tw-bg-opacity-50 tw-flex tw-items-center tw-justify-center tw-z-50">
+        <div className="tw-bg-white tw-rounded-lg tw-shadow-xl tw-p-6 tw-max-w-md tw-w-full tw-m-4">
+          <h3 className="tw-text-xl tw-font-bold tw-mb-4 tw-text-gray-800">Strategy Session Dates</h3>
+          <p className="tw-text-sm tw-text-gray-600 tw-mb-4">
+            Add dates for 2026 Strategy Sessions (TBD). These will be treated as prorate exceptions in periods 7, 8, and 9.
+          </p>
+
+          <div className="tw-mb-4">
+            <label className="tw-block tw-text-sm tw-font-medium tw-text-gray-700 tw-mb-2">
+              Add Strategy Session Date
+            </label>
+            <div className="tw-flex tw-gap-2">
+              <input
+                type="date"
+                value={newDate}
+                onChange={(e) => setNewDate(e.target.value)}
+                className="tw-flex-1 tw-border tw-border-gray-300 tw-rounded tw-px-3 tw-py-2"
+                min="2026-03-16"
+                max="2026-08-14"
+              />
+              <button
+                onClick={handleAdd}
+                className="tw-bg-blue-600 tw-text-white tw-px-4 tw-py-2 tw-rounded hover:tw-bg-blue-700"
+              >
+                Add
+              </button>
+            </div>
+          </div>
+
+          <div className="tw-mb-4 tw-max-h-48 tw-overflow-y-auto">
+            <h4 className="tw-text-sm tw-font-semibold tw-text-gray-700 tw-mb-2">Configured Sessions:</h4>
+            {strategySessions.length === 0 ? (
+              <p className="tw-text-sm tw-text-gray-500 tw-italic">No strategy sessions configured yet.</p>
+            ) : (
+              <ul className="tw-space-y-2">
+                {strategySessions.map(date => (
+                  <li key={date} className="tw-flex tw-justify-between tw-items-center tw-bg-gray-50 tw-p-2 tw-rounded">
+                    <span className="tw-text-sm">{formatDate(date)}</span>
+                    <button
+                      onClick={() => removeStrategySession(date)}
+                      className="tw-text-red-600 hover:tw-text-red-800 tw-text-sm tw-font-semibold"
+                    >
+                      Remove
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
+
+          <div className="tw-flex tw-justify-end">
+            <button
+              onClick={onClose}
+              className="tw-bg-gray-600 tw-text-white tw-px-4 tw-py-2 tw-rounded hover:tw-bg-gray-700"
+            >
+              Close
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  /* Render the app */
+  const root = ReactDOM.createRoot(document.getElementById('attendance-tracker-root'));
+  root.render(<AttendanceTracker />);
+</script>

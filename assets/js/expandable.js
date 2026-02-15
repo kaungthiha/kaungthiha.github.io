@@ -1,11 +1,8 @@
-// Expandable Sections Functionality
 (function() {
   'use strict';
 
   function initExpandable() {
     const headers = document.querySelectorAll('.expandable-header');
-
-    // Add click event listeners to all expandable headers
     headers.forEach(header => {
       header.addEventListener('click', () => {
         const section = header.dataset.section;
