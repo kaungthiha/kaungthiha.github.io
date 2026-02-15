@@ -27,6 +27,7 @@ comments: false
 
 <!-- Attendance Tracker React Component -->
 <script type="text/babel">
+{% raw %}
   const { useState, useEffect } = React;
 
   /* Period data with all 13 periods from 2026 schedule */
@@ -703,4 +704,5 @@ comments: false
   /* Render the app */
   const root = ReactDOM.createRoot(document.getElementById('attendance-tracker-root'));
   root.render(<AttendanceTracker />);
+{% endraw %}
 </script>
