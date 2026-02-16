@@ -198,55 +198,69 @@ comments: false
     return date.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
   }
 
-  function calculateProration(period, strategySessions) {
+  function calculateProration(period, strategySessions, exceptionDates) {
     const baseEligible = 65;
     const baseRequirement = 20;
 
-    let allHolidays = [...period.holidays];
+    let allExclusions = [...period.holidays];
 
     if (period.hasStrategySessions && strategySessions) {
       const sessionsInPeriod = strategySessions.filter(date =>
         date >= period.windowStart && date <= period.windowEnd && !isWeekend(date)
       );
-      allHolidays = [...allHolidays, ...sessionsInPeriod];
+      allExclusions = [...allExclusions, ...sessionsInPeriod];
     }
 
-    const uniqueHolidays = [...new Set(allHolidays)];
-    const holidayCount = uniqueHolidays.length;
+    if (exceptionDates) {
+      const exceptionsInPeriod = exceptionDates.filter(date =>
+        date >= period.windowStart && date <= period.windowEnd && !isWeekend(date)
+      );
+      allExclusions = [...allExclusions, ...exceptionsInPeriod];
+    }
 
-    const newEligible = baseEligible - holidayCount;
+    const uniqueExclusions = [...new Set(allExclusions)];
+    const exclusionCount = uniqueExclusions.length;
+
+    const newEligible = baseEligible - exclusionCount;
     const newRequirement = Math.ceil(baseRequirement * (newEligible / baseEligible));
 
     return {
       baseEligibleDays: baseEligible,
-      holidays: holidayCount,
+      holidays: period.holidays.length,
       remoteDays: 0,
-      prorateExceptions: 0,
+      prorateExceptions: exclusionCount - period.holidays.length,
       newEligibleDays: newEligible,
       newRequirement: newRequirement,
       formula: `ceil(20 × ${newEligible}/65) = ceil(${(20 * newEligible / 65).toFixed(2)}) = ${newRequirement}`
     };
   }
 
-  function countAttendance(period, attendedDates, strategySessions) {
-    let allHolidays = [...period.holidays];
+  function countAttendance(period, attendedDates, strategySessions, exceptionDates) {
+    let allExclusions = [...period.holidays];
 
     if (period.hasStrategySessions && strategySessions) {
       const sessionsInPeriod = strategySessions.filter(date =>
         date >= period.windowStart && date <= period.windowEnd && !isWeekend(date)
       );
-      allHolidays = [...allHolidays, ...sessionsInPeriod];
+      allExclusions = [...allExclusions, ...sessionsInPeriod];
+    }
+
+    if (exceptionDates) {
+      const exceptionsInPeriod = exceptionDates.filter(date =>
+        date >= period.windowStart && date <= period.windowEnd && !isWeekend(date)
+      );
+      allExclusions = [...allExclusions, ...exceptionsInPeriod];
     }
 
     return attendedDates.filter(date => {
       const inWindow = date >= period.windowStart && date <= period.windowEnd;
-      const notHoliday = !allHolidays.includes(date);
+      const notExcluded = !allExclusions.includes(date);
       const notWeekend = !isWeekend(date);
-      return inWindow && notHoliday && notWeekend;
+      return inWindow && notExcluded && notWeekend;
     }).length;
   }
 
-  function getDayStatus(dateStr, periods, attendedDates, strategySessions) {
+  function getDayStatus(dateStr, periods, attendedDates, strategySessions, exceptionDates) {
     const isWeekendDay = isWeekend(dateStr);
 
     let allHolidays = [];
@@ -261,11 +275,18 @@ comments: false
     });
 
     const isHoliday = allHolidays.includes(dateStr);
+    const isException = exceptionDates && exceptionDates.includes(dateStr);
     const isAttended = attendedDates.includes(dateStr);
     const periodCount = periods.filter(p => dateStr >= p.windowStart && dateStr <= p.windowEnd).length;
 
+    let type = 'available';
+    if (isWeekendDay) type = 'weekend';
+    else if (isHoliday) type = 'holiday';
+    else if (isException) type = 'exception';
+    else if (isAttended) type = 'attended';
+
     return {
-      type: isWeekendDay ? 'weekend' : isHoliday ? 'holiday' : isAttended ? 'attended' : 'available',
+      type: type,
       periodCount: periodCount,
       clickable: !isWeekendDay && !isHoliday
     };
@@ -274,6 +295,7 @@ comments: false
   /* Main Attendance Tracker Component */
   function AttendanceTracker() {
     const [attendedDates, setAttendedDates] = useState([]);
+    const [exceptionDates, setExceptionDates] = useState([]);
     const [strategySessions, setStrategySessions] = useState([]);
     const [currentMonth, setCurrentMonth] = useState(new Date(2025, 7, 1));
     const [showSettings, setShowSettings] = useState(false);
@@ -285,6 +307,7 @@ comments: false
         try {
           const data = JSON.parse(saved);
           setAttendedDates(data.attendedDates || []);
+          setExceptionDates(data.exceptionDates || []);
           setStrategySessions(data.strategySessions || []);
         } catch (e) {
           console.error('Failed to load saved data:', e);
@@ -298,19 +321,25 @@ comments: false
         version: "1.0",
         lastUpdated: new Date().toISOString(),
         attendedDates,
+        exceptionDates,
         strategySessions
       };
       localStorage.setItem('c1_attendance_tracker', JSON.stringify(data));
-    }, [attendedDates, strategySessions]);
+    }, [attendedDates, exceptionDates, strategySessions]);
 
     const toggleAttendance = (dateStr) => {
-      setAttendedDates(prev => {
-        if (prev.includes(dateStr)) {
-          return prev.filter(d => d !== dateStr);
-        } else {
-          return [...prev, dateStr].sort();
-        }
-      });
+      // Three-state cycle: Available -> Attended -> Exception -> Available
+      if (!attendedDates.includes(dateStr) && !exceptionDates.includes(dateStr)) {
+        // Available -> Attended
+        setAttendedDates(prev => [...prev, dateStr].sort());
+      } else if (attendedDates.includes(dateStr)) {
+        // Attended -> Exception
+        setAttendedDates(prev => prev.filter(d => d !== dateStr));
+        setExceptionDates(prev => [...prev, dateStr].sort());
+      } else if (exceptionDates.includes(dateStr)) {
+        // Exception -> Available
+        setExceptionDates(prev => prev.filter(d => d !== dateStr));
+      }
     };
 
     const exportData = () => {
@@ -318,6 +347,7 @@ comments: false
         version: "1.0",
         exportDate: new Date().toISOString(),
         attendedDates,
+        exceptionDates,
         strategySessions
       };
       const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
@@ -338,6 +368,7 @@ comments: false
         try {
           const data = JSON.parse(e.target.result);
           setAttendedDates(data.attendedDates || []);
+          setExceptionDates(data.exceptionDates || []);
           setStrategySessions(data.strategySessions || []);
           alert('Data imported successfully!');
         } catch (error) {
@@ -350,6 +381,7 @@ comments: false
     const clearAllData = () => {
       if (confirm('Are you sure you want to clear all attendance data? This cannot be undone.')) {
         setAttendedDates([]);
+        setExceptionDates([]);
         setStrategySessions([]);
         localStorage.removeItem('c1_attendance_tracker');
         alert('All data cleared.');
@@ -414,6 +446,7 @@ comments: false
         <PeriodDashboard
           periods={PERIODS}
           attendedDates={attendedDates}
+          exceptionDates={exceptionDates}
           strategySessions={strategySessions}
         />
 
@@ -423,6 +456,7 @@ comments: false
           setCurrentMonth={setCurrentMonth}
           periods={PERIODS}
           attendedDates={attendedDates}
+          exceptionDates={exceptionDates}
           strategySessions={strategySessions}
           toggleAttendance={toggleAttendance}
         />
@@ -441,7 +475,7 @@ comments: false
   }
 
   /* Period Dashboard Component */
-  function PeriodDashboard({ periods, attendedDates, strategySessions }) {
+  function PeriodDashboard({ periods, attendedDates, exceptionDates, strategySessions }) {
     return (
       <div className="tw-mb-8">
         <h2 className="tw-text-2xl tw-font-bold tw-mb-4 tw-text-gray-800">Period Overview</h2>
@@ -451,6 +485,7 @@ comments: false
               key={period.id}
               period={period}
               attendedDates={attendedDates}
+              exceptionDates={exceptionDates}
               strategySessions={strategySessions}
             />
           ))}
@@ -460,10 +495,10 @@ comments: false
   }
 
   /* Period Card Component */
-  function PeriodCard({ period, attendedDates, strategySessions }) {
+  function PeriodCard({ period, attendedDates, exceptionDates, strategySessions }) {
     const [showTooltip, setShowTooltip] = useState(false);
-    const proration = calculateProration(period, strategySessions);
-    const attended = countAttendance(period, attendedDates, strategySessions);
+    const proration = calculateProration(period, strategySessions, exceptionDates);
+    const attended = countAttendance(period, attendedDates, strategySessions, exceptionDates);
     const remaining = Math.max(0, proration.newRequirement - attended);
     const progress = (attended / proration.newRequirement) * 100;
     const isComplete = attended >= proration.newRequirement;
@@ -490,6 +525,7 @@ comments: false
                 <p className="tw-font-semibold tw-mb-1">Proration Details:</p>
                 <p>Base eligible days: {proration.baseEligibleDays}</p>
                 <p>Holidays: -{proration.holidays}</p>
+                {proration.prorateExceptions > 0 && <p>Exception days: -{proration.prorateExceptions}</p>}
                 <p>New Eligible Days: {proration.newEligibleDays}</p>
                 <p>New Requirement: {proration.newRequirement}</p>
                 <p className="tw-mt-1 tw-text-yellow-300">{proration.formula}</p>
@@ -524,7 +560,7 @@ comments: false
   }
 
   /* Calendar View Component */
-  function CalendarView({ currentMonth, setCurrentMonth, periods, attendedDates, strategySessions, toggleAttendance }) {
+  function CalendarView({ currentMonth, setCurrentMonth, periods, attendedDates, exceptionDates, strategySessions, toggleAttendance }) {
     const daysInMonth = new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1, 0).getDate();
     const firstDayOfMonth = new Date(currentMonth.getFullYear(), currentMonth.getMonth(), 1).getDay();
 
@@ -547,11 +583,12 @@ comments: false
 
     for (let day = 1; day <= daysInMonth; day++) {
       const dateStr = `${currentMonth.getFullYear()}-${String(currentMonth.getMonth() + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
-      const status = getDayStatus(dateStr, periods, attendedDates, strategySessions);
+      const status = getDayStatus(dateStr, periods, attendedDates, strategySessions, exceptionDates);
 
       let bgColor = 'tw-bg-white';
       let borderColor = 'tw-border-gray-300';
       let textColor = 'tw-text-gray-800';
+      let extraClasses = '';
 
       if (status.type === 'weekend') {
         bgColor = 'tw-bg-gray-100';
@@ -562,6 +599,10 @@ comments: false
       } else if (status.type === 'attended') {
         bgColor = 'tw-bg-green-100';
         borderColor = 'tw-border-green-500';
+      } else if (status.type === 'exception') {
+        bgColor = 'tw-bg-gradient-to-br tw-from-red-100 tw-to-red-200';
+        borderColor = 'tw-border-red-500';
+        textColor = 'tw-text-red-900';
       }
 
       days.push(
@@ -610,6 +651,10 @@ comments: false
             <span>Attended</span>
           </div>
           <div className="tw-flex tw-items-center tw-gap-2">
+            <div className="tw-w-4 tw-h-4 tw-bg-gradient-to-br tw-from-red-100 tw-to-red-200 tw-border tw-border-red-500 tw-rounded"></div>
+            <span>Exception (snow day, virtual day, etc.)</span>
+          </div>
+          <div className="tw-flex tw-items-center tw-gap-2">
             <div className="tw-w-4 tw-h-4 tw-bg-blue-100 tw-border tw-border-blue-400 tw-rounded"></div>
             <span>Holiday</span>
           </div>
@@ -621,6 +666,11 @@ comments: false
             <div className="tw-w-4 tw-h-4 tw-bg-gray-100 tw-rounded"></div>
             <span>Weekend</span>
           </div>
+        </div>
+
+        {/* Instructions */}
+        <div className="tw-mt-4 tw-p-3 tw-bg-blue-50 tw-rounded tw-text-sm tw-text-blue-800">
+          <strong>💡 Tip:</strong> Click any available day to cycle through: Available → Attended → Exception → Available
         </div>
       </div>
     );
