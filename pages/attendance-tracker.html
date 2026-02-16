@@ -419,14 +419,14 @@ comments: false
         <div className="tw-bg-gradient-to-r tw-from-amber-50 tw-to-yellow-50 tw-border tw-border-amber-200 tw-rounded-xl tw-p-5 tw-mb-6 tw-shadow-sm">
           <div className="tw-flex tw-items-start tw-gap-4">
             <div className="tw-flex-shrink-0 tw-mt-0.5">
-              <svg className="tw-h-6 tw-w-6 tw-text-amber-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+              <svg className="tw-h-6 tw-w-6 tw-text-amber-600" fill="currentColor" viewBox="0 0 20 20">
+                <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
               </svg>
             </div>
             <div className="tw-flex-1">
               <h3 className="tw-text-sm tw-font-semibold tw-text-amber-900 tw-mb-1">Personal Tracking Tool</h3>
               <p className="tw-text-sm tw-text-amber-800 tw-leading-relaxed">
-                This is a personal attendance tracker and does not indicate enterprise compliance. Not associated with HR.
+                This is a personal attendance tracker and does not indicate enterprise compliance. Totally not associated with HR.
               </p>
             </div>
           </div>
@@ -437,36 +437,35 @@ comments: false
           <div className="tw-flex tw-flex-wrap tw-gap-3">
             <button
               onClick={exportData}
-              className="tw-inline-flex tw-items-center tw-justify-center tw-gap-2 tw-bg-blue-600 tw-text-white tw-px-5 tw-py-2.5 tw-rounded-lg tw-font-medium tw-text-sm hover:tw-bg-blue-700 focus:tw-ring-4 focus:tw-ring-blue-200 tw-transition-all tw-shadow-sm hover:tw-shadow active:tw-scale-95 tw-min-w-[160px]"
+              className="tw-inline-flex tw-items-center tw-justify-center tw-gap-2 tw-bg-blue-600 tw-text-white tw-px-5 tw-rounded-lg tw-font-medium tw-text-sm hover:tw-bg-blue-700 focus:tw-ring-4 focus:tw-ring-blue-200 tw-transition-all tw-shadow-sm hover:tw-shadow active:tw-scale-95 tw-min-w-[160px] tw-h-[42px] tw-leading-5"
             >
-              <svg className="tw-w-5 tw-h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+              <svg className="tw-w-5 tw-h-5" fill="currentColor" viewBox="0 0 20 20">
+                <path fillRule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clipRule="evenodd" />
               </svg>
               Export Backup
             </button>
-            <label className="tw-inline-flex tw-items-center tw-justify-center tw-gap-2 tw-bg-emerald-600 tw-text-white tw-px-5 tw-py-2.5 tw-rounded-lg tw-font-medium tw-text-sm hover:tw-bg-emerald-700 focus-within:tw-ring-4 focus-within:tw-ring-emerald-200 tw-transition-all tw-cursor-pointer tw-shadow-sm hover:tw-shadow active:tw-scale-95 tw-min-w-[160px]">
-              <svg className="tw-w-5 tw-h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
+            <label className="tw-inline-flex tw-items-center tw-justify-center tw-gap-2 tw-bg-emerald-600 tw-text-white tw-px-5 tw-rounded-lg tw-font-medium tw-text-sm hover:tw-bg-emerald-700 focus-within:tw-ring-4 focus-within:tw-ring-emerald-200 tw-transition-all tw-cursor-pointer tw-shadow-sm hover:tw-shadow active:tw-scale-95 tw-min-w-[160px] tw-h-[42px] tw-leading-5">
+              <svg className="tw-w-5 tw-h-5" fill="currentColor" viewBox="0 0 20 20">
+                <path fillRule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM6.293 6.707a1 1 0 010-1.414l3-3a1 1 0 011.414 0l3 3a1 1 0 01-1.414 1.414L11 5.414V13a1 1 0 11-2 0V5.414L7.707 6.707a1 1 0 01-1.414 0z" clipRule="evenodd" />
               </svg>
               Import Backup
               <input type="file" accept=".json" onChange={importData} className="tw-hidden" />
             </label>
             <button
               onClick={() => setShowSettings(true)}
-              className="tw-inline-flex tw-items-center tw-justify-center tw-gap-2 tw-bg-slate-600 tw-text-white tw-px-5 tw-py-2.5 tw-rounded-lg tw-font-medium tw-text-sm hover:tw-bg-slate-700 focus:tw-ring-4 focus:tw-ring-slate-200 tw-transition-all tw-shadow-sm hover:tw-shadow active:tw-scale-95 tw-min-w-[160px]"
+              className="tw-inline-flex tw-items-center tw-justify-center tw-gap-2 tw-bg-slate-600 tw-text-white tw-px-5 tw-rounded-lg tw-font-medium tw-text-sm hover:tw-bg-slate-700 focus:tw-ring-4 focus:tw-ring-slate-200 tw-transition-all tw-shadow-sm hover:tw-shadow active:tw-scale-95 tw-min-w-[160px] tw-h-[42px] tw-leading-5"
             >
-              <svg className="tw-w-5 tw-h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
-                <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+              <svg className="tw-w-5 tw-h-5" fill="currentColor" viewBox="0 0 20 20">
+                <path fillRule="evenodd" d="M11.49 3.17c-.38-1.56-2.6-1.56-2.98 0a1.532 1.532 0 01-2.286.948c-1.372-.836-2.942.734-2.106 2.106.54.886.061 2.042-.947 2.287-1.561.379-1.561 2.6 0 2.978a1.532 1.532 0 01.947 2.287c-.836 1.372.734 2.942 2.106 2.106a1.532 1.532 0 012.287.947c.379 1.561 2.6 1.561 2.978 0a1.533 1.533 0 012.287-.947c1.372.836 2.942-.734 2.106-2.106a1.533 1.533 0 01.947-2.287c1.561-.379 1.561-2.6 0-2.978a1.532 1.532 0 01-.947-2.287c.836-1.372-.734-2.942-2.106-2.106a1.532 1.532 0 01-2.287-.947zM10 13a3 3 0 100-6 3 3 0 000 6z" clipRule="evenodd" />
               </svg>
               Settings
             </button>
             <button
               onClick={clearAllData}
-              className="tw-inline-flex tw-items-center tw-justify-center tw-gap-2 tw-bg-red-600 tw-text-white tw-px-5 tw-py-2.5 tw-rounded-lg tw-font-medium tw-text-sm hover:tw-bg-red-700 focus:tw-ring-4 focus:tw-ring-red-200 tw-transition-all tw-shadow-sm hover:tw-shadow active:tw-scale-95 tw-min-w-[160px]"
+              className="tw-inline-flex tw-items-center tw-justify-center tw-gap-2 tw-bg-red-600 tw-text-white tw-px-5 tw-rounded-lg tw-font-medium tw-text-sm hover:tw-bg-red-700 focus:tw-ring-4 focus:tw-ring-red-200 tw-transition-all tw-shadow-sm hover:tw-shadow active:tw-scale-95 tw-min-w-[160px] tw-h-[42px] tw-leading-5"
             >
-              <svg className="tw-w-5 tw-h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+              <svg className="tw-w-5 tw-h-5" fill="currentColor" viewBox="0 0 20 20">
+                <path fillRule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clipRule="evenodd" />
               </svg>
               Clear All Data
             </button>
@@ -488,8 +487,8 @@ comments: false
         <div className="tw-mt-8">
           <div className="tw-flex tw-items-center tw-justify-between tw-mb-6">
             <div className="tw-flex tw-items-center tw-gap-3">
-              <svg className="tw-w-6 tw-h-6 tw-text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+              <svg className="tw-w-6 tw-h-6 tw-text-blue-600" fill="currentColor" viewBox="0 0 20 20">
+                <path d="M2 11a1 1 0 011-1h2a1 1 0 011 1v5a1 1 0 01-1 1H3a1 1 0 01-1-1v-5zM8 7a1 1 0 011-1h2a1 1 0 011 1v9a1 1 0 01-1 1H9a1 1 0 01-1-1V7zM14 4a1 1 0 011-1h2a1 1 0 011 1v12a1 1 0 01-1 1h-2a1 1 0 01-1-1V4z" />
               </svg>
               <h2 className="tw-text-2xl tw-font-bold tw-text-gray-900">Relevant Periods</h2>
             </div>
@@ -497,8 +496,8 @@ comments: false
               onClick={() => setShowAllPeriods(true)}
               className="tw-inline-flex tw-items-center tw-gap-2 tw-bg-blue-600 tw-text-white tw-px-4 tw-py-2 tw-rounded-lg tw-font-medium tw-text-sm hover:tw-bg-blue-700 focus:tw-ring-4 focus:tw-ring-blue-200 tw-transition-all tw-shadow-sm hover:tw-shadow"
             >
-              <svg className="tw-w-5 tw-h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 10h16M4 14h16M4 18h16" />
+              <svg className="tw-w-5 tw-h-5" fill="currentColor" viewBox="0 0 20 20">
+                <path fillRule="evenodd" d="M3 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z" clipRule="evenodd" />
               </svg>
               View All Periods
             </button>
@@ -549,8 +548,8 @@ comments: false
           <div className="tw-bg-gradient-to-r tw-from-blue-600 tw-to-blue-700 tw-px-6 tw-py-5 tw-sticky tw-top-0 tw-z-10 tw-rounded-t-2xl">
             <div className="tw-flex tw-items-center tw-justify-between">
               <div className="tw-flex tw-items-center tw-gap-3">
-                <svg className="tw-w-7 tw-h-7 tw-text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                <svg className="tw-w-7 tw-h-7 tw-text-white" fill="currentColor" viewBox="0 0 20 20">
+                  <path d="M2 11a1 1 0 011-1h2a1 1 0 011 1v5a1 1 0 01-1 1H3a1 1 0 01-1-1v-5zM8 7a1 1 0 011-1h2a1 1 0 011 1v9a1 1 0 01-1 1H9a1 1 0 01-1-1V7zM14 4a1 1 0 011-1h2a1 1 0 011 1v12a1 1 0 01-1 1h-2a1 1 0 01-1-1V4z" />
                 </svg>
                 <h3 className="tw-text-2xl tw-font-bold tw-text-white">All Periods (2026)</h3>
               </div>
@@ -559,8 +558,8 @@ comments: false
                 className="tw-text-white/80 hover:tw-text-white hover:tw-bg-white/10 tw-p-2 tw-rounded-lg tw-transition-colors focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-white/30"
                 aria-label="Close"
               >
-                <svg className="tw-w-6 tw-h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                <svg className="tw-w-6 tw-h-6" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
                 </svg>
               </button>
             </div>
@@ -633,8 +632,8 @@ comments: false
           </div>
         </div>
         <div className="tw-flex tw-items-center tw-gap-2 tw-text-sm tw-text-gray-600 tw-mb-4">
-          <svg className="tw-w-4 tw-h-4 tw-text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
-            <path strokeLinecap="round" strokeLinejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+          <svg className="tw-w-4 tw-h-4 tw-text-gray-400" fill="currentColor" viewBox="0 0 20 20">
+            <path fillRule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clipRule="evenodd" />
           </svg>
           <span>{formatDate(period.windowStart)} – {formatDate(period.windowEnd)}</span>
         </div>
@@ -664,8 +663,8 @@ comments: false
             </span>
           ) : (
             <span className="tw-inline-flex tw-items-center tw-gap-1.5 tw-bg-orange-100 tw-text-orange-700 tw-px-3 tw-py-1.5 tw-rounded-full tw-font-semibold tw-text-xs">
-              <svg className="tw-w-4 tw-h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+              <svg className="tw-w-4 tw-h-4" fill="currentColor" viewBox="0 0 20 20">
+                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clipRule="evenodd" />
               </svg>
               {remaining} remaining
             </span>
@@ -747,8 +746,8 @@ comments: false
       <div className="tw-bg-white tw-rounded-xl tw-shadow-lg tw-border tw-border-gray-200 tw-overflow-hidden">
         <div className="tw-bg-gradient-to-r tw-from-blue-600 tw-to-blue-700 tw-px-6 tw-py-5 tw-flex tw-justify-between tw-items-center">
           <div className="tw-flex tw-items-center tw-gap-3">
-            <svg className="tw-w-7 tw-h-7 tw-text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
-              <path strokeLinecap="round" strokeLinejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+            <svg className="tw-w-7 tw-h-7 tw-text-white" fill="currentColor" viewBox="0 0 20 20">
+              <path fillRule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clipRule="evenodd" />
             </svg>
             <h2 className="tw-text-2xl tw-font-bold tw-text-white">
               {formatMonthYear(currentMonth)}
@@ -760,8 +759,8 @@ comments: false
               className="tw-p-2.5 tw-bg-white/20 tw-text-white tw-rounded-lg hover:tw-bg-white/30 tw-transition-colors focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-white/50"
               aria-label="Previous month"
             >
-              <svg className="tw-w-5 tw-h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
+              <svg className="tw-w-5 tw-h-5" fill="currentColor" viewBox="0 0 20 20">
+                <path fillRule="evenodd" d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z" clipRule="evenodd" />
               </svg>
             </button>
             <button
@@ -775,8 +774,8 @@ comments: false
               className="tw-p-2.5 tw-bg-white/20 tw-text-white tw-rounded-lg hover:tw-bg-white/30 tw-transition-colors focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-white/50"
               aria-label="Next month"
             >
-              <svg className="tw-w-5 tw-h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
+              <svg className="tw-w-5 tw-h-5" fill="currentColor" viewBox="0 0 20 20">
+                <path fillRule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clipRule="evenodd" />
               </svg>
             </button>
           </div>
@@ -826,8 +825,8 @@ comments: false
           {/* Instructions */}
           <div className="tw-mt-6 tw-bg-gradient-to-r tw-from-blue-50 tw-to-indigo-50 tw-border tw-border-blue-200 tw-rounded-xl tw-p-4">
             <div className="tw-flex tw-items-start tw-gap-3">
-              <svg className="tw-w-6 tw-h-6 tw-text-blue-600 tw-flex-shrink-0 tw-mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              <svg className="tw-w-6 tw-h-6 tw-text-blue-600 tw-flex-shrink-0 tw-mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
               </svg>
               <div>
                 <p className="tw-text-sm tw-font-semibold tw-text-blue-900 tw-mb-1">How to mark attendance</p>
@@ -858,9 +857,8 @@ comments: false
           <div className="tw-bg-gradient-to-r tw-from-slate-700 tw-to-slate-800 tw-px-6 tw-py-5">
             <div className="tw-flex tw-items-center tw-justify-between">
               <div className="tw-flex tw-items-center tw-gap-3">
-                <svg className="tw-w-6 tw-h-6 tw-text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                <svg className="tw-w-6 tw-h-6 tw-text-white" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M11.49 3.17c-.38-1.56-2.6-1.56-2.98 0a1.532 1.532 0 01-2.286.948c-1.372-.836-2.942.734-2.106 2.106.54.886.061 2.042-.947 2.287-1.561.379-1.561 2.6 0 2.978a1.532 1.532 0 01.947 2.287c-.836 1.372.734 2.942 2.106 2.106a1.532 1.532 0 012.287.947c.379 1.561 2.6 1.561 2.978 0a1.533 1.533 0 012.287-.947c1.372.836 2.942-.734 2.106-2.106a1.533 1.533 0 01.947-2.287c1.561-.379 1.561-2.6 0-2.978a1.532 1.532 0 01-.947-2.287c.836-1.372-.734-2.942-2.106-2.106a1.532 1.532 0 01-2.287-.947zM10 13a3 3 0 100-6 3 3 0 000 6z" clipRule="evenodd" />
                 </svg>
                 <h3 className="tw-text-xl tw-font-bold tw-text-white">Strategy Session Dates</h3>
               </div>
@@ -869,8 +867,8 @@ comments: false
                 className="tw-text-white/80 hover:tw-text-white hover:tw-bg-white/10 tw-p-1.5 tw-rounded-lg tw-transition-colors focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-white/30"
                 aria-label="Close"
               >
-                <svg className="tw-w-5 tw-h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                <svg className="tw-w-5 tw-h-5" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
                 </svg>
               </button>
             </div>
@@ -911,8 +909,8 @@ comments: false
               <div className="tw-max-h-60 tw-overflow-y-auto tw-pr-2">
                 {strategySessions.length === 0 ? (
                   <div className="tw-text-center tw-py-8 tw-text-gray-400">
-                    <svg className="tw-w-12 tw-h-12 tw-mx-auto tw-mb-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="1">
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                    <svg className="tw-w-12 tw-h-12 tw-mx-auto tw-mb-3" fill="currentColor" viewBox="0 0 20 20">
+                      <path fillRule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clipRule="evenodd" />
                     </svg>
                     <p className="tw-text-sm tw-font-medium">No strategy sessions configured yet</p>
                   </div>
@@ -921,8 +919,8 @@ comments: false
                     {strategySessions.map(date => (
                       <li key={date} className="tw-group tw-flex tw-justify-between tw-items-center tw-bg-gray-50 hover:tw-bg-gray-100 tw-p-3 tw-rounded-lg tw-border tw-border-gray-200 tw-transition-colors">
                         <div className="tw-flex tw-items-center tw-gap-2">
-                          <svg className="tw-w-4 tw-h-4 tw-text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
-                            <path strokeLinecap="round" strokeLinejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                          <svg className="tw-w-4 tw-h-4 tw-text-blue-600" fill="currentColor" viewBox="0 0 20 20">
+                            <path fillRule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clipRule="evenodd" />
                           </svg>
                           <span className="tw-text-sm tw-font-medium tw-text-gray-800">{formatDate(date)}</span>
                         </div>
