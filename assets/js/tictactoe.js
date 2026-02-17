@@ -4,7 +4,7 @@ Features to add:
 - Moves change background
 - Maybe animations for buttons
 
-*/
+
 (function() {
   'use strict';
 
@@ -416,3 +416,5 @@ Features to add:
     init();
   }
 })();
+
+*/

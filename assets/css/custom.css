@@ -1,6 +1,5 @@
 /* Enhanced Custom CSS for Portfolio Website */
 
-/* Global Enhancements */
 :root {
     --primary-color: #007bff;
     --secondary-color: #6c757d;
@@ -20,12 +19,10 @@
     --transition: all 0.3s ease;
   }
   
-  /* Smooth scrolling */
   html {
     scroll-behavior: smooth;
   }
   
-  /* Custom scrollbar */
   ::-webkit-scrollbar {
     width: 8px;
   }
