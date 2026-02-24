@@ -18,17 +18,17 @@
 }
 
 .weather-btn {
-  background: var(--md-surface-container, white);
-  border: none;
+  background: white;
+  border: 2px solid rgba(0, 102, 255, 0.2);
   border-radius: 50%;
-  width: 56px; /* Material You FAB size */
-  height: 56px;
+  width: 64px;
+  height: 64px;
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  transition: all 0.3s cubic-bezier(0.2, 0, 0, 1);
-  color: var(--md-on-surface-variant, #6c757d);
+  transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+  color: var(--text-secondary, #536471);
   box-shadow: var(--shadow-sm);
   position: relative;
   overflow: hidden;
@@ -38,29 +38,31 @@
   content: '';
   position: absolute;
   inset: 0;
-  background: var(--md-primary, #6750A4);
+  background: var(--gradient-primary, linear-gradient(135deg, #0066FF 0%, #00D4FF 100%));
   opacity: 0;
-  transition: all 0.3s cubic-bezier(0.2, 0, 0, 1);
+  transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
   border-radius: 50%;
 }
 
 .weather-btn:hover {
-  transform: translateY(-3px) scale(1.05);
+  transform: translateY(-6px) scale(1.1);
   box-shadow: var(--shadow-md);
+  border-color: var(--electric-blue, #0066FF);
 }
 
 .weather-btn:hover::before {
-  opacity: 0.12; /* State layer hover */
+  opacity: 0.1;
 }
 
 .weather-btn:active {
-  transform: translateY(-2px) scale(1.03);
+  transform: translateY(-4px) scale(1.08);
 }
 
 .weather-btn.active {
-  background: var(--md-tertiary, #7D5260);
-  color: var(--md-on-primary, white);
-  box-shadow: var(--shadow-md);
+  background: var(--gradient-primary, linear-gradient(135deg, #0066FF 0%, #00D4FF 100%));
+  color: white;
+  border-color: transparent;
+  box-shadow: var(--shadow-lg);
 }
 
 .weather-btn.active::before {
