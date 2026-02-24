@@ -7,7 +7,6 @@ comments: false
 
 <div id="attendance-tracker-root"></div>
 
-<!-- Load React, ReactDOM, and Babel from CDN -->
 <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
 <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
 <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
@@ -413,36 +412,36 @@ comments: false
 
     return (
       <div className="tw-max-w-7xl tw-mx-auto tw-p-4 md:tw-p-6 tw-min-h-screen">
-        {/* Disclaimer Banner */}
-        <div className="tw-bg-gradient-to-r tw-from-amber-50 tw-to-yellow-50 tw-border tw-border-amber-200 tw-rounded-xl tw-p-5 tw-mb-6 tw-shadow-sm">
+        {/* Disclaimer Banner - Material You */}
+        <div className="tw-bg-[#FFF8E1] tw-rounded-[24px] tw-p-6 tw-mb-6 tw-shadow-sm">
           <div className="tw-flex tw-items-start tw-gap-4">
             <div className="tw-flex-shrink-0 tw-mt-0.5">
-              <svg className="tw-h-6 tw-w-6 tw-text-amber-600" fill="currentColor" viewBox="0 0 20 20">
+              <svg className="tw-h-6 tw-w-6 tw-text-[#F57C00]" fill="currentColor" viewBox="0 0 20 20">
                 <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
               </svg>
             </div>
             <div className="tw-flex-1">
-              <h3 className="tw-text-sm tw-font-semibold tw-text-amber-900 tw-mb-1">Personal Tracking Tool</h3>
-              <p className="tw-text-sm tw-text-amber-800 tw-leading-relaxed">
+              <h3 className="tw-text-sm tw-font-medium tw-text-[#E65100] tw-mb-1">Personal Tracking Tool</h3>
+              <p className="tw-text-sm tw-text-[#EF6C00] tw-leading-relaxed">
                 This is a personal attendance tracker and does not indicate enterprise compliance. Totally not associated with HR.
               </p>
             </div>
           </div>
         </div>
 
-        {/* Import/Export Bar */}
-        <div className="tw-bg-white tw-rounded-xl tw-shadow-md tw-border tw-border-gray-200 tw-p-5 tw-mb-6">
+        {/* Import/Export Bar - Material You Pill Buttons */}
+        <div className="tw-bg-[#FFFBFE] tw-rounded-[24px] tw-shadow-md tw-p-6 tw-mb-6">
           <div className="tw-flex tw-flex-wrap tw-gap-3">
             <button
               onClick={exportData}
-              className="tw-inline-flex tw-items-center tw-justify-center tw-gap-2 tw-bg-blue-600 tw-text-white tw-px-5 tw-rounded-lg tw-font-medium tw-text-sm hover:tw-bg-blue-700 focus:tw-ring-4 focus:tw-ring-blue-200 tw-transition-all tw-shadow-sm hover:tw-shadow active:tw-scale-95 tw-min-w-[160px] tw-h-[42px] tw-leading-5"
+              className="tw-inline-flex tw-items-center tw-justify-center tw-gap-2 tw-bg-[#6750A4] tw-text-white tw-px-6 tw-rounded-full tw-font-medium tw-text-sm hover:tw-shadow-md focus:tw-ring-4 focus:tw-ring-[#E8DEF8] tw-transition-all tw-duration-300 tw-shadow-sm active:tw-scale-95 tw-min-w-[160px] tw-h-[42px]"
             >
               <svg className="tw-w-5 tw-h-5" fill="currentColor" viewBox="0 0 20 20">
                 <path fillRule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clipRule="evenodd" />
               </svg>
               Export Backup
             </button>
-            <label className="tw-inline-flex tw-items-center tw-justify-center tw-gap-2 tw-bg-emerald-600 tw-text-white tw-px-5 tw-rounded-lg tw-font-medium tw-text-sm hover:tw-bg-emerald-700 focus-within:tw-ring-4 focus-within:tw-ring-emerald-200 tw-transition-all tw-cursor-pointer tw-shadow-sm hover:tw-shadow active:tw-scale-95 tw-min-w-[160px] tw-h-[42px] tw-leading-5">
+            <label className="tw-inline-flex tw-items-center tw-justify-center tw-gap-2 tw-bg-[#E8DEF8] tw-text-[#1D192B] tw-px-6 tw-rounded-full tw-font-medium tw-text-sm hover:tw-shadow-md focus-within:tw-ring-4 focus-within:tw-ring-[#6750A4]/20 tw-transition-all tw-duration-300 tw-cursor-pointer tw-shadow-sm active:tw-scale-95 tw-min-w-[160px] tw-h-[42px]">
               <svg className="tw-w-5 tw-h-5" fill="currentColor" viewBox="0 0 20 20">
                 <path fillRule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM6.293 6.707a1 1 0 010-1.414l3-3a1 1 0 011.414 0l3 3a1 1 0 01-1.414 1.414L11 5.414V13a1 1 0 11-2 0V5.414L7.707 6.707a1 1 0 01-1.414 0z" clipRule="evenodd" />
               </svg>
@@ -451,7 +450,7 @@ comments: false
             </label>
             <button
               onClick={() => setShowSettings(true)}
-              className="tw-inline-flex tw-items-center tw-justify-center tw-gap-2 tw-bg-slate-600 tw-text-white tw-px-5 tw-rounded-lg tw-font-medium tw-text-sm hover:tw-bg-slate-700 focus:tw-ring-4 focus:tw-ring-slate-200 tw-transition-all tw-shadow-sm hover:tw-shadow active:tw-scale-95 tw-min-w-[160px] tw-h-[42px] tw-leading-5"
+              className="tw-inline-flex tw-items-center tw-justify-center tw-gap-2 tw-bg-[#E8DEF8] tw-text-[#1D192B] tw-px-6 tw-rounded-full tw-font-medium tw-text-sm hover:tw-shadow-md focus:tw-ring-4 focus:tw-ring-[#6750A4]/20 tw-transition-all tw-duration-300 tw-shadow-sm active:tw-scale-95 tw-min-w-[160px] tw-h-[42px]"
             >
               <svg className="tw-w-5 tw-h-5" fill="currentColor" viewBox="0 0 20 20">
                 <path fillRule="evenodd" d="M11.49 3.17c-.38-1.56-2.6-1.56-2.98 0a1.532 1.532 0 01-2.286.948c-1.372-.836-2.942.734-2.106 2.106.54.886.061 2.042-.947 2.287-1.561.379-1.561 2.6 0 2.978a1.532 1.532 0 01.947 2.287c-.836 1.372.734 2.942 2.106 2.106a1.532 1.532 0 012.287.947c.379 1.561 2.6 1.561 2.978 0a1.533 1.533 0 012.287-.947c1.372.836 2.942-.734 2.106-2.106a1.533 1.533 0 01.947-2.287c1.561-.379 1.561-2.6 0-2.978a1.532 1.532 0 01-.947-2.287c.836-1.372-.734-2.942-2.106-2.106a1.532 1.532 0 01-2.287-.947zM10 13a3 3 0 100-6 3 3 0 000 6z" clipRule="evenodd" />
@@ -460,7 +459,7 @@ comments: false
             </button>
             <button
               onClick={clearAllData}
-              className="tw-inline-flex tw-items-center tw-justify-center tw-gap-2 tw-bg-red-600 tw-text-white tw-px-5 tw-rounded-lg tw-font-medium tw-text-sm hover:tw-bg-red-700 focus:tw-ring-4 focus:tw-ring-red-200 tw-transition-all tw-shadow-sm hover:tw-shadow active:tw-scale-95 tw-min-w-[160px] tw-h-[42px] tw-leading-5"
+              className="tw-inline-flex tw-items-center tw-justify-center tw-gap-2 tw-bg-[#B3261E] tw-text-white tw-px-6 tw-rounded-full tw-font-medium tw-text-sm hover:tw-shadow-md focus:tw-ring-4 focus:tw-ring-[#F2B8B5] tw-transition-all tw-duration-300 tw-shadow-sm active:tw-scale-95 tw-min-w-[160px] tw-h-[42px]"
             >
               <svg className="tw-w-5 tw-h-5" fill="currentColor" viewBox="0 0 20 20">
                 <path fillRule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clipRule="evenodd" />
@@ -485,14 +484,14 @@ comments: false
         <div className="tw-mt-8">
           <div className="tw-flex tw-items-center tw-justify-between tw-mb-6">
             <div className="tw-flex tw-items-center tw-gap-3">
-              <svg className="tw-w-6 tw-h-6 tw-text-blue-600" fill="currentColor" viewBox="0 0 20 20">
+              <svg className="tw-w-6 tw-h-6 tw-text-[#6750A4]" fill="currentColor" viewBox="0 0 20 20">
                 <path d="M2 11a1 1 0 011-1h2a1 1 0 011 1v5a1 1 0 01-1 1H3a1 1 0 01-1-1v-5zM8 7a1 1 0 011-1h2a1 1 0 011 1v9a1 1 0 01-1 1H9a1 1 0 01-1-1V7zM14 4a1 1 0 011-1h2a1 1 0 011 1v12a1 1 0 01-1 1h-2a1 1 0 01-1-1V4z" />
               </svg>
-              <h2 className="tw-text-2xl tw-font-bold tw-text-gray-900">Relevant Periods</h2>
+              <h2 className="tw-text-2xl tw-font-medium tw-text-[#1C1B1F]">Relevant Periods</h2>
             </div>
             <button
               onClick={() => setShowAllPeriods(true)}
-              className="tw-inline-flex tw-items-center tw-gap-2 tw-bg-blue-600 tw-text-white tw-px-4 tw-py-2 tw-rounded-lg tw-font-medium tw-text-sm hover:tw-bg-blue-700 focus:tw-ring-4 focus:tw-ring-blue-200 tw-transition-all tw-shadow-sm hover:tw-shadow"
+              className="tw-inline-flex tw-items-center tw-gap-2 tw-bg-[#6750A4] tw-text-white tw-px-5 tw-py-2.5 tw-rounded-full tw-font-medium tw-text-sm hover:tw-shadow-md focus:tw-ring-4 focus:tw-ring-[#E8DEF8] tw-transition-all tw-duration-300 tw-shadow-sm active:tw-scale-95"
             >
               <svg className="tw-w-5 tw-h-5" fill="currentColor" viewBox="0 0 20 20">
                 <path fillRule="evenodd" d="M3 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z" clipRule="evenodd" />
@@ -741,20 +740,20 @@ comments: false
     }
 
     return (
-      <div className="tw-bg-white tw-rounded-xl tw-shadow-lg tw-border tw-border-gray-200 tw-overflow-hidden">
-        <div className="tw-bg-gradient-to-r tw-from-blue-600 tw-to-blue-700 tw-px-6 tw-py-5 tw-flex tw-justify-between tw-items-center">
+      <div className="tw-bg-[#FFFBFE] tw-rounded-[24px] tw-shadow-lg tw-overflow-hidden">
+        <div className="tw-bg-gradient-to-r tw-from-[#6750A4] tw-to-[#7D5260] tw-px-6 tw-py-5 tw-flex tw-justify-between tw-items-center">
           <div className="tw-flex tw-items-center tw-gap-3">
             <svg className="tw-w-7 tw-h-7 tw-text-white" fill="currentColor" viewBox="0 0 20 20">
               <path fillRule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clipRule="evenodd" />
             </svg>
-            <h2 className="tw-text-2xl tw-font-bold tw-text-white">
+            <h2 className="tw-text-2xl tw-font-medium tw-text-white">
               {formatMonthYear(currentMonth)}
             </h2>
           </div>
           <div className="tw-flex tw-gap-2">
             <button
               onClick={prevMonth}
-              className="tw-p-2.5 tw-bg-white/20 tw-text-white tw-rounded-lg hover:tw-bg-white/30 tw-transition-colors focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-white/50"
+              className="tw-p-2.5 tw-bg-white/20 tw-text-white tw-rounded-full hover:tw-bg-white/30 tw-transition-all tw-duration-300 focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-white/50 active:tw-scale-95"
               aria-label="Previous month"
             >
               <svg className="tw-w-5 tw-h-5" fill="currentColor" viewBox="0 0 20 20">
@@ -763,13 +762,13 @@ comments: false
             </button>
             <button
               onClick={goToToday}
-              className="tw-px-4 tw-py-2.5 tw-bg-white tw-text-blue-600 tw-rounded-lg tw-font-semibold tw-text-sm hover:tw-bg-blue-50 tw-transition-colors focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-white/50"
+              className="tw-px-5 tw-py-2.5 tw-bg-white tw-text-[#6750A4] tw-rounded-full tw-font-medium tw-text-sm hover:tw-bg-white/90 tw-transition-all tw-duration-300 focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-white/50 active:tw-scale-95"
             >
               Today
             </button>
             <button
               onClick={nextMonth}
-              className="tw-p-2.5 tw-bg-white/20 tw-text-white tw-rounded-lg hover:tw-bg-white/30 tw-transition-colors focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-white/50"
+              className="tw-p-2.5 tw-bg-white/20 tw-text-white tw-rounded-full hover:tw-bg-white/30 tw-transition-all tw-duration-300 focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-white/50 active:tw-scale-95"
               aria-label="Next month"
             >
               <svg className="tw-w-5 tw-h-5" fill="currentColor" viewBox="0 0 20 20">
@@ -794,41 +793,41 @@ comments: false
           </div>
 
           {/* Legend */}
-          <div className="tw-mt-8 tw-pt-6 tw-border-t tw-border-gray-200">
-            <h3 className="tw-text-sm tw-font-bold tw-text-gray-700 tw-mb-4 tw-uppercase tw-tracking-wide">Legend</h3>
-            <div className="tw-grid tw-grid-cols-2 md:tw-grid-cols-5 tw-gap-4">
-              <div className="tw-flex tw-items-center tw-gap-2.5 tw-p-2 tw-bg-gray-50 tw-rounded-lg">
-                <div className="tw-w-6 tw-h-6 tw-bg-green-100 tw-border-2 tw-border-green-500 tw-rounded-lg tw-flex-shrink-0"></div>
-                <span className="tw-text-sm tw-font-medium tw-text-gray-700">Attended</span>
+          <div className="tw-mt-8 tw-pt-6 tw-border-t tw-border-[#E7E0EC]">
+            <h3 className="tw-text-sm tw-font-medium tw-text-[#49454F] tw-mb-4 tw-uppercase tw-tracking-wide">Legend</h3>
+            <div className="tw-grid tw-grid-cols-2 md:tw-grid-cols-5 tw-gap-3">
+              <div className="tw-flex tw-items-center tw-gap-2.5 tw-p-2.5 tw-bg-[#F3EDF7] tw-rounded-[12px]">
+                <div className="tw-w-6 tw-h-6 tw-bg-green-100 tw-border-2 tw-border-green-500 tw-rounded-[8px] tw-flex-shrink-0"></div>
+                <span className="tw-text-sm tw-font-medium tw-text-[#1C1B1F]">Attended</span>
               </div>
-              <div className="tw-flex tw-items-center tw-gap-2.5 tw-p-2 tw-bg-gray-50 tw-rounded-lg">
-                <div className="tw-w-6 tw-h-6 tw-bg-gradient-to-br tw-from-red-100 tw-to-red-200 tw-border-2 tw-border-red-500 tw-rounded-lg tw-flex-shrink-0"></div>
-                <span className="tw-text-sm tw-font-medium tw-text-gray-700">Exception</span>
+              <div className="tw-flex tw-items-center tw-gap-2.5 tw-p-2.5 tw-bg-[#F3EDF7] tw-rounded-[12px]">
+                <div className="tw-w-6 tw-h-6 tw-bg-gradient-to-br tw-from-red-100 tw-to-red-200 tw-border-2 tw-border-red-500 tw-rounded-[8px] tw-flex-shrink-0"></div>
+                <span className="tw-text-sm tw-font-medium tw-text-[#1C1B1F]">Exception</span>
               </div>
-              <div className="tw-flex tw-items-center tw-gap-2.5 tw-p-2 tw-bg-gray-50 tw-rounded-lg">
-                <div className="tw-w-6 tw-h-6 tw-bg-blue-100 tw-border-2 tw-border-blue-400 tw-rounded-lg tw-flex-shrink-0"></div>
-                <span className="tw-text-sm tw-font-medium tw-text-gray-700">Holiday</span>
+              <div className="tw-flex tw-items-center tw-gap-2.5 tw-p-2.5 tw-bg-[#F3EDF7] tw-rounded-[12px]">
+                <div className="tw-w-6 tw-h-6 tw-bg-[#E8DEF8] tw-border-2 tw-border-[#6750A4] tw-rounded-[8px] tw-flex-shrink-0"></div>
+                <span className="tw-text-sm tw-font-medium tw-text-[#1C1B1F]">Holiday</span>
               </div>
-              <div className="tw-flex tw-items-center tw-gap-2.5 tw-p-2 tw-bg-gray-50 tw-rounded-lg">
-                <div className="tw-w-6 tw-h-6 tw-bg-white tw-border-2 tw-border-gray-300 tw-rounded-lg tw-flex-shrink-0"></div>
-                <span className="tw-text-sm tw-font-medium tw-text-gray-700">Available</span>
+              <div className="tw-flex tw-items-center tw-gap-2.5 tw-p-2.5 tw-bg-[#F3EDF7] tw-rounded-[12px]">
+                <div className="tw-w-6 tw-h-6 tw-bg-white tw-border-2 tw-border-[#79747E] tw-rounded-[8px] tw-flex-shrink-0"></div>
+                <span className="tw-text-sm tw-font-medium tw-text-[#1C1B1F]">Available</span>
               </div>
-              <div className="tw-flex tw-items-center tw-gap-2.5 tw-p-2 tw-bg-gray-50 tw-rounded-lg">
-                <div className="tw-w-6 tw-h-6 tw-bg-gray-100 tw-rounded-lg tw-flex-shrink-0"></div>
-                <span className="tw-text-sm tw-font-medium tw-text-gray-700">Weekend</span>
+              <div className="tw-flex tw-items-center tw-gap-2.5 tw-p-2.5 tw-bg-[#F3EDF7] tw-rounded-[12px]">
+                <div className="tw-w-6 tw-h-6 tw-bg-[#E7E0EC] tw-rounded-[8px] tw-flex-shrink-0"></div>
+                <span className="tw-text-sm tw-font-medium tw-text-[#1C1B1F]">Weekend</span>
               </div>
             </div>
           </div>
 
           {/* Instructions */}
-          <div className="tw-mt-6 tw-bg-gradient-to-r tw-from-blue-50 tw-to-indigo-50 tw-border tw-border-blue-200 tw-rounded-xl tw-p-4">
+          <div className="tw-mt-6 tw-bg-[#E8DEF8] tw-rounded-[16px] tw-p-4">
             <div className="tw-flex tw-items-start tw-gap-3">
-              <svg className="tw-w-6 tw-h-6 tw-text-blue-600 tw-flex-shrink-0 tw-mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+              <svg className="tw-w-6 tw-h-6 tw-text-[#6750A4] tw-flex-shrink-0 tw-mt-0.5" fill="currentColor" viewBox="0 0 20 20">
                 <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
               </svg>
               <div>
-                <p className="tw-text-sm tw-font-semibold tw-text-blue-900 tw-mb-1">How to mark attendance</p>
-                <p className="tw-text-sm tw-text-blue-800">Click any available day to cycle through: <span className="tw-font-mono tw-font-semibold">Available → Attended → Exception → Available</span></p>
+                <p className="tw-text-sm tw-font-medium tw-text-[#1D192B] tw-mb-1">How to mark attendance</p>
+                <p className="tw-text-sm tw-text-[#1D192B]">Click any available day to cycle through: <span className="tw-font-mono tw-font-semibold">Available → Attended → Exception → Available</span></p>
               </div>
             </div>
           </div>
