@@ -155,10 +155,10 @@ section {
   animation: cardReveal 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) backwards;
 }
 
-/* Stack is the positioning context; padding-top reserves the 52px peek strip */
+/* Stack is the positioning context; padding-top = peek zone height */
 .folder-stack {
   position: relative;
-  padding-top: 52px;
+  padding-top: 100px;
   transition: height 0.45s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
@@ -168,7 +168,7 @@ section {
   left: 0;
   right: 0;
   border-radius: 32px;
-  border: 1px solid rgba(0, 102, 255, 0.1);
+  border: 1.5px solid rgba(0, 102, 255, 0.12);
   overflow: hidden;
   transition: box-shadow 0.4s ease, background 0.3s ease;
 }
@@ -189,43 +189,58 @@ section {
 .folder-card[data-order="1"]::before { top: -150px; right: -150px; background: var(--gradient-primary); }
 .folder-card[data-order="1"]::after  { bottom: -150px; left: -150px; background: var(--gradient-accent); animation-delay: 4s; }
 
-/* Active card — full content, sits just below the peek strip */
+/* Active card — full content, sits below the peek zone */
 .folder-card[data-order="1"] {
-  top: 52px;
+  top: 100px;
   z-index: 30;
   background: rgba(255, 255, 255, 0.98);
   box-shadow: var(--shadow-xl);
   cursor: default;
+  border-radius: 0 32px 32px 32px;
 }
 
-/* Inactive cards — sit behind the active card; body hidden */
-.folder-card[data-order="2"],
-.folder-card[data-order="3"] {
-  top: 0;
-  background: transparent;
-  border-color: transparent;
-  box-shadow: none;
+/* Card-2: most-recently-inactive — its colored strip peeks from y=8 to y=100 */
+.folder-card[data-order="2"] {
+  top: 8px;
+  height: 92px;
+  background: linear-gradient(160deg, rgba(220, 238, 255, 0.95) 0%, rgba(200, 228, 255, 0.85) 100%);
+  border-color: rgba(0, 102, 255, 0.18);
+  border-radius: 28px 28px 0 0;
+  box-shadow: 0 -4px 20px rgba(0, 102, 255, 0.06);
+  cursor: pointer;
   z-index: 20;
 }
-.folder-card[data-order="3"] { z-index: 10; }
 
-/* Peek labels are direct children of folder-stack — never clipped by card overflow.
+/* Card-3: deepest — peeks from y=0, its top 8px visible above card-2 */
+.folder-card[data-order="3"] {
+  top: 0;
+  height: 100px;
+  background: linear-gradient(160deg, rgba(210, 232, 255, 0.7) 0%, rgba(190, 222, 255, 0.6) 100%);
+  border-color: rgba(0, 102, 255, 0.1);
+  border-radius: 28px 28px 0 0;
+  box-shadow: none;
+  cursor: pointer;
+  z-index: 10;
+}
+
+/* Peek labels — direct children of folder-stack, immune to card overflow clipping.
    data-tabpos present = visible; absent = hidden (this is the active folder's label). */
 .folder-peek-label {
   position: absolute;
-  top: 0;
+  top: 20px;
   height: 52px;
   display: inline-flex;
   align-items: center;
   padding: 0 1.5rem;
-  background: rgba(243, 248, 255, 0.92);
+  background: rgba(255, 255, 255, 0.9);
   border-radius: 14px 14px 0 0;
-  border: 1.5px solid rgba(0, 102, 255, 0.15);
+  border: 1.5px solid rgba(0, 102, 255, 0.2);
   border-bottom: none;
   white-space: nowrap;
   cursor: pointer;
   z-index: 35;
   transition: background 0.2s ease, transform 0.2s ease;
+  box-shadow: 0 -4px 12px rgba(0, 102, 255, 0.06);
 }
 
 .folder-peek-label span {
@@ -236,7 +251,6 @@ section {
   letter-spacing: 0.01em;
 }
 
-/* Horizontal positions — self-selectors since labels are no longer inside cards */
 .folder-peek-label[data-tabpos="1"] { left: 0; }
 .folder-peek-label[data-tabpos="2"] { left: 180px; }
 
@@ -244,7 +258,7 @@ section {
 .folder-peek-label:not([data-tabpos]) { display: none; }
 
 .folder-peek-label:hover {
-  background: rgba(0, 102, 255, 0.08);
+  background: rgba(230, 244, 255, 0.98);
   transform: translateY(-3px);
 }
 
@@ -1066,10 +1080,12 @@ section {
   .folder-stack-container { margin: 0.5rem auto; }
 
   .folder-card { border-radius: 24px; }
-  .folder-card[data-order="1"] { border-radius: 0 24px 24px 24px; }
+  .folder-card[data-order="1"] { top: 80px; border-radius: 0 24px 24px 24px; }
+  .folder-card[data-order="2"] { top: 6px; height: 74px; }
+  .folder-card[data-order="3"] { height: 80px; }
 
-  .folder-peek-label { padding: 0 1rem; height: 44px; }
-  .folder-stack { padding-top: 44px; }
+  .folder-stack { padding-top: 80px; }
+  .folder-peek-label { top: 14px; height: 44px; padding: 0 1.25rem; }
   .folder-peek-label[data-tabpos="2"] { left: 150px; }
 
   .folder-body { padding: 1.5rem 1rem; }
@@ -1122,10 +1138,12 @@ section {
   .folder-stack-container { margin: 0.25rem auto; padding: 0 0.5rem; }
 
   .folder-card { border-radius: 16px; }
-  .folder-card[data-order="1"] { border-radius: 0 16px 16px 16px; }
+  .folder-card[data-order="1"] { top: 68px; border-radius: 0 16px 16px 16px; }
+  .folder-card[data-order="2"] { top: 5px; height: 63px; }
+  .folder-card[data-order="3"] { height: 68px; }
 
-  .folder-peek-label { padding: 0 0.875rem; height: 40px; font-size: 0.8125rem; }
-  .folder-stack { padding-top: 40px; }
+  .folder-stack { padding-top: 68px; }
+  .folder-peek-label { top: 10px; height: 40px; padding: 0 1rem; font-size: 0.8125rem; }
   .folder-peek-label[data-tabpos="2"] { left: 130px; }
 
   .folder-body { padding: 1rem; }
