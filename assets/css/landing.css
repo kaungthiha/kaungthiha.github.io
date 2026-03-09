@@ -143,69 +143,40 @@ section {
   z-index: 1;
 }
 
-/* ── Folder Stack — horizontal tab strip + swappable content panels ── */
+/* ── Folder Stack — hand-of-cards layout ── */
 
+/* Outer wrapper; no extra right padding needed — tabs sit above the card */
 .folder-stack-container {
   max-width: 1400px;
-  margin: 0.5rem auto;
+  margin: 2rem auto;
   padding: 0 1rem;
   position: relative;
   z-index: 1;
   animation: cardReveal 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) backwards;
 }
 
-/* Persistent tab strip — all three tabs always visible at the top */
-.folder-tab-strip {
-  display: flex;
-  gap: 0.25rem;
-  padding: 0 0.5rem;
+/* Stack is the positioning context; height is managed by JS.
+   padding-top reserves the horizontal tab strip above the main card. */
+.folder-stack {
   position: relative;
-  z-index: 2;
+  padding-top: 52px;
+  transition: height 0.45s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-.folder-tab {
-  height: 48px;
-  padding: 0 1.5rem;
-  background: rgba(218, 234, 255, 0.85);
-  border: 1.5px solid rgba(0, 102, 255, 0.15);
-  border-bottom: none;
-  border-radius: 14px 14px 0 0;
-  font-family: 'Outfit', sans-serif;
-  font-size: 0.9375rem;
-  font-weight: 600;
-  color: rgba(0, 102, 255, 0.6);
-  cursor: pointer;
-  transition: background 0.2s ease, color 0.2s ease;
-  white-space: nowrap;
-  position: relative;
-  bottom: -1.5px; /* overlap the card's top border for a seamless join */
-}
-
-.folder-tab:hover:not(.active) {
-  background: rgba(200, 225, 255, 0.95);
-  color: var(--electric-blue);
-}
-
-.folder-tab.active {
-  background: rgba(255, 255, 255, 0.98);
-  color: var(--electric-blue);
-  border-color: rgba(0, 102, 255, 0.2);
-}
-
-/* Cards — normal flow; only data-order="1" is visible */
+/* Every card: absolute, full width */
 .folder-card {
-  border-radius: 4px 24px 24px 24px;
-  border: 1.5px solid rgba(0, 102, 255, 0.2);
-  background: rgba(255, 255, 255, 0.98);
-  box-shadow: var(--shadow-xl);
+  position: absolute;
+  left: 0;
+  right: 0;
+  border-radius: 32px;
+  border: 1px solid rgba(0, 102, 255, 0.1);
   overflow: hidden;
-  position: relative;
-  z-index: 1;
+  transition: box-shadow 0.4s ease, background 0.3s ease;
 }
 
-/* Atmospheric blur accents */
-.folder-card::before,
-.folder-card::after {
+/* Atmospheric blur accents on the front card only */
+.folder-card[data-order="1"]::before,
+.folder-card[data-order="1"]::after {
   content: '';
   position: absolute;
   width: 300px;
@@ -216,20 +187,94 @@ section {
   pointer-events: none;
   animation: float 8s ease-in-out infinite;
 }
-.folder-card::before { top: -150px; right: -150px; background: var(--gradient-primary); }
-.folder-card::after  { bottom: -150px; left: -150px; background: var(--gradient-accent); animation-delay: 4s; }
+.folder-card[data-order="1"]::before {
+  top: -150px; right: -150px;
+  background: var(--gradient-primary);
+  animation-delay: 0s;
+}
+.folder-card[data-order="1"]::after {
+  bottom: -150px; left: -150px;
+  background: var(--gradient-accent);
+  animation-delay: 4s;
+}
 
-.folder-card[data-order="1"] { display: block; }
-.folder-card:not([data-order="1"]) { display: none; }
+/* Order 1 — front card, sits below the tab strip */
+.folder-card[data-order="1"] {
+  top: 52px;
+  z-index: 30;
+  background: rgba(255, 255, 255, 0.98);
+  box-shadow: var(--shadow-xl);
+  cursor: default;
+}
 
-/* Fade content in when a card becomes active */
-.folder-card[data-order="1"] .folder-body { animation: fadeInUp 0.35s ease-out; }
+/* Order 2 & 3 — inactive: only the horizontal tab label is shown,
+   card body is hidden, no background behind the tab area.
+   overflow: visible lets the peek-label render even though the card has 0 in-flow height. */
+.folder-card[data-order="2"],
+.folder-card[data-order="3"] {
+  top: 0;
+  background: transparent;
+  border-color: transparent;
+  box-shadow: none;
+  cursor: pointer;
+  z-index: 20;
+  overflow: visible;
+  min-height: 52px;
+}
+.folder-card[data-order="3"] { z-index: 10; }
 
-/* Content area */
+/* Horizontal tab label — sits in the 52px strip above the main card */
+.folder-peek-label {
+  position: absolute;
+  top: 0;
+  height: 52px;
+  display: inline-flex;
+  align-items: center;
+  padding: 0 1.5rem;
+  background: rgba(243, 248, 255, 0.92);
+  border-radius: 14px 14px 0 0;
+  border: 1.5px solid rgba(0, 102, 255, 0.15);
+  border-bottom: none;
+  white-space: nowrap;
+  z-index: 2;
+  transition: background 0.2s ease, transform 0.2s ease;
+}
+
+.folder-peek-label span {
+  font-family: 'Outfit', sans-serif;
+  font-size: 0.9375rem;
+  font-weight: 600;
+  color: var(--electric-blue);
+  letter-spacing: 0.01em;
+}
+
+/* Tab horizontal positions — set via data-tabpos by JS */
+[data-tabpos="1"] .folder-peek-label { left: 0; }
+[data-tabpos="2"] .folder-peek-label { left: 180px; }
+
+.folder-card:not([data-order="1"]) .folder-peek-label:hover {
+  background: rgba(0, 102, 255, 0.08);
+  transform: translateY(-3px);
+}
+
+/* Hide label on front card */
+.folder-card[data-order="1"] .folder-peek-label { display: none; }
+
+/* Content area inside each card */
 .folder-body {
   padding: 3rem;
   position: relative;
   z-index: 1;
+}
+
+/* Inactive cards show only their peek strip — body is hidden */
+.folder-card:not([data-order="1"]) .folder-body {
+  display: none;
+}
+
+/* Fade content in when a card becomes active */
+.folder-card[data-order="1"] .folder-body {
+  animation: fadeInUp 0.35s ease-out;
 }
 
 /* My Work placeholder */
@@ -277,9 +322,42 @@ section {
   }
 }
 
+/* Animated corner accents */
+.main-content-card::before,
+.main-content-card::after {
+  content: '';
+  position: absolute;
+  width: 300px;
+  height: 300px;
+  border-radius: 50%;
+  filter: blur(80px);
+  opacity: 0.4;
+  pointer-events: none;
+  animation: float 8s ease-in-out infinite;
+}
+
+.main-content-card::before {
+  top: -150px;
+  right: -150px;
+  background: var(--gradient-primary);
+  animation-delay: 0s;
+}
+
+.main-content-card::after {
+  bottom: -150px;
+  left: -150px;
+  background: var(--gradient-accent);
+  animation-delay: 4s;
+}
+
 @keyframes float {
   0%, 100% { transform: translate(0, 0) scale(1); }
   50% { transform: translate(20px, -20px) scale(1.1); }
+}
+
+.main-content-card > * {
+  position: relative;
+  z-index: 1;
 }
 
 /* Smooth Scroll Animation */
@@ -1034,11 +1112,16 @@ section {
     padding: 0 0 1rem 0;
   }
 
-  .folder-stack-container { margin: 0.5rem auto; }
+  .folder-stack-container { margin: 1.5rem auto; }
 
-  .folder-card { border-radius: 4px 20px 20px 20px; }
+  .folder-card { border-radius: 20px; }
+  .folder-card[data-order="1"] { border-radius: 0 20px 20px 20px; }
 
-  .folder-tab { height: 44px; padding: 0 1.25rem; font-size: 0.875rem; }
+  .folder-peek-label { padding: 0 1rem; height: 44px; }
+  .folder-stack { padding-top: 44px; }
+  .folder-card[data-order="2"], .folder-card[data-order="3"] { min-height: 44px; }
+
+  [data-tabpos="2"] .folder-peek-label { left: 150px; }
 
   .folder-body { padding: 1.5rem 1rem; }
 
@@ -1087,12 +1170,16 @@ section {
     padding: 0 0 0.5rem 0;
   }
 
-  .folder-stack-container { margin: 0.25rem auto; padding: 0 0.5rem; }
+  .folder-stack-container { margin: 1rem auto; padding: 0 0.5rem; }
 
-  .folder-card { border-radius: 4px 16px 16px 16px; }
+  .folder-card { border-radius: 16px; }
+  .folder-card[data-order="1"] { border-radius: 0 16px 16px 16px; }
 
-  .folder-tab { height: 40px; padding: 0 1rem; font-size: 0.8125rem; }
-  .folder-tab-strip { padding: 0 0.25rem; }
+  .folder-peek-label { padding: 0 0.875rem; height: 40px; font-size: 0.8125rem; }
+  .folder-stack { padding-top: 40px; }
+  .folder-card[data-order="2"], .folder-card[data-order="3"] { min-height: 40px; }
+
+  [data-tabpos="2"] .folder-peek-label { left: 130px; }
 
   .folder-body { padding: 1rem; }
 
