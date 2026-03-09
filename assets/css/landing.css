@@ -269,6 +269,16 @@ section {
   z-index: 1;
 }
 
+/* Inactive cards show only their peek strip — body is hidden */
+.folder-card:not([data-order="1"]) .folder-body {
+  display: none;
+}
+
+/* Fade content in when a card becomes active */
+.folder-card[data-order="1"] .folder-body {
+  animation: fadeInUp 0.35s ease-out;
+}
+
 /* My Work placeholder */
 .placeholder-section {
   min-height: 420px;
