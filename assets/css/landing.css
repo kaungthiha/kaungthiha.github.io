@@ -208,8 +208,7 @@ section {
 }
 
 /* Order 2 & 3 — inactive: only the horizontal tab label is shown,
-   card body is hidden, no background behind the tab area.
-   overflow: visible lets the peek-label render even though the card has 0 in-flow height. */
+   card body is hidden, no background behind the tab area */
 .folder-card[data-order="2"],
 .folder-card[data-order="3"] {
   top: 0;
@@ -218,8 +217,6 @@ section {
   box-shadow: none;
   cursor: pointer;
   z-index: 20;
-  overflow: visible;
-  min-height: 52px;
 }
 .folder-card[data-order="3"] { z-index: 10; }
 
@@ -1119,7 +1116,6 @@ section {
 
   .folder-peek-label { padding: 0 1rem; height: 44px; }
   .folder-stack { padding-top: 44px; }
-  .folder-card[data-order="2"], .folder-card[data-order="3"] { min-height: 44px; }
 
   [data-tabpos="2"] .folder-peek-label { left: 150px; }
 
@@ -1177,7 +1173,6 @@ section {
 
   .folder-peek-label { padding: 0 0.875rem; height: 40px; font-size: 0.8125rem; }
   .folder-stack { padding-top: 40px; }
-  .folder-card[data-order="2"], .folder-card[data-order="3"] { min-height: 40px; }
 
   [data-tabpos="2"] .folder-peek-label { left: 130px; }
 
