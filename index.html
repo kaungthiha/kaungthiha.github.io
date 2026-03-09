@@ -171,7 +171,7 @@ comments: false
     </div>
 
     <!-- My Work -->
-    <div class="folder-card" data-folder="work" data-order="2" data-tabpos="1">
+    <div class="folder-card" data-folder="work" data-order="2">
       <div class="folder-peek-label"><span>My Work</span></div>
       <div class="folder-body">
         <section class="placeholder-section">
@@ -185,7 +185,7 @@ comments: false
     </div>
 
     <!-- Tools for Friends -->
-    <div class="folder-card" data-folder="tools" data-order="3" data-tabpos="2">
+    <div class="folder-card" data-folder="tools" data-order="3">
       <div class="folder-peek-label"><span>Tools for Friends</span></div>
       <div class="folder-body">
         <div class="tools-grid">
@@ -212,33 +212,30 @@ comments: false
     const folders = cards.map(c => c.dataset.folder);
     let active = 'about';
 
-    const TAB_H = 52; // must match .folder-stack padding-top in CSS
-
     function syncHeight() {
       const front = document.querySelector('[data-order="1"]');
-      stack.style.height = (TAB_H + front.scrollHeight) + 'px';
+      const h = front.scrollHeight + 'px';
+      stack.style.height = h;
+      // Match inactive card heights so peek strips span the full container
+      document.querySelectorAll('.folder-card:not([data-order="1"])').forEach(c => {
+        c.style.height = h;
+      });
     }
 
     function activate(target) {
       if (target === active) return;
+      const prev = active;
       active = target;
-      // Re-assign order and tab positions; inactive tabs keep folder sequence order
-      const inactive = folders.filter(f => f !== target);
+      const rest = folders.find(f => f !== target && f !== prev);
       document.querySelector(`[data-folder="${target}"]`).dataset.order = '1';
-      document.querySelector(`[data-folder="${target}"]`).removeAttribute('data-tabpos');
-      inactive.forEach((f, i) => {
-        const el = document.querySelector(`[data-folder="${f}"]`);
-        el.dataset.order = String(i + 2);
-        el.dataset.tabpos = String(i + 1);
-      });
+      document.querySelector(`[data-folder="${prev}"]`).dataset.order = '2';
+      document.querySelector(`[data-folder="${rest}"]`).dataset.order = '3';
       setTimeout(syncHeight, 30);
     }
 
-    // Only inactive cards are clickable (active card click is a no-op via activate guard)
     cards.forEach(card => card.addEventListener('click', () => activate(card.dataset.folder)));
 
-    // Initial height sync — run after layout paint so scrollHeight is accurate
-    requestAnimationFrame(syncHeight);
+    syncHeight();
     window.addEventListener('resize', syncHeight);
   }());
 </script>
