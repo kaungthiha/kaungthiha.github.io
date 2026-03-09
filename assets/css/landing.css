@@ -198,19 +198,22 @@ section {
   cursor: default;
 }
 
-/* Inactive cards — sit behind the active card; body hidden */
+/* Inactive cards — sit behind the active card at top:0; only their peek-label shows.
+   overflow:visible prevents the absolutely-positioned label from being clipped. */
 .folder-card[data-order="2"],
 .folder-card[data-order="3"] {
   top: 0;
   background: transparent;
   border-color: transparent;
   box-shadow: none;
+  cursor: pointer;
   z-index: 20;
+  overflow: visible;
+  min-height: 52px;
 }
 .folder-card[data-order="3"] { z-index: 10; }
 
-/* Peek labels are direct children of folder-stack — never clipped by card overflow.
-   data-tabpos present = visible; absent = hidden (this is the active folder's label). */
+/* Peek label — visible in the 52px strip above the active card */
 .folder-peek-label {
   position: absolute;
   top: 0;
@@ -223,8 +226,7 @@ section {
   border: 1.5px solid rgba(0, 102, 255, 0.15);
   border-bottom: none;
   white-space: nowrap;
-  cursor: pointer;
-  z-index: 35;
+  z-index: 2;
   transition: background 0.2s ease, transform 0.2s ease;
 }
 
@@ -236,17 +238,17 @@ section {
   letter-spacing: 0.01em;
 }
 
-/* Horizontal positions — self-selectors since labels are no longer inside cards */
-.folder-peek-label[data-tabpos="1"] { left: 0; }
-.folder-peek-label[data-tabpos="2"] { left: 180px; }
+/* Horizontal positions driven by data-tabpos (set by JS) */
+[data-tabpos="1"] .folder-peek-label { left: 0; }
+[data-tabpos="2"] .folder-peek-label { left: 180px; }
 
-/* Active folder's label has no data-tabpos → hidden */
-.folder-peek-label:not([data-tabpos]) { display: none; }
-
-.folder-peek-label:hover {
+.folder-card:not([data-order="1"]) .folder-peek-label:hover {
   background: rgba(0, 102, 255, 0.08);
   transform: translateY(-3px);
 }
+
+/* Active card hides its own peek label (it's in front — no peeking needed) */
+.folder-card[data-order="1"] .folder-peek-label { display: none; }
 
 /* Content area */
 .folder-body {
@@ -1070,7 +1072,9 @@ section {
 
   .folder-peek-label { padding: 0 1rem; height: 44px; }
   .folder-stack { padding-top: 44px; }
-  .folder-peek-label[data-tabpos="2"] { left: 150px; }
+  .folder-card[data-order="2"], .folder-card[data-order="3"] { min-height: 44px; }
+
+  [data-tabpos="2"] .folder-peek-label { left: 150px; }
 
   .folder-body { padding: 1.5rem 1rem; }
 
@@ -1126,7 +1130,9 @@ section {
 
   .folder-peek-label { padding: 0 0.875rem; height: 40px; font-size: 0.8125rem; }
   .folder-stack { padding-top: 40px; }
-  .folder-peek-label[data-tabpos="2"] { left: 130px; }
+  .folder-card[data-order="2"], .folder-card[data-order="3"] { min-height: 40px; }
+
+  [data-tabpos="2"] .folder-peek-label { left: 130px; }
 
   .folder-body { padding: 1rem; }
 

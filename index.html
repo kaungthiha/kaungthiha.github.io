@@ -6,21 +6,17 @@ comments: false
 
 <!--
   Brief: Three folder-cards stacked like a hand of playing cards.
-  Peek labels are direct children of folder-stack (not inside cards) so they
-  are never clipped by card overflow. data-tabpos on a label shows it;
-  no data-tabpos hides it (active folder). JS manages card data-order and label data-tabpos.
+  data-order="1" is the front (active) card. Inactive cards (order 2, 3) sit behind it at top:0,
+  with only their peek-label visible in the 52px strip above the active card.
+  Clicking an inactive card promotes it to order 1. JS syncs stack height to active card.
 -->
 
 <div class="folder-stack-container">
   <div class="folder-stack">
 
-    <!-- Peek labels sit directly in the stack — no overflow clipping risk -->
-    <div class="folder-peek-label" data-folder="about"><span>About</span></div>
-    <div class="folder-peek-label" data-folder="work" data-tabpos="1"><span>My Work</span></div>
-    <div class="folder-peek-label" data-folder="tools" data-tabpos="2"><span>Tools for Friends</span></div>
-
-    <!-- About (active by default) -->
+    <!-- About (front by default) -->
     <div class="folder-card" data-folder="about" data-order="1">
+      <div class="folder-peek-label"><span>About</span></div>
       <div class="folder-body">
 
         <section class="hero-bio-section">
@@ -175,7 +171,8 @@ comments: false
     </div>
 
     <!-- My Work -->
-    <div class="folder-card" data-folder="work" data-order="2">
+    <div class="folder-card" data-folder="work" data-order="2" data-tabpos="1">
+      <div class="folder-peek-label"><span>My Work</span></div>
       <div class="folder-body">
         <section class="placeholder-section">
           <div class="placeholder-inner">
@@ -188,7 +185,8 @@ comments: false
     </div>
 
     <!-- Tools for Friends -->
-    <div class="folder-card" data-folder="tools" data-order="3">
+    <div class="folder-card" data-folder="tools" data-order="3" data-tabpos="2">
+      <div class="folder-peek-label"><span>Tools for Friends</span></div>
       <div class="folder-body">
         <div class="tools-grid">
           <div class="tool-card">
@@ -207,18 +205,16 @@ comments: false
 </div>
 
 <script>
-  // Peek labels are siblings of cards in folder-stack — no overflow clipping.
-  // data-tabpos on a label = visible at that position; absent = hidden (active folder).
+  // Folder stack — clicking an inactive card promotes it to the front
   (function () {
     const stack = document.querySelector('.folder-stack');
     const cards = Array.from(document.querySelectorAll('.folder-card'));
-    const labels = Array.from(document.querySelectorAll('.folder-peek-label'));
     const folders = cards.map(c => c.dataset.folder);
     let active = 'about';
+    const TAB_H = 52; // must match .folder-stack padding-top in CSS
 
     function syncHeight() {
-      const TAB_H = parseInt(getComputedStyle(stack).paddingTop) || 52;
-      const front = stack.querySelector('.folder-card[data-order="1"]');
+      const front = document.querySelector('[data-order="1"]');
       stack.style.height = (TAB_H + front.scrollHeight) + 'px';
     }
 
@@ -226,24 +222,17 @@ comments: false
       if (target === active) return;
       active = target;
       const inactive = folders.filter(f => f !== target);
-
-      cards.forEach(c => {
-        c.dataset.order = c.dataset.folder === target ? '1' : String(inactive.indexOf(c.dataset.folder) + 2);
+      document.querySelector(`[data-folder="${target}"]`).dataset.order = '1';
+      document.querySelector(`[data-folder="${target}"]`).removeAttribute('data-tabpos');
+      inactive.forEach((f, i) => {
+        const el = document.querySelector(`[data-folder="${f}"]`);
+        el.dataset.order = String(i + 2);
+        el.dataset.tabpos = String(i + 1);
       });
-
-      labels.forEach(label => {
-        const idx = inactive.indexOf(label.dataset.folder);
-        if (idx === -1) {
-          label.removeAttribute('data-tabpos');
-        } else {
-          label.dataset.tabpos = String(idx + 1);
-        }
-      });
-
       setTimeout(syncHeight, 30);
     }
 
-    labels.forEach(label => label.addEventListener('click', () => activate(label.dataset.folder)));
+    cards.forEach(card => card.addEventListener('click', () => activate(card.dataset.folder)));
     requestAnimationFrame(syncHeight);
     window.addEventListener('resize', syncHeight);
   }());
