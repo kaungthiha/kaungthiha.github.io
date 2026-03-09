@@ -176,6 +176,10 @@ comments: false
 
     <!-- My Work -->
     <div class="folder-card" data-folder="work" data-order="2">
+<<<<<<< HEAD
+=======
+      <div class="folder-peek-label"><span>My Work</span></div>
+>>>>>>> parent of a00f0c0 (card fix t2)
       <div class="folder-body">
         <section class="placeholder-section">
           <div class="placeholder-inner">
@@ -189,6 +193,10 @@ comments: false
 
     <!-- Tools for Friends -->
     <div class="folder-card" data-folder="tools" data-order="3">
+<<<<<<< HEAD
+=======
+      <div class="folder-peek-label"><span>Tools for Friends</span></div>
+>>>>>>> parent of a00f0c0 (card fix t2)
       <div class="folder-body">
         <div class="tools-grid">
           <div class="tool-card">
@@ -217,14 +225,26 @@ comments: false
     let active = 'about';
 
     function syncHeight() {
+<<<<<<< HEAD
       const TAB_H = parseInt(getComputedStyle(stack).paddingTop) || 52;
       const front = stack.querySelector('.folder-card[data-order="1"]');
       stack.style.height = (TAB_H + front.scrollHeight) + 'px';
+=======
+      const front = document.querySelector('[data-order="1"]');
+      const h = front.scrollHeight + 'px';
+      stack.style.height = h;
+      // Match inactive card heights so peek strips span the full container
+      document.querySelectorAll('.folder-card:not([data-order="1"])').forEach(c => {
+        c.style.height = h;
+      });
+>>>>>>> parent of a00f0c0 (card fix t2)
     }
 
     function activate(target) {
       if (target === active) return;
+      const prev = active;
       active = target;
+<<<<<<< HEAD
       const inactive = folders.filter(f => f !== target);
 
       cards.forEach(c => {
@@ -245,6 +265,18 @@ comments: false
 
     labels.forEach(label => label.addEventListener('click', () => activate(label.dataset.folder)));
     requestAnimationFrame(syncHeight);
+=======
+      const rest = folders.find(f => f !== target && f !== prev);
+      document.querySelector(`[data-folder="${target}"]`).dataset.order = '1';
+      document.querySelector(`[data-folder="${prev}"]`).dataset.order = '2';
+      document.querySelector(`[data-folder="${rest}"]`).dataset.order = '3';
+      setTimeout(syncHeight, 30);
+    }
+
+    cards.forEach(card => card.addEventListener('click', () => activate(card.dataset.folder)));
+
+    syncHeight();
+>>>>>>> parent of a00f0c0 (card fix t2)
     window.addEventListener('resize', syncHeight);
   }());
 </script>
