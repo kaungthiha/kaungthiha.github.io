@@ -145,50 +145,32 @@ section {
 
 /* ── Folder Stack — hand-of-cards layout ── */
 
-<<<<<<< HEAD
 /* Outer wrapper; reduced top margin puts the peek labels close to the page top */
 .folder-stack-container {
   max-width: 1400px;
   margin: 0.5rem auto;
   padding: 0 1rem;
-=======
-/* Outer wrapper: right padding reserves space for 2 peek strips so they stay on-screen */
-.folder-stack-container {
-  max-width: 1400px;
-  margin: 2rem auto;
-  padding: 0 1rem 0 1rem;
-  padding-right: calc(1rem + 120px);
->>>>>>> parent of a00f0c0 (card fix t2)
   position: relative;
   z-index: 1;
   animation: cardReveal 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) backwards;
 }
 
-<<<<<<< HEAD
 /* Stack is the positioning context; padding-top = peek zone height */
 .folder-stack {
   position: relative;
   padding-top: 100px;
-=======
-/* Stack is the positioning context; height is managed by JS */
-.folder-stack {
-  position: relative;
->>>>>>> parent of a00f0c0 (card fix t2)
   transition: height 0.45s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-/* Every card: absolute, full width of the stack */
+/* Every card: absolute, full width */
 .folder-card {
   position: absolute;
-  top: 0;
   left: 0;
   right: 0;
   border-radius: 32px;
   border: 1.5px solid rgba(0, 102, 255, 0.12);
   overflow: hidden;
-  transition: transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1),
-              box-shadow 0.4s ease,
-              background 0.3s ease;
+  transition: box-shadow 0.4s ease, background 0.3s ease;
 }
 
 /* Atmospheric blur accents on active card only */
@@ -207,23 +189,16 @@ section {
 .folder-card[data-order="1"]::before { top: -150px; right: -150px; background: var(--gradient-primary); }
 .folder-card[data-order="1"]::after  { bottom: -150px; left: -150px; background: var(--gradient-accent); animation-delay: 4s; }
 
-<<<<<<< HEAD
 /* Active card — full content, sits below the peek zone */
 .folder-card[data-order="1"] {
   top: 100px;
-=======
-/* Order 1 — front, fully visible */
-.folder-card[data-order="1"] {
->>>>>>> parent of a00f0c0 (card fix t2)
   z-index: 30;
   background: rgba(255, 255, 255, 0.98);
   box-shadow: var(--shadow-xl);
-  transform: translate(0, 0);
   cursor: default;
   border-radius: 0 32px 32px 32px;
 }
 
-<<<<<<< HEAD
 /* Card-2: most-recently-inactive — its colored strip peeks from y=8 to y=100 */
 .folder-card[data-order="2"] {
   top: 8px;
@@ -233,18 +208,9 @@ section {
   border-radius: 28px 28px 0 0;
   box-shadow: 0 -4px 20px rgba(0, 102, 255, 0.06);
   cursor: pointer;
-=======
-/* Order 2 — middle, peek strip visible on right */
-.folder-card[data-order="2"] {
->>>>>>> parent of a00f0c0 (card fix t2)
   z-index: 20;
-  background: rgba(243, 248, 255, 0.96);
-  box-shadow: var(--shadow-lg);
-  transform: translate(54px, 12px);
-  cursor: pointer;
 }
 
-<<<<<<< HEAD
 /* Card-3: deepest — peeks from y=0, its top 8px visible above card-2 */
 .folder-card[data-order="3"] {
   top: 0;
@@ -275,44 +241,13 @@ section {
   z-index: 35;
   transition: background 0.2s ease, transform 0.2s ease;
   box-shadow: 0 -4px 12px rgba(0, 102, 255, 0.06);
-=======
-/* Order 3 — back, further right peek strip */
-.folder-card[data-order="3"] {
-  z-index: 10;
-  background: rgba(231, 241, 255, 0.93);
-  box-shadow: var(--shadow-md);
-  transform: translate(108px, 24px);
-  cursor: pointer;
-}
-
-/* Hover: pull inactive cards slightly forward */
-.folder-card[data-order="2"]:hover { transform: translate(44px, 9px); }
-.folder-card[data-order="3"]:hover { transform: translate(92px, 19px); }
-
-/* Vertical label shown on the right peek strip of each inactive card */
-.folder-peek-label {
-  position: absolute;
-  right: 0;
-  top: 0;
-  bottom: 0;
-  width: 54px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: linear-gradient(90deg, transparent 0%, rgba(0, 102, 255, 0.06) 100%);
-  pointer-events: none;
-  z-index: 2;
->>>>>>> parent of a00f0c0 (card fix t2)
 }
 
 .folder-peek-label span {
-  writing-mode: vertical-rl;
-  transform: rotate(180deg);
   font-family: 'Outfit', sans-serif;
-  font-size: 0.75rem;
-  font-weight: 700;
+  font-size: 0.9375rem;
+  font-weight: 600;
   color: var(--electric-blue);
-<<<<<<< HEAD
   letter-spacing: 0.01em;
 }
 
@@ -325,12 +260,6 @@ section {
 .folder-peek-label:hover {
   background: rgba(230, 244, 255, 0.98);
   transform: translateY(-3px);
-=======
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  white-space: nowrap;
-  opacity: 0.7;
->>>>>>> parent of a00f0c0 (card fix t2)
 }
 
 /* Content area */
@@ -1129,17 +1058,10 @@ section {
     padding: 1rem;
   }
 
-  .folder-stack-container {
-    margin: 2rem auto;
-    padding-right: calc(1rem + 100px);
-  }
+  .folder-stack-container { margin: 2rem auto; }
 
   .folder-card { border-radius: 24px; }
-
-  .folder-card[data-order="2"] { transform: translate(44px, 10px); }
-  .folder-card[data-order="3"] { transform: translate(88px, 20px); }
-  .folder-card[data-order="2"]:hover { transform: translate(36px, 8px); }
-  .folder-card[data-order="3"]:hover { transform: translate(74px, 15px); }
+  .folder-card[data-order="1"] { border-radius: 0 24px 24px 24px; }
 
   .folder-body { padding: 2rem 1.5rem; }
 
@@ -1155,7 +1077,6 @@ section {
     padding: 0 0 1rem 0;
   }
 
-<<<<<<< HEAD
   .folder-stack-container { margin: 0.5rem auto; }
 
   .folder-card { border-radius: 24px; }
@@ -1166,22 +1087,6 @@ section {
   .folder-stack { padding-top: 80px; }
   .folder-peek-label { top: 14px; height: 44px; padding: 0 1.25rem; }
   .folder-peek-label[data-tabpos="2"] { left: 150px; }
-=======
-  .folder-stack-container {
-    margin: 1.5rem auto;
-    padding-right: calc(1rem + 80px);
-  }
-
-  .folder-card { border-radius: 20px; }
-
-  .folder-card[data-order="2"] { transform: translate(36px, 8px); }
-  .folder-card[data-order="3"] { transform: translate(72px, 16px); }
-  .folder-card[data-order="2"]:hover { transform: translate(28px, 6px); }
-  .folder-card[data-order="3"]:hover { transform: translate(58px, 12px); }
-
-  .folder-peek-label { width: 36px; }
-  .folder-peek-label span { font-size: 0.6875rem; }
->>>>>>> parent of a00f0c0 (card fix t2)
 
   .folder-body { padding: 1.5rem 1rem; }
 
@@ -1230,7 +1135,6 @@ section {
     padding: 0 0 0.5rem 0;
   }
 
-<<<<<<< HEAD
   .folder-stack-container { margin: 0.25rem auto; padding: 0 0.5rem; }
 
   .folder-card { border-radius: 16px; }
@@ -1241,23 +1145,6 @@ section {
   .folder-stack { padding-top: 68px; }
   .folder-peek-label { top: 10px; height: 40px; padding: 0 1rem; font-size: 0.8125rem; }
   .folder-peek-label[data-tabpos="2"] { left: 130px; }
-=======
-  .folder-stack-container {
-    margin: 1rem auto;
-    padding-right: calc(0.5rem + 60px);
-    padding-left: 0.5rem;
-  }
-
-  .folder-card { border-radius: 16px; }
-
-  .folder-card[data-order="2"] { transform: translate(28px, 6px); }
-  .folder-card[data-order="3"] { transform: translate(56px, 12px); }
-  .folder-card[data-order="2"]:hover { transform: translate(22px, 4px); }
-  .folder-card[data-order="3"]:hover { transform: translate(46px, 9px); }
-
-  .folder-peek-label { width: 28px; }
-  .folder-peek-label span { font-size: 0.625rem; }
->>>>>>> parent of a00f0c0 (card fix t2)
 
   .folder-body { padding: 1rem; }
 
