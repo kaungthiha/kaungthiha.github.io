@@ -5,217 +5,235 @@ comments: false
 ---
 
 <!--
-  Brief: Three content panels behind a persistent horizontal tab strip.
-  Clicking a tab sets data-order="1" on that card (visible) and "2" on the rest (hidden).
-  JS at the bottom handles tab activation and active-class toggling.
+  Brief: Three folder-cards stacked like a hand of playing cards.
+  data-order="1" is the front (active) card. Inactive cards (order 2, 3) sit behind it at top:0,
+  with only their peek-label visible in the 52px strip above the active card.
+  Clicking an inactive card promotes it to order 1. JS syncs stack height to active card.
 -->
 
 <div class="folder-stack-container">
+  <div class="folder-stack">
 
-  <div class="folder-tab-strip">
-    <button class="folder-tab" data-folder="about">About</button>
-    <button class="folder-tab" data-folder="work">My Work</button>
-    <button class="folder-tab" data-folder="tools">Tools for Friends</button>
-  </div>
+    <!-- About (front by default) -->
+    <div class="folder-card" data-folder="about" data-order="1">
+      <div class="folder-peek-label"><span>About</span></div>
+      <div class="folder-body">
 
-  <!-- About -->
-  <div class="folder-card" data-folder="about" data-order="1">
-    <div class="folder-body">
+        <section class="hero-bio-section">
+          <div class="row g-4">
 
-      <section class="hero-bio-section">
-        <div class="row g-4">
-
-          <!-- Hero -->
-          <div class="col-lg-5">
-            <div class="hero-column">
-              <div class="profile-image-wrapper">
-                <img src="{{site.baseurl}}/assets/images/about.jpg"
-                     alt="Kaung Thiha - Data Analyst"
-                     class="profile-image"
-                     loading="lazy">
-              </div>
-              <h1 class="hero-title">I'm Kaung
-                <br><span class="burmese-name">(ကောင်းသီဟ)</span>
-              </h1>
-              <div class="hero-social-links">
-                <a class="hero-social-link" target="_blank" href="https://www.linkedin.com/in/kaungthiha/" aria-label="LinkedIn">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" fill="currentColor" viewBox="0 0 16 16">
-                    <path d="M0 1.146C0 .513.526 0 1.175 0h13.65C15.474 0 16 .513 16 1.146v13.708c0 .633-.526 1.146-1.175 1.146H1.175C.526 16 0 15.487 0 14.854zm4.943 12.248V6.169H2.542v7.225zm-1.2-8.212c.837 0 1.358-.554 1.358-1.248-.015-.709-.52-1.248-1.342-1.248S2.4 3.226 2.4 3.934c0 .694.521 1.248 1.327 1.248zm4.908 8.212V9.359c0-.216.016-.432.08-.586.173-.431.568-.878 1.232-.878.869 0 1.216.662 1.216 1.634v3.865h2.401V9.25c0-2.22-1.184-3.252-2.764-3.252-1.274 0-1.845.7-2.165 1.193v.025h-.016l.016-.025V6.169h-2.4c.03.678 0 7.225 0 7.225z"/>
-                  </svg>
-                </a>
-                <a class="hero-social-link" target="_blank" href="https://open.spotify.com/user/22k3hzyma66fj4nbmanjastiy?si=ea605d91ddae4bb2" aria-label="Spotify">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" fill="currentColor" viewBox="0 0 16 16">
-                    <path d="M8 0a8 8 0 1 0 0 16A8 8 0 0 0 8 0zm3.669 11.538a.498.498 0 0 1-.686.165c-1.879-1.147-4.243-1.407-7.028-.77a.499.499 0 0 1-.222-.973c3.048-.696 5.662-.397 7.77.892a.5.5 0 0 1 .166.686zm.979-2.178a.624.624 0 0 1-.858.205c-2.15-1.321-5.428-1.704-7.972-.932a.625.625 0 0 1-.362-1.194c2.905-.881 6.517-.454 8.986 1.063a.624.624 0 0 1 .206.858zm.084-2.268C10.154 5.56 5.9 5.419 3.438 6.166a.748.748 0 1 1-.434-1.432c2.825-.857 7.523-.692 10.492 1.07a.747.747 0 1 1-.764 1.288z"/>
-                  </svg>
-                </a>
-              </div>
-
-              <div class="weather-widget">
-                <p class="weather-prompt">How are we feeling today?</p>
-                <div class="weather-buttons">
-                  <button class="weather-btn active" data-weather="sunny" aria-label="Sunny weather">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 16 16">
-                      <path d="M8 11a3 3 0 1 1 0-6 3 3 0 0 1 0 6zm0 1a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM8 0a.5.5 0 0 1 .5.5v2a.5.5 0 0 1-1 0v-2A.5.5 0 0 1 8 0zm0 13a.5.5 0 0 1 .5.5v2a.5.5 0 0 1-1 0v-2A.5.5 0 0 1 8 13zm8-5a.5.5 0 0 1-.5.5h-2a.5.5 0 0 1 0-1h2a.5.5 0 0 1 .5.5zM3 8a.5.5 0 0 1-.5.5h-2a.5.5 0 0 1 0-1h2A.5.5 0 0 1 3 8zm10.657-5.657a.5.5 0 0 1 0 .707l-1.414 1.415a.5.5 0 1 1-.707-.708l1.414-1.414a.5.5 0 0 1 .707 0zm-9.193 9.193a.5.5 0 0 1 0 .707L3.05 13.657a.5.5 0 0 1-.707-.707l1.414-1.414a.5.5 0 0 1 .707 0zm9.193 2.121a.5.5 0 0 1-.707 0l-1.414-1.414a.5.5 0 0 1 .707-.707l1.414 1.414a.5.5 0 0 1 0 .707zM4.464 4.465a.5.5 0 0 1-.707 0L2.343 3.05a.5.5 0 1 1 .707-.707l1.414 1.414a.5.5 0 0 1 0 .708z"/>
+            <!-- Hero -->
+            <div class="col-lg-5">
+              <div class="hero-column">
+                <div class="profile-image-wrapper">
+                  <img src="{{site.baseurl}}/assets/images/about.jpg"
+                       alt="Kaung Thiha - Data Analyst"
+                       class="profile-image"
+                       loading="lazy">
+                </div>
+                <h1 class="hero-title">I'm Kaung
+                  <br><span class="burmese-name">(ကောင်းသီဟ)</span>
+                </h1>
+                <div class="hero-social-links">
+                  <a class="hero-social-link" target="_blank" href="https://www.linkedin.com/in/kaungthiha/" aria-label="LinkedIn">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" fill="currentColor" viewBox="0 0 16 16">
+                      <path d="M0 1.146C0 .513.526 0 1.175 0h13.65C15.474 0 16 .513 16 1.146v13.708c0 .633-.526 1.146-1.175 1.146H1.175C.526 16 0 15.487 0 14.854zm4.943 12.248V6.169H2.542v7.225zm-1.2-8.212c.837 0 1.358-.554 1.358-1.248-.015-.709-.52-1.248-1.342-1.248S2.4 3.226 2.4 3.934c0 .694.521 1.248 1.327 1.248zm4.908 8.212V9.359c0-.216.016-.432.08-.586.173-.431.568-.878 1.232-.878.869 0 1.216.662 1.216 1.634v3.865h2.401V9.25c0-2.22-1.184-3.252-2.764-3.252-1.274 0-1.845.7-2.165 1.193v.025h-.016l.016-.025V6.169h-2.4c.03.678 0 7.225 0 7.225z"/>
                     </svg>
-                  </button>
-                  <button class="weather-btn" data-weather="rainy" aria-label="Rainy weather">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 16 16">
-                      <path d="M4.158 12.025a.5.5 0 0 1 .316.633l-.5 1.5a.5.5 0 0 1-.948-.316l.5-1.5a.5.5 0 0 1 .632-.317zm3 0a.5.5 0 0 1 .316.633l-1 3a.5.5 0 0 1-.948-.316l1-3a.5.5 0 0 1 .632-.317zm3 0a.5.5 0 0 1 .316.633l-.5 1.5a.5.5 0 0 1-.948-.316l.5-1.5a.5.5 0 0 1 .632-.317zm3 0a.5.5 0 0 1 .316.633l-1 3a.5.5 0 1 1-.948-.316l1-3a.5.5 0 0 1 .632-.317zm.247-6.998a5.001 5.001 0 0 0-9.499-1.004A3.5 3.5 0 1 0 3.5 11H13a3 3 0 0 0 .405-5.973z"/>
+                  </a>
+                  <a class="hero-social-link" target="_blank" href="https://open.spotify.com/user/22k3hzyma66fj4nbmanjastiy?si=ea605d91ddae4bb2" aria-label="Spotify">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" fill="currentColor" viewBox="0 0 16 16">
+                      <path d="M8 0a8 8 0 1 0 0 16A8 8 0 0 0 8 0zm3.669 11.538a.498.498 0 0 1-.686.165c-1.879-1.147-4.243-1.407-7.028-.77a.499.499 0 0 1-.222-.973c3.048-.696 5.662-.397 7.77.892a.5.5 0 0 1 .166.686zm.979-2.178a.624.624 0 0 1-.858.205c-2.15-1.321-5.428-1.704-7.972-.932a.625.625 0 0 1-.362-1.194c2.905-.881 6.517-.454 8.986 1.063a.624.624 0 0 1 .206.858zm.084-2.268C10.154 5.56 5.9 5.419 3.438 6.166a.748.748 0 1 1-.434-1.432c2.825-.857 7.523-.692 10.492 1.07a.747.747 0 1 1-.764 1.288z"/>
                     </svg>
-                  </button>
-                  <button class="weather-btn" data-weather="snowy" aria-label="Snowy weather">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 16 16">
-                      <path d="M8 16a.5.5 0 0 1-.5-.5v-1.293l-.646.647a.5.5 0 0 1-.707-.708L7.5 12.793V8.866l-3.4 1.963-.496 1.85a.5.5 0 1 1-.966-.26l.237-.882-1.12.646a.5.5 0 0 1-.5-.866l1.12-.646-.884-.237a.5.5 0 1 1 .26-.966l1.848.495L7 8 3.6 6.037l-1.85.495a.5.5 0 0 1-.258-.966l.883-.237-1.12-.646a.5.5 0 1 1 .5-.866l1.12.646-.237-.883a.5.5 0 1 1 .966-.258l.495 1.849L7.5 7.134V3.207L6.147 1.854a.5.5 0 1 1 .707-.708l.646.647V.5a.5.5 0 1 1 1 0v1.293l.647-.647a.5.5 0 1 1 .707.708L8.5 3.207v3.927l3.4-1.963.496-1.85a.5.5 0 1 1 .966.26l-.236.882 1.12-.646a.5.5 0 0 1 .5.866l-1.12.646.883.237a.5.5 0 1 1-.26.966l-1.848-.495L9 8l3.4 1.963 1.849-.495a.5.5 0 0 1 .259.966l-.883.237 1.12.646a.5.5 0 0 1-.5.866l-1.12-.646.236.883a.5.5 0 1 1-.966.258l-.495-1.849-3.4-1.963v3.927l1.353 1.353a.5.5 0 0 1-.707.708l-.647-.647V15.5a.5.5 0 0 1-.5.5z"/>
-                    </svg>
-                  </button>
+                  </a>
+                </div>
+
+                <div class="weather-widget">
+                  <p class="weather-prompt">How are we feeling today?</p>
+                  <div class="weather-buttons">
+                    <button class="weather-btn active" data-weather="sunny" aria-label="Sunny weather">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 16 16">
+                        <path d="M8 11a3 3 0 1 1 0-6 3 3 0 0 1 0 6zm0 1a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM8 0a.5.5 0 0 1 .5.5v2a.5.5 0 0 1-1 0v-2A.5.5 0 0 1 8 0zm0 13a.5.5 0 0 1 .5.5v2a.5.5 0 0 1-1 0v-2A.5.5 0 0 1 8 13zm8-5a.5.5 0 0 1-.5.5h-2a.5.5 0 0 1 0-1h2a.5.5 0 0 1 .5.5zM3 8a.5.5 0 0 1-.5.5h-2a.5.5 0 0 1 0-1h2A.5.5 0 0 1 3 8zm10.657-5.657a.5.5 0 0 1 0 .707l-1.414 1.415a.5.5 0 1 1-.707-.708l1.414-1.414a.5.5 0 0 1 .707 0zm-9.193 9.193a.5.5 0 0 1 0 .707L3.05 13.657a.5.5 0 0 1-.707-.707l1.414-1.414a.5.5 0 0 1 .707 0zm9.193 2.121a.5.5 0 0 1-.707 0l-1.414-1.414a.5.5 0 0 1 .707-.707l1.414 1.414a.5.5 0 0 1 0 .707zM4.464 4.465a.5.5 0 0 1-.707 0L2.343 3.05a.5.5 0 1 1 .707-.707l1.414 1.414a.5.5 0 0 1 0 .708z"/>
+                      </svg>
+                    </button>
+                    <button class="weather-btn" data-weather="rainy" aria-label="Rainy weather">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 16 16">
+                        <path d="M4.158 12.025a.5.5 0 0 1 .316.633l-.5 1.5a.5.5 0 0 1-.948-.316l.5-1.5a.5.5 0 0 1 .632-.317zm3 0a.5.5 0 0 1 .316.633l-1 3a.5.5 0 0 1-.948-.316l1-3a.5.5 0 0 1 .632-.317zm3 0a.5.5 0 0 1 .316.633l-.5 1.5a.5.5 0 0 1-.948-.316l.5-1.5a.5.5 0 0 1 .632-.317zm3 0a.5.5 0 0 1 .316.633l-1 3a.5.5 0 1 1-.948-.316l1-3a.5.5 0 0 1 .632-.317zm.247-6.998a5.001 5.001 0 0 0-9.499-1.004A3.5 3.5 0 1 0 3.5 11H13a3 3 0 0 0 .405-5.973z"/>
+                      </svg>
+                    </button>
+                    <button class="weather-btn" data-weather="snowy" aria-label="Snowy weather">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 16 16">
+                        <path d="M8 16a.5.5 0 0 1-.5-.5v-1.293l-.646.647a.5.5 0 0 1-.707-.708L7.5 12.793V8.866l-3.4 1.963-.496 1.85a.5.5 0 1 1-.966-.26l.237-.882-1.12.646a.5.5 0 0 1-.5-.866l1.12-.646-.884-.237a.5.5 0 1 1 .26-.966l1.848.495L7 8 3.6 6.037l-1.85.495a.5.5 0 0 1-.258-.966l.883-.237-1.12-.646a.5.5 0 1 1 .5-.866l1.12.646-.237-.883a.5.5 0 1 1 .966-.258l.495 1.849L7.5 7.134V3.207L6.147 1.854a.5.5 0 1 1 .707-.708l.646.647V.5a.5.5 0 1 1 1 0v1.293l.647-.647a.5.5 0 1 1 .707.708L8.5 3.207v3.927l3.4-1.963.496-1.85a.5.5 0 1 1 .966.26l-.236.882 1.12-.646a.5.5 0 0 1 .5.866l-1.12.646.883.237a.5.5 0 1 1-.26.966l-1.848-.495L9 8l3.4 1.963 1.849-.495a.5.5 0 0 1 .259.966l-.883.237 1.12.646a.5.5 0 0 1-.5.866l-1.12-.646.236.883a.5.5 0 1 1-.966.258l-.495-1.849-3.4-1.963v3.927l1.353 1.353a.5.5 0 0 1-.707.708l-.647-.647V15.5a.5.5 0 0 1-.5.5z"/>
+                      </svg>
+                    </button>
+                  </div>
                 </div>
               </div>
             </div>
-          </div>
 
-          <!-- Bio -->
-          <div class="col-lg-7">
-            <div class="bio-column">
-              <h2>Hi</h2>
-              <p>I graduated from <strong>USF</strong> - the University of San Francisco <em>(not the University of South Florida like Google seems to think)</em> - studying <strong>Business Analytics & Computer Science</strong>. I'm currently an Associate at Capital One on the Data Products & Experiences Team.</p>
+            <!-- Bio -->
+            <div class="col-lg-7">
+              <div class="bio-column">
+                <h2>Hi</h2>
+                <p>I graduated from <strong>USF</strong> - the University of San Francisco <em>(not the University of South Florida like Google seems to think)</em> - studying <strong>Business Analytics & Computer Science</strong>. I'm currently an Associate at Capital One on the Data Products & Experiences Team.</p>
 
-              <p>I spent my formative years in Myanmar thinking I'd be a writer or the next Jimmy Neutron (that cowlick was <em>iconic</em>). Half-fittingly, I was initially an English + Philosophy major with law school aspirations. The latter is on the backburner for now but we'll see where things go :3. </p>
+                <p>I spent my formative years in Myanmar thinking I'd be a writer or the next Jimmy Neutron (that cowlick was <em>iconic</em>). Half-fittingly, I was initially an English + Philosophy major with law school aspirations. The latter is on the backburner for now but we'll see where things go :3. </p>
 
-              <h2>What I'm Up To</h2>
-              <p>Nowadays, I like playing around with data to build cool products. I've had a bunch of experiences close to product(prod.ops + data products) but never a formal PM position though I am trying to change that. In the meantime, I try to take a product minded approach in my day to day work, as well as the small utilities I'm cooking alongside AI dev tools. This ranges from helping draft scoping documents or taking a stab at PRDs to socializing my analyses to multiple stakeholders across my C1 org. I've been realizing that across all my work experiences, awesome product people are able to connect the dots across multiple facets of a business which is why I try to ask a lot of questions to build context. </p>
-              <p>I've also got a solid understanding of <strong>Python</strong> and <strong>Java</strong> + am pretty handy with <strong>SQL</strong>, <strong>R</strong> and <strong>Tableau</strong>. Been trying to understand the data engineering side of things a bit more as well <em>(Shoutout to Zach Wilson who is putting out some awesome stuff!!)</em> I think being able to speak in both technical and nontechnical terms is my biggest strength but also one that I work on everyday. </p>
+                <h2>What I'm Up To</h2>
+                <p>Nowadays, I like playing around with data to build cool products. I've had a bunch of experiences close to product(prod.ops + data products) but never a formal PM position though I am trying to change that. In the meantime, I try to take a product minded approach in my day to day work, as well as the small utilities I'm cooking alongside AI dev tools. This ranges from helping draft scoping documents or taking a stab at PRDs to socializing my analyses to multiple stakeholders across my C1 org. I've been realizing that across all my work experiences, awesome product people are able to connect the dots across multiple facets of a business which is why I try to ask a lot of questions to build context. </p>
+                <p>I've also got a solid understanding of <strong>Python</strong> and <strong>Java</strong> + am pretty handy with <strong>SQL</strong>, <strong>R</strong> and <strong>Tableau</strong>. Been trying to understand the data engineering side of things a bit more as well <em>(Shoutout to Zach Wilson who is putting out some awesome stuff!!)</em> I think being able to speak in both technical and nontechnical terms is my biggest strength but also one that I work on everyday. </p>
 
-              <h2>Technical Skills</h2>
-              <div class="skills-hexagon-grid">
-                <div class="skill-hex">
-                  <div class="skill-hex-content">
-                    <i class="fas fa-code skill-icon"></i>
-                    <div class="skill-name">Programming</div>
-                    <div class="skill-items">
-                      <span class="skill-tag">Python</span>
-                      <span class="skill-tag">Java</span>
-                      <span class="skill-tag">R</span>
-                      <span class="skill-tag">SQL</span>
-                      <span class="skill-tag">JavaScript</span>
+                <h2>Technical Skills</h2>
+                <div class="skills-hexagon-grid">
+                  <div class="skill-hex">
+                    <div class="skill-hex-content">
+                      <i class="fas fa-code skill-icon"></i>
+                      <div class="skill-name">Programming</div>
+                      <div class="skill-items">
+                        <span class="skill-tag">Python</span>
+                        <span class="skill-tag">Java</span>
+                        <span class="skill-tag">R</span>
+                        <span class="skill-tag">SQL</span>
+                        <span class="skill-tag">JavaScript</span>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="skill-hex">
+                    <div class="skill-hex-content">
+                      <i class="fas fa-chart-bar skill-icon"></i>
+                      <div class="skill-name">Analytics</div>
+                      <div class="skill-items">
+                        <span class="skill-tag">Looker</span>
+                        <span class="skill-tag">Quick Suite</span>
+                        <span class="skill-tag">Tableau</span>
+                        <span class="skill-tag">R Shiny</span>
+                        <span class="skill-tag">Plotly</span>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="skill-hex">
+                    <div class="skill-hex-content">
+                      <i class="fas fa-database skill-icon"></i>
+                      <div class="skill-name">Data Tools</div>
+                      <div class="skill-items">
+                        <span class="skill-tag">PostgreSQL</span>
+                        <span class="skill-tag">BigQuery</span>
+                        <span class="skill-tag">Databricks</span>
+                        <span class="skill-tag">Snowflake</span>
+                      </div>
                     </div>
                   </div>
                 </div>
-                <div class="skill-hex">
-                  <div class="skill-hex-content">
-                    <i class="fas fa-chart-bar skill-icon"></i>
-                    <div class="skill-name">Analytics</div>
-                    <div class="skill-items">
-                      <span class="skill-tag">Looker</span>
-                      <span class="skill-tag">Quick Suite</span>
-                      <span class="skill-tag">Tableau</span>
-                      <span class="skill-tag">R Shiny</span>
-                      <span class="skill-tag">Plotly</span>
+
+                <div class="expandable-section">
+                  <button class="expandable-header" data-section="learning">
+                    <span class="expandable-title">Current Stuff</span>
+                    <svg class="chevron-icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 16 16">
+                      <path fill-rule="evenodd" d="M1.646 4.646a.5.5 0 0 1 .708 0L8 10.293l5.646-5.647a.5.5 0 0 1 .708.708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708z"/>
+                    </svg>
+                  </button>
+                  <div class="expandable-content" data-content="learning">
+                    <div class="learning-grid">
+                      <div class="learning-category">
+                        <h4><i class="fas fa-graduation-cap"></i>Currently Learning</h4>
+                        <ul>
+                          <li>Technical Product Management</li>
+                          <li>Being really good at using Claude Code for projects</li>
+                          <li>Data Product Definitions</li>
+                        </ul>
+                      </div>
+                      <div class="learning-category">
+                        <h4><i class="fas fa-book"></i>Currently Reading</h4>
+                        <ul>
+                          <li>Palo Alto by Malcolm Harris </li>
+                          <li>Soul of a Chef by Michael Ruhlman</li>
+                          <li>Ashes of the Imperium by Chris Wraight </li>
+                        </ul>
+                      </div>
+                      <div class="learning-category">
+                        <h4><i class="fas fa-tv"></i>Currently Watching</h4>
+                        <ul>
+                          <li>Warhammer 40k Lore Dives by PancreasNoWork</li>
+                          <li>Singles Inferno</li>
+                          <li>Product management case studies</li>
+                        </ul>
+                      </div>
                     </div>
                   </div>
                 </div>
-                <div class="skill-hex">
-                  <div class="skill-hex-content">
-                    <i class="fas fa-database skill-icon"></i>
-                    <div class="skill-name">Data Tools</div>
-                    <div class="skill-items">
-                      <span class="skill-tag">PostgreSQL</span>
-                      <span class="skill-tag">BigQuery</span>
-                      <span class="skill-tag">Databricks</span>
-                      <span class="skill-tag">Snowflake</span>
-                    </div>
-                  </div>
-                </div>
+
               </div>
-
-              <div class="expandable-section">
-                <button class="expandable-header" data-section="learning">
-                  <span class="expandable-title">Current Stuff</span>
-                  <svg class="chevron-icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 16 16">
-                    <path fill-rule="evenodd" d="M1.646 4.646a.5.5 0 0 1 .708 0L8 10.293l5.646-5.647a.5.5 0 0 1 .708.708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708z"/>
-                  </svg>
-                </button>
-                <div class="expandable-content" data-content="learning">
-                  <div class="learning-grid">
-                    <div class="learning-category">
-                      <h4><i class="fas fa-graduation-cap"></i>Currently Learning</h4>
-                      <ul>
-                        <li>Technical Product Management</li>
-                        <li>Being really good at using Claude Code for projects</li>
-                        <li>Data Product Definitions</li>
-                      </ul>
-                    </div>
-                    <div class="learning-category">
-                      <h4><i class="fas fa-book"></i>Currently Reading</h4>
-                      <ul>
-                        <li>Palo Alto by Malcolm Harris </li>
-                        <li>Soul of a Chef by Michael Ruhlman</li>
-                        <li>Ashes of the Imperium by Chris Wraight </li>
-                      </ul>
-                    </div>
-                    <div class="learning-category">
-                      <h4><i class="fas fa-tv"></i>Currently Watching</h4>
-                      <ul>
-                        <li>Warhammer 40k Lore Dives by PancreasNoWork</li>
-                        <li>Singles Inferno</li>
-                        <li>Product management case studies</li>
-                      </ul>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
             </div>
+
           </div>
+        </section>
 
-        </div>
-      </section>
-
+      </div>
     </div>
-  </div>
 
-  <!-- My Work -->
-  <div class="folder-card" data-folder="work" data-order="2">
-    <div class="folder-body">
-      <section class="placeholder-section">
-        <div class="placeholder-inner">
-          <div class="placeholder-icon"><i class="fas fa-layer-group"></i></div>
-          <h2 class="placeholder-heading">My Work</h2>
-          <p class="placeholder-body">Case studies and project write-ups are on their way. Check back soon.</p>
-        </div>
-      </section>
+    <!-- My Work -->
+    <div class="folder-card" data-folder="work" data-order="2" data-tabpos="1">
+      <div class="folder-peek-label"><span>My Work</span></div>
+      <div class="folder-body">
+        <section class="placeholder-section">
+          <div class="placeholder-inner">
+            <div class="placeholder-icon"><i class="fas fa-layer-group"></i></div>
+            <h2 class="placeholder-heading">My Work</h2>
+            <p class="placeholder-body">Case studies and project write-ups are on their way. Check back soon.</p>
+          </div>
+        </section>
+      </div>
     </div>
-  </div>
 
-  <!-- Tools for Friends -->
-  <div class="folder-card" data-folder="tools" data-order="3">
-    <div class="folder-body">
-      <div class="tools-grid">
-        <div class="tool-card">
-          <div class="tool-icon"><i class="fas fa-calendar-check"></i></div>
-          <h4>KT's Capital One Attendance Tracker</h4>
-          <p>Track office attendance across rolling 13-week periods. Calculate prorated requirements, mark attendance, and export as JSON. Ping me if you have any feedback</p>
-          <a href="{{ site.baseurl }}/tools/attendance-tracker/" class="tool-link">
-            Open Tracker <i class="fas fa-arrow-right"></i>
-          </a>
+    <!-- Tools for Friends -->
+    <div class="folder-card" data-folder="tools" data-order="3" data-tabpos="2">
+      <div class="folder-peek-label"><span>Tools for Friends</span></div>
+      <div class="folder-body">
+        <div class="tools-grid">
+          <div class="tool-card">
+            <div class="tool-icon"><i class="fas fa-calendar-check"></i></div>
+            <h4>KT's Capital One Attendance Tracker</h4>
+            <p>Track office attendance across rolling 13-week periods. Calculate prorated requirements, mark attendance, and export as JSON. Ping me if you have any feedback</p>
+            <a href="{{ site.baseurl }}/tools/attendance-tracker/" class="tool-link">
+              Open Tracker <i class="fas fa-arrow-right"></i>
+            </a>
+          </div>
         </div>
       </div>
     </div>
-  </div>
 
+  </div>
 </div>
 
 <script>
-  // Tab strip — clicking a tab sets it active and swaps the visible card
+  // Folder stack — clicking an inactive card promotes it to the front
   (function () {
-    const tabs = Array.from(document.querySelectorAll('.folder-tab'));
+    const stack = document.querySelector('.folder-stack');
     const cards = Array.from(document.querySelectorAll('.folder-card'));
+    const folders = cards.map(c => c.dataset.folder);
+    let active = 'about';
+    const TAB_H = 52; // must match .folder-stack padding-top in CSS
 
-    function activate(target) {
-      tabs.forEach(t => t.classList.toggle('active', t.dataset.folder === target));
-      cards.forEach(c => { c.dataset.order = c.dataset.folder === target ? '1' : '2'; });
+    function syncHeight() {
+      const front = document.querySelector('[data-order="1"]');
+      stack.style.height = (TAB_H + front.scrollHeight) + 'px';
     }
 
-    tabs.forEach(t => t.addEventListener('click', () => activate(t.dataset.folder)));
-    activate('about');
+    function activate(target) {
+      if (target === active) return;
+      active = target;
+      const inactive = folders.filter(f => f !== target);
+      document.querySelector(`[data-folder="${target}"]`).dataset.order = '1';
+      document.querySelector(`[data-folder="${target}"]`).removeAttribute('data-tabpos');
+      inactive.forEach((f, i) => {
+        const el = document.querySelector(`[data-folder="${f}"]`);
+        el.dataset.order = String(i + 2);
+        el.dataset.tabpos = String(i + 1);
+      });
+      setTimeout(syncHeight, 30);
+    }
+
+    cards.forEach(card => card.addEventListener('click', () => activate(card.dataset.folder)));
+    requestAnimationFrame(syncHeight);
+    window.addEventListener('resize', syncHeight);
   }());
 </script>
