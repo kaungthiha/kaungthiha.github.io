@@ -1,6 +1,6 @@
 /*
  Weather Toggle
-Still need to figure out correct sun placement 
+Still need to figure out correct sun placement
  */
 
 (function() {
@@ -15,11 +15,9 @@ Still need to figure out correct sun placement
       snowy: document.getElementById('snowy-weather')
     };
 
-    // Load saved weather preference
     const savedWeather = localStorage.getItem('weather_preference') || 'sunny';
     setWeather(savedWeather);
 
-    // Add click event listeners to weather buttons
     weatherButtons.forEach(button => {
       button.addEventListener('click', () => {
         const weather = button.dataset.weather;
@@ -30,14 +28,12 @@ Still need to figure out correct sun placement
     });
 
     function setWeather(weather) {
-      // Remove active class from all buttons
       weatherButtons.forEach(btn => btn.classList.remove('active'));
       const activeButton = document.querySelector(`[data-weather="${weather}"]`);
       if (activeButton) {
         activeButton.classList.add('active');
       }
 
-      // Hide all weather containers
       Object.values(weatherContainers).forEach(container => {
         if (container) {
           container.classList.remove('active');
@@ -48,8 +44,6 @@ Still need to figure out correct sun placement
       if (weatherContainers[weather]) {
         weatherContainers[weather].classList.add('active');
       }
-
-      // Update body class for background color
       document.body.classList.remove('weather-sunny', 'weather-rainy', 'weather-snowy');
       document.body.classList.add(`weather-${weather}`);
     }

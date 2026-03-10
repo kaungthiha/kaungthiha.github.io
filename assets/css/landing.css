@@ -239,9 +239,10 @@ section {
   bottom: 0;
   width: 54px;
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: center;
-  background: linear-gradient(90deg, transparent 0%, rgba(0, 102, 255, 0.06) 100%);
+  padding-top: 1rem;
+  background: linear-gradient(90deg, transparent 0%, rgba(0, 102, 255, 0.08) 100%);
   pointer-events: none;
   z-index: 2;
 }
@@ -256,7 +257,6 @@ section {
   letter-spacing: 0.1em;
   text-transform: uppercase;
   white-space: nowrap;
-  opacity: 0.7;
 }
 
 /* Hide label on front card */
@@ -264,7 +264,7 @@ section {
 
 /* Content area inside each card */
 .folder-body {
-  padding: 3rem;
+  padding: 2rem 2.5rem;
   position: relative;
   z-index: 1;
 }
@@ -281,7 +281,7 @@ section {
 
 /* My Work placeholder */
 .placeholder-section {
-  min-height: 420px;
+  padding: 3rem 0;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -386,8 +386,8 @@ section {
 
 /* Hero Bio Section */
 .hero-bio-section {
-  padding: 2rem 0;
-  margin-bottom: 2rem;
+  padding: 1.5rem 0;
+  margin-bottom: 1rem;
 }
 
 .hero-column {
@@ -819,8 +819,8 @@ section {
 .tools-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-  gap: 2rem;
-  margin-top: 1rem;
+  gap: 1.5rem;
+  margin-top: 0;
 }
 
 .tool-card {
