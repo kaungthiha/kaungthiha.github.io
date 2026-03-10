@@ -124,42 +124,6 @@ comments: false
                   </div>
                 </div>
 
-                <div class="expandable-section">
-                  <button class="expandable-header" data-section="learning">
-                    <span class="expandable-title">Current Stuff</span>
-                    <svg class="chevron-icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 16 16">
-                      <path fill-rule="evenodd" d="M1.646 4.646a.5.5 0 0 1 .708 0L8 10.293l5.646-5.647a.5.5 0 0 1 .708.708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708z"/>
-                    </svg>
-                  </button>
-                  <div class="expandable-content" data-content="learning">
-                    <div class="learning-grid">
-                      <div class="learning-category">
-                        <h4><i class="fas fa-graduation-cap"></i>Currently Learning</h4>
-                        <ul>
-                          <li>Technical Product Management</li>
-                          <li>Being really good at using Claude Code for projects</li>
-                          <li>Data Product Definitions</li>
-                        </ul>
-                      </div>
-                      <div class="learning-category">
-                        <h4><i class="fas fa-book"></i>Currently Reading</h4>
-                        <ul>
-                          <li>Palo Alto by Malcolm Harris </li>
-                          <li>Soul of a Chef by Michael Ruhlman</li>
-                          <li>Ashes of the Imperium by Chris Wraight </li>
-                        </ul>
-                      </div>
-                      <div class="learning-category">
-                        <h4><i class="fas fa-tv"></i>Currently Watching</h4>
-                        <ul>
-                          <li>Warhammer 40k Lore Dives by PancreasNoWork</li>
-                          <li>Singles Inferno</li>
-                          <li>Product management case studies</li>
-                        </ul>
-                      </div>
-                    </div>
-                  </div>
-                </div>
 
               </div>
             </div>
@@ -201,6 +165,39 @@ comments: false
       </div>
     </div>
 
+    <!-- Current Stuff -->
+    <div class="folder-card" data-folder="current" data-order="4">
+      <div class="folder-peek-label"><span>Current Stuff</span></div>
+      <div class="folder-body">
+        <div class="learning-grid">
+          <div class="learning-category">
+            <h4><i class="fas fa-graduation-cap"></i>Currently Learning</h4>
+            <ul>
+              <li>Technical Product Management</li>
+              <li>Being really good at using Claude Code for projects</li>
+              <li>Data Product Definitions</li>
+            </ul>
+          </div>
+          <div class="learning-category">
+            <h4><i class="fas fa-book"></i>Currently Reading</h4>
+            <ul>
+              <li>Palo Alto by Malcolm Harris</li>
+              <li>Soul of a Chef by Michael Ruhlman</li>
+              <li>Ashes of the Imperium by Chris Wraight</li>
+            </ul>
+          </div>
+          <div class="learning-category">
+            <h4><i class="fas fa-tv"></i>Currently Watching</h4>
+            <ul>
+              <li>Warhammer 40k Lore Dives by PancreasNoWork</li>
+              <li>Singles Inferno</li>
+              <li>Product management case studies</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+
   </div>
 </div>
 
@@ -226,10 +223,17 @@ comments: false
       if (target === active) return;
       const prev = active;
       active = target;
-      const rest = folders.find(f => f !== target && f !== prev);
+      const others = folders
+        .filter(f => f !== target && f !== prev)
+        .sort((a, b) =>
+          parseInt(document.querySelector(`[data-folder="${a}"]`).dataset.order) -
+          parseInt(document.querySelector(`[data-folder="${b}"]`).dataset.order)
+        );
       document.querySelector(`[data-folder="${target}"]`).dataset.order = '1';
       document.querySelector(`[data-folder="${prev}"]`).dataset.order = '2';
-      document.querySelector(`[data-folder="${rest}"]`).dataset.order = '3';
+      others.forEach((f, i) => {
+        document.querySelector(`[data-folder="${f}"]`).dataset.order = String(i + 3);
+      });
       setTimeout(syncHeight, 30);
     }
 

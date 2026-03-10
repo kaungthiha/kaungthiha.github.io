@@ -145,12 +145,12 @@ section {
 
 /* ── Folder Stack — hand-of-cards layout ── */
 
-/* Outer wrapper: right padding reserves space for 2 peek strips so they stay on-screen */
+/* Outer wrapper: right padding reserves space for 3 peek strips so they stay on-screen */
 .folder-stack-container {
   max-width: 1400px;
   margin: 2rem auto;
   padding: 0 1rem 0 1rem;
-  padding-right: calc(1rem + 120px);
+  padding-right: calc(1rem + 200px);
   position: relative;
   z-index: 1;
   animation: cardReveal 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) backwards;
@@ -209,27 +209,37 @@ section {
   cursor: default;
 }
 
-/* Order 2 — middle, peek strip visible on right */
+/* Order 2 — peek strip 1 */
 .folder-card[data-order="2"] {
   z-index: 20;
   background: rgba(243, 248, 255, 0.96);
   box-shadow: var(--shadow-lg);
-  transform: translate(54px, 12px);
+  transform: translate(64px, 12px);
   cursor: pointer;
 }
 
-/* Order 3 — back, further right peek strip */
+/* Order 3 — peek strip 2 */
 .folder-card[data-order="3"] {
   z-index: 10;
   background: rgba(231, 241, 255, 0.93);
   box-shadow: var(--shadow-md);
-  transform: translate(108px, 24px);
+  transform: translate(128px, 24px);
+  cursor: pointer;
+}
+
+/* Order 4 — peek strip 3 */
+.folder-card[data-order="4"] {
+  z-index: 5;
+  background: rgba(220, 235, 255, 0.88);
+  box-shadow: var(--shadow-sm);
+  transform: translate(192px, 36px);
   cursor: pointer;
 }
 
 /* Hover: pull inactive cards slightly forward */
-.folder-card[data-order="2"]:hover { transform: translate(44px, 9px); }
-.folder-card[data-order="3"]:hover { transform: translate(92px, 19px); }
+.folder-card[data-order="2"]:hover { transform: translate(52px, 9px); }
+.folder-card[data-order="3"]:hover { transform: translate(110px, 19px); }
+.folder-card[data-order="4"]:hover { transform: translate(170px, 29px); }
 
 /* Vertical label shown on the right peek strip of each inactive card */
 .folder-peek-label {
@@ -237,7 +247,7 @@ section {
   right: 0;
   top: 0;
   bottom: 0;
-  width: 54px;
+  width: 64px;
   display: flex;
   align-items: flex-start;
   justify-content: center;
@@ -251,11 +261,10 @@ section {
   writing-mode: vertical-rl;
   transform: rotate(180deg);
   font-family: 'Outfit', sans-serif;
-  font-size: 0.75rem;
-  font-weight: 700;
+  font-size: 0.9375rem;
+  font-weight: 800;
   color: var(--electric-blue);
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
+  letter-spacing: 0.04em;
   white-space: nowrap;
 }
 
@@ -1097,15 +1106,17 @@ section {
 
   .folder-stack-container {
     margin: 2rem auto;
-    padding-right: calc(1rem + 100px);
+    padding-right: calc(1rem + 170px);
   }
 
   .folder-card { border-radius: 24px; }
 
-  .folder-card[data-order="2"] { transform: translate(44px, 10px); }
-  .folder-card[data-order="3"] { transform: translate(88px, 20px); }
-  .folder-card[data-order="2"]:hover { transform: translate(36px, 8px); }
-  .folder-card[data-order="3"]:hover { transform: translate(74px, 15px); }
+  .folder-card[data-order="2"] { transform: translate(54px, 10px); }
+  .folder-card[data-order="3"] { transform: translate(108px, 20px); }
+  .folder-card[data-order="4"] { transform: translate(162px, 30px); }
+  .folder-card[data-order="2"]:hover { transform: translate(44px, 8px); }
+  .folder-card[data-order="3"]:hover { transform: translate(92px, 16px); }
+  .folder-card[data-order="4"]:hover { transform: translate(142px, 25px); }
 
   .folder-body { padding: 2rem 1.5rem; }
 
@@ -1123,18 +1134,20 @@ section {
 
   .folder-stack-container {
     margin: 1.5rem auto;
-    padding-right: calc(1rem + 80px);
+    padding-right: calc(1rem + 140px);
   }
 
   .folder-card { border-radius: 20px; }
 
-  .folder-card[data-order="2"] { transform: translate(36px, 8px); }
-  .folder-card[data-order="3"] { transform: translate(72px, 16px); }
-  .folder-card[data-order="2"]:hover { transform: translate(28px, 6px); }
-  .folder-card[data-order="3"]:hover { transform: translate(58px, 12px); }
+  .folder-card[data-order="2"] { transform: translate(44px, 8px); }
+  .folder-card[data-order="3"] { transform: translate(88px, 16px); }
+  .folder-card[data-order="4"] { transform: translate(132px, 24px); }
+  .folder-card[data-order="2"]:hover { transform: translate(36px, 6px); }
+  .folder-card[data-order="3"]:hover { transform: translate(74px, 12px); }
+  .folder-card[data-order="4"]:hover { transform: translate(114px, 19px); }
 
-  .folder-peek-label { width: 36px; }
-  .folder-peek-label span { font-size: 0.6875rem; }
+  .folder-peek-label { width: 44px; }
+  .folder-peek-label span { font-size: 0.8125rem; }
 
   .folder-body { padding: 1.5rem 1rem; }
 
@@ -1185,19 +1198,21 @@ section {
 
   .folder-stack-container {
     margin: 1rem auto;
-    padding-right: calc(0.5rem + 60px);
+    padding-right: calc(0.5rem + 112px);
     padding-left: 0.5rem;
   }
 
   .folder-card { border-radius: 16px; }
 
-  .folder-card[data-order="2"] { transform: translate(28px, 6px); }
-  .folder-card[data-order="3"] { transform: translate(56px, 12px); }
-  .folder-card[data-order="2"]:hover { transform: translate(22px, 4px); }
-  .folder-card[data-order="3"]:hover { transform: translate(46px, 9px); }
+  .folder-card[data-order="2"] { transform: translate(32px, 6px); }
+  .folder-card[data-order="3"] { transform: translate(64px, 12px); }
+  .folder-card[data-order="4"] { transform: translate(96px, 18px); }
+  .folder-card[data-order="2"]:hover { transform: translate(26px, 4px); }
+  .folder-card[data-order="3"]:hover { transform: translate(54px, 9px); }
+  .folder-card[data-order="4"]:hover { transform: translate(82px, 14px); }
 
-  .folder-peek-label { width: 28px; }
-  .folder-peek-label span { font-size: 0.625rem; }
+  .folder-peek-label { width: 32px; }
+  .folder-peek-label span { font-size: 0.6875rem; }
 
   .folder-body { padding: 1rem; }
 
