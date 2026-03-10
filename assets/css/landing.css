@@ -207,8 +207,8 @@ section {
   box-shadow: var(--shadow-xl);
   transform: translate(0, 0);
   cursor: default;
-  -webkit-mask-image: linear-gradient(to bottom, black 70%, transparent 100%);
-  mask-image: linear-gradient(to bottom, black 70%, transparent 100%);
+  -webkit-mask-image: linear-gradient(to bottom, black calc(100% - 80px), transparent 100%);
+  mask-image: linear-gradient(to bottom, black calc(100% - 80px), transparent 100%);
 }
 
 /* Order 2 — peek strip 1 */

@@ -251,7 +251,6 @@ comments: false
         abstract: [
           'A product proposal evaluating whether to launch an Early Wage Access (EWA) feature targeted at construction workforces. My recommendation: proceed with a limited pilot.',
           'Three reasons: (1) EWA aligns with the mission to support construction workforces, (2) the ongoing labor shortage creates a real tailwind for differentiated benefits that help clients attract and retain workers, and (3) a small pilot limits downside exposure while generating the real-world learning needed to make a confident go/no-go call.',
-          '"We\'re not asking for a big commitment — we\'re asking for permission to explore."'
         ]
       },
       outbuild: {
@@ -318,12 +317,13 @@ comments: false
     let active = 'about';
 
     function syncHeight() {
+      const FADE_PX = 80; // matches CSS mask-image fade zone
       const front = document.querySelector('[data-order="1"]');
-      const h = front.scrollHeight + 'px';
-      stack.style.height = h;
-      // Match inactive card heights so peek strips span the full container
+      const contentH = front.scrollHeight;
+      // Stack height excludes the fade zone so the card bleeds visually but not in layout
+      stack.style.height = Math.max(contentH - FADE_PX, 60) + 'px';
       document.querySelectorAll('.folder-card:not([data-order="1"])').forEach(c => {
-        c.style.height = h;
+        c.style.height = contentH + 'px';
       });
     }
 
