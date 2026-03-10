@@ -148,10 +148,23 @@ comments: false
                role="button" tabindex="0"
                aria-haspopup="dialog">
             <div class="project-card-header">
-              <span class="project-tag">Business Analysis</span>
+              <span class="project-tag">Product Analysis</span>
             </div>
-            <h3 class="project-title">Lumber Market Proposal</h3>
-            <p class="project-blurb">A strategic look at the lumber market — pricing dynamics, regional supply factors, and a business opportunity framing.</p>
+            <h3 class="project-title">Early Wage Access Feature Proposal</h3>
+            <p class="project-blurb">A business case for launching an EWA feature for construction workforces — recommending a limited pilot to test a differentiated benefit during a labor shortage.</p>
+            <span class="project-card-cta">Read more <i class="fas fa-arrow-right"></i></span>
+          </div>
+
+          <div class="project-card"
+               data-project="outbuild"
+               role="button" tabindex="0"
+               aria-haspopup="dialog">
+            <div class="project-card-header">
+              <span class="project-tag">Sales Enablement</span>
+              <span class="project-tag">AI / Automation</span>
+            </div>
+            <h3 class="project-title">Outbuild AI Learning System</h3>
+            <p class="project-blurb">Compressed AE/SDR onboarding at a construction tech startup from 4 weeks to ~1 week using Claude, Notion, Google Forms, and n8n.</p>
             <span class="project-card-cta">Read more <i class="fas fa-arrow-right"></i></span>
           </div>
 
@@ -233,11 +246,21 @@ comments: false
   (function () {
     const projects = {
       lumber: {
-        title: 'Lumber Market Proposal',
-        tags: ['Business Analysis'],
+        title: 'Early Wage Access Feature Proposal',
+        tags: ['Product Analysis'],
         abstract: [
-          'An analytical proposal examining dynamics in the U.S. lumber market, developed as a strategic exercise. The work explores supply chain pressures, regional pricing variation, and demand drivers that accelerated during the post-pandemic construction boom.',
-          'The proposal identifies a strategic opportunity framing for a market entry scenario, supported by data sourced from industry reports and public pricing indices. It includes a competitive landscape overview and a recommendation set for further due diligence.'
+          'A product proposal evaluating whether to launch an Early Wage Access (EWA) feature targeted at construction workforces. My recommendation: proceed with a limited pilot.',
+          'Three reasons: (1) EWA aligns with the mission to support construction workforces, (2) the ongoing labor shortage creates a real tailwind for differentiated benefits that help clients attract and retain workers, and (3) a small pilot limits downside exposure while generating the real-world learning needed to make a confident go/no-go call.',
+          '"We\'re not asking for a big commitment — we\'re asking for permission to explore."'
+        ]
+      },
+      outbuild: {
+        title: 'Outbuild AI Learning System',
+        tags: ['Sales Enablement', 'AI / Automation'],
+        abstract: [
+          'Outbuild is a Series A construction scheduling and management SaaS company preparing for a potential Series B. As they scaled their sales team, new AEs and SDRs faced a steep learning curve — selling construction software to general contractors, superintendents, and project managers requires deep contextual knowledge of industry terminology, project delivery methods, lean construction principles, and how pull planning works. Historically this took 3–4 weeks of self-study and shadowing.',
+          'I delivered an automated learning assessment system that compressed effective onboarding time from 4 weeks to approximately 1 week. The system combined Claude (Anthropic\'s AI) for intelligent quiz generation and grading, Notion as the knowledge base and results hub, Google Forms for assessment delivery, and n8n as the automation orchestration layer tying everything together.',
+          'New hires could demonstrate role-relevant product knowledge faster, and the sales team could start meaningful revenue-generating activity significantly sooner.'
         ]
       }
     };
