@@ -320,10 +320,15 @@ comments: false
       const FADE_PX = 80; // matches CSS mask-image fade zone
       const front = document.querySelector('[data-order="1"]');
       const contentH = front.scrollHeight;
+      const stackH = Math.max(contentH - FADE_PX, 60);
       // Stack height excludes the fade zone so the card bleeds visually but not in layout
-      stack.style.height = Math.max(contentH - FADE_PX, 60) + 'px';
+      stack.style.height = stackH + 'px';
+      // Align each inactive card's bottom edge with the stack bottom.
+      // getBoundingClientRect accounts for CSS transform translateY, so yOffset = the card's Y shift.
+      const stackTop = stack.getBoundingClientRect().top;
       document.querySelectorAll('.folder-card:not([data-order="1"])').forEach(c => {
-        c.style.height = contentH + 'px';
+        const yOffset = Math.max(Math.round(c.getBoundingClientRect().top - stackTop), 0);
+        c.style.height = Math.max(stackH - yOffset, 40) + 'px';
       });
     }
 
