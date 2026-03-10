@@ -140,17 +140,19 @@ comments: false
       <div class="folder-body">
         <div class="projects-grid">
 
-          <div class="project-card">
+          <div class="project-card"
+               data-project="lumber"
+               data-primary-url="{{ site.baseurl }}/assets/projects/KT_LumberProposal.pdf"
+               data-primary-label="View PDF"
+               data-primary-icon="fa-file-pdf"
+               role="button" tabindex="0"
+               aria-haspopup="dialog">
             <div class="project-card-header">
               <span class="project-tag">Business Analysis</span>
             </div>
             <h3 class="project-title">Lumber Market Proposal</h3>
-            <p class="project-desc">A strategic proposal examining the lumber market — pricing dynamics, supply chain factors, and opportunity framing.</p>
-            <button class="tool-link project-view-btn"
-                    data-pdf="{{ site.baseurl }}/assets/projects/KT_LumberProposal.pdf"
-                    data-title="Lumber Market Proposal">
-              View Project <i class="fas fa-file-pdf"></i>
-            </button>
+            <p class="project-blurb">A strategic look at the lumber market — pricing dynamics, regional supply factors, and a business opportunity framing.</p>
+            <span class="project-card-cta">Read more <i class="fas fa-arrow-right"></i></span>
           </div>
 
         </div>
@@ -210,47 +212,76 @@ comments: false
   </div>
 </div>
 
-<!-- PDF Lightbox -->
-<div id="pdf-lightbox" class="pdf-lightbox" role="dialog" aria-modal="true">
-  <div class="pdf-lightbox-backdrop"></div>
-  <div class="pdf-lightbox-panel">
-    <div class="pdf-lightbox-header">
-      <span class="pdf-lightbox-title" id="lightbox-title"></span>
-      <button class="pdf-lightbox-close" aria-label="Close viewer">&times;</button>
+<!-- Project Abstract Modal -->
+<div id="project-modal" class="project-modal" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+  <div class="project-modal-backdrop"></div>
+  <div class="project-modal-panel">
+    <div class="project-modal-header">
+      <div class="project-modal-tags" id="modal-tags"></div>
+      <h2 class="project-modal-title" id="modal-title"></h2>
+      <button class="project-modal-close" aria-label="Close">&times;</button>
     </div>
-    <iframe class="pdf-lightbox-frame" id="lightbox-frame" title="Project viewer"></iframe>
+    <div class="project-modal-body">
+      <div class="project-modal-abstract" id="modal-abstract"></div>
+    </div>
+    <div class="project-modal-footer" id="modal-footer"></div>
   </div>
 </div>
 
 <script>
-  // PDF Lightbox
+  // Project modal — data store + open/close logic
   (function () {
-    const lb      = document.getElementById('pdf-lightbox');
-    const frame   = document.getElementById('lightbox-frame');
-    const titleEl = document.getElementById('lightbox-title');
+    const projects = {
+      lumber: {
+        title: 'Lumber Market Proposal',
+        tags: ['Business Analysis'],
+        abstract: [
+          'An analytical proposal examining dynamics in the U.S. lumber market, developed as a strategic exercise. The work explores supply chain pressures, regional pricing variation, and demand drivers that accelerated during the post-pandemic construction boom.',
+          'The proposal identifies a strategic opportunity framing for a market entry scenario, supported by data sourced from industry reports and public pricing indices. It includes a competitive landscape overview and a recommendation set for further due diligence.'
+        ]
+      }
+    };
 
-    function open(src, title) {
-      frame.src = src;
-      titleEl.textContent = title;
-      lb.classList.add('open');
+    const modal    = document.getElementById('project-modal');
+    const tagsEl   = document.getElementById('modal-tags');
+    const titleEl  = document.getElementById('modal-title');
+    const bodyEl   = document.getElementById('modal-abstract');
+    const footerEl = document.getElementById('modal-footer');
+
+    function openModal(card) {
+      const key  = card.dataset.project;
+      const data = projects[key];
+      if (!data) return;
+
+      tagsEl.innerHTML   = data.tags.map(t => `<span class="project-tag">${t}</span>`).join('');
+      titleEl.textContent = data.title;
+      bodyEl.innerHTML   = data.abstract.map(p => `<p>${p}</p>`).join('');
+
+      const url   = card.dataset.primaryUrl;
+      const label = card.dataset.primaryLabel || 'View';
+      const icon  = card.dataset.primaryIcon  || 'fa-external-link-alt';
+      footerEl.innerHTML = url
+        ? `<a class="tool-link" href="${url}" target="_blank" rel="noopener">
+             ${label} <i class="fas ${icon}"></i>
+           </a>`
+        : '';
+
+      modal.classList.add('open');
       document.body.style.overflow = 'hidden';
     }
 
-    function close() {
-      lb.classList.remove('open');
+    function closeModal() {
+      modal.classList.remove('open');
       document.body.style.overflow = '';
-      setTimeout(() => { frame.src = ''; }, 300);
     }
 
-    lb.querySelector('.pdf-lightbox-close').addEventListener('click', close);
-    lb.querySelector('.pdf-lightbox-backdrop').addEventListener('click', close);
-    document.addEventListener('keydown', e => { if (e.key === 'Escape') close(); });
+    modal.querySelector('.project-modal-close').addEventListener('click', closeModal);
+    modal.querySelector('.project-modal-backdrop').addEventListener('click', closeModal);
+    document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
 
-    document.querySelectorAll('.project-view-btn').forEach(btn => {
-      btn.addEventListener('click', e => {
-        e.stopPropagation();
-        open(btn.dataset.pdf, btn.dataset.title);
-      });
+    document.querySelectorAll('.project-card').forEach(card => {
+      card.addEventListener('click', () => openModal(card));
+      card.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') openModal(card); });
     });
   }());
 </script>
