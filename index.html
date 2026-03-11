@@ -351,27 +351,15 @@ comments: false
 
     function syncHeight() {
       const FADE_PX = 80; // matches CSS mask-image fade zone
-
-      const front  = document.querySelector('[data-order="1"]');
-      const behind = document.querySelector('[data-order="2"]');
-
-      // Let order-2 measure its intrinsic content height before we override it
-      if (behind) behind.style.height = '';
-
-      const contentH1 = front.scrollHeight;
-      const contentH2 = behind ? behind.scrollHeight : 0;
-      // Stack must be tall enough to show both cards' content
-      const maxH   = Math.max(contentH1, contentH2);
-      const stackH = Math.max(maxH - FADE_PX, 60);
-
+      const front   = document.querySelector('[data-order="1"]');
+      const contentH = front.scrollHeight;
+      const stackH   = Math.max(contentH - FADE_PX, 60);
+      // Active card bleeds visually below the layout box (fade zone), no dead whitespace
       stack.style.height = stackH + 'px';
-
-      // Order 2: set to maxH so its own mask-image fade zone aligns with the stack bottom
-      if (behind) behind.style.height = maxH + 'px';
-
-      // Orders 3 & 4: clip to their visible area using getBoundingClientRect for the Y offset
+      // Each inactive card is clipped to align its bottom with the stack bottom,
+      // accounting for its CSS translateY offset via getBoundingClientRect.
       const stackTop = stack.getBoundingClientRect().top;
-      document.querySelectorAll('.folder-card:not([data-order="1"]):not([data-order="2"])').forEach(c => {
+      document.querySelectorAll('.folder-card:not([data-order="1"])').forEach(c => {
         const yOffset = Math.max(Math.round(c.getBoundingClientRect().top - stackTop), 0);
         c.style.height = Math.max(stackH - yOffset, 40) + 'px';
       });

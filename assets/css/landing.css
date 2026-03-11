@@ -211,15 +211,13 @@ section {
   mask-image: linear-gradient(to bottom, black calc(100% - 80px), transparent 100%);
 }
 
-/* Order 2 — sits directly behind the active card and bleeds through its fade */
+/* Order 2 — peek strip 1 */
 .folder-card[data-order="2"] {
   z-index: 20;
-  background: rgba(240, 246, 255, 0.95);
-  box-shadow: var(--shadow-md);
-  transform: translate(0, 0);
+  background: rgba(243, 248, 255, 0.96);
+  box-shadow: var(--shadow-lg);
+  transform: translate(64px, 12px);
   cursor: pointer;
-  -webkit-mask-image: linear-gradient(to bottom, black calc(100% - 80px), transparent 100%);
-  mask-image: linear-gradient(to bottom, black calc(100% - 80px), transparent 100%);
 }
 
 /* Order 3 — peek strip 2 */
@@ -240,8 +238,8 @@ section {
   cursor: pointer;
 }
 
-/* Hover: order 2 stays at 0,0 but brightens; orders 3/4 pull forward */
-.folder-card[data-order="2"]:hover { transform: translate(0, 0); background: rgba(232, 242, 255, 0.97); }
+/* Hover: pull inactive cards slightly forward */
+.folder-card[data-order="2"]:hover { transform: translate(52px, 9px); }
 .folder-card[data-order="3"]:hover { transform: translate(110px, 19px); }
 .folder-card[data-order="4"]:hover { transform: translate(170px, 29px); }
 
@@ -306,18 +304,6 @@ section {
 /* Inactive cards show only their peek strip — body is hidden */
 .folder-card:not([data-order="1"]) .folder-body {
   display: none;
-}
-
-/* Order 2 body bleeds through the active card's fade — visible but dimmed */
-.folder-card[data-order="2"] .folder-body {
-  display: block;
-  opacity: 0.68;
-  pointer-events: none; /* clicks fall through to the card, activating the tab */
-  transition: opacity 0.3s ease;
-}
-
-.folder-card[data-order="2"]:hover .folder-body {
-  opacity: 0.82;
 }
 
 /* Fade content in when a card becomes active */
