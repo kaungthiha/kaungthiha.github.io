@@ -1121,7 +1121,7 @@ section {
 .projects-grid {
   display: flex;
   flex-direction: column;
-  gap: 1rem;
+  gap: 1.85rem;
 }
 
 .project-card {
