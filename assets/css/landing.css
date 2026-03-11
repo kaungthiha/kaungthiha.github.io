@@ -1128,14 +1128,34 @@ section {
   background: white;
   border-radius: 20px;
   border: 1.5px solid rgba(0, 102, 255, 0.12);
-  padding: 2rem;
+  padding: 0;
+  overflow: hidden;
   box-shadow: var(--shadow-sm);
   transition: var(--transition);
   display: flex;
   flex-direction: column;
-  gap: 0.75rem;
   cursor: pointer;
 }
+
+.project-card-thumb {
+  width: 100%;
+  height: 160px;
+  object-fit: contain;
+  background: #edf4ff;
+  display: block;
+  flex-shrink: 0;
+}
+
+.project-card > .project-card-header,
+.project-card > .project-title,
+.project-card > .project-blurb,
+.project-card > .project-card-cta {
+  padding-left: 1.75rem;
+  padding-right: 1.75rem;
+}
+
+.project-card > .project-card-header { padding-top: 1.5rem; }
+.project-card > .project-card-cta   { padding-bottom: 1.75rem; }
 
 .project-card:hover {
   transform: translateY(-6px);

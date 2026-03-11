@@ -136,7 +136,7 @@ comments: false
 
     <!-- My Work -->
     <div class="folder-card" data-folder="work" data-order="2">
-      <div class="folder-peek-label"><span>My Work</span></div>
+      <div class="folder-peek-label"><span>Projects I've Done</span></div>
       <div class="folder-body">
         <div class="projects-grid">
 
@@ -147,24 +147,43 @@ comments: false
                data-primary-icon="fa-file-pdf"
                role="button" tabindex="0"
                aria-haspopup="dialog">
+            <img class="project-card-thumb" src="{{ site.baseurl }}/assets/images/lumber.jpg" alt="">
             <div class="project-card-header">
               <span class="project-tag">Product Analysis</span>
             </div>
-            <h3 class="project-title">Early Wage Access Feature Proposal</h3>
-            <p class="project-blurb">A business case for launching an EWA feature for construction workforces — recommending a limited pilot to test a differentiated benefit during a labor shortage.</p>
+            <h3 class="project-title">Early Wage Access Feature</h3>
+            <p class="project-blurb">A product case for launching an EWA feature for construction workforces</p>
             <span class="project-card-cta">Read more <i class="fas fa-arrow-right"></i></span>
           </div>
 
           <div class="project-card"
                data-project="outbuild"
+               data-primary-url="{{ site.baseurl }}/assets/projects/Outbuild_AI Learning System_KT.docx.pdf"
+               data-primary-label="View PDF"
+               data-primary-icon="fa-file-pdf"
                role="button" tabindex="0"
                aria-haspopup="dialog">
+            <img class="project-card-thumb" src="{{ site.baseurl }}/assets/images/Outbuild.jpg" alt="">
             <div class="project-card-header">
               <span class="project-tag">Sales Enablement</span>
               <span class="project-tag">AI / Automation</span>
             </div>
             <h3 class="project-title">Outbuild AI Learning System</h3>
-            <p class="project-blurb">Compressed AE/SDR onboarding at a construction tech startup from 4 weeks to ~1 week using Claude, Notion, Google Forms, and n8n.</p>
+            <p class="project-blurb">AE/SDR onboarding at a construction tech startup from 4 weeks to ~1 week using Claude, Notion, Google Forms, and n8n.</p>
+            <span class="project-card-cta">Read more <i class="fas fa-arrow-right"></i></span>
+          </div>
+
+          <div class="project-card"
+               data-project="instacart"
+               role="button" tabindex="0"
+               aria-haspopup="dialog">
+            <img class="project-card-thumb" src="{{ site.baseurl }}/assets/images/instacart.jpg" alt="">
+            <div class="project-card-header">
+              <span class="project-tag">Product Analytics</span>
+              <span class="project-tag">Data</span>
+            </div>
+            <h3 class="project-title">Instacart Reddit Pulse Dashboard</h3>
+            <p class="project-blurb">A dashboard giving the Instacart team real-time sentiment from top Reddit threads on Instacart and the gig economy.</p>
             <span class="project-card-cta">Read more <i class="fas fa-arrow-right"></i></span>
           </div>
 
@@ -198,7 +217,7 @@ comments: false
             <h4><i class="fas fa-graduation-cap"></i>Currently Learning</h4>
             <ul>
               <li>Technical Product Management</li>
-              <li>Being really good at using Claude Code for projects</li>
+              <li>Being better at using Claude Code for projects</li>
               <li>Data Product Definitions</li>
             </ul>
           </div>
@@ -214,7 +233,7 @@ comments: false
             <h4><i class="fas fa-tv"></i>Currently Watching</h4>
             <ul>
               <li>Warhammer 40k Lore Dives by PancreasNoWork</li>
-              <li>Singles Inferno</li>
+              <li>Culinary Class Wars Season 2</li>
               <li>Product management case studies</li>
             </ul>
           </div>
@@ -242,7 +261,7 @@ comments: false
 </div>
 
 <script>
-  // Project modal — data store + open/close logic
+  // Project modal
   (function () {
     const projects = {
       lumber: {
@@ -258,8 +277,17 @@ comments: false
         tags: ['Sales Enablement', 'AI / Automation'],
         abstract: [
           'Outbuild is a Series A construction scheduling and management SaaS company preparing for a potential Series B. As they scaled their sales team, new AEs and SDRs faced a steep learning curve — selling construction software to general contractors, superintendents, and project managers requires deep contextual knowledge of industry terminology, project delivery methods, lean construction principles, and how pull planning works. Historically this took 3–4 weeks of self-study and shadowing.',
-          'I delivered an automated learning assessment system that compressed effective onboarding time from 4 weeks to approximately 1 week. The system combined Claude (Anthropic\'s AI) for intelligent quiz generation and grading, Notion as the knowledge base and results hub, Google Forms for assessment delivery, and n8n as the automation orchestration layer tying everything together.',
+          'I delivered an automated learning assessment system that shorterned onboarding time from 4 weeks to ~1 week. The system combined Claude (Anthropic\'s AI) for intelligent quiz generation and grading, Notion as the knowledge base and results hub, Google Forms for assessment delivery, and n8n as the automation layer tying everything together.',
           'New hires could demonstrate product knowledge faster while sales could start meaningful revenue-generating activity significantly sooner.'
+        ]
+      },
+      instacart: {
+        title: 'Instacart Reddit Pulse Dashboard',
+        tags: ['Product Analytics', 'Data'],
+        abstract: [
+          'A monitoring dashboard built to give the Instacart team a real-time pulse on what the internet is saying about Instacart and the broader gig economy.',
+          'The tool surfaces and aggregates the highest-signal Reddit threads — tracking sentiment, recurring themes, and community concerns — so the team can quickly identify emerging narratives without manually sifting through forums.',
+          'Designed with a product lens: the goal was to make qualitative signal legible and actionable for a team that runs on data.'
         ]
       }
     };
@@ -309,7 +337,6 @@ comments: false
 </script>
 
 <script>
-  // Folder stack — promotes clicked card to front, re-orders the others, syncs height
   (function () {
     const stack = document.querySelector('.folder-stack');
     const cards = Array.from(document.querySelectorAll('.folder-card'));
@@ -321,9 +348,9 @@ comments: false
       const front = document.querySelector('[data-order="1"]');
       const contentH = front.scrollHeight;
       const stackH = Math.max(contentH - FADE_PX, 60);
-      // Stack height excludes the fade zone so the card bleeds visually but not in layout
+      //  card bleeds visually but not in layout
       stack.style.height = stackH + 'px';
-      // Align each inactive card's bottom edge with the stack bottom.
+
       // getBoundingClientRect accounts for CSS transform translateY, so yOffset = the card's Y shift.
       const stackTop = stack.getBoundingClientRect().top;
       document.querySelectorAll('.folder-card:not([data-order="1"])').forEach(c => {
