@@ -188,7 +188,7 @@ comments: false
                 <span class="project-tag">Data</span>
               </div>
               <h3 class="project-title">Instacart Reddit Pulse</h3>
-              <p class="project-blurb">A tool giving the Instacart team sentiment from top Reddit threads on Instacart and the gig economy.</p>
+              <p class="project-blurb">Reddit API → sentiment trends, pain themes, and volume signals — qualitative signal made legible for a data-driven team.</p>
               <span class="project-card-cta">Read more <i class="fas fa-arrow-right"></i></span>
             </div>
           </div>
@@ -291,9 +291,11 @@ comments: false
         title: 'Instacart Reddit Pulse (WIP)',
         tags: ['Product Analytics', 'Data'],
         abstract: [
-          'A lightweight tool built to give the Instacart team a real-time pulse on what the internet is saying about Instacart and the broader gig economy.',
-          'The tool surfaces + aggregates the Reddit threads — tracking sentiment, recurring themes, and community concerns — so the team can quickly identify emerging narratives without sifting through forums.',
-          'I tried to approach this with a product len; the goal was to make qualitative signal legible and actionable for a team that runs on data.'
+          'A lightweight tool that taps the Reddit API to surface qualitative signal about Instacart and the gig economy — tracking sentiment trends, recurring pain themes, and community volume — so a PM can identify emerging narratives without sifting through forums.',
+          '<strong>Sample run (Mar 4–11, 2026):</strong> 24 posts across 3 subreddits. Sentiment split: <strong>66.7% negative</strong>, 20.8% positive, 12.5% neutral. Pain points clustered tightly: <em>substitutions / OOS</em> led at 7 posts (44%), <em>order accuracy</em> at 5 (31%), and <em>delivery reliability</em> at 3 (19%).',
+          '<div class="modal-figures"><figure><img src="{{ site.baseurl }}/assets/projects/negative_themes.png" alt="Top themes in negative posts"><figcaption>Top themes in negative posts</figcaption></figure><figure><img src="{{ site.baseurl }}/assets/projects/sentiment_trend.png" alt="Daily negative share trend"><figcaption>Daily negative share trend</figcaption></figure></div>',
+          '<strong>Why it matters:</strong> Consumer-side friction (fees, substitutions, accuracy) and shopper-side friction (delivery reliability, tipping) appeared across all 3 subreddits — bilateral trust erosion that could compound faster than isolated incident metrics would reveal.',
+          '<strong>Three bets from the data:</strong> (1) Add pre-checkout fee transparency and track complaint-rate changes. (2) Improve substitution prompts with item-quality preferences and monitor acceptance + refund rates. (3) Faster in-flow support for missing/wrong items with instant credit guardrails, measuring CSAT and repeat purchase.'
         ]
       }
     };

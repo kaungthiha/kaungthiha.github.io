@@ -1327,6 +1327,34 @@ section {
 .project-modal-abstract p { margin-bottom: 1.1rem; }
 .project-modal-abstract p:last-child { margin-bottom: 0; }
 
+.modal-figures {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+  margin: 1.25rem 0;
+}
+.modal-figures figure {
+  margin: 0;
+  background: #f5f8ff;
+  border-radius: 12px;
+  overflow: hidden;
+  border: 1px solid rgba(0, 102, 255, 0.08);
+}
+.modal-figures figure img {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+.modal-figures figcaption {
+  font-size: 0.78rem;
+  color: var(--text-tertiary, #888);
+  text-align: center;
+  padding: 0.45rem 0.75rem 0.55rem;
+}
+@media (max-width: 540px) {
+  .modal-figures { grid-template-columns: 1fr; }
+}
+
 .project-modal-footer {
   padding: 1.25rem 2rem;
   border-top: 1px solid rgba(0, 102, 255, 0.08);
