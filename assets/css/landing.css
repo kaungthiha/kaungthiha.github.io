@@ -234,6 +234,9 @@ section {
   bottom: 0; /* fill stack height */
   display: flex;
   flex-direction: column;
+  /* Fade to transparent at the bottom — shows background where content ends */
+  -webkit-mask-image: linear-gradient(to bottom, black calc(100% - 72px), transparent 100%);
+  mask-image: linear-gradient(to bottom, black calc(100% - 72px), transparent 100%);
 }
 
 /* Order 2 — peek strip 1, clearly white */
@@ -876,9 +879,9 @@ section {
 
 .learning-category h4 {
   font-family: 'Outfit', sans-serif;
-  font-size: 1.25rem;
-  font-weight: 600;
-  margin-bottom: 1rem;
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin-bottom: 1.1rem;
   color: var(--text-dark);
   display: flex;
   align-items: center;
@@ -886,7 +889,7 @@ section {
 }
 
 .learning-category h4 i {
-  font-size: 1.5rem;
+  font-size: 1.6rem;
   color: var(--electric-blue);
 }
 
@@ -894,13 +897,13 @@ section {
   list-style: none;
   padding: 0;
   margin: 0;
-  font-size: 1rem;
+  font-size: 1.1rem;
   color: var(--text-secondary);
 }
 
 .learning-category ul li {
-  padding: 0.75rem 0;
-  padding-left: 1.5rem;
+  padding: 0.85rem 0;
+  padding-left: 1.75rem;
   position: relative;
   transition: var(--transition);
 }
@@ -1221,19 +1224,19 @@ section {
 }
 
 .project-card-thumb {
-  width: 110px;
+  width: 148px;
   flex-shrink: 0;
   object-fit: contain;
   background: #edf4ff;
   display: block;
-  padding: 0.75rem;
+  padding: 1.1rem;
 }
 
 .project-card-body {
   display: flex;
   flex-direction: column;
-  gap: 0.35rem;
-  padding: 1.1rem 1.5rem 1.1rem 1rem;
+  gap: 0.55rem;
+  padding: 1.5rem 2rem 1.5rem 1.4rem;
   flex: 1;
   min-width: 0;
 }
@@ -1241,26 +1244,26 @@ section {
 .project-card-header {
   display: flex;
   align-items: center;
-  gap: 0.4rem;
+  gap: 0.5rem;
   flex-wrap: wrap;
 }
 
 .project-tag {
   font-family: 'Outfit', sans-serif;
-  font-size: 0.7rem;
+  font-size: 0.75rem;
   font-weight: 700;
   color: var(--electric-blue);
   background: rgba(0, 102, 255, 0.08);
   border: 1px solid rgba(0, 102, 255, 0.2);
   border-radius: 9999px;
-  padding: 0.2rem 0.65rem;
+  padding: 0.25rem 0.8rem;
   letter-spacing: 0.04em;
   text-transform: uppercase;
 }
 
 .project-title {
   font-family: 'Outfit', sans-serif;
-  font-size: 1.1rem;
+  font-size: 1.3rem;
   font-weight: 700;
   color: var(--text-dark);
   margin: 0;
@@ -1268,22 +1271,22 @@ section {
 }
 
 .project-blurb {
-  font-size: 0.9rem;
+  font-size: 1rem;
   color: var(--text-secondary);
-  line-height: 1.6;
+  line-height: 1.65;
   margin: 0;
 }
 
 .project-card-cta {
   font-family: 'Outfit', sans-serif;
-  font-size: 0.85rem;
+  font-size: 0.95rem;
   font-weight: 600;
   color: var(--electric-blue);
   display: inline-flex;
   align-items: center;
-  gap: 0.35rem;
+  gap: 0.4rem;
   transition: gap 0.2s ease;
-  margin-top: 0.1rem;
+  margin-top: 0.25rem;
 }
 
 .project-card:hover .project-card-cta {
