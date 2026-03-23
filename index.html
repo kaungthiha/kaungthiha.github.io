@@ -16,7 +16,7 @@ comments: false
 
     <!-- About (front by default) -->
     <div class="folder-card" data-folder="about" data-order="1">
-      <div class="folder-peek-label"><span>About</span></div>
+      <div class="folder-peek-label"><i class="fas fa-user peek-icon"></i><span>About</span></div>
       <div class="folder-body">
 
         <section class="hero-bio-section">
@@ -136,7 +136,7 @@ comments: false
 
     <!-- My Work -->
     <div class="folder-card" data-folder="work" data-order="2">
-      <div class="folder-peek-label"><span>Recent Projects</span></div>
+      <div class="folder-peek-label"><i class="fas fa-folder-open peek-icon"></i><span>Recent Projects</span></div>
       <div class="folder-body">
         <div class="projects-grid">
 
@@ -199,7 +199,7 @@ comments: false
 
     <!-- Tools for Friends -->
     <div class="folder-card" data-folder="tools" data-order="3">
-      <div class="folder-peek-label"><span>Tools for Friends</span></div>
+      <div class="folder-peek-label"><i class="fas fa-star peek-icon"></i><span>Tools for Friends</span></div>
       <div class="folder-body">
         <div class="tools-grid">
           <div class="tool-card">
@@ -216,7 +216,7 @@ comments: false
 
     <!-- Current Stuff -->
     <div class="folder-card" data-folder="current" data-order="4">
-      <div class="folder-peek-label"><span>Current Stuff</span></div>
+      <div class="folder-peek-label"><i class="fas fa-wrench peek-icon"></i><span>Current Stuff</span></div>
       <div class="folder-body">
         <div class="learning-grid">
           <div class="learning-category">
@@ -352,15 +352,10 @@ comments: false
     let active = 'about';
 
     function syncHeight() {
-      const FADE_PX = 80; // matches CSS mask-image fade zone
-      const front   = document.querySelector('[data-order="1"]');
-      const contentH = front.scrollHeight;
-      const stackH   = Math.max(contentH - FADE_PX, 60);
-      // Active card bleeds visually below the layout box (fade zone), no dead whitespace
-      stack.style.height = stackH + 'px';
-      // Each inactive card is clipped to align its bottom with the stack bottom,
-      // accounting for its CSS translateY offset via getBoundingClientRect.
-      const stackTop = stack.getBoundingClientRect().top;
+      // Stack height is determined by CSS flex — read it, then clip inactive cards.
+      const stackRect = stack.getBoundingClientRect();
+      const stackH   = stackRect.height;
+      const stackTop = stackRect.top;
       document.querySelectorAll('.folder-card:not([data-order="1"])').forEach(c => {
         const yOffset = Math.max(Math.round(c.getBoundingClientRect().top - stackTop), 0);
         c.style.height = Math.max(stackH - yOffset, 40) + 'px';
@@ -387,8 +382,8 @@ comments: false
 
     cards.forEach(card => card.addEventListener('click', () => activate(card.dataset.folder)));
 
-    syncHeight();
-    window.addEventListener('resize', syncHeight);
+    requestAnimationFrame(syncHeight);
+    window.addEventListener('resize', () => requestAnimationFrame(syncHeight));
   }());
 </script>
 
