@@ -736,20 +736,6 @@ section {
   transform: scale(1.12) rotate(4deg);
 }
 
-/* Illustration image used in place of Font Awesome icon in learning-category h4 */
-.learning-icon-img {
-  width: 48px;
-  height: 48px;
-  object-fit: contain;
-  flex-shrink: 0;
-  /* multiply blend dissolves the light-blue oval background into the white card */
-  mix-blend-mode: multiply;
-  transition: transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
-}
-
-.learning-category:hover .learning-icon-img {
-  transform: scale(1.1);
-}
 
 .skill-hex:hover .skill-icon {
   color: white;
@@ -875,29 +861,14 @@ section {
 
 .learning-category {
   background: white;
-  padding: 2rem;
-  border-radius: 20px;
+  border-radius: 16px;
   border: 1.5px solid rgba(0, 102, 255, 0.12);
+  overflow: hidden;
   box-shadow: var(--shadow-sm);
   transition: var(--transition);
-  position: relative;
-  overflow: hidden;
-}
-
-.learning-category::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: -100%;
-  width: 100%;
-  height: 100%;
-  background: var(--gradient-primary);
-  opacity: 0.05;
-  transition: var(--transition);
-}
-
-.learning-category:hover::before {
-  left: 0;
+  display: flex;
+  flex-direction: row;
+  align-items: stretch;
 }
 
 .learning-category:hover {
@@ -906,32 +877,50 @@ section {
   border-color: var(--electric-blue);
 }
 
-.learning-category h4 {
-  font-family: 'Outfit', sans-serif;
-  font-size: 1.5rem;
-  font-weight: 700;
-  margin-bottom: 1.1rem;
-  color: var(--text-dark);
+.learning-thumb {
+  width: 148px;
+  flex-shrink: 0;
+  background: #edf4ff;
   display: flex;
   align-items: center;
-  gap: 0.75rem;
+  justify-content: center;
+  padding: 1.1rem;
 }
 
-.learning-category h4 i {
-  font-size: 1.6rem;
-  color: var(--electric-blue);
+.learning-thumb .learning-icon-img {
+  width: 100%;
+  height: auto;
+  object-fit: contain;
+  mix-blend-mode: multiply;
+}
+
+.learning-body {
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+  padding: 1.5rem 2rem 1.5rem 1.4rem;
+  flex: 1;
+  min-width: 0;
+}
+
+.learning-category h4 {
+  font-family: 'Outfit', sans-serif;
+  font-size: 1.3rem;
+  font-weight: 700;
+  margin-bottom: 0.5rem;
+  color: var(--text-dark);
 }
 
 .learning-category ul {
   list-style: none;
   padding: 0;
   margin: 0;
-  font-size: 1.1rem;
+  font-size: 1rem;
   color: var(--text-secondary);
 }
 
 .learning-category ul li {
-  padding: 0.85rem 0;
+  padding: 0.6rem 0;
   padding-left: 1.75rem;
   position: relative;
   transition: var(--transition);
@@ -1224,12 +1213,12 @@ section {
 .projects-grid {
   display: flex;
   flex-direction: column;
-  gap: 1.25rem;
+  gap: 1.85rem;
 }
 
 .project-card {
   background: white;
-  border-radius: 20px;
+  border-radius: 16px;
   border: 1.5px solid rgba(0, 102, 255, 0.12);
   overflow: hidden;
   box-shadow: var(--shadow-sm);
@@ -1238,24 +1227,7 @@ section {
   flex-direction: row;
   align-items: stretch;
   cursor: pointer;
-  position: relative;
   gap: 0;
-}
-
-.project-card::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: -100%;
-  width: 100%;
-  height: 100%;
-  background: var(--gradient-primary);
-  opacity: 0.05;
-  transition: var(--transition);
-}
-
-.project-card:hover::before {
-  left: 0;
 }
 
 .project-card:hover {
@@ -1273,7 +1245,7 @@ section {
   width: 148px;
   flex-shrink: 0;
   object-fit: contain;
-  background: white;
+  background: #edf4ff;
   display: block;
   padding: 1.1rem;
 }
