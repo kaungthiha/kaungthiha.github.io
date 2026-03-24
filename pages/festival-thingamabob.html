@@ -1,0 +1,480 @@
+---
+layout: default
+title: KT's Festival Thingamabob
+permalink: "/tools/festival-thingamabob/"
+comments: false
+---
+
+<style>
+  /* ── Gate overlay ─────────────────────────────────────── */
+  #ft-gate {
+    position: fixed;
+    inset: 0;
+    z-index: 2000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(160deg, #f5f9ff 0%, #e4f0ff 35%, #cfe3ff 70%, #bcd6ff 100%);
+  }
+
+  .ft-gate-card {
+    background: rgba(255,255,255,0.85);
+    backdrop-filter: blur(24px);
+    -webkit-backdrop-filter: blur(24px);
+    border: 1px solid rgba(255,255,255,0.70);
+    border-radius: 28px;
+    box-shadow: 0 8px 40px rgba(0,102,255,0.12), inset 0 1px 0 rgba(255,255,255,0.9);
+    padding: 3rem 3.5rem;
+    max-width: 420px;
+    width: 90%;
+    text-align: center;
+  }
+
+  .ft-lock-icon {
+    font-size: 2.8rem;
+    color: #0066ff;
+    margin-bottom: 1.25rem;
+    display: block;
+  }
+
+  .ft-gate-title {
+    font-family: 'Outfit', sans-serif;
+    font-size: 1.75rem;
+    font-weight: 800;
+    color: #0f1419;
+    margin-bottom: 0.4rem;
+    letter-spacing: -0.01em;
+  }
+
+  .ft-gate-sub {
+    font-size: 0.9375rem;
+    color: #536471;
+    margin-bottom: 2rem;
+    line-height: 1.6;
+  }
+
+  .ft-input-wrap {
+    position: relative;
+    margin-bottom: 1rem;
+  }
+
+  #ft-passcode {
+    width: 100%;
+    padding: 0.9rem 1.25rem;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 1.4rem;
+    letter-spacing: 0.35em;
+    text-align: center;
+    border: 2px solid rgba(0,102,255,0.2);
+    border-radius: 14px;
+    background: rgba(255,255,255,0.8);
+    color: #0f1419;
+    outline: none;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  }
+
+  #ft-passcode:focus {
+    border-color: #0066ff;
+    box-shadow: 0 0 0 3px rgba(0,102,255,0.12);
+  }
+
+  #ft-passcode.shake {
+    animation: ft-shake 0.4s cubic-bezier(0.36,0.07,0.19,0.97);
+    border-color: #e53935;
+  }
+
+  @keyframes ft-shake {
+    10%, 90% { transform: translateX(-4px); }
+    20%, 80% { transform: translateX(6px); }
+    30%, 50%, 70% { transform: translateX(-6px); }
+    40%, 60% { transform: translateX(6px); }
+  }
+
+  #ft-submit {
+    width: 100%;
+    padding: 0.875rem;
+    background: linear-gradient(135deg, #0066ff 0%, #00d4ff 100%);
+    color: white;
+    border: none;
+    border-radius: 14px;
+    font-family: 'Outfit', sans-serif;
+    font-size: 1rem;
+    font-weight: 700;
+    cursor: pointer;
+    letter-spacing: 0.04em;
+    transition: opacity 0.2s ease, transform 0.2s ease;
+  }
+
+  #ft-submit:hover:not(:disabled) { opacity: 0.9; transform: translateY(-1px); }
+  #ft-submit:disabled { opacity: 0.5; cursor: not-allowed; }
+
+  #ft-msg {
+    margin-top: 1rem;
+    font-size: 0.875rem;
+    font-weight: 600;
+    min-height: 1.25rem;
+    transition: color 0.2s;
+  }
+  #ft-msg.error { color: #e53935; }
+  #ft-msg.locked { color: #f57c00; }
+
+  /* ── Tool page ────────────────────────────────────────── */
+  #ft-tool { display: none; padding: 2.5rem 1.5rem; max-width: 860px; margin: 0 auto; }
+
+  .ft-header {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 2.5rem;
+  }
+
+  .ft-header-icon {
+    font-size: 2rem;
+    color: #0066ff;
+    background: rgba(0,102,255,0.08);
+    border-radius: 14px;
+    width: 56px; height: 56px;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+  }
+
+  .ft-header h1 {
+    font-family: 'Outfit', sans-serif;
+    font-size: 2rem;
+    font-weight: 800;
+    color: #0f1419;
+    margin: 0;
+    letter-spacing: -0.02em;
+  }
+
+  .ft-header p {
+    font-size: 0.9375rem;
+    color: #536471;
+    margin: 0.2rem 0 0;
+  }
+
+  .ft-badge {
+    font-family: 'Outfit', sans-serif;
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    background: rgba(0,102,255,0.08);
+    color: #0066ff;
+    border: 1px solid rgba(0,102,255,0.2);
+    border-radius: 9999px;
+    padding: 0.2rem 0.7rem;
+    align-self: center;
+    margin-left: auto;
+    flex-shrink: 0;
+  }
+
+  .ft-section {
+    background: white;
+    border: 1.5px solid rgba(0,102,255,0.10);
+    border-radius: 20px;
+    padding: 2rem;
+    margin-bottom: 1.5rem;
+    box-shadow: 0 2px 12px rgba(0,102,255,0.06);
+  }
+
+  .ft-section-title {
+    font-family: 'Outfit', sans-serif;
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: #0f1419;
+    margin: 0 0 0.35rem;
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+  }
+
+  .ft-section-title i { color: #0066ff; font-size: 1rem; }
+
+  .ft-section-desc {
+    font-size: 0.9rem;
+    color: #536471;
+    margin: 0 0 1.25rem;
+    line-height: 1.6;
+  }
+
+  .ft-placeholder-area {
+    border: 2px dashed rgba(0,102,255,0.18);
+    border-radius: 14px;
+    padding: 2.5rem 1.5rem;
+    text-align: center;
+    color: #536471;
+    font-size: 0.9rem;
+    background: rgba(0,102,255,0.02);
+  }
+
+  .ft-placeholder-area i {
+    font-size: 2rem;
+    color: rgba(0,102,255,0.25);
+    display: block;
+    margin-bottom: 0.75rem;
+  }
+
+  .ft-tag-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-top: 1rem;
+  }
+
+  .ft-tag {
+    background: rgba(0,102,255,0.07);
+    border: 1px solid rgba(0,102,255,0.18);
+    color: #0066ff;
+    font-family: 'Outfit', sans-serif;
+    font-size: 0.8rem;
+    font-weight: 600;
+    padding: 0.3rem 0.8rem;
+    border-radius: 9999px;
+  }
+
+  .ft-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.6rem;
+    background: linear-gradient(135deg, #0066ff 0%, #00d4ff 100%);
+    color: white;
+    border: none;
+    border-radius: 9999px;
+    padding: 0.75rem 1.75rem;
+    font-family: 'Outfit', sans-serif;
+    font-size: 0.95rem;
+    font-weight: 700;
+    cursor: not-allowed;
+    opacity: 0.45;
+    letter-spacing: 0.02em;
+    margin-top: 1rem;
+  }
+
+  .ft-logout {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: #536471;
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+    border: none;
+    background: none;
+    padding: 0.5rem 0;
+    margin-top: 0.5rem;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+  .ft-logout:hover { color: #e53935; }
+</style>
+
+<!-- ── Password Gate ───────────────────────────────────── -->
+<div id="ft-gate">
+  <div class="ft-gate-card">
+    <i class="fas fa-lock ft-lock-icon"></i>
+    <div class="ft-gate-title">Friends Only</div>
+    <p class="ft-gate-sub">This tool is private. Enter the passcode KT gave you to get in.</p>
+    <div class="ft-input-wrap">
+      <input id="ft-passcode" type="password" inputmode="numeric"
+             maxlength="6" placeholder="••••••" autocomplete="off" autofocus>
+    </div>
+    <button id="ft-submit">Unlock <i class="fas fa-arrow-right"></i></button>
+    <div id="ft-msg"></div>
+  </div>
+</div>
+
+<!-- ── Tool Content (shown after auth) ───────────────────── -->
+<div id="ft-tool">
+  <div class="ft-header">
+    <div class="ft-header-icon"><i class="fas fa-map-marked-alt"></i></div>
+    <div>
+      <h1>Festival Thingamabob</h1>
+      <p>Drop a lineup, get a meetup plan. Zero chaos, maximum vibes.</p>
+    </div>
+    <span class="ft-badge">WIP</span>
+  </div>
+
+  <div class="ft-section">
+    <div class="ft-section-title"><i class="fas fa-music"></i> Festival Lineup</div>
+    <p class="ft-section-desc">Paste in the lineup (artist · stage · time) or upload a schedule image. The tool will parse it and build the conflict map.</p>
+    <div class="ft-placeholder-area">
+      <i class="fas fa-file-upload"></i>
+      Drag &amp; drop lineup CSV / text, or click to browse<br>
+      <small style="opacity:0.7">(not wired up yet — coming soon)</small>
+    </div>
+    <div class="ft-tag-row">
+      <span class="ft-tag">Coachella format</span>
+      <span class="ft-tag">Lollapalooza format</span>
+      <span class="ft-tag">Paste raw text</span>
+      <span class="ft-tag">Manual entry</span>
+    </div>
+  </div>
+
+  <div class="ft-section">
+    <div class="ft-section-title"><i class="fas fa-users"></i> Your Squad</div>
+    <p class="ft-section-desc">Add your crew and each person's must-see acts. The scheduler will minimise conflicts and find the best time and place to regroup.</p>
+    <div class="ft-placeholder-area">
+      <i class="fas fa-user-plus"></i>
+      Squad member input coming soon
+    </div>
+  </div>
+
+  <div class="ft-section">
+    <div class="ft-section-title"><i class="fas fa-calendar-check"></i> Meetup Schedule</div>
+    <p class="ft-section-desc">Output: a time-blocked schedule with a suggested rendezvous point between stages — optimised for walking distance and set overlap.</p>
+    <div class="ft-placeholder-area">
+      <i class="fas fa-route"></i>
+      Schedule will appear here after generation
+    </div>
+    <button class="ft-btn" disabled>
+      <i class="fas fa-magic"></i> Generate Schedule
+    </button>
+  </div>
+
+  <div style="text-align:center; padding-bottom: 2rem;">
+    <button class="ft-logout" id="ft-logout">
+      <i class="fas fa-sign-out-alt"></i> Lock &amp; sign out
+    </button>
+  </div>
+</div>
+
+<script>
+(function () {
+  'use strict';
+
+  /* ── Constants ───────────────────────────────────────── */
+  const SESSION_KEY  = 'ft_auth_v1';
+  const ATTEMPT_KEY  = 'ft_attempts';
+  const LOCKOUT_KEY  = 'ft_lockout';
+  const MAX_TRIES    = 5;
+  const LOCKOUT_MS   = 60 * 60 * 1000; // 1 hour
+
+  /* Passcode verification — XOR-encoded, timing-safe comparison.
+     Key: 0x1F.  Encoded chars of "020367":
+     '0'=0x30^0x1F=0x2F  '2'=0x32^0x1F=0x2D  '0'=0x30^0x1F=0x2F
+     '3'=0x33^0x1F=0x2C  '6'=0x36^0x1F=0x29  '7'=0x37^0x1F=0x28  */
+  const _k = 0x1F;
+  const _e = [0x2F, 0x2D, 0x2F, 0x2C, 0x29, 0x28];
+
+  function verifyPasscode(input) {
+    if (input.length !== _e.length) return false;
+    let diff = 0; // timing-safe: compare all chars regardless of early mismatch
+    for (let i = 0; i < _e.length; i++) {
+      diff |= (input.charCodeAt(i) ^ (_e[i] ^ _k));
+    }
+    return diff === 0;
+  }
+
+  /* ── Rate-limiting helpers ───────────────────────────── */
+  function getAttempts()  { return parseInt(localStorage.getItem(ATTEMPT_KEY) || '0', 10); }
+  function setAttempts(n) { localStorage.setItem(ATTEMPT_KEY, String(n)); }
+  function getLockoutEnd(){ return parseInt(localStorage.getItem(LOCKOUT_KEY) || '0', 10); }
+  function setLockout()   { localStorage.setItem(LOCKOUT_KEY, String(Date.now() + LOCKOUT_MS)); }
+  function clearLockout() { localStorage.removeItem(LOCKOUT_KEY); localStorage.removeItem(ATTEMPT_KEY); }
+
+  function isLockedOut() {
+    const end = getLockoutEnd();
+    if (!end) return false;
+    if (Date.now() < end) return true;
+    clearLockout(); // lockout expired
+    return false;
+  }
+
+  function remainingMinutes() {
+    return Math.ceil((getLockoutEnd() - Date.now()) / 60000);
+  }
+
+  /* ── UI helpers ──────────────────────────────────────── */
+  const gate    = document.getElementById('ft-gate');
+  const tool    = document.getElementById('ft-tool');
+  const input   = document.getElementById('ft-passcode');
+  const btn     = document.getElementById('ft-submit');
+  const msg     = document.getElementById('ft-msg');
+  const logout  = document.getElementById('ft-logout');
+
+  function showTool() {
+    gate.style.display = 'none';
+    tool.style.display = 'block';
+  }
+
+  function setMsg(text, type) {
+    msg.textContent = text;
+    msg.className   = type || '';
+  }
+
+  function shakeInput() {
+    input.classList.remove('shake');
+    void input.offsetWidth; // reflow to restart animation
+    input.classList.add('shake');
+    setTimeout(() => input.classList.remove('shake'), 500);
+  }
+
+  function lockUI() {
+    btn.disabled = true;
+    input.disabled = true;
+  }
+
+  function unlockUI() {
+    btn.disabled = false;
+    input.disabled = false;
+  }
+
+  /* ── Attempt logic ───────────────────────────────────── */
+  function handleSubmit() {
+    if (isLockedOut()) {
+      setMsg(`Too many attempts. Try again in ${remainingMinutes()} min.`, 'locked');
+      lockUI();
+      return;
+    }
+
+    const val = input.value.trim();
+    if (!val) return;
+
+    if (verifyPasscode(val)) {
+      clearLockout();
+      sessionStorage.setItem(SESSION_KEY, '1');
+      showTool();
+    } else {
+      const attempts = getAttempts() + 1;
+      setAttempts(attempts);
+      shakeInput();
+      input.value = '';
+
+      if (attempts >= MAX_TRIES) {
+        setLockout();
+        lockUI();
+        setMsg(`Too many attempts. Locked out for 1 hour.`, 'locked');
+      } else {
+        const left = MAX_TRIES - attempts;
+        setMsg(`Wrong passcode. ${left} attempt${left === 1 ? '' : 's'} left.`, 'error');
+      }
+    }
+  }
+
+  /* ── Logout ──────────────────────────────────────────── */
+  logout.addEventListener('click', function () {
+    sessionStorage.removeItem(SESSION_KEY);
+    gate.style.display = 'flex';
+    tool.style.display = 'none';
+    input.value = '';
+    unlockUI();
+    setMsg('');
+    input.focus();
+  });
+
+  /* ── Event wiring ────────────────────────────────────── */
+  btn.addEventListener('click', handleSubmit);
+  input.addEventListener('keydown', function (e) {
+    if (e.key === 'Enter') handleSubmit();
+  });
+
+  /* ── Init: check session & lockout state ─────────────── */
+  if (sessionStorage.getItem(SESSION_KEY) === '1') {
+    showTool();
+  } else if (isLockedOut()) {
+    lockUI();
+    setMsg(`Too many attempts. Try again in ${remainingMinutes()} min.`, 'locked');
+  }
+}());
+</script>
