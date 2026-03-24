@@ -1224,12 +1224,12 @@ section {
 .projects-grid {
   display: flex;
   flex-direction: column;
-  gap: 1.85rem;
+  gap: 1.25rem;
 }
 
 .project-card {
   background: white;
-  border-radius: 16px;
+  border-radius: 20px;
   border: 1.5px solid rgba(0, 102, 255, 0.12);
   overflow: hidden;
   box-shadow: var(--shadow-sm);
@@ -1238,7 +1238,24 @@ section {
   flex-direction: row;
   align-items: stretch;
   cursor: pointer;
+  position: relative;
   gap: 0;
+}
+
+.project-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: var(--gradient-primary);
+  opacity: 0.05;
+  transition: var(--transition);
+}
+
+.project-card:hover::before {
+  left: 0;
 }
 
 .project-card:hover {
@@ -1256,7 +1273,7 @@ section {
   width: 148px;
   flex-shrink: 0;
   object-fit: contain;
-  background: #edf4ff;
+  background: white;
   display: block;
   padding: 1.1rem;
 }
