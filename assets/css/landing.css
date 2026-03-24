@@ -1245,9 +1245,10 @@ section {
   width: 148px;
   flex-shrink: 0;
   object-fit: contain;
-  background: #edf4ff;
+  background: white;
   display: block;
   padding: 1.1rem;
+  mix-blend-mode: multiply;
 }
 
 .project-card-body {
