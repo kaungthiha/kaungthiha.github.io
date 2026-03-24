@@ -86,7 +86,7 @@ comments: false
                 <div class="skills-hexagon-grid">
                   <div class="skill-hex">
                     <div class="skill-hex-content">
-                      <i class="fas fa-code skill-icon"></i>
+                      <img class="skill-icon-img" src="{{ site.baseurl }}/assets/images/programming.jpg" alt="">
                       <div class="skill-name">Programming</div>
                       <div class="skill-items">
                         <span class="skill-tag">Python</span>
@@ -99,7 +99,7 @@ comments: false
                   </div>
                   <div class="skill-hex">
                     <div class="skill-hex-content">
-                      <i class="fas fa-chart-bar skill-icon"></i>
+                      <img class="skill-icon-img" src="{{ site.baseurl }}/assets/images/Analytics.jpg" alt="">
                       <div class="skill-name">Analytics</div>
                       <div class="skill-items">
                         <span class="skill-tag">Looker</span>
@@ -112,7 +112,7 @@ comments: false
                   </div>
                   <div class="skill-hex">
                     <div class="skill-hex-content">
-                      <i class="fas fa-database skill-icon"></i>
+                      <img class="skill-icon-img" src="{{ site.baseurl }}/assets/images/Data Tools.jpg" alt="">
                       <div class="skill-name">Data Tools</div>
                       <div class="skill-items">
                         <span class="skill-tag">PostgreSQL</span>
@@ -220,7 +220,7 @@ comments: false
       <div class="folder-body">
         <div class="learning-grid">
           <div class="learning-category">
-            <h4><i class="fas fa-graduation-cap"></i>Currently Learning</h4>
+            <h4><img class="learning-icon-img" src="{{ site.baseurl }}/assets/images/currently learning.jpg" alt="">Currently Learning</h4>
             <ul>
               <li>Technical Product Management</li>
               <li>Being better at using Claude Code for projects</li>
@@ -228,7 +228,7 @@ comments: false
             </ul>
           </div>
           <div class="learning-category">
-            <h4><i class="fas fa-book"></i>Currently Reading</h4>
+            <h4><img class="learning-icon-img" src="{{ site.baseurl }}/assets/images/currently reading.jpg" alt="">Currently Reading</h4>
             <ul>
               <li>Palo Alto by Malcolm Harris</li>
               <li>Soul of a Chef by Michael Ruhlman</li>
@@ -236,7 +236,7 @@ comments: false
             </ul>
           </div>
           <div class="learning-category">
-            <h4><i class="fas fa-tv"></i>Currently Watching</h4>
+            <h4><img class="learning-icon-img" src="{{ site.baseurl }}/assets/images/currently watching.jpg" alt="">Currently Watching</h4>
             <ul>
               <li>Warhammer 40k Lore Dives by PancreasNoWork</li>
               <li>Culinary Class Wars Season 2</li>
@@ -382,7 +382,10 @@ comments: false
 
     cards.forEach(card => card.addEventListener('click', () => activate(card.dataset.folder)));
 
-    requestAnimationFrame(syncHeight);
+    // Double-RAF ensures CSS flex layout is fully computed before reading heights.
+    // window.load is a safety net for slower connections where fonts/images delay layout.
+    requestAnimationFrame(() => requestAnimationFrame(syncHeight));
+    window.addEventListener('load', syncHeight);
     window.addEventListener('resize', () => requestAnimationFrame(syncHeight));
   }());
 </script>
