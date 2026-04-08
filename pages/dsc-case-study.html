@@ -1,876 +1,888 @@
-<!DOCTYPE html>
-<html class="light" lang="en">
-<head>
-<meta charset="utf-8"/>
-<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-<title>EASE — DSC Case Study</title>
+---
+layout: default
+title: DSC Case Study — EASE
+permalink: "/pages/dsc-case-study.html"
+---
+
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@700;800&family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet"/>
 <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
-<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+
+<style>
+/* ── Brand tokens ── */
+:root {
+  --e-primary:           #004870;
+  --e-primary-dim:       #003251;
+  --e-primary-container: #E3F2FD;
+  --e-secondary:         #00668e;
+  --e-secondary-container: #d2e5f4;
+  --e-tertiary:          #d12b2f;
+  --e-bg:                #f4f7f9;
+  --e-surface:           #ffffff;
+  --e-surface-low:       #f0f4f9;
+  --e-surface-high:      #edf2f7;
+  --e-on-surface:        #1a1f24;
+  --e-on-surface-var:    #4a5568;
+  --e-outline:           #cbd5e0;
+}
+
+/* ── App shell ── */
+#dsc-root { background: var(--e-bg); }
+.ease-wrap {
+  font-family: 'Manrope', sans-serif;
+  color: var(--e-on-surface);
+  background: var(--e-bg);
+  max-width: 480px;
+  margin: 0 auto;
+  min-height: 100vh;
+}
+
+/* ── Material icons ── */
+.mi {
+  font-family: 'Material Symbols Outlined';
+  font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+  line-height: 1; user-select: none;
+}
+.mi-fill { font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
+
+/* ── Typography ── */
+.ease-wrap h1, .ease-wrap h2, .ease-wrap h3, .ease-wrap h4 {
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  margin: 0;
+}
+
+/* ── Buttons ── */
+.e-btn {
+  display: inline-flex; align-items: center; justify-content: center;
+  cursor: pointer; border: none; outline: none;
+  font-family: 'Manrope', sans-serif; font-weight: 700;
+  transition: all 0.15s ease;
+}
+.e-btn:active { transform: scale(0.97); }
+.e-btn-primary {
+  background: var(--e-primary); color: #fff;
+  padding: 14px 20px; border-radius: 8px; width: 100%;
+  font-size: 15px;
+}
+.e-btn-primary:hover { background: var(--e-primary-dim); }
+.e-btn-secondary-outline {
+  background: var(--e-surface-high); color: var(--e-primary);
+  padding: 13px 20px; border-radius: 8px; width: 100%;
+  font-size: 14px; border: 1px solid var(--e-outline);
+}
+.e-btn-secondary-outline:hover { background: rgba(203,213,224,0.3); }
+.e-btn-ghost {
+  background: none; color: var(--e-secondary);
+  padding: 8px 0; font-size: 13px; font-weight: 700;
+  display: inline-flex; align-items: center; gap: 4px;
+}
+
+/* ── Cards ── */
+.e-card {
+  background: var(--e-surface); border-radius: 16px;
+  border: 1px solid rgba(203,213,224,0.3);
+  box-shadow: 0 4px 20px rgba(0,73,119,0.08);
+}
+.e-card-glow {
+  box-shadow: 0 0 0 1px rgba(0,73,119,0.1), 0 10px 30px -10px rgba(0,73,119,0.15);
+}
+.e-shadow-cap { box-shadow: 0 4px 24px rgba(0,44,77,0.08); }
+
+/* ── Tags ── */
+.e-tag {
+  display: inline-block; padding: 2px 10px;
+  background: var(--e-surface-low); color: var(--e-on-surface-var);
+  border-radius: 4px; font-size: 11px; font-weight: 700; text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+.e-tag-recommended {
+  background: var(--e-secondary); color: #fff;
+  border-radius: 999px; padding: 5px 12px;
+}
+
+/* ── Screen transitions ── */
+.e-screen {
+  opacity: 0; transform: translateX(30px);
+  transition: opacity 0.28s ease, transform 0.28s ease;
+  pointer-events: none;
+}
+.e-screen.e-screen-active {
+  opacity: 1; transform: translateX(0); pointer-events: auto;
+}
+.e-screen.e-screen-exit {
+  opacity: 0; transform: translateX(-30px);
+}
+
+/* ── Survey modal ── */
+.e-survey-overlay {
+  position: fixed; inset: 0; z-index: 9999;
+  display: flex; align-items: center; justify-content: center; padding: 24px;
+  background: rgba(15,23,42,0.6); backdrop-filter: blur(4px);
+  opacity: 0; pointer-events: none;
+  transition: opacity 0.25s ease;
+}
+.e-survey-overlay.open { opacity: 1; pointer-events: auto; }
+.e-survey-modal {
+  background: #fff; border-radius: 32px; overflow: hidden;
+  width: 100%; max-width: 360px; box-shadow: 0 25px 60px rgba(0,0,0,0.2);
+  transform: translateY(50px); opacity: 0;
+  transition: transform 0.28s ease, opacity 0.28s ease;
+  max-height: 90vh; overflow-y: auto;
+}
+.e-survey-overlay.open .e-survey-modal {
+  transform: translateY(0); opacity: 1;
+}
+
+/* ── Survey steps ── */
+.e-step { display: none; }
+.e-step.active {
+  display: block;
+  animation: eSlideIn 0.25s ease-out forwards;
+}
+@keyframes eSlideIn {
+  from { opacity: 0; transform: translateX(16px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+
+/* ── Option buttons ── */
+.e-option {
+  width: 100%; text-align: left; padding: 18px 20px;
+  border-radius: 16px; border: 2px solid transparent;
+  background: var(--e-surface-low); cursor: pointer;
+  font-family: 'Manrope', sans-serif; font-weight: 700;
+  font-size: 15px; color: var(--e-on-surface);
+  display: flex; align-items: center; justify-content: space-between;
+  transition: background 0.15s ease, border-color 0.15s ease;
+}
+.e-option:hover { background: var(--e-surface-high); }
+.e-option.selected { border-color: var(--e-primary); background: rgba(0,72,112,0.05); }
+.e-option:active { transform: scale(0.99); }
+
+/* ── Expandable panels ── */
+.e-expand {
+  max-height: 0; overflow: hidden; opacity: 0;
+  transition: max-height 0.3s ease-out, opacity 0.25s ease;
+}
+.e-expand.open { max-height: 1200px; opacity: 1; }
+
+/* ── Toast ── */
+.e-toast {
+  position: fixed; bottom: 88px; left: 16px; right: 16px; z-index: 9998;
+  background: var(--e-primary); color: #fff;
+  padding: 14px 16px; border-radius: 12px;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.18);
+  display: flex; align-items: center; gap: 10px;
+  transform: translateY(80px); opacity: 0;
+  transition: transform 0.3s ease, opacity 0.3s ease;
+  pointer-events: none; max-width: 480px; margin: 0 auto;
+}
+.e-toast.show { transform: translateY(0); opacity: 1; pointer-events: auto; }
+
+/* ── Warning bottom sheet ── */
+.e-sheet-overlay {
+  position: fixed; inset: 0; z-index: 9998;
+  background: rgba(0,72,112,0.4); backdrop-filter: blur(4px);
+  opacity: 0; pointer-events: none;
+  transition: opacity 0.25s ease;
+}
+.e-sheet-overlay.open { opacity: 1; pointer-events: auto; }
+.e-sheet {
+  position: absolute; bottom: 0; left: 50%; transform: translateX(-50%) translateY(100%);
+  width: 100%; max-width: 480px;
+  background: #fff; border-radius: 24px 24px 0 0; padding: 32px;
+  transition: transform 0.3s ease;
+}
+.e-sheet-overlay.open .e-sheet { transform: translateX(-50%) translateY(0); }
+
+/* ── App bottom nav ── */
+.e-nav {
+  background: rgba(255,255,255,0.92); backdrop-filter: blur(16px);
+  border-top: 1px solid rgba(203,213,224,0.4);
+  padding: 8px 0 20px; display: flex; justify-content: space-around;
+}
+.e-nav-item {
+  display: flex; flex-direction: column; align-items: center;
+  padding: 6px 20px; color: rgba(74,85,104,0.6);
+  cursor: pointer; text-decoration: none;
+  font-family: 'Manrope', sans-serif; font-weight: 700; font-size: 10px;
+  letter-spacing: 0.04em; gap: 2px; transition: color 0.15s ease;
+}
+.e-nav-item:hover { color: var(--e-primary); }
+.e-nav-item.active { color: var(--e-primary); }
+.e-nav-dot {
+  width: 4px; height: 4px; border-radius: 50%;
+  background: var(--e-primary); margin-top: 2px;
+}
+
+/* ── App header ── */
+.e-app-header {
+  position: sticky; top: 0; z-index: 100;
+  background: rgba(255,255,255,0.88); backdrop-filter: blur(16px);
+  border-bottom: 1px solid rgba(203,213,224,0.3);
+}
+.e-app-header-inner {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 14px 24px; max-width: 480px; margin: 0 auto;
+}
+
+/* ── Misc ── */
+.e-progress { transition: width 0.4s ease; }
+.e-back-link {
+  display: inline-flex; align-items: center; gap: 6px;
+  color: #84cffe; text-decoration: none; font-size: 11px; font-weight: 700;
+}
+.e-back-link:hover { text-decoration: underline; }
+.e-icon-btn {
+  width: 36px; height: 36px; border-radius: 50%; border: none;
+  background: none; cursor: pointer; display: flex; align-items: center;
+  justify-content: center; color: var(--e-on-surface-var);
+  transition: background 0.15s ease;
+}
+.e-icon-btn:hover { background: var(--e-surface-low); }
+.thin-scroll::-webkit-scrollbar { height: 4px; }
+.thin-scroll::-webkit-scrollbar-track { background: #f1f1f1; }
+.thin-scroll::-webkit-scrollbar-thumb { background: #cbd5e0; border-radius: 4px; }
+</style>
+
+<div id="dsc-root"></div>
+
+<script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+<script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+<script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+<script src="https://cdn.tailwindcss.com"></script>
 <script>
   tailwind.config = {
-    darkMode: "class",
-    theme: {
-      extend: {
-        colors: {
-          "primary":                "#004870",
-          "primary-dim":            "#003251",
-          "primary-container":      "#E3F2FD",
-          "on-primary-container":   "#002C4D",
-          "secondary":              "#00668e",
-          "secondary-container":    "#d2e5f4",
-          "on-secondary-container": "#003243",
-          "tertiary":               "#d12b2f",
-          "background":             "#f4f7f9",
-          "surface":                "#ffffff",
-          "surface-container-low":  "#f0f4f9",
-          "surface-container-high": "#edf2f7",
-          "on-surface":             "#1a1f24",
-          "on-surface-variant":     "#4a5568",
-          "outline":                "#cbd5e0",
-        },
-        borderRadius: {
-          DEFAULT: "0.5rem",
-          lg:      "0.75rem",
-          xl:      "1.5rem",
-          "2xl":   "1rem",
-          "3xl":   "1.5rem",
-          full:    "9999px",
-        },
-        fontFamily: {
-          headline: ["Plus Jakarta Sans"],
-          body:     ["Manrope"],
-          label:    ["Manrope"],
-        },
-      },
-    },
+    prefix: 'tw-',
+    corePlugins: { preflight: false }
   };
 </script>
-<style>
-  * { box-sizing: border-box; }
-  body { font-family: 'Manrope', sans-serif; background: #f4f7f9; }
-  h1, h2, h3, h4 { font-family: 'Plus Jakarta Sans', sans-serif; }
 
-  .material-symbols-outlined {
-    font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
-  }
+<script type="text/babel">
+{% raw %}
+const { useState, useEffect, useRef } = React;
 
-  /* ── Screen management ── */
-  .app-screen {
-    position: fixed; inset: 0;
-    overflow-y: auto;
-    opacity: 0;
-    transform: translateX(40px);
-    pointer-events: none;
-    transition: opacity 300ms ease, transform 300ms ease;
-    background: #f4f7f9;
-  }
-  .app-screen.active {
-    opacity: 1; transform: translateX(0); pointer-events: auto;
-  }
-  .app-screen.exit-left {
-    opacity: 0; transform: translateX(-40px); pointer-events: none;
-  }
-
-  /* ── Survey modal ── */
-  .step-content { display: none; }
-  .step-content.active {
-    display: block;
-    animation: slideIn 0.3s ease-out forwards;
-  }
-  @keyframes slideIn {
-    from { opacity: 0; transform: translateX(20px); }
-    to   { opacity: 1; transform: translateX(0); }
-  }
-
-  /* ── Support paths ── */
-  .expandable-content {
-    max-height: 0; overflow: hidden;
-    transition: max-height 300ms ease-out, opacity 300ms ease-in;
-    opacity: 0;
-  }
-  .expandable-content.open {
-    max-height: 2000px; opacity: 1;
-  }
-  .btn-press:active { transform: scale(0.97); }
-
-  /* ── Toast ── */
-  .toast-bar {
-    transform: translateY(100px);
-    transition: transform 0.3s ease-out;
-  }
-  .toast-bar.show { transform: translateY(0); }
-
-  /* ── Confirmation shadows ── */
-  .cap-shadow { box-shadow: 0 4px 24px rgba(0,44,77,0.08); }
-  .c1-shadow  { box-shadow: 0 4px 20px rgba(0,73,119,0.08); }
-  .rec-glow   {
-    box-shadow: 0 0 0 1px rgba(0,73,119,0.1),
-                0 10px 30px -10px rgba(0,73,119,0.15);
-  }
-
-  /* ── Scrollbar ── */
-  .thin-scroll::-webkit-scrollbar { height: 4px; }
-  .thin-scroll::-webkit-scrollbar-track { background: #f1f1f1; }
-  .thin-scroll::-webkit-scrollbar-thumb { background: #cbd5e0; border-radius: 4px; }
-
-  /* ── Back-to-portfolio strip ── */
-  .portfolio-bar {
-    position: fixed; top: 0; left: 0; right: 0; z-index: 200;
-    background: #002C4D; color: #fff;
-    display: flex; align-items: center; gap: 8px;
-    padding: 6px 16px; font-size: 11px; font-weight: 700;
-    font-family: 'Manrope', sans-serif; letter-spacing: 0.04em;
-  }
-  .portfolio-bar a {
-    color: #84cffe; text-decoration: none;
-    display: flex; align-items: center; gap: 4px;
-  }
-  .portfolio-bar a:hover { text-decoration: underline; }
-  /* Push app headers below the strip */
-  .app-header { top: 32px !important; }
-  .app-main   { padding-top: calc(6rem + 32px) !important; }
-</style>
-</head>
-<body>
-
-<!-- Portfolio back-link strip -->
-<div class="portfolio-bar">
-  <span class="material-symbols-outlined" style="font-size:14px">arrow_back</span>
-  <a href="/projects">Back to Projects</a>
-  <span style="margin-left:auto;opacity:0.6">EASE · DSC Case Study · Capital One</span>
-</div>
-
-<!-- ═══════════════════════════════════════
-     SCREEN 1 — Dashboard + Smart Survey
-     ═══════════════════════════════════════ -->
-<div class="app-screen active" id="screen-dashboard">
-
-  <!-- App Header -->
-  <header class="app-header fixed w-full z-50 bg-white/80 backdrop-blur-md border-b border-outline/30">
-    <div class="flex justify-between items-center px-6 py-4 w-full max-w-md mx-auto">
-      <div class="flex items-center gap-3">
-        <div class="w-10 h-10 rounded-full overflow-hidden border border-outline/30">
-          <img class="w-full h-full object-cover" alt="Profile"
-            src="https://lh3.googleusercontent.com/aida-public/AB6AXuD19f-glggUw-Gpn9wlEbeCrVTVDB5KY1XXd4W7h3vW8jkXuySN5sv0GWfcUo09CvtNJ0V53m5OkMUQkGjTyS6Fs5yohrrxhI-dJ9MMNL0kFAqHDexzgPwwW07M_ajSfPitxAkyCP8QSvEkp6QbPzqQUXjqbE4LowWKQDRDLsTAfpbw1m1bNWz9vfiwwgdaqk5FO0gEl6YYzgOmgUBs3yrFdALVTCGrjJnk3vep2cIqnaCjBrdl0fWw4pwLxR9aCzOVM0I3lUBAckpk"/>
+/* ── Shared app header ── */
+function AppHeader({ onBack, title = 'EASE', showProfile = false }) {
+  return (
+    <div className="e-app-header">
+      <div className="e-app-header-inner">
+        <div className="tw-flex tw-items-center tw-gap-3">
+          {onBack && (
+            <button className="e-icon-btn" onClick={onBack}>
+              <span className="mi" style={{fontSize: 20}}>arrow_back</span>
+            </button>
+          )}
+          {!onBack && (
+            <div style={{width:36,height:36,borderRadius:'50%',overflow:'hidden',border:'1px solid #cbd5e0'}}>
+              <img style={{width:'100%',height:'100%',objectFit:'cover'}} alt="Profile"
+                src="https://lh3.googleusercontent.com/aida-public/AB6AXuD19f-glggUw-Gpn9wlEbeCrVTVDB5KY1XXd4W7h3vW8jkXuySN5sv0GWfcUo09CvtNJ0V53m5OkMUQkGjTyS6Fs5yohrrxhI-dJ9MMNL0kFAqHDexzgPwwW07M_ajSfPitxAkyCP8QSvEkp6QbPzqQUXjqbE4LowWKQDRDLsTAfpbw1m1bNWz9vfiwwgdaqk5FO0gEl6YYzgOmgUBs3yrFdALVTCGrjJnk3vep2cIqnaCjBrdl0fWw4pwLxR9aCzOVM0I3lUBAckpk"/>
+            </div>
+          )}
+          <span style={{fontFamily:'Plus Jakarta Sans',fontWeight:800,fontSize:18,color:'var(--e-primary)',fontStyle: onBack ? 'normal' : 'italic',letterSpacing:'-0.02em'}}>
+            {title}
+          </span>
         </div>
-        <span class="text-xl font-extrabold tracking-tight text-primary font-headline italic">EASE</span>
-      </div>
-      <button class="w-10 h-10 flex items-center justify-center rounded-xl hover:bg-surface-container-low transition-colors">
-        <span class="material-symbols-outlined text-on-surface-variant">notifications</span>
-      </button>
-    </div>
-  </header>
-
-  <!-- Dashboard Content (background) -->
-  <main class="app-main px-6 max-w-md mx-auto pb-32 space-y-6">
-    <section>
-      <h2 class="font-headline text-3xl font-extrabold tracking-tight text-on-surface mb-1">Hello, Sarah</h2>
-      <p class="text-on-surface-variant text-sm">Here is your financial overview.</p>
-    </section>
-
-    <div class="bg-white p-6 rounded-xl cap-shadow border border-outline/20">
-      <div class="text-xs text-on-surface-variant font-semibold mb-1">Current Balance</div>
-      <div class="font-headline text-4xl font-bold text-primary mb-4">$4,280.50</div>
-      <div class="h-2 w-full bg-surface-container-low rounded-full overflow-hidden">
-        <div class="h-full bg-primary rounded-full" style="width:66%;box-shadow:0 0 12px rgba(0,102,142,0.3)"></div>
-      </div>
-    </div>
-
-    <div class="grid grid-cols-2 gap-4">
-      <div class="bg-primary-container/40 p-4 rounded-xl">
-        <span class="material-symbols-outlined text-primary mb-2">trending_up</span>
-        <div class="text-sm font-semibold text-on-primary-container">Savings</div>
-        <div class="text-lg font-bold text-primary">+$240.00</div>
-      </div>
-      <div class="bg-surface-container-low p-4 rounded-xl">
-        <span class="material-symbols-outlined text-on-surface-variant mb-2">receipt_long</span>
-        <div class="text-sm font-semibold text-on-surface-variant">Next Bill</div>
-        <div class="text-lg font-bold text-on-surface">Oct 12</div>
-      </div>
-    </div>
-
-    <!-- Survey Trigger Tile -->
-    <button onclick="openSurvey()"
-      class="w-full bg-primary text-white p-5 rounded-xl text-left flex items-center justify-between cap-shadow hover:bg-primary-dim transition-colors btn-press">
-      <div>
-        <div class="text-[10px] font-extrabold uppercase tracking-widest opacity-70 mb-1">Action Required</div>
-        <div class="font-headline font-extrabold text-lg leading-tight">Get your personalized support plan</div>
-        <div class="text-sm opacity-80 mt-1">Answer 4 quick questions</div>
-      </div>
-      <span class="material-symbols-outlined text-3xl opacity-80 ml-4">arrow_forward</span>
-    </button>
-  </main>
-
-  <!-- Bottom Nav -->
-  <nav class="fixed bottom-0 w-full z-40 bg-white/80 backdrop-blur-xl border-t border-outline/20">
-    <div class="flex justify-around items-center px-4 pb-6 pt-2 max-w-md mx-auto">
-      <a class="flex flex-col items-center px-5 py-2 text-primary" href="#">
-        <span class="material-symbols-outlined" style="font-variation-settings:'FILL' 1">home</span>
-        <span class="text-[11px] font-bold tracking-wide mt-1">Home</span>
-        <div class="w-1 h-1 rounded-full bg-primary mt-1"></div>
-      </a>
-      <a class="flex flex-col items-center px-5 py-2 text-on-surface-variant/60 hover:text-primary" href="#">
-        <span class="material-symbols-outlined">splitscreen</span>
-        <span class="text-[11px] font-bold tracking-wide mt-1">Support</span>
-      </a>
-      <a class="flex flex-col items-center px-5 py-2 text-on-surface-variant/60 hover:text-primary" href="#">
-        <span class="material-symbols-outlined">person</span>
-        <span class="text-[11px] font-bold tracking-wide mt-1">Account</span>
-      </a>
-    </div>
-  </nav>
-
-  <!-- Smart Survey Modal -->
-  <div class="fixed inset-0 z-50 flex items-center justify-center p-6 pointer-events-none opacity-0 transition-opacity duration-300" id="surveyOverlay">
-    <div class="absolute inset-0 bg-slate-900/60 backdrop-blur-sm pointer-events-auto" onclick="closeSurvey()"></div>
-    <div class="relative bg-white w-full max-w-sm rounded-[32px] overflow-hidden shadow-2xl flex flex-col pointer-events-auto"
-         id="surveyModal" style="transform:translateY(60px);transition:transform 300ms ease,opacity 300ms ease;opacity:0">
-      <!-- Progress bar -->
-      <div class="h-1.5 w-full bg-slate-100">
-        <div class="h-full bg-primary transition-all duration-500 ease-out" id="surveyProgress" style="width:25%"></div>
-      </div>
-
-      <div class="px-8 pt-6 pb-8 overflow-y-auto max-h-[80vh]">
-        <!-- Nav header -->
-        <div class="flex justify-between items-center mb-4">
-          <button class="invisible flex items-center text-on-surface-variant hover:text-primary transition-colors py-2 btn-press" id="surveyBack">
-            <span class="material-symbols-outlined text-[20px]">arrow_back</span>
-            <span class="ml-1 text-sm font-bold uppercase tracking-wider">Back</span>
+        <div className="tw-flex tw-items-center tw-gap-2">
+          {showProfile && (
+            <div style={{width:32,height:32,borderRadius:'50%',overflow:'hidden',border:'1px solid #cbd5e0'}}>
+              <img style={{width:'100%',height:'100%',objectFit:'cover'}} alt="Profile"
+                src="https://lh3.googleusercontent.com/aida-public/AB6AXuDUGcrlXw2P5MxdIY0O3Bee3fMRmD_mA11pvllwooErEWCEBD5w528_M3efkAypVqpEB07Mu2seLVejXs37lw_WeaUC2-NnN6QSvT0zVPnuvYVuC0ik8IPxgwX0U28FV3ThafbXBzBYqKDJFgxBs8mIR3LgGIHImj0ZAfv1VH_JTW35uE_MgF5YAmEJfoNS49RvjcE7w1j_2oh44LWfqt-44YVf5EC_HhNScwotGa8SNindq5kCW7eEwVOt-jWlzOPQoPvRPu-oO8d1"/>
+            </div>
+          )}
+          <button className="e-icon-btn">
+            <span className="mi" style={{fontSize:22,color:'var(--e-on-surface-var)'}}>notifications</span>
           </button>
-          <button class="text-on-surface-variant hover:text-primary text-sm font-bold py-2 uppercase tracking-wider"
-                  onclick="surveySkip()">Skip</button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ── Bottom nav ── */
+function AppNav({ active = 'home' }) {
+  const items = [
+    { key: 'home',    icon: 'home',         label: 'Home' },
+    { key: 'support', icon: 'help_center',   label: 'Support' },
+    { key: 'account', icon: 'person',        label: 'Account' },
+  ];
+  return (
+    <div className="e-nav">
+      {items.map(item => (
+        <a key={item.key} className={`e-nav-item${active === item.key ? ' active' : ''}`} href="#">
+          <span className={`mi${active === item.key ? ' mi-fill' : ''}`} style={{fontSize:22}}>
+            {item.icon}
+          </span>
+          {item.label}
+          {active === item.key && <div className="e-nav-dot" />}
+        </a>
+      ))}
+    </div>
+  );
+}
+
+/* ══════════════════════════════════════════
+   SCREEN 1 — Dashboard
+   ══════════════════════════════════════════ */
+function Dashboard({ onOpenSurvey }) {
+  return (
+    <div>
+      <AppHeader />
+      <div style={{padding:'24px 24px 100px'}}>
+
+        {/* Greeting */}
+        <div style={{marginBottom:24}}>
+          <h2 style={{fontSize:28,fontWeight:800,color:'var(--e-on-surface)',marginBottom:4}}>
+            Hello, Sarah
+          </h2>
+          <p style={{color:'var(--e-on-surface-var)',fontSize:14}}>Here is your financial overview.</p>
         </div>
 
-        <!-- Step 1 -->
-        <div class="step-content active" id="survey-step1">
-          <h3 class="font-headline text-2xl font-extrabold text-on-surface leading-tight mb-2">Let's understand your situation</h3>
-          <p class="text-on-surface-variant text-base mb-8 font-medium">Are you having trouble making payments?</p>
-          <div class="space-y-3">
-            <button class="w-full text-left p-5 rounded-2xl bg-surface-container-low hover:bg-surface-container-high transition-all group flex items-center justify-between border border-transparent btn-press"
-                    onclick="surveyNext(1,{user_payment_difficulty:'yes'})">
-              <span class="font-bold text-on-surface">Yes</span>
-              <span class="material-symbols-outlined text-outline group-hover:text-primary text-[20px]">chevron_right</span>
-            </button>
-            <button class="w-full text-left p-5 rounded-2xl bg-surface-container-low hover:bg-surface-container-high transition-all group flex items-center justify-between border border-transparent btn-press"
-                    onclick="surveyNext(1,{user_payment_difficulty:'sometimes'})">
-              <span class="font-bold text-on-surface">Sometimes</span>
-              <span class="material-symbols-outlined text-outline group-hover:text-primary text-[20px]">chevron_right</span>
-            </button>
-            <button class="w-full text-left p-5 rounded-2xl bg-surface-container-low hover:bg-surface-container-high transition-all group flex items-center justify-between border border-transparent btn-press"
-                    onclick="surveyNext(1,{user_payment_difficulty:'no'})">
-              <span class="font-bold text-on-surface">No</span>
-              <span class="material-symbols-outlined text-outline group-hover:text-primary text-[20px]">chevron_right</span>
-            </button>
+        {/* Balance card */}
+        <div className="e-card e-shadow-cap" style={{padding:24,marginBottom:16}}>
+          <div style={{fontSize:11,color:'var(--e-on-surface-var)',fontWeight:600,marginBottom:4,textTransform:'uppercase',letterSpacing:'0.06em'}}>
+            Current Balance
+          </div>
+          <div style={{fontFamily:'Plus Jakarta Sans',fontSize:36,fontWeight:800,color:'var(--e-primary)',marginBottom:16}}>
+            $4,280.50
+          </div>
+          <div style={{height:8,background:'var(--e-surface-low)',borderRadius:999,overflow:'hidden'}}>
+            <div style={{height:'100%',width:'66%',background:'var(--e-primary)',borderRadius:999,boxShadow:'0 0 12px rgba(0,102,142,0.3)'}} />
           </div>
         </div>
 
-        <!-- Step 2 -->
-        <div class="step-content" id="survey-step2">
-          <h3 class="font-headline text-2xl font-extrabold text-on-surface leading-tight mb-2">Tell us about your debt</h3>
-          <p class="text-on-surface-variant text-base mb-8 font-medium">Do you have debt outside of Capital One?</p>
-          <div class="space-y-3">
-            <button class="w-full text-left p-5 rounded-2xl bg-surface-container-low hover:bg-surface-container-high transition-all group flex items-center justify-between border border-transparent btn-press"
-                    onclick="surveyNext(2,{user_external_debt:true})">
-              <span class="font-bold text-on-surface">Yes</span>
-              <span class="material-symbols-outlined text-outline group-hover:text-primary text-[20px]">chevron_right</span>
-            </button>
-            <button class="w-full text-left p-5 rounded-2xl bg-surface-container-low hover:bg-surface-container-high transition-all group flex items-center justify-between border border-transparent btn-press"
-                    onclick="surveyNext(2,{user_external_debt:false})">
-              <span class="font-bold text-on-surface">No</span>
-              <span class="material-symbols-outlined text-outline group-hover:text-primary text-[20px]">chevron_right</span>
-            </button>
+        {/* Stats row */}
+        <div className="tw-grid tw-grid-cols-2 tw-gap-4" style={{marginBottom:24}}>
+          <div style={{background:'rgba(227,242,253,0.5)',padding:16,borderRadius:12}}>
+            <span className="mi" style={{color:'var(--e-primary)',fontSize:22,display:'block',marginBottom:6}}>trending_up</span>
+            <div style={{fontSize:12,fontWeight:600,color:'var(--e-primary)',marginBottom:2}}>Savings</div>
+            <div style={{fontSize:17,fontWeight:800,color:'var(--e-primary)'}}>+$240.00</div>
+          </div>
+          <div style={{background:'var(--e-surface-low)',padding:16,borderRadius:12}}>
+            <span className="mi" style={{color:'var(--e-on-surface-var)',fontSize:22,display:'block',marginBottom:6}}>receipt_long</span>
+            <div style={{fontSize:12,fontWeight:600,color:'var(--e-on-surface-var)',marginBottom:2}}>Next Bill</div>
+            <div style={{fontSize:17,fontWeight:800,color:'var(--e-on-surface)'}}>Oct 12</div>
           </div>
         </div>
 
-        <!-- Step 3 -->
-        <div class="step-content" id="survey-step3">
-          <h3 class="font-headline text-2xl font-extrabold text-on-surface leading-tight mb-2">Debt Settlement</h3>
-          <p class="text-on-surface-variant text-base mb-8 font-medium">Have you considered debt settlement services?</p>
-          <div class="space-y-3">
-            <button class="w-full text-left p-5 rounded-2xl bg-surface-container-low hover:bg-surface-container-high transition-all group flex items-center justify-between border border-transparent btn-press"
-                    onclick="surveyNext(3,{user_dsc_intent:'high'})">
-              <span class="font-bold text-on-surface">Yes</span>
-              <span class="material-symbols-outlined text-outline group-hover:text-primary text-[20px]">chevron_right</span>
-            </button>
-            <button class="w-full text-left p-5 rounded-2xl bg-surface-container-low hover:bg-surface-container-high transition-all group flex items-center justify-between border border-transparent btn-press"
-                    onclick="surveyNext(3,{user_dsc_intent:'unsure'})">
-              <span class="font-bold text-on-surface">Not sure</span>
-              <span class="material-symbols-outlined text-outline group-hover:text-primary text-[20px]">chevron_right</span>
-            </button>
-            <button class="w-full text-left p-5 rounded-2xl bg-surface-container-low hover:bg-surface-container-high transition-all group flex items-center justify-between border border-transparent btn-press"
-                    onclick="surveyNext(3,{user_dsc_intent:'low'})">
-              <span class="font-bold text-on-surface">No</span>
-              <span class="material-symbols-outlined text-outline group-hover:text-primary text-[20px]">chevron_right</span>
-            </button>
+        {/* Survey CTA tile */}
+        <button className="e-btn" onClick={onOpenSurvey} style={{
+          width:'100%', background:'var(--e-primary)', color:'#fff',
+          padding:'20px 20px', borderRadius:14, textAlign:'left',
+          display:'flex', alignItems:'center', justifyContent:'space-between',
+          boxShadow:'0 4px 24px rgba(0,44,77,0.15)'
+        }}>
+          <div>
+            <div style={{fontSize:10,fontWeight:700,textTransform:'uppercase',letterSpacing:'0.08em',opacity:0.7,marginBottom:4}}>
+              Action Required
+            </div>
+            <div style={{fontFamily:'Plus Jakarta Sans',fontWeight:800,fontSize:17,lineHeight:1.3,marginBottom:4}}>
+              Get your personalized support plan
+            </div>
+            <div style={{fontSize:13,opacity:0.8}}>Answer 4 quick questions</div>
           </div>
+          <span className="mi" style={{fontSize:30,opacity:0.8,marginLeft:12}}>arrow_forward</span>
+        </button>
+
+      </div>
+      <AppNav active="home" />
+    </div>
+  );
+}
+
+/* ══════════════════════════════════════════
+   Survey Modal
+   ══════════════════════════════════════════ */
+function SurveyModal({ open, onClose, onComplete }) {
+  const [step, setStep] = useState(1);
+  const [userData, setUserData] = useState({});
+  const [selected, setSelected] = useState(null);
+  const progressMap = { 1: '25%', 2: '50%', 3: '75%', 4: '100%' };
+
+  const handleNext = (stepNum, data) => {
+    setUserData(prev => ({...prev, ...data}));
+    if (step < 4) setStep(step + 1);
+  };
+
+  const handleBack = () => { if (step > 1) setStep(step - 1); };
+
+  const handleFinalize = () => {
+    if (!selected) { alert('Please select your primary concern first.'); return; }
+    const final = {...userData, user_primary_concern: selected};
+    onComplete(final);
+  };
+
+  // Reset on close
+  useEffect(() => {
+    if (!open) { setStep(1); setUserData({}); setSelected(null); }
+  }, [open]);
+
+  return (
+    <div className={`e-survey-overlay${open ? ' open' : ''}`}>
+      <div className="e-survey-overlay" style={{position:'absolute',inset:0}} onClick={onClose} />
+      <div className="e-survey-modal" style={{position:'relative',zIndex:1}}>
+
+        {/* Progress bar */}
+        <div style={{height:6,background:'#f1f5f9'}}>
+          <div className="e-progress" style={{height:'100%',background:'var(--e-primary)',width:progressMap[step]}} />
         </div>
 
-        <!-- Step 4 -->
-        <div class="step-content" id="survey-step4">
-          <h3 class="font-headline text-2xl font-extrabold text-on-surface leading-tight mb-2">The Final Step</h3>
-          <p class="text-on-surface-variant text-base mb-8 font-medium">What's your biggest concern right now?</p>
-          <div class="space-y-3" id="survey-step4-options">
-            <button class="w-full text-left p-5 rounded-2xl bg-surface-container-low border-2 border-transparent transition-all hover:bg-surface-container-high btn-press"
-                    onclick="surveySelectOption(this,'Monthly payments too high')">
-              <span class="font-bold text-on-surface">Monthly payments too high</span>
+        <div style={{padding:'20px 28px 28px'}}>
+          {/* Nav row */}
+          <div className="tw-flex tw-justify-between tw-items-center" style={{marginBottom:16}}>
+            <button className="e-btn" onClick={handleBack} style={{
+              visibility: step > 1 ? 'visible' : 'hidden',
+              background:'none', color:'var(--e-on-surface-var)', padding:'6px 0',
+              display:'flex', alignItems:'center', gap:4, fontSize:12, fontWeight:700,
+              textTransform:'uppercase', letterSpacing:'0.06em'
+            }}>
+              <span className="mi" style={{fontSize:18}}>arrow_back</span> Back
             </button>
-            <button class="w-full text-left p-5 rounded-2xl bg-surface-container-low border-2 border-transparent transition-all hover:bg-surface-container-high btn-press"
-                    onclick="surveySelectOption(this,'Too many accounts')">
-              <span class="font-bold text-on-surface">Too many accounts</span>
-            </button>
-            <button class="w-full text-left p-5 rounded-2xl bg-surface-container-low border-2 border-transparent transition-all hover:bg-surface-container-high btn-press"
-                    onclick="surveySelectOption(this,'Behind on payments')">
-              <span class="font-bold text-on-surface">Behind on payments</span>
-            </button>
-            <button class="w-full text-left p-5 rounded-2xl bg-surface-container-low border-2 border-transparent transition-all hover:bg-surface-container-high btn-press"
-                    onclick="surveySelectOption(this,'Exploring options')">
-              <span class="font-bold text-on-surface">Exploring options</span>
+            <button className="e-btn" onClick={() => onComplete(userData)} style={{
+              background:'none', color:'var(--e-on-surface-var)', fontSize:12,
+              fontWeight:700, textTransform:'uppercase', letterSpacing:'0.06em', padding:'6px 0'
+            }}>
+              Skip
             </button>
           </div>
-          <button class="w-full mt-8 py-4 rounded-full bg-primary text-white font-extrabold shadow-lg active:scale-[0.97] transition-all text-lg tracking-tight btn-press"
-                  onclick="surveyFinalize()">See My Options</button>
-        </div>
 
-        <!-- Info callout -->
-        <div class="mt-8 p-5 rounded-2xl bg-surface-container-low flex items-start gap-4">
-          <span class="material-symbols-outlined text-primary text-2xl mt-0.5" style="font-variation-settings:'FILL' 1">info</span>
-          <p class="text-[13px] text-on-surface-variant leading-relaxed">
-            Don't worry, we'll keep this secure. We're here to help you stay on track with zero judgment.
+          {/* Step 1 */}
+          <div className={`e-step${step === 1 ? ' active' : ''}`}>
+            <h3 style={{fontSize:22,fontWeight:800,marginBottom:8,lineHeight:1.3}}>Let's understand your situation</h3>
+            <p style={{color:'var(--e-on-surface-var)',marginBottom:24,fontSize:15}}>Are you having trouble making payments?</p>
+            <div className="tw-flex tw-flex-col tw-gap-3">
+              {['Yes','Sometimes','No'].map((opt, i) => {
+                const vals = ['yes','sometimes','no'];
+                return (
+                  <button key={opt} className="e-option" onClick={() => handleNext(1, {user_payment_difficulty: vals[i]})}>
+                    {opt}
+                    <span className="mi" style={{fontSize:18,color:'var(--e-outline)'}}>chevron_right</span>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Step 2 */}
+          <div className={`e-step${step === 2 ? ' active' : ''}`}>
+            <h3 style={{fontSize:22,fontWeight:800,marginBottom:8,lineHeight:1.3}}>Tell us about your debt</h3>
+            <p style={{color:'var(--e-on-surface-var)',marginBottom:24,fontSize:15}}>Do you have debt outside of Capital One?</p>
+            <div className="tw-flex tw-flex-col tw-gap-3">
+              {[['Yes', true], ['No', false]].map(([label, val]) => (
+                <button key={label} className="e-option" onClick={() => handleNext(2, {user_external_debt: val})}>
+                  {label}
+                  <span className="mi" style={{fontSize:18,color:'var(--e-outline)'}}>chevron_right</span>
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Step 3 */}
+          <div className={`e-step${step === 3 ? ' active' : ''}`}>
+            <h3 style={{fontSize:22,fontWeight:800,marginBottom:8,lineHeight:1.3}}>Debt Settlement</h3>
+            <p style={{color:'var(--e-on-surface-var)',marginBottom:24,fontSize:15}}>Have you considered debt settlement services?</p>
+            <div className="tw-flex tw-flex-col tw-gap-3">
+              {[['Yes','high'],['Not sure','unsure'],['No','low']].map(([label, val]) => (
+                <button key={label} className="e-option" onClick={() => handleNext(3, {user_dsc_intent: val})}>
+                  {label}
+                  <span className="mi" style={{fontSize:18,color:'var(--e-outline)'}}>chevron_right</span>
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Step 4 */}
+          <div className={`e-step${step === 4 ? ' active' : ''}`}>
+            <h3 style={{fontSize:22,fontWeight:800,marginBottom:8,lineHeight:1.3}}>The Final Step</h3>
+            <p style={{color:'var(--e-on-surface-var)',marginBottom:24,fontSize:15}}>What's your biggest concern right now?</p>
+            <div className="tw-flex tw-flex-col tw-gap-3">
+              {['Monthly payments too high','Too many accounts','Behind on payments','Exploring options'].map(opt => (
+                <button key={opt}
+                  className={`e-option${selected === opt ? ' selected' : ''}`}
+                  onClick={() => setSelected(opt)}>
+                  {opt}
+                </button>
+              ))}
+            </div>
+            <button className="e-btn e-btn-primary" onClick={handleFinalize}
+              style={{marginTop:24,borderRadius:999,fontSize:17,fontWeight:800}}>
+              See My Options
+            </button>
+          </div>
+
+          {/* Info callout */}
+          <div style={{marginTop:24,background:'var(--e-surface-low)',borderRadius:16,padding:16,display:'flex',gap:12,alignItems:'flex-start'}}>
+            <span className="mi mi-fill" style={{color:'var(--e-primary)',fontSize:22,flexShrink:0}}>info</span>
+            <p style={{fontSize:12,color:'var(--e-on-surface-var)',lineHeight:1.6,margin:0}}>
+              Don't worry, we'll keep this secure. We're here to help you stay on track with zero judgment.
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ══════════════════════════════════════════
+   SCREEN 2 — Support Paths
+   ══════════════════════════════════════════ */
+function SupportPaths({ onBack, onStartPlan }) {
+  const [expanded, setExpanded] = useState(null);
+  const [warningOpen, setWarningOpen] = useState(false);
+
+  const toggle = (id) => setExpanded(prev => prev === id ? null : id);
+
+  return (
+    <div>
+      <AppHeader onBack={onBack} title="EASE" />
+
+      {/* Warning bottom sheet */}
+      <div className={`e-sheet-overlay${warningOpen ? ' open' : ''}`}>
+        <div className="e-sheet">
+          <div style={{width:48,height:6,background:'rgba(203,213,224,0.4)',borderRadius:999,margin:'0 auto 24px'}} />
+          <div style={{display:'flex',alignItems:'center',gap:10,marginBottom:14,color:'var(--e-tertiary)'}}>
+            <span className="mi" style={{fontSize:22}}>warning</span>
+            <h3 style={{fontSize:18,fontWeight:800}}>Final Confirmation</h3>
+          </div>
+          <p style={{color:'var(--e-on-surface-var)',fontSize:13,lineHeight:1.7,marginBottom:24}}>
+            Debt settlement may significantly impact your credit score for up to 7 years and may have tax implications. Are you sure you want to proceed?
+          </p>
+          <div className="tw-flex tw-flex-col tw-gap-3">
+            <button className="e-btn e-btn-primary" onClick={() => setWarningOpen(false)}>Continue to Settlement</button>
+            <button className="e-btn e-btn-secondary-outline" onClick={() => setWarningOpen(false)}>Go Back</button>
+          </div>
+        </div>
+      </div>
+
+      <div style={{padding:'24px 24px 100px'}}>
+        {/* Header */}
+        <div style={{marginBottom:28}}>
+          <p style={{fontSize:10,fontWeight:700,color:'var(--e-secondary)',textTransform:'uppercase',letterSpacing:'0.1em',marginBottom:6}}>
+            Your Path Forward
+          </p>
+          <h1 style={{fontSize:26,fontWeight:800,color:'var(--e-primary)',lineHeight:1.2,marginBottom:10}}>
+            We've tailored these routes for you
+          </h1>
+          <p style={{color:'var(--e-on-surface-var)',fontSize:14,lineHeight:1.6}}>
+            Based on your unique financial profile, here are the three most impactful directions to consider.
           </p>
         </div>
-      </div>
-    </div>
-  </div>
-</div><!-- /screen-dashboard -->
 
-
-<!-- ═══════════════════════════════════════
-     SCREEN 2 — Support Paths
-     ═══════════════════════════════════════ -->
-<div class="app-screen" id="screen-support-paths">
-
-  <!-- Toast -->
-  <div class="toast-bar fixed bottom-24 left-6 right-6 z-[100] bg-primary text-white p-4 rounded-xl shadow-2xl flex items-center gap-3" id="paths-toast">
-    <span class="material-symbols-outlined text-green-400">check_circle</span>
-    <p class="text-sm font-bold">Plan successfully started! Check your email.</p>
-  </div>
-
-  <!-- Warning modal -->
-  <div class="fixed inset-0 bg-primary/40 backdrop-blur-sm z-[60] hidden opacity-0 transition-opacity duration-300" id="paths-modal-overlay">
-    <div class="absolute bottom-0 w-full bg-white rounded-t-3xl p-8 transform translate-y-full transition-transform duration-300 max-w-md left-1/2 -translate-x-1/2" id="paths-warning-modal">
-      <div class="w-12 h-1.5 bg-outline/30 rounded-full mx-auto mb-6"></div>
-      <div class="flex items-center gap-3 mb-4 text-tertiary">
-        <span class="material-symbols-outlined font-bold">warning</span>
-        <h3 class="text-xl font-extrabold">Final Confirmation</h3>
-      </div>
-      <p class="text-on-surface-variant mb-8 text-sm leading-relaxed">
-        Debt settlement may significantly impact your credit score for up to 7 years and may have tax implications. Are you sure you want to proceed?
-      </p>
-      <div class="flex flex-col gap-3">
-        <button class="w-full py-4 bg-primary text-white rounded-lg font-bold btn-press" onclick="pathsCloseModal()">Continue to Settlement</button>
-        <button class="w-full py-4 bg-surface-container-high text-primary rounded-lg font-bold btn-press" onclick="pathsCloseModal()">Go Back</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- Header -->
-  <header class="app-header fixed w-full z-50 bg-white/90 backdrop-blur-md border-b border-outline/20">
-    <div class="flex justify-between items-center px-6 py-4 w-full max-w-md mx-auto">
-      <div class="flex items-center gap-3">
-        <button onclick="goToScreen('screen-dashboard')"
-                class="w-9 h-9 flex items-center justify-center rounded-full hover:bg-surface-container-low transition-colors text-on-surface-variant btn-press">
-          <span class="material-symbols-outlined text-[20px]">arrow_back</span>
-        </button>
-        <span class="text-xl font-extrabold tracking-tight text-primary uppercase">Ease</span>
-      </div>
-      <button class="p-2 rounded-full hover:bg-surface-container-high transition-colors text-on-surface-variant btn-press">
-        <span class="material-symbols-outlined">notifications</span>
-      </button>
-    </div>
-  </header>
-
-  <!-- Content -->
-  <main class="app-main px-6 max-w-md mx-auto space-y-8 pb-32">
-
-    <div>
-      <p class="text-secondary font-bold text-[10px] tracking-widest uppercase mb-2">Your Path Forward</p>
-      <h1 class="text-3xl font-extrabold text-primary leading-tight mb-3">We've tailored these routes for you</h1>
-      <p class="text-on-surface-variant text-base leading-relaxed">Based on your unique financial profile, here are the three most impactful directions to consider.</p>
-    </div>
-
-    <!-- Path A -->
-    <section class="relative">
-      <div class="absolute -top-3 right-6 z-10">
-        <span class="bg-secondary text-white text-[10px] font-extrabold px-3 py-1.5 rounded-full uppercase tracking-widest shadow-sm">Recommended</span>
-      </div>
-      <div class="bg-white rounded-2xl p-6 rec-glow border border-secondary/10 flex flex-col">
-        <div class="flex items-start mb-5">
-          <div class="p-3 bg-secondary/5 rounded-xl border border-secondary/10">
-            <span class="material-symbols-outlined text-secondary text-2xl">account_balance</span>
+        {/* Path A — Recommended */}
+        <div style={{position:'relative',marginBottom:16}}>
+          <div style={{position:'absolute',top:-10,right:16,zIndex:1}}>
+            <span className="e-tag e-tag-recommended" style={{fontSize:9}}>Recommended</span>
           </div>
-        </div>
-        <h2 class="text-2xl font-extrabold text-primary mb-3">You have options with us</h2>
-        <p class="text-on-surface-variant mb-6 text-sm leading-relaxed">Direct payment plans with reduced interest rates and predictable monthly installments designed for your Capital One accounts.</p>
-        <div class="space-y-3 mb-8">
-          <div class="flex items-center gap-3">
-            <span class="material-symbols-outlined text-secondary text-lg" style="font-variation-settings:'FILL' 1">check_circle</span>
-            <span class="text-sm font-semibold text-primary">Protect your credit score</span>
-          </div>
-          <div class="flex items-center gap-3">
-            <span class="material-symbols-outlined text-secondary text-lg" style="font-variation-settings:'FILL' 1">check_circle</span>
-            <span class="text-sm font-semibold text-primary">Stop late fees immediately</span>
-          </div>
-        </div>
-        <button class="w-full mt-auto py-4 bg-primary text-white rounded-lg font-bold text-base hover:bg-primary-dim transition-all btn-press shadow-md"
-                onclick="pathsToggle('path-a-detail')">View My Plan Options</button>
-        <div class="expandable-content space-y-3" id="path-a-detail">
-          <div class="mt-4 p-4 bg-surface-container-low rounded-xl border border-outline/20">
-            <h4 class="text-xs font-extrabold text-primary uppercase tracking-wider mb-2">Personalized Offers</h4>
-            <div class="space-y-3">
-              <div class="flex justify-between items-center text-sm">
-                <span class="text-on-surface-variant">Standard Payment Plan</span>
-                <span class="font-bold text-primary">From $120/mo</span>
-              </div>
-              <div class="flex justify-between items-center text-sm">
-                <span class="text-on-surface-variant">Reduced APR (Fixed 4.9%)</span>
-                <span class="font-bold text-primary">24 Months</span>
-              </div>
-              <div class="flex justify-between items-center text-sm">
-                <span class="text-on-surface-variant">Settlement-lite Option</span>
-                <span class="font-bold text-tertiary">35% Savings</span>
+          <div className="e-card e-card-glow" style={{padding:24}}>
+            <div style={{padding:10,background:'rgba(0,104,142,0.06)',borderRadius:12,border:'1px solid rgba(0,104,142,0.1)',display:'inline-flex',marginBottom:16}}>
+              <span className="mi" style={{color:'var(--e-secondary)',fontSize:24}}>account_balance</span>
+            </div>
+            <h2 style={{fontSize:22,fontWeight:800,color:'var(--e-primary)',marginBottom:10}}>You have options with us</h2>
+            <p style={{color:'var(--e-on-surface-var)',fontSize:13,lineHeight:1.7,marginBottom:16}}>
+              Direct payment plans with reduced interest rates and predictable monthly installments designed for your Capital One accounts.
+            </p>
+            <div style={{marginBottom:20,display:'flex',flexDirection:'column',gap:10}}>
+              {['Protect your credit score','Stop late fees immediately'].map(t => (
+                <div key={t} style={{display:'flex',alignItems:'center',gap:10}}>
+                  <span className="mi mi-fill" style={{color:'var(--e-secondary)',fontSize:18}}>check_circle</span>
+                  <span style={{fontSize:13,fontWeight:600,color:'var(--e-primary)'}}>{t}</span>
+                </div>
+              ))}
+            </div>
+            <button className="e-btn e-btn-primary" onClick={() => toggle('a')}>View My Plan Options</button>
+            <div className={`e-expand${expanded === 'a' ? ' open' : ''}`}>
+              <div style={{marginTop:14,padding:16,background:'var(--e-surface-low)',borderRadius:12,border:'1px solid rgba(203,213,224,0.25)'}}>
+                <p style={{fontSize:10,fontWeight:800,color:'var(--e-primary)',textTransform:'uppercase',letterSpacing:'0.08em',marginBottom:12}}>Personalized Offers</p>
+                {[['Standard Payment Plan','From $120/mo','var(--e-primary)'],
+                  ['Reduced APR (Fixed 4.9%)','24 Months','var(--e-primary)'],
+                  ['Settlement-lite Option','35% Savings','var(--e-tertiary)']].map(([label, val, color]) => (
+                  <div key={label} style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:10,fontSize:13}}>
+                    <span style={{color:'var(--e-on-surface-var)'}}>{label}</span>
+                    <span style={{fontWeight:700,color}}>{val}</span>
+                  </div>
+                ))}
+                <button className="e-btn" onClick={onStartPlan} style={{
+                  width:'100%',marginTop:10,padding:'12px 16px',background:'var(--e-secondary)',
+                  color:'#fff',borderRadius:8,fontSize:13,fontWeight:700
+                }}>
+                  Start a Payment Plan
+                </button>
               </div>
             </div>
-            <button class="w-full mt-4 py-3 bg-secondary text-white rounded-lg text-sm font-bold btn-press"
-                    onclick="pathsStartPlan()">Start a Payment Plan</button>
           </div>
         </div>
-      </div>
-    </section>
 
-    <!-- Path B -->
-    <section>
-      <div class="bg-white rounded-2xl p-6 c1-shadow border border-outline/10 flex flex-col">
-        <div class="flex items-center gap-4 mb-5">
-          <div class="p-2.5 bg-surface-container-high rounded-lg text-on-surface-variant">
-            <span class="material-symbols-outlined text-xl">dashboard_customize</span>
+        {/* Path B */}
+        <div className="e-card" style={{padding:24,marginBottom:16}}>
+          <div style={{padding:8,background:'var(--e-surface-high)',borderRadius:8,display:'inline-flex',marginBottom:16}}>
+            <span className="mi" style={{color:'var(--e-on-surface-var)',fontSize:20}}>dashboard_customize</span>
           </div>
-        </div>
-        <h2 class="text-xl font-extrabold text-primary mb-2">Look at your full picture</h2>
-        <p class="text-on-surface-variant mb-6 text-sm leading-relaxed">Integrated budgeting tools and certified credit counseling to help manage multiple creditors simultaneously.</p>
-        <div class="grid grid-cols-2 gap-4 mb-6">
-          <div class="bg-surface-container-low p-3.5 rounded-xl border border-outline/20">
-            <span class="block text-[10px] font-extrabold text-secondary uppercase tracking-wider mb-1">Budgeting</span>
-            <span class="text-xs font-semibold text-on-surface">Smart tracking</span>
+          <h2 style={{fontSize:19,fontWeight:800,color:'var(--e-primary)',marginBottom:8}}>Look at your full picture</h2>
+          <p style={{color:'var(--e-on-surface-var)',fontSize:13,lineHeight:1.7,marginBottom:16}}>
+            Integrated budgeting tools and certified credit counseling to help manage multiple creditors simultaneously.
+          </p>
+          <div className="tw-grid tw-grid-cols-2 tw-gap-3" style={{marginBottom:16}}>
+            {[['Budgeting','Smart tracking'],['Counseling','Expert advice']].map(([title, sub]) => (
+              <div key={title} style={{background:'var(--e-surface-low)',padding:12,borderRadius:10,border:'1px solid rgba(203,213,224,0.3)'}}>
+                <div style={{fontSize:9,fontWeight:800,color:'var(--e-secondary)',textTransform:'uppercase',letterSpacing:'0.08em',marginBottom:3}}>{title}</div>
+                <div style={{fontSize:11,fontWeight:600,color:'var(--e-on-surface)'}}>{sub}</div>
+              </div>
+            ))}
           </div>
-          <div class="bg-surface-container-low p-3.5 rounded-xl border border-outline/20">
-            <span class="block text-[10px] font-extrabold text-secondary uppercase tracking-wider mb-1">Counseling</span>
-            <span class="text-xs font-semibold text-on-surface">Expert advice</span>
-          </div>
-        </div>
-        <button class="w-full mt-auto py-3.5 bg-surface-container-high text-primary rounded-lg font-bold text-sm hover:bg-outline/20 transition-colors border border-outline/30 btn-press"
-                onclick="pathsToggle('path-b-detail')">Explore Financial Tools</button>
-        <div class="expandable-content" id="path-b-detail">
-          <div class="mt-4 p-4 bg-surface-container-low rounded-xl border border-outline/20">
-            <h4 class="text-xs font-extrabold text-primary uppercase tracking-wider mb-3">Simple Budget Snapshot</h4>
-            <div class="space-y-2 mb-4">
-              <div class="flex justify-between items-center text-xs">
-                <span class="text-on-surface-variant">Monthly Income</span>
-                <span class="font-bold text-primary">$3,200</span>
+          <button className="e-btn e-btn-secondary-outline" onClick={() => toggle('b')}>Explore Financial Tools</button>
+          <div className={`e-expand${expanded === 'b' ? ' open' : ''}`}>
+            <div style={{marginTop:14,padding:16,background:'var(--e-surface-low)',borderRadius:12,border:'1px solid rgba(203,213,224,0.25)'}}>
+              <p style={{fontSize:10,fontWeight:800,color:'var(--e-primary)',textTransform:'uppercase',letterSpacing:'0.08em',marginBottom:12}}>Simple Budget Snapshot</p>
+              <div style={{marginBottom:12}}>
+                {[['Monthly Income','$3,200','var(--e-primary)'],['Total Debt','$12,450','var(--e-tertiary)']].map(([label, val, color]) => (
+                  <div key={label} style={{display:'flex',justifyContent:'space-between',fontSize:12,marginBottom:6}}>
+                    <span style={{color:'var(--e-on-surface-var)'}}>{label}</span>
+                    <span style={{fontWeight:700,color}}>{val}</span>
+                  </div>
+                ))}
+                <div style={{height:6,background:'rgba(203,213,224,0.3)',borderRadius:999,overflow:'hidden',margin:'8px 0'}}>
+                  <div style={{height:'100%',width:'100%',background:'var(--e-secondary)',borderRadius:999}} />
+                </div>
               </div>
-              <div class="w-full bg-outline/20 h-1.5 rounded-full overflow-hidden">
-                <div class="bg-secondary h-full rounded-full w-full"></div>
-              </div>
-              <div class="flex justify-between items-center text-xs mt-2">
-                <span class="text-on-surface-variant">Total Debt</span>
-                <span class="font-bold text-tertiary">$12,450</span>
-              </div>
+              <p style={{fontSize:10,fontWeight:800,color:'var(--e-primary)',textTransform:'uppercase',letterSpacing:'0.08em',marginBottom:10}}>Your 3-Step Plan</p>
+              {[['1','Link other bank accounts',false],['2','Categorize your spending',true]].map(([n,text,dim]) => (
+                <div key={n} style={{display:'flex',alignItems:'center',gap:10,padding:10,background:'#fff',borderRadius:8,border:'1px solid rgba(203,213,224,0.2)',marginBottom:6,opacity:dim?0.5:1}}>
+                  <div style={{width:20,height:20,borderRadius:'50%',background:dim?'var(--e-surface-high)':'rgba(0,104,142,0.12)',display:'flex',alignItems:'center',justifyContent:'center',fontSize:10,fontWeight:700,color:dim?'inherit':'var(--e-secondary)',flexShrink:0}}>{n}</div>
+                  <span style={{fontSize:12,fontWeight:500}}>{text}</span>
+                </div>
+              ))}
+              <button className="e-btn e-btn-primary" style={{marginTop:12,fontSize:13}}>Create a Plan</button>
             </div>
-            <h4 class="text-xs font-extrabold text-primary uppercase tracking-wider mb-3">Your 3-Step Plan</h4>
-            <div class="space-y-2">
-              <div class="flex items-center gap-3 p-3 bg-white rounded-lg border border-outline/10">
-                <div class="w-5 h-5 rounded-full bg-secondary/10 flex items-center justify-center text-[10px] font-bold text-secondary">1</div>
-                <span class="text-xs font-medium">Link other bank accounts</span>
-              </div>
-              <div class="flex items-center gap-3 p-3 bg-white rounded-lg border border-outline/10 opacity-50">
-                <div class="w-5 h-5 rounded-full bg-surface-container-high flex items-center justify-center text-[10px] font-bold">2</div>
-                <span class="text-xs font-medium">Categorize your spending</span>
-              </div>
-            </div>
-            <button class="w-full mt-4 py-3 bg-primary text-white rounded-lg text-sm font-bold btn-press">Create a Plan</button>
           </div>
         </div>
-      </div>
-    </section>
 
-    <!-- Path C -->
-    <section class="mb-8">
-      <div class="bg-white rounded-2xl p-6 border border-outline/30 flex flex-col">
-        <div class="flex items-start gap-3 mb-4">
-          <span class="material-symbols-outlined text-tertiary mt-0.5" style="font-variation-settings:'FILL' 1">info</span>
-          <h2 class="text-lg font-extrabold text-primary">Before you decide</h2>
-        </div>
-        <p class="text-on-surface-variant mb-5 text-sm leading-relaxed">Debt settlement can lower your total balance, but it may significantly impact your credit score and involves potential tax implications.</p>
-        <div class="border-l-4 border-tertiary p-4 mb-6 rounded-r-lg" style="background:rgba(209,43,47,0.03)">
-          <p class="text-[10px] font-extrabold text-primary mb-3 uppercase tracking-wider">Important Considerations:</p>
-          <ul class="space-y-2.5">
-            <li class="flex items-start gap-2.5 text-xs text-on-surface-variant leading-relaxed">
-              <span class="w-1.5 h-1.5 rounded-full bg-tertiary mt-1.5 shrink-0"></span>
-              <span>Settlement is often viewed as a last resort option.</span>
-            </li>
-            <li class="flex items-start gap-2.5 text-xs text-on-surface-variant leading-relaxed">
-              <span class="w-1.5 h-1.5 rounded-full bg-tertiary mt-1.5 shrink-0"></span>
-              <span>Account closure is typically required.</span>
-            </li>
-          </ul>
-        </div>
-        <button class="w-full mt-auto py-2 text-secondary font-bold text-sm hover:underline flex items-center justify-center gap-1.5 group btn-press"
-                onclick="pathsToggle('path-c-detail')">
-          Compare All Options
-          <span class="material-symbols-outlined text-base transition-transform group-hover:translate-x-1">arrow_forward</span>
-        </button>
-        <div class="expandable-content" id="path-c-detail">
-          <div class="mt-6 overflow-x-auto -mx-1 thin-scroll pb-2">
-            <table class="w-full text-left text-[11px] border-collapse min-w-[300px]">
-              <thead>
-                <tr class="bg-surface-container-high">
-                  <th class="p-3 border border-outline/20 font-extrabold text-primary">Feature</th>
-                  <th class="p-3 border border-outline/20 font-extrabold text-primary">Payment Plan</th>
-                  <th class="p-3 border border-outline/20 font-extrabold text-primary">Counseling</th>
-                  <th class="p-3 border border-outline/20 font-extrabold text-primary">Settlement</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td class="p-3 border border-outline/20 font-bold bg-white">Credit Impact</td>
-                  <td class="p-3 border border-outline/20 text-green-600 font-semibold bg-white">Positive</td>
-                  <td class="p-3 border border-outline/20 bg-white">Neutral</td>
-                  <td class="p-3 border border-outline/20 text-tertiary font-semibold bg-white">Negative</td>
-                </tr>
-                <tr>
-                  <td class="p-3 border border-outline/20 font-bold bg-white">Debt Reduction</td>
-                  <td class="p-3 border border-outline/20 bg-white">None</td>
-                  <td class="p-3 border border-outline/20 bg-white">Minimal</td>
-                  <td class="p-3 border border-outline/20 text-green-600 font-semibold bg-white">High</td>
-                </tr>
-              </tbody>
-            </table>
+        {/* Path C */}
+        <div className="e-card" style={{padding:24,border:'1px solid rgba(203,213,224,0.4)'}}>
+          <div style={{display:'flex',alignItems:'flex-start',gap:10,marginBottom:12}}>
+            <span className="mi mi-fill" style={{color:'var(--e-tertiary)',fontSize:20,flexShrink:0,marginTop:1}}>info</span>
+            <h2 style={{fontSize:16,fontWeight:800,color:'var(--e-primary)'}}>Before you decide</h2>
           </div>
-          <button class="w-full mt-6 py-4 border-2 border-tertiary text-tertiary rounded-lg font-bold text-sm btn-press"
-                  onclick="pathsOpenModal()">Proceed with Debt Settlement</button>
-        </div>
-      </div>
-    </section>
-  </main>
-
-  <!-- Bottom Nav -->
-  <nav class="fixed bottom-0 left-0 w-full z-50 bg-white border-t border-outline/20">
-    <div class="flex justify-around items-center px-4 pb-8 pt-2 w-full max-w-md mx-auto">
-      <a class="flex flex-col items-center px-4 py-2 group" href="#">
-        <span class="material-symbols-outlined text-primary" style="font-variation-settings:'FILL' 1">home</span>
-        <span class="text-[10px] font-bold tracking-wide mt-1 text-primary">Home</span>
-        <div class="w-1 h-1 rounded-full bg-primary mt-1"></div>
-      </a>
-      <a class="flex flex-col items-center px-4 py-2 text-on-surface-variant/60 hover:text-primary group" href="#">
-        <span class="material-symbols-outlined">help_center</span>
-        <span class="text-[10px] font-bold tracking-wide mt-1">Support</span>
-      </a>
-      <a class="flex flex-col items-center px-4 py-2 text-on-surface-variant/60 hover:text-primary group" href="#">
-        <span class="material-symbols-outlined">person</span>
-        <span class="text-[10px] font-bold tracking-wide mt-1">Account</span>
-      </a>
-    </div>
-  </nav>
-
-</div><!-- /screen-support-paths -->
-
-
-<!-- ═══════════════════════════════════════
-     SCREEN 3 — Confirmation
-     ═══════════════════════════════════════ -->
-<div class="app-screen" id="screen-confirmation">
-
-  <!-- Header -->
-  <header class="app-header fixed w-full z-50 bg-white/80 backdrop-blur-md border-b border-outline/30">
-    <div class="flex justify-between items-center px-6 py-4 w-full max-w-2xl mx-auto">
-      <div class="flex items-center gap-3">
-        <button onclick="goToScreen('screen-support-paths')"
-                class="w-9 h-9 flex items-center justify-center rounded-full hover:bg-surface-container-low transition-colors text-on-surface-variant btn-press">
-          <span class="material-symbols-outlined text-[20px]">arrow_back</span>
-        </button>
-        <span class="text-xl font-extrabold tracking-tight text-primary font-headline italic">EASE</span>
-      </div>
-      <div class="flex items-center gap-4">
-        <button class="material-symbols-outlined text-on-surface-variant hover:bg-primary-container transition-colors p-2 rounded-full">notifications</button>
-        <div class="w-8 h-8 rounded-full overflow-hidden border border-outline">
-          <img class="w-full h-full object-cover" alt="Profile"
-            src="https://lh3.googleusercontent.com/aida-public/AB6AXuDUGcrlXw2P5MxdIY0O3Bee3fMRmD_mA11pvllwooErEWCEBD5w528_M3efkAypVqpEB07Mu2seLVejXs37lw_WeaUC2-NnN6QSvT0zVPnuvYVuC0ik8IPxgwX0U28FV3ThafbXBzBYqKDJFgxBs8mIR3LgGIHImj0ZAfv1VH_JTW35uE_MgF5YAmEJfoNS49RvjcE7w1j_2oh44LWfqt-44YVf5EC_HhNScwotGa8SNindq5kCW7eEwVOt-jWlzOPQoPvRPu-oO8d1"/>
-        </div>
-      </div>
-    </div>
-  </header>
-
-  <!-- Content -->
-  <main class="app-main px-6 max-w-2xl mx-auto pb-32">
-
-    <!-- Confirmation section -->
-    <section class="flex flex-col items-center text-center py-8">
-      <div class="w-20 h-20 bg-primary-container rounded-full flex items-center justify-center mb-6">
-        <span class="material-symbols-outlined text-primary text-4xl" style="font-variation-settings:'FILL' 1">mail</span>
-      </div>
-      <h1 class="font-headline text-3xl font-extrabold text-on-surface tracking-tight mb-3">Your personalized plan is ready</h1>
-      <p class="text-on-surface-variant text-base max-w-xs mb-10 leading-relaxed">We've sent resources to your email.</p>
-
-      <div class="bg-surface p-6 rounded-xl w-full mb-12 cap-shadow flex items-start gap-4 text-left border border-outline/20">
-        <div class="bg-primary-container p-2.5 rounded-lg">
-          <span class="material-symbols-outlined text-primary text-xl">info</span>
-        </div>
-        <div class="space-y-3">
-          <h3 class="font-bold text-on-surface mb-1 text-base">Check your inbox</h3>
-          <ul class="space-y-2">
-            <li class="flex items-center gap-2 text-sm text-on-surface-variant leading-relaxed">
-              <span class="w-1 h-1 bg-primary rounded-full"></span>Payment options sent
-            </li>
-            <li class="flex items-center gap-2 text-sm text-on-surface-variant leading-relaxed">
-              <span class="w-1 h-1 bg-primary rounded-full"></span>Financial tools sent
-            </li>
-            <li class="flex items-center gap-2 text-sm text-on-surface-variant leading-relaxed">
-              <span class="w-1 h-1 bg-primary rounded-full"></span>Debt comparison guide sent
-            </li>
-          </ul>
-          <p class="text-xs text-on-surface-variant/80 italic mt-2">Your plan includes a step-by-step guide to improving your score.</p>
-        </div>
-      </div>
-    </section>
-
-    <div class="h-px bg-outline/40 w-full mb-12"></div>
-
-    <!-- Rebuild section -->
-    <section class="space-y-8">
-      <header class="space-y-1">
-        <h2 class="font-headline text-3xl font-extrabold text-primary tracking-tight">Rebuild with us</h2>
-        <p class="text-on-surface-variant font-medium">Tools and resources designed for your growth.</p>
-      </header>
-
-      <div class="grid grid-cols-1 gap-4">
-        <div class="bg-primary p-8 rounded-xl text-white shadow-lg relative overflow-hidden">
-          <div class="relative z-10 space-y-5">
-            <span class="inline-block px-3 py-1 bg-white/20 backdrop-blur-md rounded-md text-[10px] font-bold uppercase tracking-widest border border-white/30">Recommended</span>
-            <div>
-              <h3 class="text-2xl font-bold font-headline leading-tight mb-2">Build Credit with a Secured Card</h3>
-              <p class="text-white/80 text-sm max-w-xs">No hidden fees. Just a clear path to a better score with responsible use.</p>
+          <p style={{color:'var(--e-on-surface-var)',fontSize:13,lineHeight:1.7,marginBottom:14}}>
+            Debt settlement can lower your total balance, but it may significantly impact your credit score and involves potential tax implications.
+          </p>
+          <div style={{borderLeft:'4px solid var(--e-tertiary)',padding:'12px 14px',marginBottom:16,borderRadius:'0 8px 8px 0',background:'rgba(209,43,47,0.03)'}}>
+            <p style={{fontSize:9,fontWeight:800,color:'var(--e-primary)',textTransform:'uppercase',letterSpacing:'0.08em',marginBottom:8}}>Important Considerations:</p>
+            {['Settlement is often viewed as a last resort option.','Account closure is typically required.'].map(t => (
+              <div key={t} style={{display:'flex',alignItems:'flex-start',gap:8,marginBottom:6}}>
+                <div style={{width:6,height:6,borderRadius:'50%',background:'var(--e-tertiary)',flexShrink:0,marginTop:4}} />
+                <span style={{fontSize:11,color:'var(--e-on-surface-var)',lineHeight:1.6}}>{t}</span>
+              </div>
+            ))}
+          </div>
+          <button className="e-btn e-btn-ghost" onClick={() => toggle('c')}>
+            Compare All Options
+            <span className="mi" style={{fontSize:16}}>arrow_forward</span>
+          </button>
+          <div className={`e-expand${expanded === 'c' ? ' open' : ''}`}>
+            <div style={{marginTop:16,overflowX:'auto'}} className="thin-scroll">
+              <table style={{width:'100%',fontSize:11,borderCollapse:'collapse',minWidth:280}}>
+                <thead>
+                  <tr style={{background:'var(--e-surface-high)'}}>
+                    {['Feature','Payment Plan','Counseling','Settlement'].map(h => (
+                      <th key={h} style={{padding:'10px 12px',border:'1px solid rgba(203,213,224,0.3)',fontWeight:800,color:'var(--e-primary)',textAlign:'left'}}>{h}</th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td style={{padding:'10px 12px',border:'1px solid rgba(203,213,224,0.3)',fontWeight:700,background:'#fff'}}>Credit Impact</td>
+                    <td style={{padding:'10px 12px',border:'1px solid rgba(203,213,224,0.3)',color:'#16a34a',fontWeight:600,background:'#fff'}}>Positive</td>
+                    <td style={{padding:'10px 12px',border:'1px solid rgba(203,213,224,0.3)',background:'#fff'}}>Neutral</td>
+                    <td style={{padding:'10px 12px',border:'1px solid rgba(203,213,224,0.3)',color:'var(--e-tertiary)',fontWeight:600,background:'#fff'}}>Negative</td>
+                  </tr>
+                  <tr>
+                    <td style={{padding:'10px 12px',border:'1px solid rgba(203,213,224,0.3)',fontWeight:700,background:'#fff'}}>Debt Reduction</td>
+                    <td style={{padding:'10px 12px',border:'1px solid rgba(203,213,224,0.3)',background:'#fff'}}>None</td>
+                    <td style={{padding:'10px 12px',border:'1px solid rgba(203,213,224,0.3)',background:'#fff'}}>Minimal</td>
+                    <td style={{padding:'10px 12px',border:'1px solid rgba(203,213,224,0.3)',color:'#16a34a',fontWeight:600,background:'#fff'}}>High</td>
+                  </tr>
+                </tbody>
+              </table>
             </div>
-            <button class="bg-white text-primary px-6 py-3 rounded font-bold text-sm hover:bg-white/90 transition-all flex items-center gap-2 btn-press">
-              Explore Offers
-              <span class="material-symbols-outlined text-sm">arrow_forward</span>
+            <button className="e-btn" onClick={() => setWarningOpen(true)} style={{
+              width:'100%',marginTop:16,padding:'14px 16px',
+              border:'2px solid var(--e-tertiary)',color:'var(--e-tertiary)',
+              borderRadius:8,fontSize:13,fontWeight:700,background:'none',cursor:'pointer'
+            }}>
+              Proceed with Debt Settlement
             </button>
           </div>
-          <div class="absolute right-[-10%] bottom-[-10%] w-64 h-40 bg-white/5 rounded-2xl rotate-[15deg] border border-white/10"></div>
-          <div class="absolute right-[-5%] bottom-[-5%] w-64 h-40 bg-white/10 rounded-2xl rotate-[15deg] border border-white/20"></div>
-        </div>
-
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div class="bg-white p-6 rounded-xl border border-outline/30 cap-shadow hover:border-primary transition-colors">
-            <div class="w-10 h-10 bg-secondary-container rounded-lg flex items-center justify-center mb-4">
-              <span class="material-symbols-outlined text-secondary">query_stats</span>
-            </div>
-            <h4 class="font-bold text-lg mb-2">Track Progress</h4>
-            <p class="text-on-surface-variant text-sm leading-relaxed">Daily updates and personalized insights to see how your actions impact your score.</p>
-          </div>
-          <div class="bg-white p-6 rounded-xl border border-outline/30 cap-shadow hover:border-primary transition-colors">
-            <div class="w-10 h-10 bg-secondary-container rounded-lg flex items-center justify-center mb-4">
-              <span class="material-symbols-outlined text-secondary">menu_book</span>
-            </div>
-            <h4 class="font-bold text-lg mb-2">Master Your Finances</h4>
-            <p class="text-on-surface-variant text-sm leading-relaxed">Bite-sized lessons on debt management and saving strategies.</p>
-          </div>
         </div>
       </div>
 
-      <div class="space-y-4">
-        <h3 class="font-headline text-xl font-bold">Essential Guides</h3>
-        <div class="space-y-3">
-          <div class="flex items-center justify-between p-4 bg-white border border-outline/30 rounded-xl cap-shadow cursor-pointer hover:bg-secondary-container transition-colors">
-            <div class="flex items-center gap-4">
-              <span class="material-symbols-outlined text-on-surface-variant">play_circle</span>
-              <span class="font-semibold text-sm">How credit scores are calculated</span>
-            </div>
-            <span class="text-[10px] font-bold text-secondary uppercase tracking-wider bg-secondary-container px-2 py-1 rounded">5 MIN</span>
+      <AppNav active="home" />
+    </div>
+  );
+}
+
+/* ══════════════════════════════════════════
+   SCREEN 3 — Confirmation
+   ══════════════════════════════════════════ */
+function Confirmation({ onBack, onRestart }) {
+  return (
+    <div>
+      <AppHeader onBack={onBack} title="EASE" showProfile={true} />
+
+      <div style={{padding:'24px 24px 100px'}}>
+
+        {/* Success state */}
+        <div style={{display:'flex',flexDirection:'column',alignItems:'center',textAlign:'center',paddingTop:16,paddingBottom:32}}>
+          <div style={{width:80,height:80,background:'var(--e-primary-container)',borderRadius:'50%',display:'flex',alignItems:'center',justifyContent:'center',marginBottom:20}}>
+            <span className="mi mi-fill" style={{color:'var(--e-primary)',fontSize:36}}>mail</span>
           </div>
-          <div class="flex items-center justify-between p-4 bg-white border border-outline/30 rounded-xl cap-shadow cursor-pointer hover:bg-secondary-container transition-colors">
-            <div class="flex items-center gap-4">
-              <span class="material-symbols-outlined text-on-surface-variant">article</span>
-              <span class="font-semibold text-sm">Disputing errors on your report</span>
+          <h1 style={{fontSize:26,fontWeight:800,color:'var(--e-on-surface)',marginBottom:10,lineHeight:1.2}}>Your personalized plan is ready</h1>
+          <p style={{color:'var(--e-on-surface-var)',fontSize:14,maxWidth:240,lineHeight:1.6,marginBottom:32}}>
+            We've sent resources to your email.
+          </p>
+
+          <div className="e-card e-shadow-cap" style={{padding:20,width:'100%',display:'flex',gap:14,textAlign:'left',border:'1px solid rgba(203,213,224,0.25)'}}>
+            <div style={{background:'var(--e-primary-container)',padding:10,borderRadius:8,flexShrink:0,height:'fit-content'}}>
+              <span className="mi" style={{color:'var(--e-primary)',fontSize:20}}>info</span>
             </div>
-            <span class="text-[10px] font-bold text-secondary uppercase tracking-wider bg-secondary-container px-2 py-1 rounded">3 MIN</span>
+            <div>
+              <h3 style={{fontSize:14,fontWeight:700,marginBottom:10}}>Check your inbox</h3>
+              {['Payment options sent','Financial tools sent','Debt comparison guide sent'].map(t => (
+                <div key={t} style={{display:'flex',alignItems:'center',gap:8,marginBottom:6}}>
+                  <div style={{width:4,height:4,borderRadius:'50%',background:'var(--e-primary)',flexShrink:0}} />
+                  <span style={{fontSize:13,color:'var(--e-on-surface-var)'}}>{t}</span>
+                </div>
+              ))}
+              <p style={{fontSize:11,color:'rgba(74,85,104,0.7)',fontStyle:'italic',marginTop:8}}>
+                Your plan includes a step-by-step guide to improving your score.
+              </p>
+            </div>
           </div>
+        </div>
+
+        <div style={{height:1,background:'rgba(203,213,224,0.5)',marginBottom:32}} />
+
+        {/* Rebuild section */}
+        <div>
+          <h2 style={{fontSize:26,fontWeight:800,color:'var(--e-primary)',marginBottom:6}}>Rebuild with us</h2>
+          <p style={{color:'var(--e-on-surface-var)',fontWeight:500,fontSize:14,marginBottom:24}}>Tools and resources designed for your growth.</p>
+
+          {/* Secured card hero */}
+          <div style={{background:'var(--e-primary)',padding:28,borderRadius:14,color:'#fff',marginBottom:14,position:'relative',overflow:'hidden',boxShadow:'0 8px 24px rgba(0,44,77,0.2)'}}>
+            <div style={{position:'relative',zIndex:1}}>
+              <span style={{display:'inline-block',padding:'3px 10px',background:'rgba(255,255,255,0.2)',borderRadius:6,fontSize:9,fontWeight:700,textTransform:'uppercase',letterSpacing:'0.08em',border:'1px solid rgba(255,255,255,0.3)',marginBottom:16}}>Recommended</span>
+              <h3 style={{fontFamily:'Plus Jakarta Sans',fontSize:20,fontWeight:800,lineHeight:1.3,marginBottom:8}}>Build Credit with a Secured Card</h3>
+              <p style={{fontSize:13,opacity:0.8,maxWidth:220,lineHeight:1.6,marginBottom:16}}>No hidden fees. Just a clear path to a better score with responsible use.</p>
+              <button className="e-btn" style={{background:'#fff',color:'var(--e-primary)',padding:'10px 18px',borderRadius:6,fontSize:13,fontWeight:700,display:'flex',alignItems:'center',gap:6}}>
+                Explore Offers <span className="mi" style={{fontSize:14}}>arrow_forward</span>
+              </button>
+            </div>
+            <div style={{position:'absolute',right:'-10%',bottom:'-10%',width:160,height:100,background:'rgba(255,255,255,0.05)',borderRadius:12,transform:'rotate(15deg)',border:'1px solid rgba(255,255,255,0.1)'}} />
+            <div style={{position:'absolute',right:'-5%',bottom:'-5%',width:160,height:100,background:'rgba(255,255,255,0.08)',borderRadius:12,transform:'rotate(15deg)',border:'1px solid rgba(255,255,255,0.15)'}} />
+          </div>
+
+          {/* Tool cards */}
+          <div className="tw-grid tw-grid-cols-2 tw-gap-3" style={{marginBottom:20}}>
+            {[
+              ['query_stats','Track Progress','Daily updates and personalized insights to see how your actions impact your score.'],
+              ['menu_book','Master Your Finances','Bite-sized lessons on debt management and saving strategies.'],
+            ].map(([icon, title, desc]) => (
+              <div key={title} className="e-card e-shadow-cap" style={{padding:18,border:'1px solid rgba(203,213,224,0.3)'}}>
+                <div style={{width:38,height:38,background:'var(--e-secondary-container)',borderRadius:8,display:'flex',alignItems:'center',justifyContent:'center',marginBottom:10}}>
+                  <span className="mi" style={{color:'var(--e-secondary)',fontSize:20}}>{icon}</span>
+                </div>
+                <h4 style={{fontSize:14,fontWeight:700,marginBottom:6}}>{title}</h4>
+                <p style={{fontSize:12,color:'var(--e-on-surface-var)',lineHeight:1.6}}>{desc}</p>
+              </div>
+            ))}
+          </div>
+
+          {/* Guides */}
+          <h3 style={{fontFamily:'Plus Jakarta Sans',fontSize:18,fontWeight:700,marginBottom:12}}>Essential Guides</h3>
+          <div style={{display:'flex',flexDirection:'column',gap:10,marginBottom:28}}>
+            {[['play_circle','How credit scores are calculated','5 MIN'],
+              ['article','Disputing errors on your report','3 MIN']].map(([icon, title, time]) => (
+              <div key={title} className="e-card e-shadow-cap" style={{padding:14,display:'flex',alignItems:'center',justifyContent:'space-between',cursor:'pointer',border:'1px solid rgba(203,213,224,0.3)'}}>
+                <div style={{display:'flex',alignItems:'center',gap:12}}>
+                  <span className="mi" style={{color:'var(--e-on-surface-var)',fontSize:20}}>{icon}</span>
+                  <span style={{fontWeight:600,fontSize:13}}>{title}</span>
+                </div>
+                <span style={{fontSize:9,fontWeight:700,color:'var(--e-secondary)',textTransform:'uppercase',letterSpacing:'0.08em',background:'var(--e-secondary-container)',padding:'3px 8px',borderRadius:4}}>{time}</span>
+              </div>
+            ))}
+          </div>
+
+          <button className="e-btn e-btn-primary" onClick={onRestart}
+            style={{borderRadius:8,fontSize:16,fontWeight:700,boxShadow:'0 4px 16px rgba(0,44,77,0.15)'}}>
+            Start rebuilding my credit
+          </button>
         </div>
       </div>
 
-      <div class="pt-6 pb-12">
-        <button onclick="goToScreen('screen-dashboard')"
-                class="w-full bg-primary text-white py-4 rounded font-bold text-lg shadow-md hover:bg-primary/95 transition-all btn-press">
-          Start rebuilding my credit
-        </button>
+      <AppNav active="account" />
+    </div>
+  );
+}
+
+/* ══════════════════════════════════════════
+   Root App
+   ══════════════════════════════════════════ */
+function App() {
+  const [screen, setScreen] = useState('dashboard');
+  const [surveyOpen, setSurveyOpen] = useState(false);
+  const [toastVisible, setToastVisible] = useState(false);
+
+  const navigate = (to) => {
+    setScreen(to);
+    window.scrollTo({ top: 0 });
+  };
+
+  const handleSurveyComplete = () => {
+    setSurveyOpen(false);
+    setTimeout(() => navigate('paths'), 280);
+  };
+
+  const handleStartPlan = () => {
+    setToastVisible(true);
+    setTimeout(() => {
+      setToastVisible(false);
+      setTimeout(() => navigate('confirmation'), 200);
+    }, 1600);
+  };
+
+  return (
+    <div className="ease-wrap">
+      {/* Toast (lives outside screen components) */}
+      <div className={`e-toast${toastVisible ? ' show' : ''}`} style={{maxWidth:480}}>
+        <span className="mi" style={{color:'#4ade80',fontSize:20}}>check_circle</span>
+        <span style={{fontSize:13,fontWeight:700}}>Plan successfully started! Check your email.</span>
       </div>
-    </section>
-  </main>
 
-  <!-- Bottom Nav -->
-  <nav class="fixed bottom-0 left-0 w-full flex justify-around items-center px-4 pb-8 pt-3 bg-white border-t border-outline/30 z-50">
-    <a class="flex flex-col items-center justify-center text-on-surface-variant px-5 py-1 hover:text-primary" href="#">
-      <span class="material-symbols-outlined mb-1">home</span>
-      <span class="text-[11px] font-semibold tracking-wide">Home</span>
-    </a>
-    <a class="flex flex-col items-center justify-center text-on-surface-variant px-5 py-1 hover:text-primary" href="#">
-      <span class="material-symbols-outlined mb-1">support_agent</span>
-      <span class="text-[11px] font-semibold tracking-wide">Support</span>
-    </a>
-    <a class="flex flex-col items-center justify-center text-primary px-5 py-1" href="#">
-      <div class="bg-primary-container px-6 py-1 rounded-full flex flex-col items-center">
-        <span class="material-symbols-outlined mb-1" style="font-variation-settings:'FILL' 1">person</span>
-        <span class="text-[11px] font-bold tracking-wide">Account</span>
-      </div>
-    </a>
-  </nav>
+      {screen === 'dashboard' && (
+        <>
+          <Dashboard onOpenSurvey={() => setSurveyOpen(true)} />
+          <SurveyModal
+            open={surveyOpen}
+            onClose={() => setSurveyOpen(false)}
+            onComplete={handleSurveyComplete}
+          />
+        </>
+      )}
 
-</div><!-- /screen-confirmation -->
+      {screen === 'paths' && (
+        <SupportPaths
+          onBack={() => navigate('dashboard')}
+          onStartPlan={handleStartPlan}
+        />
+      )}
 
-
-<script>
-// ─────────────────────────────────────────
-// Screen management
-// ─────────────────────────────────────────
-let currentScreen = 'screen-dashboard';
-
-function goToScreen(targetId) {
-  if (targetId === currentScreen) return;
-  const current = document.getElementById(currentScreen);
-  const target  = document.getElementById(targetId);
-
-  current.classList.add('exit-left');
-  current.classList.remove('active');
-
-  target.classList.remove('exit-left');
-  // Small delay so browser paints the starting transform before transition
-  requestAnimationFrame(() => {
-    requestAnimationFrame(() => {
-      target.classList.add('active');
-    });
-  });
-
-  setTimeout(() => { current.classList.remove('exit-left'); }, 350);
-  currentScreen = targetId;
-  window.scrollTo(0, 0);
+      {screen === 'confirmation' && (
+        <Confirmation
+          onBack={() => navigate('paths')}
+          onRestart={() => navigate('dashboard')}
+        />
+      )}
+    </div>
+  );
 }
 
-// ─────────────────────────────────────────
-// Survey logic
-// ─────────────────────────────────────────
-let surveyCurrent = 1;
-let surveyData = { user_payment_difficulty: null, user_external_debt: null, user_dsc_intent: null, user_primary_concern: null };
-const surveyProgressMap = { 1: '25%', 2: '50%', 3: '75%', 4: '100%' };
-
-function openSurvey() {
-  const overlay = document.getElementById('surveyOverlay');
-  const modal   = document.getElementById('surveyModal');
-  overlay.style.pointerEvents = 'auto';
-  overlay.style.opacity = '1';
-  modal.style.transform = 'translateY(0)';
-  modal.style.opacity   = '1';
-}
-
-function closeSurvey() {
-  const overlay = document.getElementById('surveyOverlay');
-  const modal   = document.getElementById('surveyModal');
-  overlay.style.opacity = '0';
-  modal.style.transform = 'translateY(60px)';
-  modal.style.opacity   = '0';
-  setTimeout(() => { overlay.style.pointerEvents = 'none'; }, 320);
-}
-
-function surveyUpdateUI() {
-  document.getElementById('surveyProgress').style.width = surveyProgressMap[surveyCurrent];
-  document.querySelectorAll('.step-content').forEach((el, i) => {
-    el.classList.toggle('active', i + 1 === surveyCurrent);
-  });
-  const back = document.getElementById('surveyBack');
-  back.classList.toggle('invisible', surveyCurrent === 1);
-}
-
-function surveyNext(stepNum, data) {
-  surveyData = { ...surveyData, ...data };
-  if (surveyCurrent < 4) { surveyCurrent++; surveyUpdateUI(); }
-}
-
-function surveySelectOption(el, value) {
-  surveyData.user_primary_concern = value;
-  document.querySelectorAll('#survey-step4-options button').forEach(btn => {
-    btn.classList.remove('border-primary', 'bg-primary-container/10');
-    btn.classList.add('bg-surface-container-low', 'border-transparent');
-  });
-  el.classList.remove('bg-surface-container-low', 'border-transparent');
-  el.classList.add('border-primary', 'bg-primary-container/10');
-}
-
-document.getElementById('surveyBack').addEventListener('click', () => {
-  if (surveyCurrent > 1) { surveyCurrent--; surveyUpdateUI(); }
-});
-
-function surveySkip() {
-  closeSurvey();
-  setTimeout(() => goToScreen('screen-support-paths'), 320);
-}
-
-function surveyFinalize() {
-  if (!surveyData.user_primary_concern) {
-    alert('Please select your primary concern first.');
-    return;
-  }
-  closeSurvey();
-  setTimeout(() => goToScreen('screen-support-paths'), 320);
-}
-
-// ─────────────────────────────────────────
-// Support paths logic
-// ─────────────────────────────────────────
-function pathsToggle(id) {
-  const el = document.getElementById(id);
-  const isOpen = el.classList.contains('open');
-  document.querySelectorAll('#screen-support-paths .expandable-content').forEach(e => e.classList.remove('open'));
-  if (!isOpen) {
-    el.classList.add('open');
-    setTimeout(() => el.scrollIntoView({ behavior: 'smooth', block: 'nearest' }), 300);
-  }
-}
-
-function pathsStartPlan() {
-  // Show toast, then transition to confirmation
-  const toast = document.getElementById('paths-toast');
-  toast.classList.add('show');
-  setTimeout(() => {
-    toast.classList.remove('show');
-    setTimeout(() => goToScreen('screen-confirmation'), 200);
-  }, 1600);
-}
-
-function pathsOpenModal() {
-  const overlay = document.getElementById('paths-modal-overlay');
-  const modal   = document.getElementById('paths-warning-modal');
-  overlay.classList.remove('hidden');
-  requestAnimationFrame(() => requestAnimationFrame(() => {
-    overlay.classList.add('opacity-100');
-    modal.classList.remove('translate-y-full');
-  }));
-}
-
-function pathsCloseModal() {
-  const overlay = document.getElementById('paths-modal-overlay');
-  const modal   = document.getElementById('paths-warning-modal');
-  overlay.classList.remove('opacity-100');
-  modal.classList.add('translate-y-full');
-  setTimeout(() => overlay.classList.add('hidden'), 300);
-}
+ReactDOM.createRoot(document.getElementById('dsc-root')).render(<App />);
+{% endraw %}
 </script>
-</body>
-</html>
