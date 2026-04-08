@@ -193,6 +193,30 @@ comments: false
             </div>
           </div>
 
+          <div class="project-card"
+               data-project="dsc"
+               data-primary-url="{{ site.baseurl }}/pages/dsc-case-study.html"
+               data-primary-label="Launch App"
+               data-primary-icon="fa-mobile-alt"
+               role="button" tabindex="0"
+               aria-haspopup="dialog">
+            <div class="project-card-thumb" style="background: linear-gradient(135deg, #004870 0%, #00668e 100%); display:flex; align-items:center; justify-content:center; min-height:160px;">
+              <div style="text-align:center;">
+                <i class="fas fa-mobile-alt" style="font-size:2.5rem; color:#E3F2FD;"></i>
+                <div style="color:#84cffe; font-size:0.7rem; font-weight:700; letter-spacing:0.1em; margin-top:8px; text-transform:uppercase;">EASE · Capital One</div>
+              </div>
+            </div>
+            <div class="project-card-body">
+              <div class="project-card-header">
+                <span class="project-tag">UX Design</span>
+                <span class="project-tag">Case Study</span>
+              </div>
+              <h3 class="project-title">DSC Case Study</h3>
+              <p class="project-blurb">Interactive mobile app prototype for Capital One's debt support flow — smart survey, personalized paths, and a confirmation experience.</p>
+              <span class="project-card-cta">Read more <i class="fas fa-arrow-right"></i></span>
+            </div>
+          </div>
+
         </div>
       </div>
     </div>
@@ -308,6 +332,16 @@ comments: false
           'Outbuild is a Series A construction scheduling and management SaaS company preparing for a potential Series B. As they scaled their sales team, new AEs and SDRs faced a steep learning curve — selling construction software to general contractors, superintendents, and project managers requires deep contextual knowledge of industry terminology, project delivery methods, lean construction principles, and how pull planning works. Historically this took 3–4 weeks of self-study and shadowing.',
           'I delivered an automated learning assessment system that shorterned onboarding time from 4 weeks to ~1 week. The system combined Claude (Anthropic\'s AI) for intelligent quiz generation and grading, Notion as the knowledge base and results hub, Google Forms for assessment delivery, and n8n as the automation layer tying everything together.',
           'New hires could demonstrate product knowledge faster while sales could start meaningful revenue-generating activity significantly sooner.'
+        ]
+      },
+      dsc: {
+        title: 'DSC Case Study — EASE',
+        tags: ['UX Design', 'Case Study'],
+        abstract: [
+          'A functional proof-of-concept mobile app prototype designed for Capital One\'s Debt Settlement Counseling (DSC) flow. The app is called <strong>EASE</strong> and is built around the insight that customers in financial distress need clarity, not complexity.',
+          'The experience is a three-screen applet: a <strong>dashboard home</strong> that surfaces the customer\'s financial snapshot and prompts them to get a personalized plan; a <strong>smart survey</strong> modal that collects four key signals (payment difficulty, external debt, DSC intent, and primary concern) and uses segmentation logic to route users to the most relevant path; and a <strong>support paths</strong> screen offering three differentiated options — a Capital One payment plan, integrated budgeting tools, and debt settlement — with expandable detail panels and a comparison table.',
+          'Completing a plan flow leads to a <strong>confirmation screen</strong> with a "Rebuild with us" section including a secured card offer, credit monitoring, and financial education resources.',
+          'Built as a standalone interactive prototype using Tailwind CSS and vanilla JavaScript, with smooth screen transitions and full interactivity — no backend required.',
         ]
       },
       instacart: {
