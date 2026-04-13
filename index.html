@@ -200,12 +200,7 @@ comments: false
                data-primary-icon="fa-mobile-alt"
                role="button" tabindex="0"
                aria-haspopup="dialog">
-            <div class="project-card-thumb" style="background: linear-gradient(135deg, #004870 0%, #00668e 100%); display:flex; align-items:center; justify-content:center; min-height:160px;">
-              <div style="text-align:center;">
-                <i class="fas fa-mobile-alt" style="font-size:2.5rem; color:#E3F2FD;"></i>
-                <div style="color:#84cffe; font-size:0.7rem; font-weight:700; letter-spacing:0.1em; margin-top:8px; text-transform:uppercase;">EASE · Capital One</div>
-              </div>
-            </div>
+            <img class="project-card-thumb" src="{{ site.baseurl }}/assets/images/ease.png" alt="">
             <div class="project-card-body">
               <div class="project-card-header">
                 <span class="project-tag">UX Design</span>
@@ -297,6 +292,16 @@ comments: false
   </div>
 </div>
 
+<!-- Image Lightbox -->
+<div id="img-lightbox" class="img-lightbox" role="dialog" aria-modal="true" aria-label="Diagram viewer">
+  <div class="img-lightbox-backdrop"></div>
+  <div class="img-lightbox-panel">
+    <button class="img-lightbox-close" aria-label="Close">&times;</button>
+    <img class="img-lightbox-img" src="" alt="">
+    <p class="img-lightbox-caption"></p>
+  </div>
+</div>
+
 <!-- Project Abstract Modal -->
 <div id="project-modal" class="project-modal" role="dialog" aria-modal="true" aria-labelledby="modal-title">
   <div class="project-modal-backdrop"></div>
@@ -331,7 +336,8 @@ comments: false
         abstract: [
           'Outbuild is a Series A construction scheduling and management SaaS company preparing for a potential Series B. As they scaled their sales team, new AEs and SDRs faced a steep learning curve — selling construction software to general contractors, superintendents, and project managers requires deep contextual knowledge of industry terminology, project delivery methods, lean construction principles, and how pull planning works. Historically this took 3–4 weeks of self-study and shadowing.',
           'I delivered an automated learning assessment system that shorterned onboarding time from 4 weeks to ~1 week. The system combined Claude (Anthropic\'s AI) for intelligent quiz generation and grading, Notion as the knowledge base and results hub, Google Forms for assessment delivery, and n8n as the automation layer tying everything together.',
-          'New hires could demonstrate product knowledge faster while sales could start meaningful revenue-generating activity significantly sooner.'
+          'New hires could demonstrate product knowledge faster while sales could start meaningful revenue-generating activity significantly sooner.',
+          '<button class="diagram-btn" data-src="{{ site.baseurl }}/assets/projects/outbuild_diagram.jpg" data-caption="V1 vs V2 system architecture">View Diagram <i class="fas fa-image"></i></button>'
         ]
       },
       dsc: {
@@ -397,6 +403,32 @@ comments: false
     document.querySelectorAll('.project-card').forEach(card => {
       card.addEventListener('click', () => openModal(card));
       card.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') openModal(card); });
+    });
+
+    // Diagram lightbox
+    const lightbox     = document.getElementById('img-lightbox');
+    const lightboxImg  = lightbox.querySelector('.img-lightbox-img');
+    const lightboxCap  = lightbox.querySelector('.img-lightbox-caption');
+
+    function openLightbox(src, caption) {
+      lightboxImg.src = src;
+      lightboxImg.alt = caption || '';
+      lightboxCap.textContent = caption || '';
+      lightbox.classList.add('open');
+    }
+
+    function closeLightbox() {
+      lightbox.classList.remove('open');
+      lightboxImg.src = '';
+    }
+
+    lightbox.querySelector('.img-lightbox-close').addEventListener('click', closeLightbox);
+    lightbox.querySelector('.img-lightbox-backdrop').addEventListener('click', closeLightbox);
+    document.addEventListener('keydown', e => { if (e.key === 'Escape') closeLightbox(); });
+
+    bodyEl.addEventListener('click', e => {
+      const btn = e.target.closest('.diagram-btn');
+      if (btn) openLightbox(btn.dataset.src, btn.dataset.caption);
     });
   }());
 </script>
