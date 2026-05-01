@@ -1,0 +1,26 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(jekyll --version)",
+      "Bash(bundle exec *)",
+      "Bash(ruby --version)",
+      "Bash(bundle --version)",
+      "Bash(gem list *)",
+      "Bash(ruby -e 'require \"rubygems\"; puts Gem.bindir')",
+      "Bash(/c/Ruby33-x64/bin/bundle exec *)",
+      "Bash(curl -s http://127.0.0.1:4321/ -o /tmp/idx.html -w \"HTTP %{http_code}  bytes %{size_download}\\\\n\")",
+      "Bash(curl -s -I http://127.0.0.1:4321/assets/css/editorial.css)",
+      "Bash(curl -s -I http://127.0.0.1:4321/assets/js/weather.js)",
+      "Bash(curl -s -I http://127.0.0.1:4321/assets/js/ripple.js)",
+      "Bash(curl -s http://127.0.0.1:4321/pages/dsc-case-study.html -o /tmp/dsc.html -w \"HTTP %{http_code}  bytes %{size_download}\\\\n\")",
+      "Bash(curl -s http://127.0.0.1:4321/tools/attendance-tracker/ -o /tmp/at.html -w \"HTTP %{http_code}  bytes %{size_download}\\\\n\")",
+      "Bash(curl -s http://127.0.0.1:4321/tools/festival-thingamabob/ -o /tmp/ft.html -w \"HTTP %{http_code}  bytes %{size_download}\\\\n\")",
+      "Bash(pkill -f \"jekyll serve\")",
+      "Bash(ps -W)",
+      "Bash(wait)",
+      "Bash(taskkill //F //PID 1026 //PID 104892)",
+      "Bash(tasklist //FI \"IMAGENAME eq ruby.exe\")",
+      "Bash(taskkill //F //PID 42528 //PID 39356)"
+    ]
+  }
+}

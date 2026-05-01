@@ -6,6 +6,9 @@ comments: false
 ---
 
 <style>
+  /* Editorial palette tokens come from editorial.css; this file only adds the
+     festival-tool-specific shell styles. */
+
   /* ── Gate overlay ─────────────────────────────────────── */
   #ft-gate {
     position: fixed;
@@ -14,73 +17,82 @@ comments: false
     display: flex;
     align-items: center;
     justify-content: center;
-    background: linear-gradient(160deg, #f5f9ff 0%, #e4f0ff 35%, #cfe3ff 70%, #bcd6ff 100%);
+    background: linear-gradient(180deg, var(--sky-start) 0%, var(--surface) 100%);
+    padding: var(--gutter);
   }
 
   .ft-gate-card {
-    background: rgba(255,255,255,0.85);
-    backdrop-filter: blur(24px);
-    -webkit-backdrop-filter: blur(24px);
-    border: 1px solid rgba(255,255,255,0.70);
-    border-radius: 28px;
-    box-shadow: 0 8px 40px rgba(0,102,255,0.12), inset 0 1px 0 rgba(255,255,255,0.9);
-    padding: 3rem 3.5rem;
+    background: rgba(248, 251, 253, 0.85);
+    backdrop-filter: blur(20px) saturate(1.4);
+    -webkit-backdrop-filter: blur(20px) saturate(1.4);
+    border: 1px solid rgba(255,255,255,0.7);
+    border-radius: var(--r-xl);
+    box-shadow: var(--shadow-card), 0 8px 40px rgba(36, 128, 253, 0.1);
+    padding: clamp(2rem, 1rem + 4vw, 3rem) clamp(1.5rem, 1rem + 3vw, 2.75rem);
     max-width: 420px;
-    width: 90%;
+    width: 100%;
     text-align: center;
   }
 
   .ft-lock-icon {
-    font-size: 2.8rem;
-    color: #0066ff;
-    margin-bottom: 1.25rem;
-    display: block;
+    font-size: 2rem;
+    color: var(--primary);
+    margin-bottom: 1rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    background: var(--secondary-container);
+    color: var(--on-secondary-container);
   }
 
   .ft-gate-title {
-    font-family: 'Outfit', sans-serif;
-    font-size: 1.75rem;
-    font-weight: 800;
-    color: #0f1419;
-    margin-bottom: 0.4rem;
+    font-family: var(--font-sans);
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--text-strong);
+    margin-bottom: 0.35rem;
     letter-spacing: -0.01em;
   }
 
   .ft-gate-sub {
-    font-size: 0.9375rem;
-    color: #536471;
-    margin-bottom: 2rem;
+    font-size: var(--fs-body-sm);
+    color: var(--text-body);
+    margin-bottom: 1.75rem;
     line-height: 1.6;
   }
 
   .ft-input-wrap {
     position: relative;
-    margin-bottom: 1rem;
+    margin-bottom: 0.875rem;
   }
 
   #ft-passcode {
     width: 100%;
-    padding: 0.9rem 1.25rem;
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 1.4rem;
-    letter-spacing: 0.35em;
+    padding: 0.85rem 1rem;
+    font-family: var(--font-ui);
+    font-size: 1.25rem;
+    font-weight: 600;
+    letter-spacing: 0.3em;
     text-align: center;
-    border: 2px solid rgba(0,102,255,0.2);
-    border-radius: 14px;
-    background: rgba(255,255,255,0.8);
-    color: #0f1419;
+    border: 1.5px solid var(--outline-variant);
+    border-radius: var(--r-md);
+    background: white;
+    color: var(--text-strong);
     outline: none;
     transition: border-color 0.2s ease, box-shadow 0.2s ease;
   }
 
   #ft-passcode:focus {
-    border-color: #0066ff;
-    box-shadow: 0 0 0 3px rgba(0,102,255,0.12);
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(0, 89, 187, 0.12);
   }
 
   #ft-passcode.shake {
     animation: ft-shake 0.4s cubic-bezier(0.36,0.07,0.19,0.97);
-    border-color: #e53935;
+    border-color: var(--error);
   }
 
   @keyframes ft-shake {
@@ -92,77 +104,80 @@ comments: false
 
   #ft-submit {
     width: 100%;
-    padding: 0.875rem;
-    background: linear-gradient(135deg, #0066ff 0%, #00d4ff 100%);
+    padding: 0.85rem;
+    background: var(--primary);
     color: white;
     border: none;
-    border-radius: 14px;
-    font-family: 'Outfit', sans-serif;
-    font-size: 1rem;
-    font-weight: 700;
+    border-radius: var(--r-pill);
+    font-family: var(--font-ui);
+    font-size: var(--fs-nav);
+    font-weight: 600;
     cursor: pointer;
-    letter-spacing: 0.04em;
-    transition: opacity 0.2s ease, transform 0.2s ease;
+    transition: background 0.2s ease, transform 0.2s ease;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.4rem;
   }
 
-  #ft-submit:hover:not(:disabled) { opacity: 0.9; transform: translateY(-1px); }
+  #ft-submit:hover:not(:disabled) { background: var(--primary-container); transform: translateY(-1px); }
   #ft-submit:disabled { opacity: 0.5; cursor: not-allowed; }
 
   #ft-msg {
-    margin-top: 1rem;
-    font-size: 0.875rem;
+    margin-top: 0.875rem;
+    font-size: 0.8125rem;
     font-weight: 600;
     min-height: 1.25rem;
-    transition: color 0.2s;
+    color: var(--text-body);
   }
-  #ft-msg.error { color: #e53935; }
-  #ft-msg.locked { color: #f57c00; }
+  #ft-msg.error { color: var(--error); }
+  #ft-msg.locked { color: #b45309; }
 
   /* ── Tool page ────────────────────────────────────────── */
-  #ft-tool { display: none; padding: 2.5rem 1.5rem; max-width: 860px; margin: 0 auto; }
+  #ft-tool { display: none; padding: 0; max-width: 860px; margin: 0 auto; }
 
   .ft-header {
     display: flex;
     align-items: center;
     gap: 1rem;
-    margin-bottom: 2.5rem;
+    margin-bottom: 2rem;
   }
 
   .ft-header-icon {
-    font-size: 2rem;
-    color: #0066ff;
-    background: rgba(0,102,255,0.08);
-    border-radius: 14px;
-    width: 56px; height: 56px;
+    font-size: 1.5rem;
+    color: var(--on-secondary-container);
+    background: var(--secondary-container);
+    border-radius: 50%;
+    width: 48px; height: 48px;
     display: flex; align-items: center; justify-content: center;
     flex-shrink: 0;
   }
 
   .ft-header h1 {
-    font-family: 'Outfit', sans-serif;
-    font-size: 2rem;
-    font-weight: 800;
-    color: #0f1419;
+    font-family: var(--font-sans);
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--text-strong);
     margin: 0;
-    letter-spacing: -0.02em;
+    letter-spacing: -0.01em;
   }
 
   .ft-header p {
-    font-size: 0.9375rem;
-    color: #536471;
+    font-size: var(--fs-body-sm);
+    color: var(--text-body);
     margin: 0.2rem 0 0;
   }
 
   .ft-badge {
-    font-family: 'Outfit', sans-serif;
-    font-size: 0.7rem;
-    font-weight: 700;
+    font-family: var(--font-ui);
+    font-size: var(--fs-label-caps);
+    font-weight: 600;
     letter-spacing: 0.06em;
     text-transform: uppercase;
-    background: rgba(0,102,255,0.08);
-    color: #0066ff;
-    border: 1px solid rgba(0,102,255,0.2);
-    border-radius: 9999px;
+    background: rgba(0, 89, 187, 0.08);
+    color: var(--primary);
+    border: 1px solid rgba(0, 89, 187, 0.2);
+    border-radius: var(--r-pill);
     padding: 0.2rem 0.7rem;
     align-self: center;
     margin-left: auto;
@@ -170,47 +185,47 @@ comments: false
   }
 
   .ft-section {
-    background: white;
-    border: 1.5px solid rgba(0,102,255,0.10);
-    border-radius: 20px;
-    padding: 2rem;
-    margin-bottom: 1.5rem;
-    box-shadow: 0 2px 12px rgba(0,102,255,0.06);
+    background: var(--frost-surface);
+    border: 1px solid rgba(255, 255, 255, 0.7);
+    border-radius: var(--r-xl);
+    padding: clamp(1.25rem, 1rem + 1vw, 2rem);
+    margin-bottom: 1.25rem;
+    box-shadow: var(--shadow-card);
   }
 
   .ft-section-title {
-    font-family: 'Outfit', sans-serif;
-    font-size: 1.1rem;
+    font-family: var(--font-sans);
+    font-size: 1.0625rem;
     font-weight: 700;
-    color: #0f1419;
+    color: var(--text-strong);
     margin: 0 0 0.35rem;
     display: flex;
     align-items: center;
     gap: 0.6rem;
   }
 
-  .ft-section-title i { color: #0066ff; font-size: 1rem; }
+  .ft-section-title i { color: var(--primary); font-size: 1rem; }
 
   .ft-section-desc {
     font-size: 0.9rem;
-    color: #536471;
+    color: var(--text-body);
     margin: 0 0 1.25rem;
     line-height: 1.6;
   }
 
   .ft-placeholder-area {
-    border: 2px dashed rgba(0,102,255,0.18);
-    border-radius: 14px;
-    padding: 2.5rem 1.5rem;
+    border: 1.5px dashed rgba(0, 89, 187, 0.2);
+    border-radius: var(--r-md);
+    padding: 2rem 1.25rem;
     text-align: center;
-    color: #536471;
-    font-size: 0.9rem;
-    background: rgba(0,102,255,0.02);
+    color: var(--text-body);
+    font-size: 0.875rem;
+    background: rgba(238, 244, 250, 0.5);
   }
 
   .ft-placeholder-area i {
-    font-size: 2rem;
-    color: rgba(0,102,255,0.25);
+    font-size: 1.75rem;
+    color: rgba(0, 89, 187, 0.3);
     display: block;
     margin-bottom: 0.75rem;
   }
@@ -218,46 +233,46 @@ comments: false
   .ft-tag-row {
     display: flex;
     flex-wrap: wrap;
-    gap: 0.5rem;
-    margin-top: 1rem;
+    gap: 0.4rem;
+    margin-top: 0.875rem;
   }
 
   .ft-tag {
-    background: rgba(0,102,255,0.07);
-    border: 1px solid rgba(0,102,255,0.18);
-    color: #0066ff;
-    font-family: 'Outfit', sans-serif;
-    font-size: 0.8rem;
-    font-weight: 600;
-    padding: 0.3rem 0.8rem;
-    border-radius: 9999px;
+    background: white;
+    border: 1px solid var(--outline-variant);
+    color: var(--text-body);
+    font-family: var(--font-ui);
+    font-size: 0.75rem;
+    font-weight: 500;
+    padding: 0.25rem 0.7rem;
+    border-radius: var(--r-pill);
   }
 
   .ft-btn {
     display: inline-flex;
     align-items: center;
-    gap: 0.6rem;
-    background: linear-gradient(135deg, #0066ff 0%, #00d4ff 100%);
+    gap: 0.5rem;
+    background: var(--primary);
     color: white;
     border: none;
-    border-radius: 9999px;
-    padding: 0.75rem 1.75rem;
-    font-family: 'Outfit', sans-serif;
-    font-size: 0.95rem;
-    font-weight: 700;
+    border-radius: var(--r-pill);
+    padding: 0.65rem 1.4rem;
+    font-family: var(--font-ui);
+    font-size: var(--fs-nav);
+    font-weight: 600;
     cursor: not-allowed;
-    opacity: 0.45;
-    letter-spacing: 0.02em;
+    opacity: 0.5;
     margin-top: 1rem;
   }
 
   .ft-logout {
     display: inline-flex;
     align-items: center;
-    gap: 0.5rem;
-    color: #536471;
-    font-size: 0.85rem;
-    font-weight: 600;
+    gap: 0.4rem;
+    color: var(--text-muted);
+    font-family: var(--font-ui);
+    font-size: 0.8125rem;
+    font-weight: 500;
     cursor: pointer;
     border: none;
     background: none;
@@ -266,7 +281,7 @@ comments: false
     text-decoration: underline;
     text-underline-offset: 3px;
   }
-  .ft-logout:hover { color: #e53935; }
+  .ft-logout:hover { color: var(--error); }
 </style>
 
 <!-- ── Password Gate ───────────────────────────────────── -->

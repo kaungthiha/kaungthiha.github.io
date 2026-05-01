@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Recent Projects - Portfolio</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;700;800&amp;family=Inter:wght@500;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              "colors": {
+                      "sky-start": "#D0E5FC",
+                      "inverse-on-surface": "#ebf2f7",
+                      "on-tertiary-fixed-variant": "#2b4a5c",
+                      "primary-fixed": "#d8e2ff",
+                      "sky-end": "#A0CDEB",
+                      "background": "#f5faff",
+                      "on-secondary-container": "#00566b",
+                      "on-primary-fixed": "#001a41",
+                      "secondary-container": "#23d1ff",
+                      "on-primary-container": "#fefcff",
+                      "frost-glow": "#C7E8FE",
+                      "error-container": "#ffdad6",
+                      "outline-variant": "#c1c6d7",
+                      "secondary-fixed-dim": "#50d5ff",
+                      "secondary-fixed": "#b8eaff",
+                      "tertiary-fixed": "#c6e7fd",
+                      "text-strong": "#171D27",
+                      "on-primary-fixed-variant": "#004492",
+                      "on-tertiary-container": "#fbfcff",
+                      "tertiary": "#406072",
+                      "on-secondary-fixed-variant": "#004d61",
+                      "error": "#ba1a1a",
+                      "surface-container-high": "#e2e9ef",
+                      "surface-bright": "#f5faff",
+                      "surface-variant": "#dde3e9",
+                      "on-tertiary-fixed": "#001e2c",
+                      "on-secondary-fixed": "#001f28",
+                      "outline": "#727786",
+                      "on-error-container": "#93000a",
+                      "surface-container-highest": "#dde3e9",
+                      "on-primary": "#ffffff",
+                      "tertiary-container": "#59798c",
+                      "primary": "#0059bb",
+                      "surface-container-low": "#eef4fa",
+                      "primary-container": "#0070ea",
+                      "on-surface-variant": "#414754",
+                      "on-tertiary": "#ffffff",
+                      "frost-surface": "#F8FBFD",
+                      "surface": "#f5faff",
+                      "tertiary-fixed-dim": "#aacbe0",
+                      "inverse-primary": "#acc7ff",
+                      "surface-container": "#e8eff4",
+                      "surface-dim": "#d4dbe0",
+                      "surface-tint": "#005bbf",
+                      "inverse-surface": "#2a3136",
+                      "primary-fixed-dim": "#acc7ff",
+                      "on-background": "#161c21",
+                      "on-surface": "#161c21",
+                      "surface-container-lowest": "#ffffff",
+                      "secondary": "#006780",
+                      "text-body": "#737A7F",
+                      "accent-gradient": "linear-gradient(135deg, #2480FD 0%, #26A1FF 50%, #22D1FF 100%)",
+                      "on-secondary": "#ffffff",
+                      "on-error": "#ffffff"
+              },
+              "borderRadius": {
+                      "DEFAULT": "0.25rem",
+                      "lg": "0.5rem",
+                      "xl": "0.75rem",
+                      "full": "9999px"
+              },
+              "spacing": {
+                      "section-gap-desktop": "120px",
+                      "container-max": "1100px",
+                      "section-gap-mobile": "64px",
+                      "card-padding": "32px",
+                      "gutter": "24px",
+                      "unit": "8px"
+              },
+              "fontFamily": {
+                      "headline-section": [
+                              "Plus Jakarta Sans"
+                      ],
+                      "body-large": [
+                              "Plus Jakarta Sans"
+                      ],
+                      "body-main": [
+                              "Plus Jakarta Sans"
+                      ],
+                      "display-hero": [
+                              "Plus Jakarta Sans"
+                      ],
+                      "label-caps": [
+                              "Inter"
+                      ],
+                      "nav-item": [
+                              "Inter"
+                      ]
+              },
+              "fontSize": {
+                      "headline-section": [
+                              "24px",
+                              {
+                                      "lineHeight": "1.3",
+                                      "letterSpacing": "-0.01em",
+                                      "fontWeight": "700"
+                              }
+                      ],
+                      "body-large": [
+                              "18px",
+                              {
+                                      "lineHeight": "1.6",
+                                      "fontWeight": "400"
+                              }
+                      ],
+                      "body-main": [
+                              "16px",
+                              {
+                                      "lineHeight": "1.6",
+                                      "fontWeight": "400"
+                              }
+                      ],
+                      "display-hero": [
+                              "48px",
+                              {
+                                      "lineHeight": "1.1",
+                                      "letterSpacing": "-0.02em",
+                                      "fontWeight": "800"
+                              }
+                      ],
+                      "label-caps": [
+                              "12px",
+                              {
+                                      "lineHeight": "1",
+                                      "letterSpacing": "0.05em",
+                                      "fontWeight": "600"
+                              }
+                      ],
+                      "nav-item": [
+                              "14px",
+                              {
+                                      "lineHeight": "1",
+                                      "fontWeight": "500"
+                              }
+                      ]
+              }
+      },
+          },
+        }
+      </script>
+</head>
+<body class="bg-background min-h-screen text-on-background bg-gradient-to-br from-sky-start/30 to-sky-end/10 font-body-main text-body-main relative pb-32">
+<!-- TopAppBar -->
+<header class="fixed top-6 left-1/2 -translate-x-1/2 rounded-full border border-white/20 dark:border-slate-700/30 bg-white/40 dark:bg-slate-900/40 backdrop-blur-xl shadow-[0_8px_32px_0_rgba(31,38,135,0.07)] backdrop-filter border border-white/40 dark:border-slate-800/50 flex items-center justify-between w-[90%] max-w-[1100px] px-6 py-2 z-50 hidden md:flex">
+<div class="text-lg font-bold tracking-tight text-slate-900 dark:text-slate-50 font-['Plus_Jakarta_Sans'] antialiased">
+            Editorial Portfolio
+        </div>
+<nav class="flex items-center gap-2">
+<a class="bg-gradient-to-r from-blue-500 to-blue-700 text-white rounded-full px-4 py-1.5 transition-all duration-300 hover:scale-105 font-nav-item text-nav-item" href="#">Work</a>
+<a class="text-slate-600 dark:text-slate-400 px-4 py-1.5 hover:text-blue-600 dark:hover:text-blue-400 hover:scale-105 transition-transform duration-200 font-nav-item text-nav-item" href="#">About</a>
+<a class="text-slate-600 dark:text-slate-400 px-4 py-1.5 hover:text-blue-600 dark:hover:text-blue-400 hover:scale-105 transition-transform duration-200 font-nav-item text-nav-item" href="#">Tools</a>
+<a class="text-slate-600 dark:text-slate-400 px-4 py-1.5 hover:text-blue-600 dark:hover:text-blue-400 hover:scale-105 transition-transform duration-200 font-nav-item text-nav-item" href="#">Now</a>
+</nav>
+<button class="text-blue-600 dark:text-blue-400 hover:scale-105 transition-transform duration-200 flex items-center justify-center p-2 rounded-full">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 0;">light_mode</span>
+</button>
+</header>
+<!-- Main Content Canvas -->
+<main class="max-w-[1100px] mx-auto px-6 pt-32 pb-section-gap-desktop">
+<section class="mb-section-gap-desktop">
+<div class="mb-12 flex items-end justify-between">
+<div>
+<h2 class="font-headline-section text-headline-section text-text-strong mb-2">Recent Projects</h2>
+<p class="font-body-large text-body-large text-text-body max-w-2xl">A collection of recent work focusing on intuitive interfaces and scalable design systems.</p>
+</div>
+</div>
+<!-- Featured Project Card (Large) -->
+<article class="bg-frost-surface/80 backdrop-blur-[12px] border border-white/60 shadow-[0_4px_40px_rgba(199,232,254,0.3)] rounded-2xl overflow-hidden mb-8 grid grid-cols-1 md:grid-cols-2 gap-0 group hover:-translate-y-1 transition-all duration-300">
+<div class="relative aspect-video md:aspect-auto md:h-full overflow-hidden">
+<img alt="Dashboard Interface" class="object-cover w-full h-full group-hover:scale-105 transition-transform duration-700 ease-in-out" data-alt="A clean, modern data visualization dashboard displayed on a high-resolution screen, angled slightly. The interface features crisp charts, elegant typography, and a primarily light color palette with soft blue and grey accents, perfectly aligning with a glassmorphic, minimalist UI style. The lighting is soft and natural, suggesting a bright, airy workspace." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDIVVxXy4Zj2Gfoa5mUD6OWqdg3vOBlvhXs23TMeF8cBrFdM-oehAAVswG2UuMCduq3Ts8Rm5NyhakUK0oWOHDjFJGTyebBhFuLXFnnj8u_OK2S5L2vbi8OARBHH_1aeuny4GGoFWnVm-3hIsKPKgayuyHTKgGZpEENzEBkobPJCrXZtKe8_QfIQk-huN6VJFX7XHTO-E04Bv7slGDQ0kcoSZtnLvIJsREtDJs2w98d--niTIa_Y55DeTUWczOwdSLhtabPMZCvkx8"/>
+</div>
+<div class="p-card-padding flex flex-col justify-center">
+<div class="flex items-center gap-2 mb-4"><span class="bg-secondary-fixed/50 text-on-secondary-fixed px-3 py-1 rounded-full font-label-caps text-label-caps">Product Analysis</span></div>
+<h3 class="font-headline-section text-headline-section text-text-strong mb-4">Early Wage Access Feature</h3>
+<p class="font-body-main text-body-main text-text-body mb-8">A product case for launching an EWA feature for contech.</p>
+<a class="inline-flex items-center justify-center self-start px-6 py-3 rounded-full bg-surface text-primary border border-primary/20 hover:bg-primary hover:text-white transition-colors duration-300 font-nav-item text-nav-item group/btn" href="#">
+                        View Case Study
+                        <span class="material-symbols-outlined ml-2 group-hover/btn:translate-x-1 transition-transform" style="font-variation-settings: 'FILL' 0;">arrow_forward</span>
+</a>
+</div>
+</article>
+<!-- Secondary Projects Grid -->
+<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+<!-- Secondary Card 1 -->
+<article class="bg-frost-surface/80 backdrop-blur-[12px] border border-white/60 shadow-[0_4px_30px_rgba(199,232,254,0.2)] rounded-2xl overflow-hidden group hover:-translate-y-1 transition-all duration-300 flex flex-col">
+<div class="relative aspect-video overflow-hidden border-b border-white/40">
+<img alt="Mobile App Design" class="object-cover w-full h-full group-hover:scale-105 transition-transform duration-700 ease-in-out" data-alt="A modern mobile application interface displayed on a sleek smartphone resting on a clean, light-colored desk. The app features soft, rounded elements, a bright white and soft blue color palette, and minimal typography, adhering to a serene, airy design aesthetic. Soft window light creates gentle reflections on the screen." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBDFURD3GVt-v_LUYOVlws6PFGQmmiCN4n4il7Ey5Oo4PR1ExNsyH_jhVJB1V2g6fkksmdJuPXfy4PY8FFTSYTz5tloBINXWZkzyXyCB3BSJ5DNUoDDtL_Pyzv5popd7hBMuNeHP6UFd-9SZVA3jEKGKBWVlPJ5cEIpssngHCy6kjYVAUyCJL4bnWGI1l_4AtCFa2y1HZf_RApQaYHQVFl2zrl8tAUXCS11IJ-oPPAc3llks6XkMtKfjTEVSCWhhZAujP2Gh6kQnuI"/>
+</div>
+<div class="p-6 flex-grow flex flex-col">
+<div class="flex items-center gap-2 mb-3"><span class="bg-secondary-fixed/50 text-on-secondary-fixed px-3 py-1 rounded-full font-label-caps text-label-caps">Sales Enablement</span><span class="bg-surface-variant/50 text-on-surface-variant px-3 py-1 rounded-full font-label-caps text-label-caps">AI / Automation</span></div>
+<h3 class="font-bold text-xl text-text-strong mb-2 font-['Plus_Jakarta_Sans']">Outbuild AI Learning System</h3>
+<p class="font-body-main text-body-main text-text-body mb-6 flex-grow">AE/SDR onboarding at a contech startup from 4 weeks to ~1 week using Claude, Notion, Google Forms, and n8n.</p>
+<a class="inline-flex items-center text-primary hover:text-primary-container font-nav-item text-nav-item group/link" href="#">
+                            Explore Project
+                            <span class="material-symbols-outlined ml-1 text-sm group-hover/link:translate-x-1 transition-transform" style="font-variation-settings: 'FILL' 0;">arrow_forward</span>
+</a>
+</div>
+</article>
+<!-- Secondary Card 2 -->
+<article class="bg-frost-surface/80 backdrop-blur-[12px] border border-white/60 shadow-[0_4px_30px_rgba(199,232,254,0.2)] rounded-2xl overflow-hidden group hover:-translate-y-1 transition-all duration-300 flex flex-col">
+<div class="relative aspect-video overflow-hidden border-b border-white/40">
+<img alt="E-commerce Website" class="object-cover w-full h-full group-hover:scale-105 transition-transform duration-700 ease-in-out" data-alt="A minimalist e-commerce website layout shown on a laptop screen, emphasizing high-quality product photography and ample white space. The interface uses a clean, grid-based structure with delicate typography, embodying a sophisticated, editorial style. The overall tone is bright, calm, and professional, with a soft shadow adding depth." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCUUfpJ7aHp-5Gpz3I-yE718fKnmcRNW24O94hMPpmbT04Jf41ILrdXJz07OWvg_Fe_pFuklwuD-uVsQqxJ5Uf1sODqXAWM3MO2eA33ND7lfhR6BErihdWHYWORyft3VmMYsaqly0HOWhoMOukSEcvIQRsjRa0gtbZgnH2PAT4lC_bSLNADuA8QS9-okcOz-h0YZ-0GZbkehvaGgYbg_3gRGq94Fhd1Zg5uzw-BmDgcc9EjkIKX0BERPvwzWGoQgUG2YlSQ5tOGr_A"/>
+</div>
+<div class="p-6 flex-grow flex flex-col">
+<div class="flex items-center gap-2 mb-3"><span class="bg-secondary-fixed/50 text-on-secondary-fixed px-3 py-1 rounded-full font-label-caps text-label-caps">Product Analytics</span><span class="bg-surface-variant/50 text-on-surface-variant px-3 py-1 rounded-full font-label-caps text-label-caps">Data</span></div>
+<h3 class="font-bold text-xl text-text-strong mb-2 font-['Plus_Jakarta_Sans']">Instacart Reddit Pulse</h3>
+<p class="font-body-main text-body-main text-text-body mb-6 flex-grow">Fun alpha of a tool that analyzes Reddit API — sentiment trends, pain themes, and volume signals for a data-driven team.</p>
+<a class="inline-flex items-center text-primary hover:text-primary-container font-nav-item text-nav-item group/link" href="#">
+                            Explore Project
+                            <span class="material-symbols-outlined ml-1 text-sm group-hover/link:translate-x-1 transition-transform" style="font-variation-settings: 'FILL' 0;">arrow_forward</span>
+</a>
+</div>
+</article>
+<article class="bg-frost-surface/80 backdrop-blur-[12px] border border-white/60 shadow-[0_4px_30px_rgba(199,232,254,0.2)] rounded-2xl overflow-hidden group hover:-translate-y-1 transition-all duration-300 flex flex-col">
+<div class="relative aspect-video overflow-hidden border-b border-white/40">
+<img alt="UX Case Study" class="object-cover w-full h-full group-hover:scale-105 transition-transform duration-700 ease-in-out" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDIVVxXy4Zj2Gfoa5mUD6OWqdg3vOBlvhXs23TMeF8cBrFdM-oehAAVswG2UuMCduq3Ts8Rm5NyhakUK0oWOHDjFJGTyebBhFuLXFnnj8u_OK2S5L2vbi8OARBHH_1aeuny4GGoFWnVm-3hIsKPKgayuyHTKgGZpEENzEBkobPJCrXZtKe8_QfIQk-huN6VJFX7XHTO-E04Bv7slGDQ0kcoSZtnLvIJsREtDJs2w98d--niTIa_Y55DeTUWczOwdSLhtabPMZCvkx8"/>
+</div>
+<div class="p-6 flex-grow flex flex-col">
+<div class="flex items-center gap-2 mb-3">
+<span class="bg-secondary-fixed/50 text-on-secondary-fixed px-3 py-1 rounded-full font-label-caps text-label-caps">UX Design</span>
+<span class="bg-surface-variant/50 text-on-surface-variant px-3 py-1 rounded-full font-label-caps text-label-caps">Case Study</span>
+</div>
+<h3 class="font-bold text-xl text-text-strong mb-2 font-['Plus_Jakarta_Sans']">DSC Case Study</h3>
+<p class="font-body-main text-body-main text-text-body mb-6 flex-grow">Interactive mobile app prototype for Capital One's debt support flow— smart survey, personalized paths, and a confirmation experience.</p>
+<a class="inline-flex items-center text-primary hover:text-primary-container font-nav-item text-nav-item group/link" href="#">
+                            Explore Project
+                            <span class="material-symbols-outlined ml-1 text-sm group-hover/link:translate-x-1 transition-transform" style="font-variation-settings: 'FILL' 0;">arrow_forward</span>
+</a>
+</div>
+</article></div>
+</section>
+</main>
+<!-- BottomNavBar (Mobile) -->
+<nav class="md:hidden fixed bottom-0 left-0 w-full z-50 flex justify-around items-center px-4 pb-6 pt-3 bg-white/60 dark:bg-slate-900/60 backdrop-blur-lg rounded-t-3xl border-t border-white/20 shadow-[0_-4px_20px_rgba(0,0,0,0.05)]">
+<a class="flex flex-col items-center justify-center text-blue-600 dark:text-blue-400 scale-110 hover:text-blue-500 font-['Plus_Jakarta_Sans'] text-[10px] font-semibold" href="#">
+<span class="material-symbols-outlined mb-1" style="font-variation-settings: 'FILL' 0;">grid_view</span>
+            Work
+        </a>
+<a class="flex flex-col items-center justify-center text-slate-400 dark:text-slate-500 hover:text-blue-500 font-['Plus_Jakarta_Sans'] text-[10px] font-semibold" href="#">
+<span class="material-symbols-outlined mb-1" style="font-variation-settings: 'FILL' 0;">person</span>
+            About
+        </a>
+<a class="flex flex-col items-center justify-center text-slate-400 dark:text-slate-500 hover:text-blue-500 font-['Plus_Jakarta_Sans'] text-[10px] font-semibold" href="#">
+<span class="material-symbols-outlined mb-1" style="font-variation-settings: 'FILL' 0;">build</span>
+            Tools
+        </a>
+<a class="flex flex-col items-center justify-center text-slate-400 dark:text-slate-500 hover:text-blue-500 font-['Plus_Jakarta_Sans'] text-[10px] font-semibold" href="#">
+<span class="material-symbols-outlined mb-1" style="font-variation-settings: 'FILL' 0;">schedule</span>
+            Now
+        </a>
+</nav>
+</body></html>
