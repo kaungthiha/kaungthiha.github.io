@@ -185,7 +185,7 @@
 
   const canopies = [];
   TREE_LAYOUT.forEach(spec => {
-    const { group, canopy } = buildTree();
+    const { group, canopy } = buildTree(spec);
     group.position.set(spec.x, 0, spec.z);
     group.scale.setScalar(spec.s);
     group.rotation.y = (Math.random() - 0.5) * 0.6;
