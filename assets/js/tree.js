@@ -87,32 +87,35 @@
   const dummy = new THREE.Object3D();
 
   // Build a single tree returning { group, canopy } so each canopy can sway independently
-  function buildTree() {
+  // Helper to create more natural branches
+  function createNaturalBranches(trunk, type) {
+    const counts = { tall:3, medium:4, short:5, sparse:2 };
+    const count = counts[type] || 4;
+    for (let i = 0; i < count; i++) {
+      const branch = new THREE.Mesh(branchGeom, branchMat);
+      // Angle outward/upward, tapering with length
+      const angleY = (i - (count-1)/2) * 0.3; // spread horizontally
+      const angleX = 0.2 + Math.random()*0.2; // upward tilt
+      branch.rotation.set(angleX, angleY, 0);
+      const length = 0.6 + Math.random()*0.3;
+      branch.scale.set(1, length, 1);
+      branch.position.y = 0.7; // start at trunk top
+      trunk.add(branch);
+    }
+  }
+
+  function buildTree(spec) {
     const group  = new THREE.Group();
     const trunk  = new THREE.Mesh(trunkGeom, trunkMat);
     trunk.position.y = 0.7;
     group.add(trunk);
 
+    // Add branches based on archetype
+    createNaturalBranches(trunk, spec.type);
+
     const canopy = new THREE.Group();
     canopy.position.y = 1.5;
     group.add(canopy);
-
-    [
-      { rx:  0,    rz:  0.65 },
-      { rx:  0,    rz: -0.65 },
-      { rx:  0.65, rz:  0    },
-      { rx: -0.65, rz:  0    },
-    ].forEach(b => {
-      const branch = new THREE.Mesh(branchGeom, branchMat);
-      branch.rotation.set(b.rx, 0, b.rz);
-      const offset = 0.45;
-      branch.position.set(
-        Math.sin(b.rz) * offset,
-        Math.cos(b.rz) * Math.cos(b.rx) * offset,
-        Math.sin(-b.rx) * offset
-      );
-      canopy.add(branch);
-    });
 
     const LEAF_COUNT = isMobile ? 28 : 36;
     const leaves = new THREE.InstancedMesh(leafGeom, leafMat, LEAF_COUNT);
@@ -156,19 +159,29 @@
   }
 
   // ── Forest layout — small grove of trees with depth + scale variance
-  const TREE_LAYOUT = isMobile
-    ? [
-        { x: -3.0, z:  0.0, s: 1.0  },
-        { x:  3.2, z: -0.4, s: 0.9  },
-      ]
-    : [
-        { x: -7.5, z:  0.6, s: 0.85 },
-        { x: -4.5, z: -0.3, s: 1.0  },
-        { x: -1.5, z:  0.8, s: 0.9  },
-        { x:  1.8, z:  0.0, s: 1.05 },
-        { x:  5.0, z: -0.4, s: 0.95 },
-        { x:  8.0, z:  0.4, s: 0.8  },
-      ];
+  // Generate a richer forest layout with varied archetypes
+  const TREE_TYPES = ['tall','medium','short','sparse'];
+  function randomArchetype() {
+    // Prefer medium and short for visual balance
+    const weights = { tall:0.2, medium:0.4, short:0.3, sparse:0.1 };
+    const r = Math.random();
+    let acc = 0;
+    for (const t of TREE_TYPES) {
+      acc += weights[t];
+      if (r <= acc) return t;
+    }
+    return 'medium';
+  }
+
+  const TREE_LAYOUT = [];
+  const count = isMobile ? 6 : 12;
+  for (let i = 0; i < count; i++) {
+    const x = (Math.random() - 0.5) * 16; // spread horizontally
+    const z = (Math.random() - 0.5) * 2;  // slight depth variation
+    const s = 0.6 + Math.random() * 0.6; // scale range
+    const type = randomArchetype();
+    TREE_LAYOUT.push({ x, z, s, type });
+  }
 
   const canopies = [];
   TREE_LAYOUT.forEach(spec => {
@@ -236,34 +249,11 @@
   }
 
   // ── Squirrel (1 small ground-level shape near a tree base) ─────────
-  const SQUIRREL_COUNT = reduceMotion ? 0 : (isMobile ? 0 : 1);
-  const squirrels = [];
-  if (SQUIRREL_COUNT > 0) {
-    const sqMat      = new THREE.MeshStandardMaterial({ color: 0x9a6d44, roughness: 0.85 });
-    const sqBodyGeom = new THREE.SphereGeometry(0.12, 6, 6);
-    const sqTailGeom = new THREE.SphereGeometry(0.09, 6, 6);
-    for (let i = 0; i < SQUIRREL_COUNT; i++) {
-      const group = new THREE.Group();
-      const body  = new THREE.Mesh(sqBodyGeom, sqMat);
-      body.scale.set(1.4, 0.85, 0.85);
-      body.position.set(0, 0.10, 0);
-      const tail  = new THREE.Mesh(sqTailGeom, sqMat);
-      tail.scale.set(0.7, 1.6, 0.5);
-      tail.position.set(-0.18, 0.19, 0);
-      group.add(body, tail);
-      const base = TREE_LAYOUT[Math.floor(Math.random() * TREE_LAYOUT.length)];
-      group.position.set(base.x + 0.5, 0, base.z + 0.6);
-      group.userData = {
-        baseY: group.position.y,
-        phase: Math.random() * Math.PI * 2,
-      };
-      scene.add(group);
-      squirrels.push(group);
-    }
-  }
+  // Squirrels removed per design update
 
   // ── Snow particles — wider scene volume now ───────────────────────
   const SNOW_COUNT = reduceMotion ? 0 : (isMobile ? 18 : 38);
+  const SQUIRREL_COUNT = 0; // squirrels removed
   const snowGeom   = new THREE.SphereGeometry(0.045, 4, 4);
   const snowMat    = new THREE.MeshBasicMaterial({
     color: 0xffffff, transparent: true, opacity: 0
@@ -290,11 +280,13 @@
   const MODES = {
     sunny: {
       leafColor:           new THREE.Color(0x5fa052),
-      leafOpacity:         1.0,
+      leafOpacity:         0.9,
       capOpacity:          0.0,
       snowParticleOpacity: 0.0,
       sunOpacity:          0.85,
       birdOpacity:         0.7,
+      pondOpacity:         0.2,
+      shrubOpacity:        0.6,
       ambientIntensity:    0.7,
       directionalIntensity:0.6,
       directionalColor:    new THREE.Color(0xfff7e6),
@@ -303,11 +295,13 @@
     },
     rainy: {
       leafColor:           new THREE.Color(0x3a6e3a),
-      leafOpacity:         0.95,
+      leafOpacity:         0.85,
       capOpacity:          0.0,
       snowParticleOpacity: 0.0,
       sunOpacity:          0.0,
       birdOpacity:         0.25,
+      pondOpacity:         0.1,
+      shrubOpacity:        0.4,
       ambientIntensity:    0.5,
       directionalIntensity:0.35,
       directionalColor:    new THREE.Color(0xb8c8d8),
@@ -321,6 +315,8 @@
       snowParticleOpacity: 0.95,
       sunOpacity:          0.0,
       birdOpacity:         0.15,
+      pondOpacity:         0.05,
+      shrubOpacity:        0.2,
       ambientIntensity:    0.85,
       directionalIntensity:0.5,
       directionalColor:    new THREE.Color(0xeaf4ff),
