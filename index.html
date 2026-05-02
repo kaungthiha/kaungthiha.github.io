@@ -30,6 +30,9 @@ comments: false
   </div>
 </nav>
 
+<!-- Ambient forest background (Three.js, fixed full-viewport, behind content) -->
+<div class="tree-canvas-host" id="tree-canvas-host" aria-hidden="true"></div>
+
 <!-- ─────────────────────────────────────────────────────────────────────
      Shell: Persistent identity column + Flippable content card
      Can fill identity-bio w/ my information if needed
@@ -65,9 +68,6 @@ comments: false
         </a>
       </li>
     </ul>
-
-    <!-- Seasonal tree visualization (Three.js, with SVG fallback) -->
-    <div class="tree-canvas-host" id="tree-canvas-host" aria-hidden="true"></div>
 
     <!-- Weather mood — sits beneath socials in identity column -->
     <div class="weather-control" role="group" aria-label="Background weather">

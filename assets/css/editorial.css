@@ -280,16 +280,18 @@ body::after {
   flex-shrink: 0;
 }
 
-/* Seasonal tree visualization — sits between socials and weather control */
+/* Ambient forest background — fixed full viewport, behind all content.
+   Tweak `--forest-opacity` below to dial down/up the visual presence. */
 .tree-canvas-host {
-  width: 100%;
-  align-self: stretch;
-  height: clamp(140px, 22vw, 220px);
-  position: relative;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin: 0.25rem 0;
+  --forest-opacity: 0.55;
+  position: fixed;
+  inset: 0;
+  width: 100vw;
+  height: 100vh;
+  height: 100dvh;
+  z-index: -1;             /* sits below content & nav, above body bloom (-3) and weather-bg (-2) */
+  pointer-events: none;
+  opacity: var(--forest-opacity);
 }
 .tree-canvas-host canvas {
   display: block;
@@ -298,19 +300,19 @@ body::after {
   background: transparent;
 }
 .tree-canvas-host .tree-fallback {
-  width: clamp(120px, 60%, 180px);
-  height: 100%;
-  opacity: 0.85;
+  position: absolute;
+  bottom: 8%;
+  left: 50%;
+  transform: translateX(-50%);
+  width: clamp(180px, 28vw, 280px);
+  opacity: 0.5;
 }
 
-/* Mobile sizing per spec */
 @media (max-width: 720px) {
-  .tree-canvas-host {
-    height: clamp(140px, 28vw, 190px);
-    max-width: 320px;
-    margin-left: auto;
-    margin-right: auto;
-  }
+  .tree-canvas-host { --forest-opacity: 0.45; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .tree-canvas-host { --forest-opacity: 0.4; }
 }
 
 /* Weather mood — sits in the identity column under the socials */
