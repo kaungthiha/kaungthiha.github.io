@@ -89,6 +89,9 @@
     if (mode === 'snowy' && containers.snowy) buildSnow(containers.snowy);
 
     try { localStorage.setItem(STORAGE_KEY, mode); } catch (_) { /* ignore */ }
+
+    // Broadcast for downstream listeners (e.g. tree.js)
+    window.dispatchEvent(new CustomEvent('weather:change', { detail: { mode } }));
   }
 
   // ── Pause particles when tab hidden ────────────────────────────────

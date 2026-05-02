@@ -280,6 +280,39 @@ body::after {
   flex-shrink: 0;
 }
 
+/* Seasonal tree visualization — sits between socials and weather control */
+.tree-canvas-host {
+  width: 100%;
+  align-self: stretch;
+  height: clamp(140px, 22vw, 220px);
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0.25rem 0;
+}
+.tree-canvas-host canvas {
+  display: block;
+  width: 100% !important;
+  height: 100% !important;
+  background: transparent;
+}
+.tree-canvas-host .tree-fallback {
+  width: clamp(120px, 60%, 180px);
+  height: 100%;
+  opacity: 0.85;
+}
+
+/* Mobile sizing per spec */
+@media (max-width: 720px) {
+  .tree-canvas-host {
+    height: clamp(140px, 28vw, 190px);
+    max-width: 320px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+}
+
 /* Weather mood — sits in the identity column under the socials */
 .weather-control {
   display: inline-flex;
