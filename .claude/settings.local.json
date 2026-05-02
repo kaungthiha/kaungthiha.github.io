@@ -20,7 +20,10 @@
       "Bash(wait)",
       "Bash(taskkill //F //PID 1026 //PID 104892)",
       "Bash(tasklist //FI \"IMAGENAME eq ruby.exe\")",
-      "Bash(taskkill //F //PID 42528 //PID 39356)"
+      "Bash(taskkill //F //PID 42528 //PID 39356)",
+      "Bash(curl -s http://127.0.0.1:4321/pages/dsc-case-study.html -o /dev/null -w \"DSC: HTTP %{http_code}  bytes %{size_download}\\\\n\")",
+      "Bash(curl -s http://127.0.0.1:4321/tools/attendance-tracker/ -o /dev/null -w \"Attendance: HTTP %{http_code}  bytes %{size_download}\\\\n\")",
+      "Bash(curl -s http://127.0.0.1:4321/tools/festival-thingamabob/ -o /dev/null -w \"Festival: HTTP %{http_code}  bytes %{size_download}\\\\n\")"
     ]
   }
 }

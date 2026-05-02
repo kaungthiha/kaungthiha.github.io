@@ -5,356 +5,352 @@ comments: false
 ---
 
 <!-- ─────────────────────────────────────────────────────────────────────
-     Top navigation rail
+     Top navigation rail — brand, section links, weather, flip toggle
      ───────────────────────────────────────────────────────────────────── -->
 <nav class="editorial-topnav" aria-label="Primary">
   <div class="topnav-brand">
-    <a href="#hero">
+    <a href="#" data-nav-target="me">
       <span class="topnav-brand-mark" aria-hidden="true"></span>
       <span class="topnav-brand-text">Kaung Thiha</span>
     </a>
   </div>
+
   <div class="topnav-links" role="tablist">
-    <a class="topnav-link" href="#hero" data-nav-target="hero">Me</a>
-    <a class="topnav-link" href="#work" data-nav-target="work">Projects</a>
-    <a class="topnav-link" href="#tools" data-nav-target="tools">Tools for Friends</a>
-    <a class="topnav-link" href="#now" data-nav-target="now">Currently...</a>
+    <button class="topnav-link" type="button" data-nav-target="me">Me</button>
+    <button class="topnav-link is-active" type="button" data-nav-target="projects">Projects</button>
+    <button class="topnav-link" type="button" data-nav-target="tools">Tools for Friends</button>
+    <button class="topnav-link" type="button" data-nav-target="currently">Currently...</button>
   </div>
-  <div class="topnav-action" aria-hidden="true"></div>
+
+  <div class="topnav-controls">
+    <div class="weather-control" role="group" aria-label="Background weather">
+      <button class="weather-btn is-active" data-weather="sunny" aria-label="Sunny" aria-pressed="true">
+        <svg viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">
+          <path d="M8 11a3 3 0 1 1 0-6 3 3 0 0 1 0 6zm0 1a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM8 0a.5.5 0 0 1 .5.5v2a.5.5 0 0 1-1 0v-2A.5.5 0 0 1 8 0zm0 13a.5.5 0 0 1 .5.5v2a.5.5 0 0 1-1 0v-2A.5.5 0 0 1 8 13zm8-5a.5.5 0 0 1-.5.5h-2a.5.5 0 0 1 0-1h2a.5.5 0 0 1 .5.5zM3 8a.5.5 0 0 1-.5.5h-2a.5.5 0 0 1 0-1h2A.5.5 0 0 1 3 8zm10.657-5.657a.5.5 0 0 1 0 .707l-1.414 1.415a.5.5 0 1 1-.707-.708l1.414-1.414a.5.5 0 0 1 .707 0zm-9.193 9.193a.5.5 0 0 1 0 .707L3.05 13.657a.5.5 0 0 1-.707-.707l1.414-1.414a.5.5 0 0 1 .707 0zm9.193 2.121a.5.5 0 0 1-.707 0l-1.414-1.414a.5.5 0 0 1 .707-.707l1.414 1.414a.5.5 0 0 1 0 .707zM4.464 4.465a.5.5 0 0 1-.707 0L2.343 3.05a.5.5 0 1 1 .707-.707l1.414 1.414a.5.5 0 0 1 0 .708z"/>
+        </svg>
+      </button>
+      <button class="weather-btn" data-weather="rainy" aria-label="Rainy" aria-pressed="false">
+        <svg viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">
+          <path d="M4.158 12.025a.5.5 0 0 1 .316.633l-.5 1.5a.5.5 0 0 1-.948-.316l.5-1.5a.5.5 0 0 1 .632-.317zm3 0a.5.5 0 0 1 .316.633l-1 3a.5.5 0 0 1-.948-.316l1-3a.5.5 0 0 1 .632-.317zm3 0a.5.5 0 0 1 .316.633l-.5 1.5a.5.5 0 0 1-.948-.316l.5-1.5a.5.5 0 0 1 .632-.317zm3 0a.5.5 0 0 1 .316.633l-1 3a.5.5 0 1 1-.948-.316l1-3a.5.5 0 0 1 .632-.317zm.247-6.998a5.001 5.001 0 0 0-9.499-1.004A3.5 3.5 0 1 0 3.5 11H13a3 3 0 0 0 .405-5.973z"/>
+        </svg>
+      </button>
+      <button class="weather-btn" data-weather="snowy" aria-label="Snowy" aria-pressed="false">
+        <svg viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">
+          <path d="M8 16a.5.5 0 0 1-.5-.5v-1.293l-.646.647a.5.5 0 0 1-.707-.708L7.5 12.793V8.866l-3.4 1.963-.496 1.85a.5.5 0 1 1-.966-.26l.237-.882-1.12.646a.5.5 0 0 1-.5-.866l1.12-.646-.884-.237a.5.5 0 1 1 .26-.966l1.848.495L7 8 3.6 6.037l-1.85.495a.5.5 0 0 1-.258-.966l.883-.237-1.12-.646a.5.5 0 1 1 .5-.866l1.12.646-.237-.883a.5.5 0 1 1 .966-.258l.495 1.849L7.5 7.134V3.207L6.147 1.854a.5.5 0 1 1 .707-.708l.646.647V.5a.5.5 0 1 1 1 0v1.293l.647-.647a.5.5 0 1 1 .707.708L8.5 3.207v3.927l3.4-1.963.496-1.85a.5.5 0 1 1 .966.26l-.236.882 1.12-.646a.5.5 0 0 1 .5.866l-1.12.646.883.237a.5.5 0 1 1-.26.966l-1.848-.495L9 8l3.4 1.963 1.849-.495a.5.5 0 0 1 .259.966l-.883.237 1.12.646a.5.5 0 0 1-.5.866l-1.12-.646.236.883a.5.5 0 1 1-.966.258l-.495-1.849-3.4-1.963v3.927l1.353 1.353a.5.5 0 0 1-.707.708l-.647-.647V15.5a.5.5 0 0 1-.5.5z"/>
+        </svg>
+      </button>
+    </div>
+
+    <button class="flip-toggle" type="button" id="flip-toggle-nav" aria-label="Toggle view" aria-pressed="false">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M3 12a9 9 0 0 1 15.5-6.3M21 4v5h-5M21 12a9 9 0 0 1-15.5 6.3M3 20v-5h5"/></svg>
+      <span class="flip-toggle-label">Quick view</span>
+    </button>
+  </div>
 </nav>
 
-<div class="editorial-main">
-
-  <!-- ─────────────────────────────────────────────────────────────────────
-       Hero / About
-       ───────────────────────────────────────────────────────────────────── -->
-  <section class="editorial-section" id="hero" aria-labelledby="hero-name">
-    <div class="hero">
-      <div class="hero-identity">
-        <img class="hero-portrait"
-             src="{{ site.baseurl }}/assets/images/about.jpg"
-             alt="Kaung Thiha"
-             loading="eager"
-             width="200" height="200">
-        <h1 class="hero-name" id="hero-name">
-          I'm Kaung
-          <span class="burmese">(ကောင်းသီဟ)</span>
-        </h1>
-        <p class="hero-tagline"></p>
-
-        <ul class="hero-socials">
-          <li>
-            <a href="https://www.linkedin.com/in/kaungthiha/" target="_blank" rel="noopener" aria-label="LinkedIn">
-              <svg viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">
-                <path d="M0 1.146C0 .513.526 0 1.175 0h13.65C15.474 0 16 .513 16 1.146v13.708c0 .633-.526 1.146-1.175 1.146H1.175C.526 16 0 15.487 0 14.854zm4.943 12.248V6.169H2.542v7.225zm-1.2-8.212c.837 0 1.358-.554 1.358-1.248-.015-.709-.52-1.248-1.342-1.248S2.4 3.226 2.4 3.934c0 .694.521 1.248 1.327 1.248zm4.908 8.212V9.359c0-.216.016-.432.08-.586.173-.431.568-.878 1.232-.878.869 0 1.216.662 1.216 1.634v3.865h2.401V9.25c0-2.22-1.184-3.252-2.764-3.252-1.274 0-1.845.7-2.165 1.193v.025h-.016l.016-.025V6.169h-2.4c.03.678 0 7.225 0 7.225z"/>
-              </svg>
-            </a>
-          </li>
-          <li>
-            <a href="https://open.spotify.com/user/22k3hzyma66fj4nbmanjastiy?si=ea605d91ddae4bb2" target="_blank" rel="noopener" aria-label="Spotify">
-              <svg viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">
-                <path d="M8 0a8 8 0 1 0 0 16A8 8 0 0 0 8 0zm3.669 11.538a.498.498 0 0 1-.686.165c-1.879-1.147-4.243-1.407-7.028-.77a.499.499 0 0 1-.222-.973c3.048-.696 5.662-.397 7.77.892a.5.5 0 0 1 .166.686zm.979-2.178a.624.624 0 0 1-.858.205c-2.15-1.321-5.428-1.704-7.972-.932a.625.625 0 0 1-.362-1.194c2.905-.881 6.517-.454 8.986 1.063a.624.624 0 0 1 .206.858zm.084-2.268C10.154 5.56 5.9 5.419 3.438 6.166a.748.748 0 1 1-.434-1.432c2.825-.857 7.523-.692 10.492 1.07a.747.747 0 1 1-.764 1.288z"/>
-              </svg>
-            </a>
-          </li>
-        </ul>
-
-        <div class="weather-control" role="group" aria-label="Background weather">
-          <span class="weather-control-label">Mood</span>
-          <button class="weather-btn is-active" data-weather="sunny" aria-label="Sunny" aria-pressed="true">
-            <svg viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">
-              <path d="M8 11a3 3 0 1 1 0-6 3 3 0 0 1 0 6zm0 1a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM8 0a.5.5 0 0 1 .5.5v2a.5.5 0 0 1-1 0v-2A.5.5 0 0 1 8 0zm0 13a.5.5 0 0 1 .5.5v2a.5.5 0 0 1-1 0v-2A.5.5 0 0 1 8 13zm8-5a.5.5 0 0 1-.5.5h-2a.5.5 0 0 1 0-1h2a.5.5 0 0 1 .5.5zM3 8a.5.5 0 0 1-.5.5h-2a.5.5 0 0 1 0-1h2A.5.5 0 0 1 3 8zm10.657-5.657a.5.5 0 0 1 0 .707l-1.414 1.415a.5.5 0 1 1-.707-.708l1.414-1.414a.5.5 0 0 1 .707 0zm-9.193 9.193a.5.5 0 0 1 0 .707L3.05 13.657a.5.5 0 0 1-.707-.707l1.414-1.414a.5.5 0 0 1 .707 0zm9.193 2.121a.5.5 0 0 1-.707 0l-1.414-1.414a.5.5 0 0 1 .707-.707l1.414 1.414a.5.5 0 0 1 0 .707zM4.464 4.465a.5.5 0 0 1-.707 0L2.343 3.05a.5.5 0 1 1 .707-.707l1.414 1.414a.5.5 0 0 1 0 .708z"/>
-            </svg>
-          </button>
-          <button class="weather-btn" data-weather="rainy" aria-label="Rainy" aria-pressed="false">
-            <svg viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">
-              <path d="M4.158 12.025a.5.5 0 0 1 .316.633l-.5 1.5a.5.5 0 0 1-.948-.316l.5-1.5a.5.5 0 0 1 .632-.317zm3 0a.5.5 0 0 1 .316.633l-1 3a.5.5 0 0 1-.948-.316l1-3a.5.5 0 0 1 .632-.317zm3 0a.5.5 0 0 1 .316.633l-.5 1.5a.5.5 0 0 1-.948-.316l.5-1.5a.5.5 0 0 1 .632-.317zm3 0a.5.5 0 0 1 .316.633l-1 3a.5.5 0 1 1-.948-.316l1-3a.5.5 0 0 1 .632-.317zm.247-6.998a5.001 5.001 0 0 0-9.499-1.004A3.5 3.5 0 1 0 3.5 11H13a3 3 0 0 0 .405-5.973z"/>
-            </svg>
-          </button>
-          <button class="weather-btn" data-weather="snowy" aria-label="Snowy" aria-pressed="false">
-            <svg viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">
-              <path d="M8 16a.5.5 0 0 1-.5-.5v-1.293l-.646.647a.5.5 0 0 1-.707-.708L7.5 12.793V8.866l-3.4 1.963-.496 1.85a.5.5 0 1 1-.966-.26l.237-.882-1.12.646a.5.5 0 0 1-.5-.866l1.12-.646-.884-.237a.5.5 0 1 1 .26-.966l1.848.495L7 8 3.6 6.037l-1.85.495a.5.5 0 0 1-.258-.966l.883-.237-1.12-.646a.5.5 0 1 1 .5-.866l1.12.646-.237-.883a.5.5 0 1 1 .966-.258l.495 1.849L7.5 7.134V3.207L6.147 1.854a.5.5 0 1 1 .707-.708l.646.647V.5a.5.5 0 1 1 1 0v1.293l.647-.647a.5.5 0 1 1 .707.708L8.5 3.207v3.927l3.4-1.963.496-1.85a.5.5 0 1 1 .966.26l-.236.882 1.12-.646a.5.5 0 0 1 .5.866l-1.12.646.883.237a.5.5 0 1 1-.26.966l-1.848-.495L9 8l3.4 1.963 1.849-.495a.5.5 0 0 1 .259.966l-.883.237 1.12.646a.5.5 0 0 1-.5.866l-1.12-.646.236.883a.5.5 0 1 1-.966.258l-.495-1.849-3.4-1.963v3.927l1.353 1.353a.5.5 0 0 1-.707.708l-.647-.647V15.5a.5.5 0 0 1-.5.5z"/>
-            </svg>
-          </button>
-        </div>
-      </div>
-
-      <div class="hero-copy">
-        <h2 class="hero-greeting">Hi</h2>
-        <p>I graduated from <strong>USF</strong> — the University of San Francisco <em>(not the University of South Florida like Google thinks)</em> — studying <strong>Business Analytics &amp; Computer Science</strong>. I'm currently an Associate at Capital One on the Data Products &amp; Experiences Team.</p>
-        <p>I spent my formative years in Myanmar thinking I'd be a writer or the next Jimmy Neutron (that cowlick was <em>iconic</em>). Half-fittingly, I was initially an English + Philosophy major with law school aspirations. The latter is on the backburner for now, but we'll see where things go.</p>
-
-        <h3 class="hero-subhead">What I'm Up To</h3>
-        <p>Nowadays, I like playing around with data to build cool products. I've had a bunch of experiences close to product (prod ops + data products) but never a formal PM position — though I'm trying to change that. In the meantime, I take a product-minded approach in my day-to-day work, plus the small utilities I'm cooking alongside AI dev tools. That ranges from drafting scoping docs and PRDs to socializing analyses across my C1 org. Across every job, the awesome product people I've met all connect dots across multiple facets of a business — which is why I ask a lot of questions to build context.</p>
-        <p>I've also got a solid grasp of <strong>Python</strong> and <strong>Java</strong>, and I'm pretty handy with <strong>SQL</strong>, <strong>R</strong>, and <strong>Tableau</strong>. Lately I'm digging into the data engineering side <em>(shoutout to Zach Wilson, who is putting out some awesome stuff)</em>. Speaking in both technical and non-technical terms is my biggest strength — and one I work on every day.</p>
-
-        <h3 class="hero-subhead">Technical Skills</h3>
-        <div class="skills-grid">
-          <div class="skill-card">
-            <div class="skill-card-head">
-              <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M9.4 16.6 4.8 12l4.6-4.6L8 6l-6 6 6 6 1.4-1.4zm5.2 0L19.2 12l-4.6-4.6L16 6l6 6-6 6-1.4-1.4z"/></svg>
-              <span class="skill-card-name">Programming</span>
-            </div>
-            <ul class="skill-tags">
-              <li class="skill-tag">Python</li>
-              <li class="skill-tag">Java</li>
-              <li class="skill-tag">R</li>
-              <li class="skill-tag">SQL</li>
-              <li class="skill-tag">JavaScript</li>
-            </ul>
-          </div>
-          <div class="skill-card">
-            <div class="skill-card-head">
-              <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M5 9.2h3V19H5zm5.6-4.2h2.8V19h-2.8zm5.6 8h2.8V19h-2.8z"/></svg>
-              <span class="skill-card-name">Analytics</span>
-            </div>
-            <ul class="skill-tags">
-              <li class="skill-tag">Looker</li>
-              <li class="skill-tag">Quick Suite</li>
-              <li class="skill-tag">Tableau</li>
-              <li class="skill-tag">R Shiny</li>
-              <li class="skill-tag">Plotly</li>
-            </ul>
-          </div>
-          <div class="skill-card">
-            <div class="skill-card-head">
-              <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 3C7.58 3 4 4.79 4 7s3.58 4 8 4 8-1.79 8-4-3.58-4-8-4zM4 9v3c0 2.21 3.58 4 8 4s8-1.79 8-4V9c0 2.21-3.58 4-8 4s-8-1.79-8-4zm0 5v3c0 2.21 3.58 4 8 4s8-1.79 8-4v-3c0 2.21-3.58 4-8 4s-8-1.79-8-4z"/></svg>
-              <span class="skill-card-name">Data Tools</span>
-            </div>
-            <ul class="skill-tags">
-              <li class="skill-tag">PostgreSQL</li>
-              <li class="skill-tag">BigQuery</li>
-              <li class="skill-tag">Databricks</li>
-              <li class="skill-tag">Snowflake</li>
-            </ul>
-          </div>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- ─────────────────────────────────────────────────────────────────────
-       Personal photo strip
-       ───────────────────────────────────────────────────────────────────── 
-  <section class="editorial-section" aria-label="Life outside the canvas">
-    <div class="photo-strip">
-      <figure class="photo-tile is-placeholder" aria-label="Home — Yangon">
-        <figcaption class="photo-tile-label">
-          <span></span>
-          <span class="photo-tile-caption">My inspiration</span>
-        </figcaption>
-      </figure>
-      <figure class="photo-tile is-placeholder" aria-label="Play — badminton &amp; raves">
-        <figcaption class="photo-tile-label">
-          <span></span>
-          <span class="photo-tile-caption">I love electronic music!</span>
-        </figcaption>
-      </figure>
-      <figure class="photo-tile is-placeholder" aria-label="Taste — coffee &amp; cooking">
-        <figcaption class="photo-tile-label">
-          <span></span>
-          <span class="photo-tile-caption">Sourdough!</span>
-        </figcaption>
-      </figure>
-    </div>
-  </section> -->
-
-  <!-- ─────────────────────────────────────────────────────────────────────
-       Recent Projects
-       ───────────────────────────────────────────────────────────────────── -->
-  <section class="editorial-section" id="work" aria-labelledby="work-title">
-    <div>
-      <span class="section-eyebrow"></span>
-      <h2 class="section-title" id="work-title">Recent Projects</h2>
-      <p class="section-lede">Product analyses, mock case studies, and shareable deliverables.</p>
-    </div>
-
-    <div class="project-grid">
-      <!-- Featured -->
-      <article class="project-card project-card--featured"
-               data-project="lumber"
-               data-primary-url="{{ site.baseurl }}/assets/projects/KT_LumberProposal.pdf"
-               data-primary-label="View PDF"
-               data-primary-icon="fa-file-pdf"
-               role="button" tabindex="0"
-               aria-haspopup="dialog">
-        <div class="project-card-body">
-          <ul class="project-tags"><li class="project-tag">Product Analysis</li></ul>
-          <h3 class="project-title">Early Wage Access Feature</h3>
-          <p class="project-blurb">A product case for launching an EWA feature for contech — recommended a limited pilot to test the labor-shortage tailwind without overcommitting.</p>
-          <span class="project-cta">
-            View Case Study
-            <svg class="project-cta-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M5 12h14m-6-6 6 6-6 6"/></svg>
-          </span>
-        </div>
-      </article>
-
-      <!-- Secondary cards -->
-      <article class="project-card"
-               data-project="outbuild"
-               data-primary-url="{{ site.baseurl }}/assets/projects/Outbuild_AI Learning System_KT.docx.pdf"
-               data-primary-label="View PDF"
-               data-primary-icon="fa-file-pdf"
-               role="button" tabindex="0"
-               aria-haspopup="dialog">
-        <div class="project-card-body">
-          <ul class="project-tags">
-            <li class="project-tag">Sales Enablement</li>
-            <li class="project-tag project-tag--alt">AI / Automation</li>
-          </ul>
-          <h3 class="project-title">Outbuild AI Learning System</h3>
-          <p class="project-blurb">AE/SDR onboarding at a contech startup, from 4 weeks to ~1 week, using Claude, Notion, Google Forms, and n8n.</p>
-          <span class="project-cta">
-            Explore Project
-            <svg class="project-cta-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M5 12h14m-6-6 6 6-6 6"/></svg>
-          </span>
-        </div>
-      </article>
-
-      <article class="project-card"
-               data-project="instacart"
-               role="button" tabindex="0"
-               aria-haspopup="dialog">
-        <div class="project-card-body">
-          <ul class="project-tags">
-            <li class="project-tag">Product Analytics</li>
-            <li class="project-tag project-tag--alt">Data</li>
-          </ul>
-          <h3 class="project-title">Instacart Reddit Pulse</h3>
-          <p class="project-blurb">A lightweight tool that uses the Reddit API to surface sentiment trends, pain themes, and volume signals for a data-driven team.</p>
-          <span class="project-cta">
-            Explore Project
-            <svg class="project-cta-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M5 12h14m-6-6 6 6-6 6"/></svg>
-          </span>
-        </div>
-      </article>
-
-      <article class="project-card"
-               data-project="dsc"
-               data-primary-url="{{ site.baseurl }}/pages/dsc-case-study.html"
-               data-primary-label="Launch App"
-               data-primary-icon="fa-mobile-alt"
-               role="button" tabindex="0"
-               aria-haspopup="dialog">
-        <div class="project-card-body">
-          <ul class="project-tags">
-            <li class="project-tag">UX Design</li>
-            <li class="project-tag project-tag--alt">Case Study</li>
-          </ul>
-          <h3 class="project-title">DSC Case Study</h3>
-          <p class="project-blurb">Interactive mobile app prototype for Capital One's debt-support flow — smart survey, personalized paths, and a confirmation experience.</p>
-          <span class="project-cta">
-            Explore Project
-            <svg class="project-cta-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M5 12h14m-6-6 6 6-6 6"/></svg>
-          </span>
-        </div>
-      </article>
-    </div>
-  </section>
-
-  <!-- ─────────────────────────────────────────────────────────────────────
-       Tools for Friends
-       ───────────────────────────────────────────────────────────────────── -->
-  <section class="editorial-section" id="tools" aria-labelledby="tools-title">
-    <div>
-      <span class="section-eyebrow"></span>
-      <h2 class="section-title" id="tools-title">Tools for Friends</h2>
-      <p class="section-lede">Random utilities</p>
-    </div>
-
-    <div class="tool-grid">
-      <div class="tool-card">
-        <div class="tool-card-head">
-          <span class="tool-icon" aria-hidden="true">
-            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M19 4h-1V2h-2v2H8V2H6v2H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2zm0 16H5V10h14v10zm0-12H5V6h14v2z"/></svg>
-          </span>
-          <h3 class="tool-title">KT's Capital One Attendance Tracker</h3>
-        </div>
-        <p class="tool-blurb">Track office attendance across rolling 13-week periods. Calculate prorated requirements, mark attendance, and export as JSON. Ping me if you have feedback.</p>
-        <a class="tool-link" href="{{ site.baseurl }}/tools/attendance-tracker/">
-          Open Tracker
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path d="M5 12h14m-6-6 6 6-6 6"/></svg>
-        </a>
-      </div>
-
-      <div class="tool-card">
-        <div class="tool-card-head">
-          <span class="tool-icon" aria-hidden="true">
-            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 3v9.28a4.39 4.39 0 0 0-1.5-.28c-2.49 0-4.5 2.01-4.5 4.5S8.01 21 10.5 21s4.5-2.01 4.5-4.5V6h4V3h-7z"/></svg>
-          </span>
-          <h3 class="tool-title">KT's Festival Thingamabob</h3>
-        </div>
-        <p class="tool-blurb">Plan festival meetups with the squad and build a schedule around the sets we don't want to miss. Ask KT for the passcode.</p>
-        <a class="tool-link" href="{{ site.baseurl }}/tools/festival-thingamabob/">
-          Open Tool
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path d="M5 12h14m-6-6 6 6-6 6"/></svg>
-        </a>
-      </div>
-    </div>
-  </section>
-
-  <!-- ─────────────────────────────────────────────────────────────────────
-       Current Stuff (Now)
-       ───────────────────────────────────────────────────────────────────── -->
-  <section class="editorial-section" id="now" aria-labelledby="now-title">
-    <div>
-      <span class="section-eyebrow"></span>
-      <h2 class="section-title" id="now-title">Current Stuff</h2>
-      <p class="section-lede">Stuff occupying my mind and time lately.</p>
-    </div>
-
-    <div class="now-grid">
-      <div class="now-card" data-cat="learning">
-        <div class="now-card-head">
-          <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 3 1 9l11 6 9-4.91V17h2V9L12 3zM5 13.18v4L12 21l7-3.82v-4L12 17l-7-3.82z"/></svg>
-          <span class="now-eyebrow">Learning</span>
-        </div>
-        <ul class="now-list">
-          <li>Technical Product Management</li>
-          <li>Being better at using Claude Code for projects</li>
-          <li>Data Product Definitions</li>
-        </ul>
-      </div>
-
-      <div class="now-card" data-cat="reading">
-        <div class="now-card-head">
-          <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M21 5a13.65 13.65 0 0 0-9 1V21a13.65 13.65 0 0 1 9-1V5zM3 5v15a13.65 13.65 0 0 1 9 1V6a13.65 13.65 0 0 0-9-1z"/></svg>
-          <span class="now-eyebrow">Reading</span>
-        </div>
-        <ul class="now-list">
-          <li>Palo Alto by Malcolm Harris</li>
-          <li>Soul of a Chef by Michael Ruhlman</li>
-          <li>Ashes of the Imperium by Chris Wraight</li>
-        </ul>
-      </div>
-
-      <div class="now-card" data-cat="watching">
-        <div class="now-card-head">
-          <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M21 3H3a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h6v2h6v-2h6a2 2 0 0 0 2-2V5a2 2 0 0 0-2-2zm0 14H3V5h18v12zM10 8v6l5-3-5-3z"/></svg>
-          <span class="now-eyebrow">Watching</span>
-        </div>
-        <ul class="now-list">
-          <li>Warhammer 40k Lore Dives by PancreasNoWork</li>
-          <li>Culinary Class Wars Season 2</li>
-          <li>Product management case studies</li>
-        </ul>
-      </div>
-    </div>
-  </section>
-
-</div>
-
 <!-- ─────────────────────────────────────────────────────────────────────
-     Footer
+     Shell: Persistent identity column + Flippable content card
      ───────────────────────────────────────────────────────────────────── -->
-<footer class="editorial-footer">
-  <div>© {{ 'now' | date: '%Y' }} Kaung Thiha .</div>
-  <!--<ul class="editorial-footer-links">
-    <li><a href="https://www.linkedin.com/in/kaungthiha/" target="_blank" rel="noopener">LinkedIn</a></li>
-    <li><a href="https://github.com/kaungthiha" target="_blank" rel="noopener">GitHub</a></li>
-    <li><a href="mailto:kaungthiha.3@gmail.com">Email</a></li>
-  </ul>-->
-</footer>
+<div class="editorial-shell">
+
+  <!-- Identity column (left, persistent) -->
+  <aside class="identity-col" aria-label="About me">
+    <img class="identity-portrait"
+         src="{{ site.baseurl }}/assets/images/about.jpg"
+         alt="Kaung Thiha"
+         loading="eager"
+         width="160" height="160">
+    <h1 class="identity-name">
+      I'm Kaung
+      <span class="burmese">(ကောင်းသီဟ)</span>
+    </h1>
+    <p class="identity-bio">Building data-driven products at Capital One — currently on the Data Products &amp; Experiences team.</p>
+
+    <ul class="identity-socials">
+      <li>
+        <a href="https://www.linkedin.com/in/kaungthiha/" target="_blank" rel="noopener" aria-label="LinkedIn">
+          <svg viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">
+            <path d="M0 1.146C0 .513.526 0 1.175 0h13.65C15.474 0 16 .513 16 1.146v13.708c0 .633-.526 1.146-1.175 1.146H1.175C.526 16 0 15.487 0 14.854zm4.943 12.248V6.169H2.542v7.225zm-1.2-8.212c.837 0 1.358-.554 1.358-1.248-.015-.709-.52-1.248-1.342-1.248S2.4 3.226 2.4 3.934c0 .694.521 1.248 1.327 1.248zm4.908 8.212V9.359c0-.216.016-.432.08-.586.173-.431.568-.878 1.232-.878.869 0 1.216.662 1.216 1.634v3.865h2.401V9.25c0-2.22-1.184-3.252-2.764-3.252-1.274 0-1.845.7-2.165 1.193v.025h-.016l.016-.025V6.169h-2.4c.03.678 0 7.225 0 7.225z"/>
+          </svg>
+        </a>
+      </li>
+      <li>
+        <a href="https://open.spotify.com/user/22k3hzyma66fj4nbmanjastiy?si=ea605d91ddae4bb2" target="_blank" rel="noopener" aria-label="Spotify">
+          <svg viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">
+            <path d="M8 0a8 8 0 1 0 0 16A8 8 0 0 0 8 0zm3.669 11.538a.498.498 0 0 1-.686.165c-1.879-1.147-4.243-1.407-7.028-.77a.499.499 0 0 1-.222-.973c3.048-.696 5.662-.397 7.77.892a.5.5 0 0 1 .166.686zm.979-2.178a.624.624 0 0 1-.858.205c-2.15-1.321-5.428-1.704-7.972-.932a.625.625 0 0 1-.362-1.194c2.905-.881 6.517-.454 8.986 1.063a.624.624 0 0 1 .206.858zm.084-2.268C10.154 5.56 5.9 5.419 3.438 6.166a.748.748 0 1 1-.434-1.432c2.825-.857 7.523-.692 10.492 1.07a.747.747 0 1 1-.764 1.288z"/>
+          </svg>
+        </a>
+      </li>
+    </ul>
+
+    <!-- Mobile-only segmented control (Work / Context) — hidden on desktop -->
+    <div class="segmented-control" role="tablist" aria-label="Switch view">
+      <button class="segmented-btn is-active" type="button" data-face="front">Work</button>
+      <button class="segmented-btn" type="button" data-face="back">Context</button>
+    </div>
+
+    <!-- Primary flip CTA — desktop -->
+    <button class="identity-flip" type="button" id="flip-toggle-primary" data-face-label="front" aria-label="See the person behind the work" aria-pressed="false">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M3 12a9 9 0 0 1 15.5-6.3M21 4v5h-5M21 12a9 9 0 0 1-15.5 6.3M3 20v-5h5"/></svg>
+      See the person
+    </button>
+    <button class="identity-flip" type="button" data-face-label="back" aria-label="Back to the work" aria-pressed="true">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M3 12a9 9 0 0 1 15.5-6.3M21 4v5h-5M21 12a9 9 0 0 1-15.5 6.3M3 20v-5h5"/></svg>
+      Back to the work
+    </button>
+  </aside>
+
+  <!-- Flippable card stage (right) -->
+  <div class="card-stage">
+    <div class="card-flipper">
+
+      <!-- ── FRONT FACE: Work-First ──────────────────────────────────── -->
+      <section class="card-face card-face--front" id="card-front" aria-label="Work">
+
+        <!-- Projects subsection -->
+        <section class="card-section" id="sub-projects" aria-labelledby="projects-title">
+          <span class="section-eyebrow">Featured work</span>
+          <h2 class="section-title" id="projects-title">Recent Projects</h2>
+          <p class="section-lede">Product analyses, mock case studies, and shareable deliverables.</p>
+
+          <div class="project-grid">
+            <article class="project-card project-card--featured"
+                     data-project="lumber"
+                     data-primary-url="{{ site.baseurl }}/assets/projects/KT_LumberProposal.pdf"
+                     data-primary-label="View PDF"
+                     data-primary-icon="fa-file-pdf"
+                     role="button" tabindex="0"
+                     aria-haspopup="dialog">
+              <div class="project-card-media">
+                <img src="{{ site.baseurl }}/assets/images/lumber.jpg" alt="" loading="lazy">
+              </div>
+              <div class="project-card-body">
+                <ul class="project-tags"><li class="project-tag">Product Analysis</li></ul>
+                <h3 class="project-title">Early Wage Access Feature</h3>
+                <p class="project-blurb">A product case for launching an EWA feature for contech — recommended a limited pilot to test the labor-shortage tailwind without overcommitting.</p>
+                <span class="project-cta">
+                  View Case Study
+                  <svg class="project-cta-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M5 12h14m-6-6 6 6-6 6"/></svg>
+                </span>
+              </div>
+            </article>
+
+            <article class="project-card"
+                     data-project="outbuild"
+                     data-primary-url="{{ site.baseurl }}/assets/projects/Outbuild_AI Learning System_KT.docx.pdf"
+                     data-primary-label="View PDF"
+                     data-primary-icon="fa-file-pdf"
+                     role="button" tabindex="0"
+                     aria-haspopup="dialog">
+              <div class="project-card-media">
+                <img src="{{ site.baseurl }}/assets/images/Outbuild.jpg" alt="" loading="lazy">
+              </div>
+              <div class="project-card-body">
+                <ul class="project-tags">
+                  <li class="project-tag">Sales Enablement</li>
+                  <li class="project-tag project-tag--alt">AI / Automation</li>
+                </ul>
+                <h3 class="project-title">Outbuild AI Learning System</h3>
+                <p class="project-blurb">AE/SDR onboarding at a contech startup, from 4 weeks to ~1 week, using Claude, Notion, Google Forms, and n8n.</p>
+                <span class="project-cta">
+                  Explore Project
+                  <svg class="project-cta-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M5 12h14m-6-6 6 6-6 6"/></svg>
+                </span>
+              </div>
+            </article>
+
+            <article class="project-card"
+                     data-project="instacart"
+                     role="button" tabindex="0"
+                     aria-haspopup="dialog">
+              <div class="project-card-media">
+                <img src="{{ site.baseurl }}/assets/images/instacart.jpg" alt="" loading="lazy">
+              </div>
+              <div class="project-card-body">
+                <ul class="project-tags">
+                  <li class="project-tag">Product Analytics</li>
+                  <li class="project-tag project-tag--alt">Data</li>
+                </ul>
+                <h3 class="project-title">Instacart Reddit Pulse</h3>
+                <p class="project-blurb">A lightweight tool that uses the Reddit API to surface sentiment trends, pain themes, and volume signals for a data-driven team.</p>
+                <span class="project-cta">
+                  Explore Project
+                  <svg class="project-cta-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M5 12h14m-6-6 6 6-6 6"/></svg>
+                </span>
+              </div>
+            </article>
+
+            <article class="project-card"
+                     data-project="dsc"
+                     data-primary-url="{{ site.baseurl }}/pages/dsc-case-study.html"
+                     data-primary-label="Launch App"
+                     data-primary-icon="fa-mobile-alt"
+                     role="button" tabindex="0"
+                     aria-haspopup="dialog">
+              <div class="project-card-media">
+                <img src="{{ site.baseurl }}/assets/images/ease.png" alt="" loading="lazy">
+              </div>
+              <div class="project-card-body">
+                <ul class="project-tags">
+                  <li class="project-tag">UX Design</li>
+                  <li class="project-tag project-tag--alt">Case Study</li>
+                </ul>
+                <h3 class="project-title">DSC Case Study</h3>
+                <p class="project-blurb">Interactive mobile app prototype for Capital One's debt-support flow — smart survey, personalized paths, and a confirmation experience.</p>
+                <span class="project-cta">
+                  Explore Project
+                  <svg class="project-cta-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M5 12h14m-6-6 6 6-6 6"/></svg>
+                </span>
+              </div>
+            </article>
+          </div>
+        </section>
+
+        <!-- Tools subsection -->
+        <section class="card-section" id="sub-tools" aria-labelledby="tools-title">
+          <h2 class="section-title" id="tools-title">Tools for Friends</h2>
+          <p class="section-lede">Random utilities I've cooked up for people I care about.</p>
+
+          <div class="tool-grid">
+            <div class="tool-card">
+              <div class="tool-card-head">
+                <span class="tool-icon" aria-hidden="true">
+                  <svg viewBox="0 0 24 24" fill="currentColor"><path d="M19 4h-1V2h-2v2H8V2H6v2H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2zm0 16H5V10h14v10zm0-12H5V6h14v2z"/></svg>
+                </span>
+                <h3 class="tool-title">Capital One Attendance Tracker</h3>
+              </div>
+              <p class="tool-blurb">Track office attendance across rolling 13-week periods. Calculate prorated requirements, mark attendance, and export as JSON.</p>
+              <a class="tool-link" href="{{ site.baseurl }}/tools/attendance-tracker/">
+                Open Tracker
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path d="M5 12h14m-6-6 6 6-6 6"/></svg>
+              </a>
+            </div>
+
+            <div class="tool-card">
+              <div class="tool-card-head">
+                <span class="tool-icon" aria-hidden="true">
+                  <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 3v9.28a4.39 4.39 0 0 0-1.5-.28c-2.49 0-4.5 2.01-4.5 4.5S8.01 21 10.5 21s4.5-2.01 4.5-4.5V6h4V3h-7z"/></svg>
+                </span>
+                <h3 class="tool-title">Festival Thingamabob</h3>
+              </div>
+              <p class="tool-blurb">Plan festival meetups with the squad and build a schedule around the sets we don't want to miss. Ask KT for the passcode.</p>
+              <a class="tool-link" href="{{ site.baseurl }}/tools/festival-thingamabob/">
+                Open Tool
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path d="M5 12h14m-6-6 6 6-6 6"/></svg>
+              </a>
+            </div>
+          </div>
+        </section>
+      </section>
+
+      <!-- ── BACK FACE: Context ──────────────────────────────────────── -->
+      <section class="card-face card-face--back" id="card-back" aria-label="Context" aria-hidden="true">
+
+        <!-- About / Me subsection -->
+        <section class="card-section" id="sub-me" aria-labelledby="me-title">
+          <span class="section-eyebrow">The longer version</span>
+          <h2 class="section-title" id="me-title">A bit more about me</h2>
+
+          <div class="about-prose">
+            <p>I graduated from <strong>USF</strong> — the University of San Francisco <em>(not the University of South Florida like Google thinks)</em> — studying <strong>Business Analytics &amp; Computer Science</strong>. I'm currently an Associate at Capital One on the Data Products &amp; Experiences Team.</p>
+            <p>I spent my formative years in Myanmar thinking I'd be a writer or the next Jimmy Neutron (that cowlick was <em>iconic</em>). Half-fittingly, I was initially an English + Philosophy major with law school aspirations. The latter is on the backburner for now, but we'll see where things go.</p>
+
+            <h3 class="about-subhead">What I'm Up To</h3>
+            <p>Nowadays, I like playing around with data to build cool products. I've had a bunch of experiences close to product (prod ops + data products) but never a formal PM position — though I'm trying to change that. In the meantime, I take a product-minded approach in my day-to-day work, plus the small utilities I'm cooking alongside AI dev tools. That ranges from drafting scoping docs and PRDs to socializing analyses across my C1 org. Across every job, the awesome product people I've met all connect dots across multiple facets of a business — which is why I ask a lot of questions to build context.</p>
+            <p>I've also got a solid grasp of <strong>Python</strong> and <strong>Java</strong>, and I'm pretty handy with <strong>SQL</strong>, <strong>R</strong>, and <strong>Tableau</strong>. Lately I'm digging into the data engineering side <em>(shoutout to Zach Wilson, who is putting out some awesome stuff)</em>. Speaking in both technical and non-technical terms is my biggest strength — and one I work on every day.</p>
+
+            <h3 class="about-subhead">Technical Skills</h3>
+            <div class="skills-grid">
+              <div class="skill-card">
+                <div class="skill-card-head">
+                  <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M9.4 16.6 4.8 12l4.6-4.6L8 6l-6 6 6 6 1.4-1.4zm5.2 0L19.2 12l-4.6-4.6L16 6l6 6-6 6-1.4-1.4z"/></svg>
+                  <span class="skill-card-name">Programming</span>
+                </div>
+                <ul class="skill-tags">
+                  <li class="skill-tag">Python</li>
+                  <li class="skill-tag">Java</li>
+                  <li class="skill-tag">R</li>
+                  <li class="skill-tag">SQL</li>
+                  <li class="skill-tag">JavaScript</li>
+                </ul>
+              </div>
+              <div class="skill-card">
+                <div class="skill-card-head">
+                  <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M5 9.2h3V19H5zm5.6-4.2h2.8V19h-2.8zm5.6 8h2.8V19h-2.8z"/></svg>
+                  <span class="skill-card-name">Analytics</span>
+                </div>
+                <ul class="skill-tags">
+                  <li class="skill-tag">Looker</li>
+                  <li class="skill-tag">Quick Suite</li>
+                  <li class="skill-tag">Tableau</li>
+                  <li class="skill-tag">R Shiny</li>
+                  <li class="skill-tag">Plotly</li>
+                </ul>
+              </div>
+              <div class="skill-card">
+                <div class="skill-card-head">
+                  <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 3C7.58 3 4 4.79 4 7s3.58 4 8 4 8-1.79 8-4-3.58-4-8-4zM4 9v3c0 2.21 3.58 4 8 4s8-1.79 8-4V9c0 2.21-3.58 4-8 4s-8-1.79-8-4zm0 5v3c0 2.21 3.58 4 8 4s8-1.79 8-4v-3c0 2.21-3.58 4-8 4s-8-1.79-8-4z"/></svg>
+                  <span class="skill-card-name">Data Tools</span>
+                </div>
+                <ul class="skill-tags">
+                  <li class="skill-tag">PostgreSQL</li>
+                  <li class="skill-tag">BigQuery</li>
+                  <li class="skill-tag">Databricks</li>
+                  <li class="skill-tag">Snowflake</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Currently subsection -->
+        <section class="card-section" id="sub-currently" aria-labelledby="currently-title">
+          <h2 class="section-title" id="currently-title">Currently...</h2>
+          <p class="section-lede">Stuff occupying my mind and time lately.</p>
+
+          <div class="now-grid">
+            <div class="now-card" data-cat="learning">
+              <div class="now-card-head">
+                <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 3 1 9l11 6 9-4.91V17h2V9L12 3zM5 13.18v4L12 21l7-3.82v-4L12 17l-7-3.82z"/></svg>
+                <span class="now-eyebrow">Learning</span>
+              </div>
+              <ul class="now-list">
+                <li>Technical Product Management</li>
+                <li>Being better at using Claude Code for projects</li>
+                <li>Data Product Definitions</li>
+              </ul>
+            </div>
+
+            <div class="now-card" data-cat="reading">
+              <div class="now-card-head">
+                <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M21 5a13.65 13.65 0 0 0-9 1V21a13.65 13.65 0 0 1 9-1V5zM3 5v15a13.65 13.65 0 0 1 9 1V6a13.65 13.65 0 0 0-9-1z"/></svg>
+                <span class="now-eyebrow">Reading</span>
+              </div>
+              <ul class="now-list">
+                <li>Palo Alto by Malcolm Harris</li>
+                <li>Soul of a Chef by Michael Ruhlman</li>
+                <li>Ashes of the Imperium by Chris Wraight</li>
+              </ul>
+            </div>
+
+            <div class="now-card" data-cat="watching">
+              <div class="now-card-head">
+                <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M21 3H3a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h6v2h6v-2h6a2 2 0 0 0 2-2V5a2 2 0 0 0-2-2zm0 14H3V5h18v12zM10 8v6l5-3-5-3z"/></svg>
+                <span class="now-eyebrow">Watching</span>
+              </div>
+              <ul class="now-list">
+                <li>Warhammer 40k Lore Dives by PancreasNoWork</li>
+                <li>Culinary Class Wars Season 2</li>
+                <li>Product management case studies</li>
+              </ul>
+            </div>
+          </div>
+        </section>
+      </section>
+
+    </div>
+  </div>
+</div>
 
 <!-- Image Lightbox -->
 <div id="img-lightbox" class="img-lightbox" role="dialog" aria-modal="true" aria-label="Diagram viewer">
@@ -496,28 +492,99 @@ comments: false
     });
   }());
 
-  // ── Scroll-spy nav active state ──────────────────────────────────────
+  // ── Flip + nav routing ──────────────────────────────────────────────
   (function () {
-    const links    = document.querySelectorAll('[data-nav-target]');
-    if (!links.length || !('IntersectionObserver' in window)) return;
+    // Map nav targets → which face + which subsection inside that face
+    const ROUTE = {
+      me:        { face: 'back',  section: 'sub-me' },
+      projects:  { face: 'front', section: 'sub-projects' },
+      tools:     { face: 'front', section: 'sub-tools' },
+      currently: { face: 'back',  section: 'sub-currently' },
+    };
 
-    const sections = Array.from(links).map(l => document.getElementById(l.dataset.navTarget)).filter(Boolean);
-    const linkFor  = id => document.querySelector(`[data-nav-target="${id}"]`);
+    const body       = document.body;
+    const flipper    = document.querySelector('.card-flipper');
+    const frontFace  = document.getElementById('card-front');
+    const backFace   = document.getElementById('card-back');
+    const navLinks   = document.querySelectorAll('[data-nav-target]');
+    const flipBtns   = document.querySelectorAll('[id^="flip-toggle"]');
+    const segBtns    = document.querySelectorAll('.segmented-btn');
+    if (!flipper || !frontFace || !backFace) return;
 
-    const observer = new IntersectionObserver(entries => {
-      entries.forEach(entry => {
-        if (entry.isIntersecting) {
-          links.forEach(l => l.classList.remove('is-active'));
-          const link = linkFor(entry.target.id);
-          if (link) link.classList.add('is-active');
-        }
+    body.dataset.face = 'front';
+
+    function applyFace(face) {
+      body.dataset.face = face;
+      const isFront = face === 'front';
+      frontFace.setAttribute('aria-hidden', isFront ? 'false' : 'true');
+      backFace .setAttribute('aria-hidden', isFront ? 'true'  : 'false');
+      // Remove inactive face from tab order so SR/keyboard skip it
+      [...frontFace.querySelectorAll('a, button, [tabindex]')].forEach(el => {
+        if (isFront) el.removeAttribute('tabindex');
+        else el.setAttribute('tabindex', '-1');
       });
-    }, {
-      // Section is "active" when its top crosses ~30% from viewport top
-      rootMargin: '-30% 0px -55% 0px',
-      threshold: 0,
+      [...backFace.querySelectorAll('a, button, [tabindex]')].forEach(el => {
+        if (!isFront) el.removeAttribute('tabindex');
+        else el.setAttribute('tabindex', '-1');
+      });
+      flipBtns.forEach(b => b.setAttribute('aria-pressed', isFront ? 'false' : 'true'));
+      segBtns.forEach(b => b.classList.toggle('is-active', b.dataset.face === face));
+    }
+
+    function scrollToSubsection(id) {
+      const el = document.getElementById(id);
+      if (!el) return;
+      // Each face has its own scroll context (overflow-y on .card-face).
+      // On mobile, faces are static — fall back to window scroll.
+      const face = el.closest('.card-face');
+      if (face && getComputedStyle(face).position === 'absolute') {
+        face.scrollTo({ top: el.offsetTop - 8, behavior: 'smooth' });
+      } else {
+        el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+    }
+
+    function navigate(target) {
+      const route = ROUTE[target];
+      if (!route) return;
+      const needsFlip = body.dataset.face !== route.face;
+      navLinks.forEach(l => l.classList.toggle('is-active', l.dataset.navTarget === target));
+
+      if (needsFlip) {
+        applyFace(route.face);
+        // Wait for flip transition before scrolling
+        setTimeout(() => scrollToSubsection(route.section), 620);
+      } else {
+        scrollToSubsection(route.section);
+      }
+    }
+
+    // Wire nav links
+    navLinks.forEach(l => {
+      l.addEventListener('click', e => {
+        e.preventDefault();
+        navigate(l.dataset.navTarget);
+      });
     });
 
-    sections.forEach(s => observer.observe(s));
+    // Wire flip toggles (both nav and identity-column buttons)
+    flipBtns.forEach(btn => {
+      btn.addEventListener('click', () => {
+        const next = body.dataset.face === 'front' ? 'back' : 'front';
+        applyFace(next);
+        // Update active nav link to first subsection of the new face
+        const targets = next === 'front' ? ['projects', 'tools'] : ['me', 'currently'];
+        navLinks.forEach(l => l.classList.toggle('is-active', l.dataset.navTarget === targets[0]));
+      });
+    });
+
+    // Wire mobile segmented control
+    segBtns.forEach(btn => {
+      btn.addEventListener('click', () => applyFace(btn.dataset.face));
+    });
+
+    // Initial state — front face, projects active
+    applyFace('front');
+    navLinks.forEach(l => l.classList.toggle('is-active', l.dataset.navTarget === 'projects'));
   }());
 </script>
