@@ -181,7 +181,92 @@
     const s = 0.6 + Math.random() * 0.6; // scale range
     const type = randomArchetype();
     TREE_LAYOUT.push({ x, z, s, type });
+  }
+
+  // Build tree instances from layout
+  const canopies = [];
+  TREE_LAYOUT.forEach(spec => {
+    const { group, canopy } = buildTree(spec);
+    group.position.set(spec.x, 0, spec.z);
+    group.scale.setScalar(spec.s);
+    group.rotation.y = (Math.random() - 0.5) * 0.6;
+    scene.add(group);
     canopies.push({ canopy, phase: Math.random() * Math.PI * 2 });
+  });
+
+  // ----- Add pond -----
+  const pondGeom = new THREE.RingGeometry(0.8, 1.0, 32);
+  const pondMat = new THREE.MeshStandardMaterial({
+    color: 0x7fb3d5,
+    transparent: true,
+    opacity: 0,
+    side: THREE.DoubleSide,
+  });
+  const pond = new THREE.Mesh(pondGeom, pondMat);
+  pond.rotation.x = -Math.PI / 2;
+  pond.position.set(-4, 0.02, -1);
+  scene.add(pond);
+
+  // ----- Add shrubs (simple cylinders) -----
+  const shrubGeom = new THREE.CylinderGeometry(0.05, 0.07, 0.3, 6);
+  const shrubMat = new THREE.MeshStandardMaterial({
+    color: 0x2e8b57,
+    transparent: true,
+    opacity: 0,
+  });
+  const shrubs = [];
+  // place a few shrubs around the pond
+  const shrubPositions = [
+    {x: -4.5, z: -0.8},
+    {x: -3.5, z: -1.2},
+    {x: -4.2, z: -1.5},
+  ];
+  shrubPositions.forEach(pos => {
+    const shrub = new THREE.Mesh(shrubGeom, shrubMat.clone());
+    shrub.position.set(pos.x, 0.15, pos.z);
+    shrub.scale.setScalar(1);
+    scene.add(shrub);
+    shrubs.push(shrub);
+  });
+
+  // ----- Add lily pads (flat circles) -----
+  const padGeom = new THREE.RingGeometry(0.2, 0.25, 16);
+  const padMat = new THREE.MeshStandardMaterial({
+    color: 0x88c999,
+    transparent: true,
+    opacity: 0,
+    side: THREE.DoubleSide,
+  });
+  const pads = [];
+  const padPositions = [
+    {x: -4.1, z: -0.9},
+    {x: -3.9, z: -1.1},
+  ];
+  padPositions.forEach(pos => {
+    const pad = new THREE.Mesh(padGeom, padMat.clone());
+    pad.rotation.x = -Math.PI / 2;
+    pad.position.set(pos.x, 0.021, pos.z);
+    scene.add(pad);
+    pads.push(pad);
+  });
+
+  // ----- Add tiny fish (small spheres) -----
+  const fishGeom = new THREE.SphereGeometry(0.03, 8, 8);
+  const fishMat = new THREE.MeshStandardMaterial({
+    color: 0xffa07a,
+    transparent: true,
+    opacity: 0,
+  });
+  const fish = [];
+  const fishPositions = [
+    {x: -4.0, z: -0.95},
+    {x: -4.2, z: -1.05},
+  ];
+  fishPositions.forEach(pos => {
+    const f = new THREE.Mesh(fishGeom, fishMat.clone());
+    f.position.set(pos.x, 0.03, pos.z);
+    scene.add(f);
+    fish.push(f);
   });
 
   // ── Sun glow (sprite with radial-gradient texture) ────────────────
@@ -324,6 +409,17 @@
     snowMat.opacity      = m.snowParticleOpacity;
     sunMat.opacity       = m.sunOpacity;
     birdMat.opacity      = m.birdOpacity;
+    // Apply pond and shrub opacity if they exist
+    if (typeof pond !== 'undefined') pond.material.opacity = m.pondOpacity;
+    if (typeof shrubs !== 'undefined') {
+      shrubs.forEach(s => { if (s.material) s.material.opacity = m.shrubOpacity; });
+    }
+    if (typeof pads !== 'undefined') {
+      pads.forEach(p => { if (p.material) p.material.opacity = m.pondOpacity; });
+    }
+    if (typeof fish !== 'undefined') {
+      fish.forEach(f => { if (f.material) f.material.opacity = m.pondOpacity; });
+    }
     ambient.intensity    = m.ambientIntensity;
     directional.intensity = m.directionalIntensity;
     directional.color.copy(m.directionalColor);
