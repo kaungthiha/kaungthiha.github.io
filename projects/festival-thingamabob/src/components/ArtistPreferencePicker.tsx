@@ -1,4 +1,3 @@
-import React from 'react';
 import { FestivalSet, ArtistPreference, PreferenceLevel } from '../types/festival';
 import { formatTimeRange } from '../lib/timeUtils';
 import { STAGES } from '../lib/sampleData';

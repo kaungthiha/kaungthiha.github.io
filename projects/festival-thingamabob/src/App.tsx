@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useCallback } from 'react';
+import { useState, useMemo, useCallback } from 'react';
 import { ArtistPreference, PreferenceLevel, UserPreferences, GeneratedItinerary } from './types/festival';
 import { EDC_2026_SETS, DAYS } from './lib/sampleData';
 import { generateItinerary } from './lib/itineraryOptimizer';

@@ -1,4 +1,3 @@
-import React from 'react';
 import { ItineraryItem, PreferenceLevel } from '../types/festival';
 import { formatTime, formatTimeRange, getDurationMinutes, formatDuration } from '../lib/timeUtils';
 

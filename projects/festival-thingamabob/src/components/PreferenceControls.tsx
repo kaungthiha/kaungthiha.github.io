@@ -1,4 +1,3 @@
-import React from 'react';
 import { UserPreferences } from '../types/festival';
 
 interface PreferenceControlsProps {

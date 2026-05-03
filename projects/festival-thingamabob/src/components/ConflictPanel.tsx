@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { ConflictExplanation } from '../types/festival';
 import { formatTimeRange } from '../lib/timeUtils';
 

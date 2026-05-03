@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect } from 'react';
 
 const STORAGE_KEY = 'rave_route_access';
 const CORRECT = 'mikiya';

@@ -1,4 +1,4 @@
-import React, { useRef, useState } from 'react';
+import { useRef, useState } from 'react';
 import { FestivalSet } from '../types/festival';
 import { parseCsv } from '../lib/csvParser';
 
