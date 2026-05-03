@@ -197,7 +197,16 @@
         bGeo.translate(0, len / 2, 0);
         const br   = new THREE.Mesh(bGeo, trunkMat);
         br.position.y = cfg.tH * yF;
-        br.rotation.set(-upA, ry, (rnd()-0.5) * bnC.sp);
+        // Align cylinder axis (local +Y) to the intended outward direction so
+        // tip positions computed below exactly match where the branch ends.
+        br.quaternion.setFromUnitVectors(
+          new THREE.Vector3(0, 1, 0),
+          new THREE.Vector3(
+            Math.sin(ry) * Math.cos(upA),
+            Math.sin(upA),
+            Math.cos(ry) * Math.cos(upA)
+          )
+        );
         group.add(br);
         tips.push({
           x: Math.sin(ry) * len * Math.cos(upA),
@@ -610,6 +619,51 @@
     ], -2.2, 0.48);
   }
 
+  // ── Clouds ─────────────────────────────────────────────────────────
+  const cloudMat = new THREE.MeshToonMaterial({
+    color: 0xffffff, gradientMap: toonGrad, transparent: true, opacity: 0.0,
+  });
+  const NC     = quality === 'low' ? 2 : quality === 'medium' ? 4 : 6;
+  const clouds = [];
+  (function () {
+    const SPREAD = 22;
+    for (let i = 0; i < NC; i++) {
+      const g      = new THREE.Group();
+      const nLobes = 4 + Math.floor(Math.random() * 4);
+      for (let j = 0; j < nLobes; j++) {
+        const lobe = new THREE.Mesh(
+          new THREE.SphereGeometry(0.42 + Math.random() * 0.32,
+            quality === 'low' ? 5 : 7,
+            quality === 'low' ? 3 : 5),
+          cloudMat
+        );
+        lobe.position.set(
+          (Math.random() - 0.5) * 1.8,
+          (Math.random() - 0.5) * 0.32,
+          (Math.random() - 0.5) * 0.42
+        );
+        lobe.scale.set(
+          0.85 + Math.random() * 0.55,
+          0.42 + Math.random() * 0.26,
+          0.60 + Math.random() * 0.26
+        );
+        g.add(lobe);
+      }
+      const bx    = (Math.random() - 0.5) * SPREAD;
+      const by    = 5.2 + Math.random() * 2.5;
+      const bz    = -5  - Math.random() * 10;
+      const scale = 0.75 + Math.random() * 0.85;
+      g.position.set(bx, by, bz);
+      g.scale.setScalar(scale);
+      g.userData.baseX  = bx;
+      g.userData.baseY  = by;
+      g.userData.speed  = 0.05 + Math.random() * 0.07;
+      g.userData.spread = SPREAD;
+      scene.add(g);
+      clouds.push(g);
+    }
+  }());
+
   // ── Mode presets ───────────────────────────────────────────────────
   const MODES = {
     sunny: {
@@ -639,6 +693,8 @@
       mtnScale:     1.00,
       hikerOpacity: 0.70,
       sunColor:     new THREE.Color(0xFFE882),
+      cloudOpacity: 0.52,
+      cloudColor:   new THREE.Color(0xffffff),
     },
     rainy: {
       leafColor:    new THREE.Color(0x3a6e3a),
@@ -667,6 +723,8 @@
       mtnScale:     0.55,
       hikerOpacity: 0.38,
       sunColor:     new THREE.Color(0x7A8EA0),
+      cloudOpacity: 0.82,
+      cloudColor:   new THREE.Color(0x7a8a98),
     },
     snowy: {
       leafColor:    new THREE.Color(0x9ba9b0),
@@ -695,6 +753,8 @@
       mtnScale:     1.20,
       hikerOpacity: 0.50,
       sunColor:     new THREE.Color(0xE4EDFF),
+      cloudOpacity: 0.68,
+      cloudColor:   new THREE.Color(0xeef3f8),
     },
   };
 
@@ -726,6 +786,8 @@
     hikerMat.opacity = m.hikerOpacity;
     sunCoreMat.color.copy(m.sunColor);
     sunHaloMat.color.copy(m.sunColor);
+    cloudMat.opacity = m.cloudOpacity;
+    cloudMat.color.copy(m.cloudColor);
   }
 
   // ── Tween ──────────────────────────────────────────────────────────
@@ -763,6 +825,8 @@
       mtnScale:     TO.mtnScale,
       hikerOpacity: hikerMat.opacity,
       sunColor:     sunCoreMat.color.clone(),
+      cloudOpacity: cloudMat.opacity,
+      cloudColor:   cloudMat.color.clone(),
     };
     TO   = MODES[mode];
     PROG = 0;
@@ -831,6 +895,19 @@
       hikerMat.opacity = lerp(FROM.hikerOpacity, TO.hikerOpacity, e);
       sunCoreMat.color.copy(FROM.sunColor).lerp(TO.sunColor, e);
       sunHaloMat.color.copy(FROM.sunColor).lerp(TO.sunColor, e);
+      cloudMat.opacity = lerp(FROM.cloudOpacity, TO.cloudOpacity, e);
+      cloudMat.color.copy(FROM.cloudColor).lerp(TO.cloudColor, e);
+    }
+
+    // Cloud drift
+    if (cloudMat.opacity > 0.01) {
+      for (const c of clouds) {
+        const u    = c.userData;
+        const half = u.spread / 2;
+        c.position.x = ((u.baseX + t * u.speed + half) % u.spread) - half;
+        if (!reduceMotion)
+          c.position.y = u.baseY + Math.sin(t * 0.22 + u.speed * 18) * 0.12;
+      }
     }
 
     // Canopy sway
