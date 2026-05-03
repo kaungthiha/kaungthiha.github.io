@@ -485,24 +485,24 @@
   }
   scene.add(snow);
 
-  // ── Mountains — far background, always behind scene geometry ─────────
-  // depthTest:false + negative renderOrder guarantees they never clip trees.
-  // yBase sits in the sky zone so peaks read above the tree line.
+  // ── Mountains — far background silhouettes above the tree line ───────
+  // yBase sits above tree canopy (~3.0+) so only peaks show in the sky zone.
+  // A small below-base fill (1.5 units) seals the shape without creating a box.
   const mtnMats = [];
   (function () {
     const LAYERS = quality === 'low' ? [
-      { z:-22, yBase:1.4, w:36, pks:4, maxH:5.2, col:0xC2D0DA, op:0.17 },
+      { z:-22, yBase:3.2, w:36, pks:4, maxH:5.0, col:0xC2D0DA, op:0.14 },
     ] : quality === 'medium' ? [
-      { z:-28, yBase:1.7, w:42, pks:5, maxH:5.8, col:0xCCD8E0, op:0.13 },
-      { z:-20, yBase:1.4, w:30, pks:4, maxH:4.4, col:0x90AEBE, op:0.20 },
+      { z:-28, yBase:3.5, w:42, pks:5, maxH:5.8, col:0xCCD8E0, op:0.11 },
+      { z:-20, yBase:3.1, w:30, pks:4, maxH:4.4, col:0x90AEBE, op:0.17 },
     ] : [
-      { z:-32, yBase:1.9, w:48, pks:6, maxH:6.4, col:0xD0DAE2, op:0.11 },
-      { z:-24, yBase:1.6, w:36, pks:5, maxH:5.0, col:0x9EB4C2, op:0.18 },
-      { z:-18, yBase:1.2, w:28, pks:4, maxH:3.8, col:0x728EA0, op:0.24 },
+      { z:-32, yBase:3.7, w:48, pks:6, maxH:6.4, col:0xD0DAE2, op:0.09 },
+      { z:-24, yBase:3.4, w:36, pks:5, maxH:5.0, col:0x9EB4C2, op:0.15 },
+      { z:-18, yBase:3.0, w:28, pks:4, maxH:3.8, col:0x728EA0, op:0.20 },
     ];
-    LAYERS.forEach((l, li) => {
+    LAYERS.forEach((l) => {
       const shape = new THREE.Shape();
-      shape.moveTo(-l.w / 2, l.yBase - 6.0); // base reaches below ground
+      shape.moveTo(-l.w / 2, l.yBase - 1.5);
       shape.lineTo(-l.w / 2, l.yBase);
       const sp = l.w / l.pks;
       for (let i = 0; i < l.pks; i++) {
@@ -514,16 +514,15 @@
         shape.lineTo(cx + hw * 0.68, l.yBase + 0.10);
       }
       shape.lineTo(l.w / 2, l.yBase);
-      shape.lineTo(l.w / 2, l.yBase - 6.0);
+      shape.lineTo(l.w / 2, l.yBase - 1.5);
       shape.closePath();
       const mat = new THREE.MeshBasicMaterial({
         color: new THREE.Color(l.col), transparent: true, opacity: l.op,
-        depthTest: false, depthWrite: false,
+        depthWrite: false,
       });
       mtnMats.push({ mat, base: l.op });
       const mesh = new THREE.Mesh(new THREE.ShapeGeometry(shape), mat);
       mesh.position.z = l.z;
-      mesh.renderOrder = -10 - li; // farthest layer draws first
       scene.add(mesh);
     });
   }());
