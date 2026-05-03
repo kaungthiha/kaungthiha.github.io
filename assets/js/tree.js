@@ -330,6 +330,7 @@
   });
 
   // ── Small flowers at forest edges ──────────────────────────────────
+  const SEG_F = new THREE.SphereGeometry(0.075, 6, 4);
   const FN = quality === 'low' ? 0 : (quality === 'medium' ? 5 : 10);
   const flowers = [];
   for (let i = 0; i < FN; i++) {
