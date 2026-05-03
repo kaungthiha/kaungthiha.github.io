@@ -438,6 +438,111 @@
   }
   scene.add(snow);
 
+  // ── Mountains — layered silhouettes behind tree line ─────────────────
+  const mtnMats = [];
+  (function () {
+    const LAYERS = quality === 'low' ? [
+      { z:-15, yBase:-0.9, w:34, pks:4, maxH:5.2, col:0xBCCED8, op:0.18 },
+    ] : quality === 'medium' ? [
+      { z:-17, yBase:-1.1, w:38, pks:5, maxH:5.8, col:0xC8D8E2, op:0.14 },
+      { z:-12, yBase:-0.8, w:28, pks:4, maxH:4.4, col:0x8AAAB8, op:0.22 },
+    ] : [
+      { z:-18, yBase:-1.3, w:42, pks:6, maxH:6.2, col:0xCED9E2, op:0.12 },
+      { z:-13, yBase:-1.0, w:32, pks:5, maxH:5.0, col:0x9CB4C2, op:0.20 },
+      { z:-10, yBase:-0.6, w:24, pks:4, maxH:3.8, col:0x6E94A8, op:0.27 },
+    ];
+    LAYERS.forEach(l => {
+      const shape = new THREE.Shape();
+      shape.moveTo(-l.w / 2, l.yBase - 2.2);
+      shape.lineTo(-l.w / 2, l.yBase);
+      const sp = l.w / l.pks;
+      for (let i = 0; i < l.pks; i++) {
+        const cx = -l.w/2 + sp * (i + 0.5) + (Math.random()-0.5) * sp * 0.20;
+        const h  = l.maxH * (0.56 + Math.random() * 0.42);
+        const hw = sp * (0.30 + Math.random() * 0.22);
+        shape.lineTo(cx - hw * 0.65, l.yBase + 0.14);
+        shape.lineTo(cx, l.yBase + h);
+        shape.lineTo(cx + hw * 0.65, l.yBase + 0.14);
+      }
+      shape.lineTo(l.w / 2, l.yBase);
+      shape.lineTo(l.w / 2, l.yBase - 2.2);
+      shape.closePath();
+      const mat = new THREE.MeshBasicMaterial({
+        color: new THREE.Color(l.col), transparent: true, opacity: l.op, depthWrite: false,
+      });
+      mtnMats.push({ mat, base: l.op });
+      scene.add(new THREE.Mesh(new THREE.ShapeGeometry(shape), mat));
+    });
+  }());
+
+  // ── Hikers — tiny ambient stick-figures ──────────────────────────────
+  const FH = 0.28;
+  const hikerMat = new THREE.LineBasicMaterial({ color: 0x2d3a48, transparent: true, opacity: 0.0 });
+  const hikerObjs = [];
+  function figGeo(segs) {
+    const pts = [];
+    segs.forEach(s => pts.push(s[0]*FH, s[1]*FH, 0,  s[2]*FH, s[3]*FH, 0));
+    const g = new THREE.BufferGeometry();
+    g.setAttribute('position', new THREE.Float32BufferAttribute(pts, 3));
+    return g;
+  }
+  const gWalk  = figGeo([
+    [-0.04,0.88, 0.04,0.88],[0,0.85, 0,0.92],
+    [0,0.83, 0,0.50],
+    [0,0.73, 0.22,0.57],[0,0.73,-0.17,0.64],
+    [0,0.50,-0.20,0.14],[0,0.50, 0.16,0.28],
+  ]);
+  const gStand = figGeo([
+    [-0.04,0.88, 0.04,0.88],[0,0.85, 0,0.92],
+    [0,0.83, 0,0.50],
+    [0,0.73,-0.18,0.56],[0,0.73, 0.18,0.56],
+    [0,0.50,-0.13,0.16],[0,0.50, 0.13,0.16],
+  ]);
+  const gSit   = figGeo([
+    [-0.04,0.56, 0.04,0.56],[0,0.53, 0,0.60],
+    [0,0.52, 0,0.26],
+    [0,0.44,-0.18,0.30],[0,0.44, 0.18,0.28],
+    [0,0.26,-0.24,0.06],[0,0.26, 0.24,0.06],
+  ]);
+  const gCrouch= figGeo([
+    [-0.04,0.52, 0.04,0.52],[0,0.49, 0,0.56],
+    [0,0.48, 0,0.27],
+    [0,0.44,-0.26,0.34],[0,0.44, 0.24,0.38],
+    [0,0.27,-0.14,0.05],[0,0.27, 0.14,0.05],
+  ]);
+  if (quality !== 'low') {
+    // Walking pair — left edge
+    [
+      { g:gWalk,  x:-4.0, z:0.80, sp:0.11, off:0.0, lo:-6.8, hi:-0.8 },
+      { g:gWalk,  x:-3.6, z:0.90, sp:0.09, off:1.4, lo:-6.8, hi:-0.8 },
+    ].forEach(d => {
+      const m = new THREE.LineSegments(d.g, hikerMat);
+      m.position.set(d.x, 0, d.z);
+      m.userData = { walk:true, sp:d.sp, lo:d.lo, hi:d.hi, off:d.off };
+      scene.add(m); hikerObjs.push(m);
+    });
+    // Resting pair — right edge near shrub
+    [
+      { g:gSit,   x:4.55, z:0.35 },
+      { g:gStand, x:4.92, z:0.25 },
+    ].forEach(d => {
+      const m = new THREE.LineSegments(d.g, hikerMat);
+      m.position.set(d.x, 0, d.z);
+      scene.add(m); hikerObjs.push(m);
+    });
+  }
+  if (quality === 'high') {
+    // Photo moment — near pond
+    [
+      { g:gStand,  x:-2.7, z:0.30 },
+      { g:gCrouch, x:-2.2, z:0.48 },
+    ].forEach(d => {
+      const m = new THREE.LineSegments(d.g, hikerMat);
+      m.position.set(d.x, 0, d.z);
+      scene.add(m); hikerObjs.push(m);
+    });
+  }
+
   // ── Mode presets ───────────────────────────────────────────────────
   const MODES = {
     sunny: {
@@ -464,6 +569,9 @@
       windStr:      0.025,
       pondColor:    new THREE.Color(0x60A8D0),
       pondRipple:   0.0,
+      mtnScale:     1.00,
+      hikerOpacity: 0.70,
+      sunColor:     new THREE.Color(0xFFE882),
     },
     rainy: {
       leafColor:    new THREE.Color(0x3a6e3a),
@@ -489,13 +597,16 @@
       windStr:      0.058,
       pondColor:    new THREE.Color(0x4A7A98),
       pondRipple:   1.0,
+      mtnScale:     0.55,
+      hikerOpacity: 0.38,
+      sunColor:     new THREE.Color(0x7A8EA0),
     },
     snowy: {
       leafColor:    new THREE.Color(0x9ba9b0),
       leafOpacity:  0.28,
       capOpacity:   1.0,
       snowOpacity:  0.94,
-      sunOpacity:   0.0,
+      sunOpacity:   0.32,
       birdOpacity:  0.12,
       pondOpacity:  0.48,
       shrubOpacity: 0.38,
@@ -514,6 +625,9 @@
       windStr:      0.011,
       pondColor:    new THREE.Color(0x88AAB6),
       pondRipple:   0.0,
+      mtnScale:     1.20,
+      hikerOpacity: 0.50,
+      sunColor:     new THREE.Color(0xE4EDFF),
     },
   };
 
@@ -541,6 +655,10 @@
     SKY_UNI.uOpacity.value = m.skyOpacity;
     hemi.intensity    = m.hemInt;
     sunLight.intensity = m.sunInt;
+    mtnMats.forEach(({ mat, base }) => { mat.opacity = base * m.mtnScale; });
+    hikerObjs.forEach(h => { h.material.opacity = m.hikerOpacity; });
+    sunCoreMat.color.copy(m.sunColor);
+    sunHaloMat.color.copy(m.sunColor);
   }
 
   // ── Tween ──────────────────────────────────────────────────────────
@@ -575,6 +693,9 @@
       windStr:      WIND_UNI.uStr.value,
       swayAmp:      TO.swayAmp,
       swaySpeed:    TO.swaySpeed,
+      mtnScale:     TO.mtnScale,
+      hikerOpacity: hikerObjs[0]?.material?.opacity ?? 0.70,
+      sunColor:     sunCoreMat.color.clone(),
     };
     TO   = MODES[mode];
     PROG = 0;
@@ -639,6 +760,12 @@
       WIND_UNI.uStr.value = reduceMotion
         ? lerp(FROM.windStr, TO.windStr, e) * 0.18
         : lerp(FROM.windStr, TO.windStr, e);
+      const mtnS = lerp(FROM.mtnScale, TO.mtnScale, e);
+      mtnMats.forEach(({ mat, base }) => { mat.opacity = base * mtnS; });
+      const hikOp = lerp(FROM.hikerOpacity, TO.hikerOpacity, e);
+      hikerObjs.forEach(h => { h.material.opacity = hikOp; });
+      sunCoreMat.color.copy(FROM.sunColor).lerp(TO.sunColor, e);
+      sunHaloMat.color.copy(FROM.sunColor).lerp(TO.sunColor, e);
     }
 
     // Canopy sway
@@ -684,6 +811,15 @@
         snow.setMatrixAt(i, dummy.matrix);
       }
       snow.instanceMatrix.needsUpdate = true;
+    }
+
+    // Hiker walking
+    if (!reduceMotion && hikerMat.opacity > 0.04) {
+      for (const h of hikerObjs) {
+        if (!h.userData.walk) continue;
+        const u = h.userData;
+        h.position.x = u.lo + ((t * u.sp + u.off) % (u.hi - u.lo));
+      }
     }
 
     renderer.render(scene, camera);
