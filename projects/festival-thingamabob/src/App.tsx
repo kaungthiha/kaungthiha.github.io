@@ -7,6 +7,7 @@ import { PreferenceControls } from './components/PreferenceControls';
 import { ItineraryTimeline } from './components/ItineraryTimeline';
 import { ConflictPanel } from './components/ConflictPanel';
 import { HowItWorks } from './components/HowItWorks';
+import { PasscodeGate } from './components/PasscodeGate';
 
 type AppStep = 'preferences' | 'itinerary';
 
@@ -62,6 +63,7 @@ export default function App() {
   const mustSeeCount = dayPrefs.filter(p => p.level === 'must-see').length;
 
   return (
+    <PasscodeGate>
     <div className="min-h-screen bg-festival-noise" style={{ backgroundColor: '#0a0a0f' }}>
       {/* Header */}
       <header className="border-b border-[#1e1e2e] sticky top-0 z-50 backdrop-blur-md bg-[#0a0a0f]/90">
@@ -271,5 +273,6 @@ export default function App() {
         <p>RaveRoute · EDC Las Vegas 2026 · Lineup data for planning purposes only</p>
       </footer>
     </div>
+    </PasscodeGate>
   );
 }
