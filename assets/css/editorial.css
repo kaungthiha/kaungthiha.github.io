@@ -283,7 +283,7 @@ body::after {
 /* Ambient forest background — fixed full viewport, behind all content.
    Tweak `--forest-opacity` below to dial down/up the visual presence. */
 .tree-canvas-host {
-  --forest-opacity: 0.55;
+  --forest-opacity: 0.48;
   position: fixed;
   inset: 0;
   width: 100vw;
@@ -292,6 +292,9 @@ body::after {
   z-index: -1;             /* sits below content & nav, above body bloom (-3) and weather-bg (-2) */
   pointer-events: none;
   opacity: var(--forest-opacity);
+  /* Soft centre-fade: forest detail lives at the edges, reading zone stays clean */
+  mask-image: radial-gradient(ellipse 58% 78% at 52% 50%, rgba(0,0,0,0.10) 0%, rgba(0,0,0,0.42) 42%, rgba(0,0,0,0.88) 68%, black 100%);
+  -webkit-mask-image: radial-gradient(ellipse 58% 78% at 52% 50%, rgba(0,0,0,0.10) 0%, rgba(0,0,0,0.42) 42%, rgba(0,0,0,0.88) 68%, black 100%);
 }
 .tree-canvas-host canvas {
   display: block;
@@ -309,10 +312,14 @@ body::after {
 }
 
 @media (max-width: 720px) {
-  .tree-canvas-host { --forest-opacity: 0.45; }
+  .tree-canvas-host {
+    --forest-opacity: 0.38;
+    mask-image: none;
+    -webkit-mask-image: none;
+  }
 }
 @media (prefers-reduced-motion: reduce) {
-  .tree-canvas-host { --forest-opacity: 0.4; }
+  .tree-canvas-host { --forest-opacity: 0.35; }
 }
 
 /* Weather mood — sits in the identity column under the socials */
