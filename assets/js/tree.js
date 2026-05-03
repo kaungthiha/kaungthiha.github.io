@@ -129,9 +129,6 @@
   const capMat   = new THREE.MeshToonMaterial({
     color: 0xf0f5f8, gradientMap: toonGrad, transparent: true, opacity: 0.0,
   });
-  const shrubMat = new THREE.MeshToonMaterial({
-    color: 0x3a8a5a, gradientMap: toonGrad, transparent: true, opacity: 0.75,
-  });
   const flowerMat = new THREE.MeshToonMaterial({
     color: 0xffaabb, gradientMap: toonGrad, transparent: true, opacity: 0.85,
   });
@@ -142,103 +139,123 @@
     color: 0xff8060, gradientMap: toonGrad, transparent: true, opacity: 0.0,
   });
 
-  // ── Shared geometry ────────────────────────────────────────────────
-  const SEG_L = new THREE.SphereGeometry(0.22, quality === 'high' ? 8 : 6, quality === 'high' ? 6 : 4);
-  const SEG_C = new THREE.SphereGeometry(0.15, 6, 4);
-  const SEG_S = new THREE.SphereGeometry(0.30, 7, 5);
-  const SEG_F = new THREE.SphereGeometry(0.07, 5, 4);
   const dummy = new THREE.Object3D();
 
-  // ── Tree archetypes ────────────────────────────────────────────────
-  const ARCHETYPES = {
-    tall:       { tH: 2.3, tR: [0.08, 0.14], cY: 2.0, cS: [0.7, 0.65, 0.7], lR: 0.95, lN: { high:40, medium:28, low:16 }, bn: { n:3, sp:0.32, up:0.32, len:0.72 }, cl:2 },
-    round:      { tH: 1.7, tR: [0.12, 0.19], cY: 1.4, cS: [1.0, 1.00, 1.0], lR: 1.20, lN: { high:48, medium:34, low:22 }, bn: { n:5, sp:0.42, up:0.24, len:0.80 }, cl:3 },
-    wide:       { tH: 1.5, tR: [0.13, 0.20], cY: 1.1, cS: [1.4, 0.72, 1.4], lR: 1.10, lN: { high:44, medium:32, low:20 }, bn: { n:6, sp:0.52, up:0.14, len:0.85 }, cl:3 },
-    sparse:     { tH: 2.0, tR: [0.08, 0.13], cY: 1.7, cS: [0.8, 0.90, 0.8], lR: 0.65, lN: { high:20, medium:14, low: 8 }, bn: { n:4, sp:0.28, up:0.38, len:0.90 }, cl:2 },
-    ornamental: { tH: 1.3, tR: [0.10, 0.15], cY: 1.0, cS: [0.9, 0.95, 0.9], lR: 0.90, lN: { high:44, medium:30, low:18 }, bn: { n:4, sp:0.36, up:0.20, len:0.65 }, cl:4 },
-  };
+  // ── Tree builder — pine (cone tiers) + deciduous (branch-tip clusters) ─
+  function buildTree(type) {
+    const group  = new THREE.Group();
+    const canopy = new THREE.Group();
+    const rnd    = () => Math.random();
 
-  function buildTree(archetype) {
-    const spec  = ARCHETYPES[archetype] || ARCHETYPES.round;
-    const group = new THREE.Group();
+    const cfgs = {
+      pine:   { tH: 2.5,  tR: [0.050, 0.10] },
+      round:  { tH: 1.75, tR: [0.095, 0.17] },
+      wide:   { tH: 1.45, tR: [0.10,  0.18] },
+      sparse: { tH: 2.1,  tR: [0.065, 0.12] },
+    };
+    const cfg = cfgs[type] || cfgs.round;
 
-    // Trunk
     const tk = new THREE.Mesh(
-      new THREE.CylinderGeometry(spec.tR[0], spec.tR[1], spec.tH, 8),
-      trunkMat
-    );
-    tk.position.y = spec.tH / 2;
+      new THREE.CylinderGeometry(cfg.tR[0], cfg.tR[1], cfg.tH, 7), trunkMat);
+    tk.position.y = cfg.tH / 2;
     group.add(tk);
 
-    // Branches — emerge from upper trunk going upward + outward
-    const bn = spec.bn;
-    for (let i = 0; i < bn.n; i++) {
-      const len   = bn.len * (0.72 + Math.random() * 0.28);
-      const bGeom = new THREE.CylinderGeometry(0.018, 0.052, len, 5);
-      bGeom.translate(0, len / 2, 0); // pivot at base
-      const br    = new THREE.Mesh(bGeom, trunkMat);
-      const t     = 0.60 + (i / bn.n) * 0.32;
-      br.position.y = spec.tH * t;
-      br.rotation.x = -(bn.up + Math.random() * 0.14);
-      br.rotation.y = (i / bn.n) * Math.PI * 2 + Math.random() * 0.3;
-      br.rotation.z = (Math.random() - 0.5) * bn.sp;
-      group.add(br);
-    }
-
-    // Canopy
-    const canopy = new THREE.Group();
-    canopy.position.y = spec.cY;
-    canopy.scale.set(...spec.cS);
-    group.add(canopy);
-
-    const LC = spec.lN[quality] || spec.lN.medium;
-    const leaves = new THREE.InstancedMesh(SEG_L, leafMat, LC);
-    leaves.instanceMatrix.setUsage(THREE.StaticDrawUsage);
-
-    // Cluster centres for natural canopy distribution
-    const clCenters = [];
-    for (let c = 0; c < spec.cl; c++) {
-      const theta = (c / spec.cl) * Math.PI * 2;
-      clCenters.push(new THREE.Vector3(
-        Math.cos(theta) * spec.lR * 0.35,
-        0.08 * c - 0.1,
-        Math.sin(theta) * spec.lR * 0.35
-      ));
-    }
-    for (let i = 0; i < LC; i++) {
-      const cc  = clCenters[i % spec.cl];
-      const phi = Math.acos(2 * Math.random() - 1);
-      const th  = Math.random() * Math.PI * 2;
-      const r   = spec.lR * (0.38 + Math.random() * 0.62);
-      dummy.position.set(
-        cc.x + r * Math.sin(phi) * Math.cos(th),
-        cc.y + r * Math.cos(phi) * 0.72,
-        cc.z + r * Math.sin(phi) * Math.sin(th)
-      );
-      const s = 0.62 + Math.random() * 0.65;
-      dummy.scale.setScalar(s);
-      dummy.rotation.set(Math.random() * 0.3, Math.random() * Math.PI, 0);
-      dummy.updateMatrix();
-      leaves.setMatrixAt(i, dummy.matrix);
-    }
-    canopy.add(leaves);
-
-    // Snow caps
-    if (quality !== 'low') {
-      const CC = 7;
-      const caps = new THREE.InstancedMesh(SEG_C, capMat, CC);
-      for (let i = 0; i < CC; i++) {
-        const th = Math.random() * Math.PI * 2;
-        const r  = 0.35 + Math.random() * spec.lR * 0.65;
-        dummy.position.set(r * Math.cos(th), 0.72 + Math.random() * 0.45, r * Math.sin(th));
-        dummy.scale.set(1.25 + Math.random() * 0.35, 0.42, 1.25 + Math.random() * 0.35);
-        dummy.rotation.set(0, 0, 0);
-        dummy.updateMatrix();
-        caps.setMatrixAt(i, dummy.matrix);
+    if (type === 'pine') {
+      // ── Stacked cone tiers for recognisable pine silhouette ──
+      const nT = quality === 'low' ? 3 : quality === 'medium' ? 4 : 5;
+      for (let i = 0; i < nT; i++) {
+        const t   = i / nT;
+        const yP  = cfg.tH * (0.26 + (1 - t) * 0.62);
+        const rad = (0.48 + rnd() * 0.16) * (1 - t * 0.50);
+        const ht  = rad * 1.15 + rnd() * 0.07;
+        const tier = new THREE.Mesh(
+          new THREE.ConeGeometry(rad, ht, quality === 'low' ? 6 : 8), leafMat);
+        tier.position.set((rnd()-0.5)*0.05, yP, (rnd()-0.5)*0.05);
+        canopy.add(tier);
+        if (quality !== 'low') {
+          const cap = new THREE.Mesh(new THREE.ConeGeometry(rad*0.70, ht*0.18, 6), capMat);
+          cap.position.copy(tier.position);
+          cap.position.y += ht * 0.46;
+          canopy.add(cap);
+        }
       }
-      canopy.add(caps);
+    } else {
+      // ── Deciduous: branches + leaf clusters at approximate tip positions ──
+      const bnC = {
+        round:  { n:5, sp:0.40, up:0.26, len:0.78 },
+        wide:   { n:6, sp:0.52, up:0.16, len:0.84 },
+        sparse: { n:4, sp:0.28, up:0.42, len:0.96 },
+      }[type] || { n:5, sp:0.40, up:0.26, len:0.78 };
+
+      const tips = [];
+      for (let i = 0; i < bnC.n; i++) {
+        const len  = bnC.len * (0.72 + rnd() * 0.28);
+        const ry   = (i / bnC.n) * Math.PI * 2 + rnd() * 0.4;
+        const upA  = bnC.up + rnd() * 0.14;
+        const yF   = 0.58 + (i / bnC.n) * 0.34;
+        const bGeo = new THREE.CylinderGeometry(0.012, 0.040, len, 5);
+        bGeo.translate(0, len / 2, 0);
+        const br   = new THREE.Mesh(bGeo, trunkMat);
+        br.position.y = cfg.tH * yF;
+        br.rotation.set(-upA, ry, (rnd()-0.5) * bnC.sp);
+        group.add(br);
+        tips.push({
+          x: Math.sin(ry) * len * Math.cos(upA),
+          y: cfg.tH * yF + len * Math.sin(upA),
+          z: Math.cos(ry) * len * Math.cos(upA),
+        });
+        if (quality !== 'low' && rnd() > 0.38) {
+          const sl  = len * (0.40 + rnd() * 0.22);
+          const sGeo = new THREE.CylinderGeometry(0.006, 0.016, sl, 4);
+          sGeo.translate(0, sl / 2, 0);
+          const sb = new THREE.Mesh(sGeo, trunkMat);
+          sb.position.y = len * (0.52 + rnd() * 0.30);
+          sb.rotation.set(-(0.20 + rnd()*0.14), rnd()*Math.PI*2, 0);
+          br.add(sb);
+        }
+      }
+
+      const lGeo  = new THREE.SphereGeometry(0.17, quality === 'high' ? 7 : 5, quality === 'high' ? 5 : 4);
+      const lScX  = type === 'wide' ? 1.30 : 1.0;
+      const lScY  = type === 'wide' ? 0.58 : 0.82;
+      const lSprd = type === 'sparse' ? 0.20 : 0.40;
+      const lCnt  = quality === 'low' ? bnC.n*3 : quality === 'medium' ? bnC.n*5 : bnC.n*7;
+      const lInst = new THREE.InstancedMesh(lGeo, leafMat, lCnt);
+      lInst.instanceMatrix.setUsage(THREE.StaticDrawUsage);
+      for (let i = 0; i < lCnt; i++) {
+        const tip = tips[i % tips.length];
+        const sc  = 0.55 + rnd() * 0.55;
+        dummy.position.set(
+          tip.x + (rnd()-0.5)*lSprd,
+          tip.y + (rnd()-0.5)*lSprd*0.55,
+          tip.z + (rnd()-0.5)*lSprd);
+        dummy.scale.set(sc*lScX, sc*lScY, sc*lScX);
+        dummy.rotation.y = rnd() * Math.PI * 2;
+        dummy.updateMatrix();
+        lInst.setMatrixAt(i, dummy.matrix);
+      }
+      canopy.add(lInst);
+
+      if (quality !== 'low') {
+        const cGeo  = new THREE.SphereGeometry(0.11, 5, 3);
+        const nC    = type === 'sparse' ? 3 : 5;
+        const cInst = new THREE.InstancedMesh(cGeo, capMat, nC);
+        for (let i = 0; i < nC; i++) {
+          const tip = tips[i % tips.length];
+          dummy.position.set(
+            tip.x + (rnd()-0.5)*0.22,
+            tip.y + 0.14 + rnd()*0.20,
+            tip.z + (rnd()-0.5)*0.22);
+          dummy.scale.set(1.2, 0.36, 1.2);
+          dummy.rotation.set(0, 0, 0);
+          dummy.updateMatrix();
+          cInst.setMatrixAt(i, dummy.matrix);
+        }
+        canopy.add(cInst);
+      }
     }
 
+    group.add(canopy);
     return { group, canopy };
   }
 
@@ -247,7 +264,7 @@
   const NR = quality === 'low' ? 2 : (quality === 'medium' ? 3 : 5);  // right count
   const NB = quality === 'low' ? 1 : (quality === 'medium' ? 2 : 3);  // back row
   const NF = quality === 'low' ? 0 : (quality === 'medium' ? 1 : 2);  // foreground
-  const ARR = ['tall', 'round', 'wide', 'sparse', 'ornamental'];
+  const ARR = ['pine', 'round', 'wide', 'sparse', 'round']; // round weighted heavier
   const rA  = () => ARR[Math.floor(Math.random() * ARR.length)];
 
   const SPECS = [];
@@ -266,7 +283,10 @@
     canopies.push({ canopy, phase: Math.random() * Math.PI * 2 });
   });
 
-  // ── Shrubs — sphere clusters between trunks ────────────────────────
+  // ── Shrubs — multi-lobe organic clusters ─────────────────────────────
+  const shrubMat = new THREE.MeshToonMaterial({
+    color: 0x3a8a5a, gradientMap: toonGrad, transparent: true, opacity: 0.75,
+  });
   const SHRUB_POS = quality === 'low' ? [
     { x: -5.4, z: 0.3 }, { x: 4.7, z: 0.2 },
   ] : [
@@ -274,13 +294,39 @@
     { x:  4.7, z: 0.2 }, { x:  5.4, z: -0.6 }, { x:  3.1, z: -0.9 },
     { x: -1.4, z: -2.1 }, { x: 1.7, z: -2.3 }, { x: -0.2, z: -1.5 },
   ];
-  const shrubs = SHRUB_POS.map(p => {
-    const s   = new THREE.Mesh(SEG_S, shrubMat.clone());
-    const scl = 0.55 + Math.random() * 0.60;
-    s.position.set(p.x, 0.19, p.z);
-    s.scale.set(scl, scl * 0.68, scl);
-    scene.add(s);
-    return s;
+  SHRUB_POS.forEach(p => {
+    const g   = new THREE.Group();
+    const scl = 0.55 + Math.random() * 0.55;
+    const n   = 3 + Math.floor(Math.random() * 3); // 3-5 lobes
+    for (let i = 0; i < n; i++) {
+      const lobe = new THREE.Mesh(
+        new THREE.SphereGeometry(
+          0.12 + Math.random() * 0.10, quality === 'low' ? 5 : 7, 4),
+        shrubMat
+      );
+      const ang = (i / n) * Math.PI * 2 + Math.random() * 0.55;
+      const rad = 0.06 + Math.random() * 0.14;
+      lobe.position.set(
+        Math.cos(ang) * rad,
+        0.07 + Math.random() * 0.18,
+        Math.sin(ang) * rad
+      );
+      lobe.scale.set(
+        0.88 + Math.random() * 0.30,
+        0.50 + Math.random() * 0.24,
+        0.88 + Math.random() * 0.30
+      );
+      g.add(lobe);
+    }
+    if (quality !== 'low') {
+      const stem = new THREE.Mesh(
+        new THREE.CylinderGeometry(0.014, 0.022, 0.10, 5), trunkMat);
+      stem.position.y = 0.05;
+      g.add(stem);
+    }
+    g.position.set(p.x, 0, p.z);
+    g.scale.setScalar(scl);
+    scene.add(g);
   });
 
   // ── Small flowers at forest edges ──────────────────────────────────
@@ -438,109 +484,130 @@
   }
   scene.add(snow);
 
-  // ── Mountains — layered silhouettes behind tree line ─────────────────
+  // ── Mountains — far background, always behind scene geometry ─────────
+  // depthTest:false + negative renderOrder guarantees they never clip trees.
+  // yBase sits in the sky zone so peaks read above the tree line.
   const mtnMats = [];
   (function () {
     const LAYERS = quality === 'low' ? [
-      { z:-15, yBase:-0.9, w:34, pks:4, maxH:5.2, col:0xBCCED8, op:0.18 },
+      { z:-22, yBase:1.4, w:36, pks:4, maxH:5.2, col:0xC2D0DA, op:0.17 },
     ] : quality === 'medium' ? [
-      { z:-17, yBase:-1.1, w:38, pks:5, maxH:5.8, col:0xC8D8E2, op:0.14 },
-      { z:-12, yBase:-0.8, w:28, pks:4, maxH:4.4, col:0x8AAAB8, op:0.22 },
+      { z:-28, yBase:1.7, w:42, pks:5, maxH:5.8, col:0xCCD8E0, op:0.13 },
+      { z:-20, yBase:1.4, w:30, pks:4, maxH:4.4, col:0x90AEBE, op:0.20 },
     ] : [
-      { z:-18, yBase:-1.3, w:42, pks:6, maxH:6.2, col:0xCED9E2, op:0.12 },
-      { z:-13, yBase:-1.0, w:32, pks:5, maxH:5.0, col:0x9CB4C2, op:0.20 },
-      { z:-10, yBase:-0.6, w:24, pks:4, maxH:3.8, col:0x6E94A8, op:0.27 },
+      { z:-32, yBase:1.9, w:48, pks:6, maxH:6.4, col:0xD0DAE2, op:0.11 },
+      { z:-24, yBase:1.6, w:36, pks:5, maxH:5.0, col:0x9EB4C2, op:0.18 },
+      { z:-18, yBase:1.2, w:28, pks:4, maxH:3.8, col:0x728EA0, op:0.24 },
     ];
-    LAYERS.forEach(l => {
+    LAYERS.forEach((l, li) => {
       const shape = new THREE.Shape();
-      shape.moveTo(-l.w / 2, l.yBase - 2.2);
+      shape.moveTo(-l.w / 2, l.yBase - 6.0); // base reaches below ground
       shape.lineTo(-l.w / 2, l.yBase);
       const sp = l.w / l.pks;
       for (let i = 0; i < l.pks; i++) {
-        const cx = -l.w/2 + sp * (i + 0.5) + (Math.random()-0.5) * sp * 0.20;
-        const h  = l.maxH * (0.56 + Math.random() * 0.42);
-        const hw = sp * (0.30 + Math.random() * 0.22);
-        shape.lineTo(cx - hw * 0.65, l.yBase + 0.14);
+        const cx = -l.w/2 + sp * (i + 0.5) + (Math.random()-0.5) * sp * 0.18;
+        const h  = l.maxH * (0.55 + Math.random() * 0.42);
+        const hw = sp * (0.28 + Math.random() * 0.24);
+        shape.lineTo(cx - hw * 0.68, l.yBase + 0.10);
         shape.lineTo(cx, l.yBase + h);
-        shape.lineTo(cx + hw * 0.65, l.yBase + 0.14);
+        shape.lineTo(cx + hw * 0.68, l.yBase + 0.10);
       }
       shape.lineTo(l.w / 2, l.yBase);
-      shape.lineTo(l.w / 2, l.yBase - 2.2);
+      shape.lineTo(l.w / 2, l.yBase - 6.0);
       shape.closePath();
       const mat = new THREE.MeshBasicMaterial({
-        color: new THREE.Color(l.col), transparent: true, opacity: l.op, depthWrite: false,
+        color: new THREE.Color(l.col), transparent: true, opacity: l.op,
+        depthTest: false, depthWrite: false,
       });
       mtnMats.push({ mat, base: l.op });
-      scene.add(new THREE.Mesh(new THREE.ShapeGeometry(shape), mat));
+      const mesh = new THREE.Mesh(new THREE.ShapeGeometry(shape), mat);
+      mesh.position.z = l.z;
+      mesh.renderOrder = -10 - li; // farthest layer draws first
+      scene.add(mesh);
     });
   }());
 
-  // ── Hikers — tiny ambient stick-figures ──────────────────────────────
-  const FH = 0.28;
+  // ── Hikers — articulated figures with limb-rotation walk cycle ────────
+  const HS      = 0.26; // figure height scale
   const hikerMat = new THREE.LineBasicMaterial({ color: 0x2d3a48, transparent: true, opacity: 0.0 });
-  const hikerObjs = [];
-  function figGeo(segs) {
-    const pts = [];
-    segs.forEach(s => pts.push(s[0]*FH, s[1]*FH, 0,  s[2]*FH, s[3]*FH, 0));
-    const g = new THREE.BufferGeometry();
-    g.setAttribute('position', new THREE.Float32BufferAttribute(pts, 3));
-    return g;
+  const hikerObjs = []; // all figure root groups (for opacity / scene cleanup)
+  const walkers   = []; // animated walkers only
+
+  // Build a limb as a child Group so rotation.z swings it from the pivot
+  function mkLimb(xOff, yPivot, segLen) {
+    const grp = new THREE.Group();
+    grp.position.set(xOff * HS, yPivot * HS, 0);
+    const geo = new THREE.BufferGeometry();
+    geo.setAttribute('position', new THREE.Float32BufferAttribute(
+      [0, 0, 0,  0, -segLen * HS, 0], 3));
+    grp.add(new THREE.LineSegments(geo, hikerMat));
+    return grp;
   }
-  const gWalk  = figGeo([
-    [-0.04,0.88, 0.04,0.88],[0,0.85, 0,0.92],
-    [0,0.83, 0,0.50],
-    [0,0.73, 0.22,0.57],[0,0.73,-0.17,0.64],
-    [0,0.50,-0.20,0.14],[0,0.50, 0.16,0.28],
-  ]);
-  const gStand = figGeo([
-    [-0.04,0.88, 0.04,0.88],[0,0.85, 0,0.92],
-    [0,0.83, 0,0.50],
-    [0,0.73,-0.18,0.56],[0,0.73, 0.18,0.56],
-    [0,0.50,-0.13,0.16],[0,0.50, 0.13,0.16],
-  ]);
-  const gSit   = figGeo([
-    [-0.04,0.56, 0.04,0.56],[0,0.53, 0,0.60],
-    [0,0.52, 0,0.26],
-    [0,0.44,-0.18,0.30],[0,0.44, 0.18,0.28],
-    [0,0.26,-0.24,0.06],[0,0.26, 0.24,0.06],
-  ]);
-  const gCrouch= figGeo([
-    [-0.04,0.52, 0.04,0.52],[0,0.49, 0,0.56],
-    [0,0.48, 0,0.27],
-    [0,0.44,-0.26,0.34],[0,0.44, 0.24,0.38],
-    [0,0.27,-0.14,0.05],[0,0.27, 0.14,0.05],
-  ]);
+
+  function buildWalker(lo, hi, pz, speed, offset) {
+    const fig = new THREE.Group();
+    // Torso + head
+    const tGeo = new THREE.BufferGeometry();
+    tGeo.setAttribute('position', new THREE.Float32BufferAttribute([
+      -0.030*HS, 0.87*HS, 0,   0.030*HS, 0.87*HS, 0,  // head cross-bar
+       0,        0.84*HS, 0,   0,        0.92*HS, 0,   // head vertical
+       0,        0.83*HS, 0,   0,        0.50*HS, 0,   // body
+    ], 3));
+    fig.add(new THREE.LineSegments(tGeo, hikerMat));
+    const lArm = mkLimb(-0.04, 0.74, 0.22);
+    const rArm = mkLimb( 0.04, 0.74, 0.22);
+    const lLeg = mkLimb(-0.04, 0.50, 0.30);
+    const rLeg = mkLimb( 0.04, 0.50, 0.30);
+    fig.add(lArm, rArm, lLeg, rLeg);
+    fig.position.set(lo, 0, pz);
+    scene.add(fig);
+    hikerObjs.push(fig);
+    walkers.push({ fig, lArm, rArm, lLeg, rLeg, lo, hi, pz, speed, offset });
+  }
+
+  // Static posed figures (sitting, crouching, standing)
+  function buildStatic(segs, x, z) {
+    const pts = [];
+    segs.forEach(s => pts.push(s[0]*HS, s[1]*HS, 0,  s[2]*HS, s[3]*HS, 0));
+    const geo = new THREE.BufferGeometry();
+    geo.setAttribute('position', new THREE.Float32BufferAttribute(pts, 3));
+    const fig = new THREE.LineSegments(geo, hikerMat);
+    fig.position.set(x, 0, z);
+    scene.add(fig);
+    hikerObjs.push(fig);
+  }
+
   if (quality !== 'low') {
-    // Walking pair — left edge
-    [
-      { g:gWalk,  x:-4.0, z:0.80, sp:0.11, off:0.0, lo:-6.8, hi:-0.8 },
-      { g:gWalk,  x:-3.6, z:0.90, sp:0.09, off:1.4, lo:-6.8, hi:-0.8 },
-    ].forEach(d => {
-      const m = new THREE.LineSegments(d.g, hikerMat);
-      m.position.set(d.x, 0, d.z);
-      m.userData = { walk:true, sp:d.sp, lo:d.lo, hi:d.hi, off:d.off };
-      scene.add(m); hikerObjs.push(m);
-    });
-    // Resting pair — right edge near shrub
-    [
-      { g:gSit,   x:4.55, z:0.35 },
-      { g:gStand, x:4.92, z:0.25 },
-    ].forEach(d => {
-      const m = new THREE.LineSegments(d.g, hikerMat);
-      m.position.set(d.x, 0, d.z);
-      scene.add(m); hikerObjs.push(m);
-    });
+    buildWalker(-6.8, -1.0, 0.82, 0.10, 0.0);
+    buildWalker(-6.8, -1.0, 0.92, 0.08, 1.6);
+    // Sitting pair — right edge
+    buildStatic([
+      [-0.04,0.56, 0.04,0.56],[0,0.53, 0,0.60],
+      [0,0.52, 0,0.26],
+      [0,0.44,-0.18,0.30],[0,0.44, 0.18,0.28],
+      [0,0.26,-0.24,0.06],[0,0.26, 0.24,0.06],
+    ], 4.55, 0.35);
+    buildStatic([
+      [-0.04,0.88, 0.04,0.88],[0,0.85, 0,0.92],
+      [0,0.83, 0,0.50],
+      [0,0.73,-0.18,0.56],[0,0.73, 0.18,0.56],
+      [0,0.50,-0.13,0.16],[0,0.50, 0.13,0.16],
+    ], 4.92, 0.25);
   }
   if (quality === 'high') {
-    // Photo moment — near pond
-    [
-      { g:gStand,  x:-2.7, z:0.30 },
-      { g:gCrouch, x:-2.2, z:0.48 },
-    ].forEach(d => {
-      const m = new THREE.LineSegments(d.g, hikerMat);
-      m.position.set(d.x, 0, d.z);
-      scene.add(m); hikerObjs.push(m);
-    });
+    // Photo pair — near pond
+    buildStatic([
+      [-0.04,0.88, 0.04,0.88],[0,0.85, 0,0.92],
+      [0,0.83, 0,0.50],
+      [0,0.73,-0.18,0.56],[0,0.73, 0.18,0.56],
+      [0,0.50,-0.13,0.16],[0,0.50, 0.13,0.16],
+    ], -2.7, 0.30);
+    buildStatic([
+      [-0.04,0.52, 0.04,0.52],[0,0.49, 0,0.56],
+      [0,0.48, 0,0.27],
+      [0,0.44,-0.26,0.34],[0,0.44, 0.24,0.38],
+      [0,0.27,-0.14,0.05],[0,0.27, 0.14,0.05],
+    ], -2.2, 0.48);
   }
 
   // ── Mode presets ───────────────────────────────────────────────────
@@ -641,7 +708,7 @@
     sunHaloMat.opacity    = m.sunOpacity * 0.52;
     birdMat.opacity       = m.birdOpacity;
     WIND_UNI.uStr.value   = reduceMotion ? m.windStr * 0.18 : m.windStr;
-    shrubs.forEach(s  => { if (s.material) s.material.opacity = m.shrubOpacity; });
+    shrubMat.opacity = m.shrubOpacity;
     pads.forEach(p    => { if (p.material) p.material.opacity = m.padOpacity; });
     fish.forEach(f    => { if (f.material) f.material.opacity = m.fishOpacity; });
     flowers.forEach(f => { if (f.material) f.material.opacity = m.flowerOpacity; });
@@ -656,7 +723,7 @@
     hemi.intensity    = m.hemInt;
     sunLight.intensity = m.sunInt;
     mtnMats.forEach(({ mat, base }) => { mat.opacity = base * m.mtnScale; });
-    hikerObjs.forEach(h => { h.material.opacity = m.hikerOpacity; });
+    hikerMat.opacity = m.hikerOpacity;
     sunCoreMat.color.copy(m.sunColor);
     sunHaloMat.color.copy(m.sunColor);
   }
@@ -676,7 +743,7 @@
       snowOpacity:  snowMat.opacity,
       sunOpacity:   sunCoreMat.opacity,
       birdOpacity:  birdMat.opacity,
-      shrubOpacity: shrubs[0]?.material?.opacity ?? 0.75,
+      shrubOpacity: shrubMat.opacity,
       padOpacity:   pads[0]?.material?.opacity   ?? 0.85,
       fishOpacity:  fish[0]?.material?.opacity   ?? 0.82,
       flowerOpacity:flowers[0]?.material?.opacity ?? 0.80,
@@ -694,7 +761,7 @@
       swayAmp:      TO.swayAmp,
       swaySpeed:    TO.swaySpeed,
       mtnScale:     TO.mtnScale,
-      hikerOpacity: hikerObjs[0]?.material?.opacity ?? 0.70,
+      hikerOpacity: hikerMat.opacity,
       sunColor:     sunCoreMat.color.clone(),
     };
     TO   = MODES[mode];
@@ -739,11 +806,10 @@
       sunCoreMat.opacity    = lerp(FROM.sunOpacity,     TO.sunOpacity,     e);
       sunHaloMat.opacity    = sunCoreMat.opacity * 0.52;
       birdMat.opacity       = lerp(FROM.birdOpacity,    TO.birdOpacity,    e);
-      const sp = lerp(FROM.shrubOpacity,  TO.shrubOpacity,  e);
+      shrubMat.opacity = lerp(FROM.shrubOpacity,  TO.shrubOpacity,  e);
       const pp = lerp(FROM.padOpacity,    TO.padOpacity,    e);
       const fp = lerp(FROM.fishOpacity,   TO.fishOpacity,   e);
       const flp= lerp(FROM.flowerOpacity, TO.flowerOpacity, e);
-      shrubs.forEach(s  => { if (s.material) s.material.opacity = sp;  });
       pads.forEach(p    => { if (p.material) p.material.opacity = pp;  });
       fish.forEach(f    => { if (f.material) f.material.opacity = fp;  });
       flowers.forEach(f => { if (f.material) f.material.opacity = flp; });
@@ -762,8 +828,7 @@
         : lerp(FROM.windStr, TO.windStr, e);
       const mtnS = lerp(FROM.mtnScale, TO.mtnScale, e);
       mtnMats.forEach(({ mat, base }) => { mat.opacity = base * mtnS; });
-      const hikOp = lerp(FROM.hikerOpacity, TO.hikerOpacity, e);
-      hikerObjs.forEach(h => { h.material.opacity = hikOp; });
+      hikerMat.opacity = lerp(FROM.hikerOpacity, TO.hikerOpacity, e);
       sunCoreMat.color.copy(FROM.sunColor).lerp(TO.sunColor, e);
       sunHaloMat.color.copy(FROM.sunColor).lerp(TO.sunColor, e);
     }
@@ -813,12 +878,21 @@
       snow.instanceMatrix.needsUpdate = true;
     }
 
-    // Hiker walking
-    if (!reduceMotion && hikerMat.opacity > 0.04) {
-      for (const h of hikerObjs) {
-        if (!h.userData.walk) continue;
-        const u = h.userData;
-        h.position.x = u.lo + ((t * u.sp + u.off) % (u.hi - u.lo));
+    // Articulated walk cycle
+    if (hikerMat.opacity > 0.04 && walkers.length) {
+      for (const w of walkers) {
+        const range = w.hi - w.lo;
+        w.fig.position.x = w.lo + ((t * w.speed + w.offset) % range);
+        w.fig.position.z = w.pz;
+        if (!reduceMotion) {
+          const phase  = t * w.speed * 8.0;
+          const swing  = Math.sin(phase) * 0.40;
+          w.lLeg.rotation.z =  swing;
+          w.rLeg.rotation.z = -swing;
+          w.lArm.rotation.z = -swing * 0.60;
+          w.rArm.rotation.z =  swing * 0.60;
+          w.fig.position.y  = Math.abs(Math.sin(phase * 2)) * 0.009;
+        }
       }
     }
 

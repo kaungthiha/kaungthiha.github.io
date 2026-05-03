@@ -83,13 +83,7 @@ comments: false
       </button>
     </div>
 
-    <!-- Mobile-only segmented control (Work / Context) — hidden on desktop -->
-    <div class="segmented-control" role="tablist" aria-label="Switch view">
-      <button class="segmented-btn is-active" type="button" data-face="front">Work</button>
-      <button class="segmented-btn" type="button" data-face="back">Context</button>
-    </div>
-
-    <!-- Primary flip CTA — desktop -->
+    <!-- Primary flip CTA — desktop, sits above mood selector -->
     <button class="identity-flip" type="button" id="flip-toggle-primary" data-face-label="front" aria-label="See the person behind the work" aria-pressed="false">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M3 12a9 9 0 0 1 15.5-6.3M21 4v5h-5M21 12a9 9 0 0 1-15.5 6.3M3 20v-5h5"/></svg>
       Me!
@@ -98,6 +92,12 @@ comments: false
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M3 12a9 9 0 0 1 15.5-6.3M21 4v5h-5M21 12a9 9 0 0 1-15.5 6.3M3 20v-5h5"/></svg>
       Back to the work
     </button>
+
+    <!-- Mobile-only segmented control (Work / Context) — hidden on desktop -->
+    <div class="segmented-control" role="tablist" aria-label="Switch view">
+      <button class="segmented-btn is-active" type="button" data-face="front">Work</button>
+      <button class="segmented-btn" type="button" data-face="back">Context</button>
+    </div>
   </aside>
 
   <!-- Flippable card stage (right) -->

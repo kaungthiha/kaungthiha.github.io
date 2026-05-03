@@ -502,7 +502,7 @@ body[data-face="back"] .flip-toggle svg { transform: rotate(180deg); }
 
 /* Primary flip CTA in identity column */
 .identity-flip {
-  margin-top: auto;       /* push to the bottom of the column */
+  margin-top: 0.25rem;
   display: inline-flex;
   align-items: center;
   gap: 0.6rem;
