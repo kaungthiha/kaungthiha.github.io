@@ -1,7 +1,6 @@
 import { useState, useMemo, useCallback } from 'react';
 import { ArtistPreference, PreferenceLevel, UserPreferences, GeneratedItinerary } from './types/festival';
 import { EDC_2026_SETS, DAYS } from './lib/sampleData';
-import { formatTime } from './lib/timeUtils';
 import { generateItinerary } from './lib/itineraryOptimizer';
 import {
   FlockInfo,
@@ -98,6 +97,16 @@ export default function App() {
     setStep('preferences');
   }
 
+  function handleFirstSetChange(artist: string) {
+    const updated = { ...(userPrefs.firstSetByDay ?? {}) };
+    if (artist) {
+      updated[selectedDay] = artist;
+    } else {
+      delete updated[selectedDay];
+    }
+    setUserPrefs(prev => ({ ...prev, firstSetByDay: updated }));
+  }
+
   async function handleViewFlock() {
     if (!flockInfo) return;
     setShowFlockView(true);
@@ -154,14 +163,6 @@ export default function App() {
 
   const dayArtists = useMemo(
     () => EDC_2026_SETS.filter(s => s.day === selectedDay).map(s => s.artist),
-    [selectedDay],
-  );
-
-  const daySetOptions = useMemo(
-    () => EDC_2026_SETS
-      .filter(s => s.day === selectedDay)
-      .sort((a, b) => a.startTime.getTime() - b.startTime.getTime())
-      .map(s => ({ artist: s.artist, time: formatTime(s.startTime) })),
     [selectedDay],
   );
 
@@ -321,11 +322,13 @@ export default function App() {
                         preferences={artistPreferences}
                         onPreferenceChange={handlePreferenceChange}
                         selectedDay={selectedDay}
+                        firstSet={userPrefs.firstSetByDay?.[selectedDay] ?? ''}
+                        onFirstSetChange={handleFirstSetChange}
                       />
                     </div>
 
                     <div className="space-y-4 order-1 lg:order-2">
-                      <PreferenceControls preferences={userPrefs} onChange={setUserPrefs} selectedDay={selectedDay} daySetOptions={daySetOptions} />
+                      <PreferenceControls preferences={userPrefs} onChange={setUserPrefs} selectedDay={selectedDay} />
 
                       <div className="bg-festival-card border border-festival-border rounded-xl p-4">
                         <button
@@ -408,7 +411,6 @@ export default function App() {
                           <PreferenceControls
                             preferences={userPrefs}
                             selectedDay={selectedDay}
-                            daySetOptions={daySetOptions}
                             onChange={(prefs) => {
                               setUserPrefs(prefs);
                               const result = generateItinerary(EDC_2026_SETS, artistPreferences, prefs, selectedDay);

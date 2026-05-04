@@ -4,7 +4,6 @@ interface PreferenceControlsProps {
   preferences: UserPreferences;
   onChange: (prefs: UserPreferences) => void;
   selectedDay: string;
-  daySetOptions: { artist: string; time: string }[];
 }
 
 const WALKING_OPTIONS = [5, 10, 15, 20] as const;
@@ -25,7 +24,7 @@ const START_TIME_OPTIONS: { label: string; value: string }[] = [
   { label: '3:00 AM', value: '03:00' },
 ];
 
-export function PreferenceControls({ preferences, onChange, selectedDay, daySetOptions }: PreferenceControlsProps) {
+export function PreferenceControls({ preferences, onChange, selectedDay }: PreferenceControlsProps) {
   function setWalking(minutes: number) {
     onChange({ ...preferences, defaultWalkingMinutes: minutes });
   }
@@ -38,16 +37,6 @@ export function PreferenceControls({ preferences, onChange, selectedDay, daySetO
     onChange({ ...preferences, minimumSetMinutes: minutes });
   }
 
-  function setFirstSet(artist: string) {
-    const updated = { ...(preferences.firstSetByDay ?? {}) };
-    if (artist) {
-      updated[selectedDay] = artist;
-    } else {
-      delete updated[selectedDay];
-    }
-    onChange({ ...preferences, firstSetByDay: updated });
-  }
-
   function setDayStart(value: string) {
     const updated = { ...(preferences.dayStartTimes ?? {}) };
     if (value) {
@@ -58,7 +47,7 @@ export function PreferenceControls({ preferences, onChange, selectedDay, daySetO
     onChange({ ...preferences, dayStartTimes: updated });
   }
 
-  const currentFirstSet = preferences.firstSetByDay?.[selectedDay] ?? '';
+  const pinnedFirstSet = preferences.firstSetByDay?.[selectedDay];
   const currentStart = preferences.dayStartTimes?.[selectedDay] ?? '';
 
   return (
@@ -70,28 +59,16 @@ export function PreferenceControls({ preferences, onChange, selectedDay, daySetO
       </div>
 
       <div className="p-4 space-y-5">
-        {/* First Set */}
-        <div>
-          <label className="block text-sm font-medium text-slate-300 mb-2">
-            First Set of the Day
-          </label>
-          <select
-            value={currentFirstSet}
-            onChange={e => setFirstSet(e.target.value)}
-            className="w-full px-3 py-2 rounded-lg text-sm text-slate-200 border border-festival-border bg-[#0a0a0f] focus:border-amber-500/60 focus:outline-none transition-colors"
-          >
-            <option value="">None — start anywhere</option>
-            {daySetOptions.map(opt => (
-              <option key={opt.artist} value={opt.artist}>{opt.time} — {opt.artist}</option>
-            ))}
-          </select>
-          <p className="mt-1.5 text-xs text-slate-600">
-            This set is guaranteed first — everything before it becomes sheep travel time
-          </p>
-        </div>
-
-        {/* Day start time — only shown when no first set is pinned */}
-        {!currentFirstSet && (
+        {/* Arrival time / first set indicator */}
+        {pinnedFirstSet ? (
+          <div className="flex items-center gap-2 px-3 py-2.5 rounded-lg bg-amber-950/25 border border-amber-500/30">
+            <span className="text-base">🏁</span>
+            <div>
+              <div className="text-xs font-semibold text-amber-300">First stop pinned</div>
+              <div className="text-xs text-amber-400/60">{pinnedFirstSet} — arrival time set automatically</div>
+            </div>
+          </div>
+        ) : (
           <div>
             <label className="block text-sm font-medium text-slate-300 mb-2">
               Arriving at the Pasture
@@ -106,7 +83,7 @@ export function PreferenceControls({ preferences, onChange, selectedDay, daySetO
               ))}
             </select>
             <p className="mt-1.5 text-xs text-slate-600">
-              Sets before this time won't be scheduled
+              Sets before this time won't be scheduled — or pin a First Stop in the lineup
             </p>
           </div>
         )}
@@ -160,7 +137,7 @@ export function PreferenceControls({ preferences, onChange, selectedDay, daySetO
           </div>
         </div>
 
-        {/* Minimum set time — only relevant when partial sets are on */}
+        {/* Minimum set time */}
         <div className={preferences.allowPartialSets ? '' : 'opacity-40 pointer-events-none'}>
           <label className="block text-sm font-medium text-slate-300 mb-2">
             Minimum Time @ Stage worth trekking for
