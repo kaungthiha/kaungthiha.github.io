@@ -215,6 +215,7 @@ export function generateItinerary(
       endTime: festSet.endTime,
       artist: festSet.artist,
       stage: festSet.stage,
+      genre: festSet.genre,
       isPartial,
       preferenceLevel: level,
       notes: isPartial

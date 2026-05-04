@@ -29,7 +29,6 @@ export default function App() {
       const existing = prev.find(p => p.artist === artist);
       if (existing) {
         if (existing.level === level) {
-          // clicking same level resets to neutral
           return prev.map(p => p.artist === artist ? { ...p, level: 'neutral' } : p);
         }
         return prev.map(p => p.artist === artist ? { ...p, level } : p);
@@ -49,7 +48,6 @@ export default function App() {
     setStep('preferences');
   }
 
-  // Count preferences for the selected day
   const dayArtists = useMemo(
     () => EDC_2026_SETS.filter(s => s.day === selectedDay).map(s => s.artist),
     [selectedDay]
@@ -70,11 +68,15 @@ export default function App() {
         <div className="max-w-6xl mx-auto px-4 py-4">
           <div className="flex items-center justify-between gap-4">
             <div>
-              <h1 className="text-2xl sm:text-3xl font-black text-gradient-cyber leading-none">
-                RaveRoute
+              <h1 className="text-2xl sm:text-3xl font-black leading-none flex items-center gap-2" style={{
+                background: 'linear-gradient(135deg, #2563eb, #38bdf8)',
+                WebkitBackgroundClip: 'text',
+                WebkitTextFillColor: 'transparent',
+              }}>
+                🐑 SheepHerder
               </h1>
               <p className="text-xs text-slate-500 mt-0.5 hidden sm:block">
-                EDC Las Vegas 2026 — Turn chaos into your personal game plan
+                EDC Las Vegas 2026 — Herd your flock, don't lose a single sheep
               </p>
             </div>
 
@@ -84,7 +86,7 @@ export default function App() {
                 onClick={() => { if (step === 'itinerary') setStep('preferences'); }}
                 className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg transition-colors ${
                   step === 'preferences'
-                    ? 'bg-festival-fuchsia text-white font-semibold'
+                    ? 'bg-festival-blue text-white font-semibold'
                     : 'text-slate-500 hover:text-slate-300 cursor-pointer'
                 }`}
               >
@@ -95,7 +97,7 @@ export default function App() {
               <div
                 className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg ${
                   step === 'itinerary'
-                    ? 'bg-festival-fuchsia text-white font-semibold'
+                    ? 'bg-festival-blue text-white font-semibold'
                     : 'text-slate-700'
                 }`}
               >
@@ -118,8 +120,8 @@ export default function App() {
                   onClick={() => setSelectedDay(day)}
                   className={`flex-1 sm:flex-none px-5 py-3 rounded-xl font-semibold text-sm transition-all duration-150 ${
                     selectedDay === day
-                      ? 'bg-festival-fuchsia text-white shadow-glow-fuchsia'
-                      : 'bg-festival-card border border-festival-border text-slate-400 hover:text-white hover:border-festival-fuchsia/50'
+                      ? 'bg-festival-blue text-white shadow-glow-blue'
+                      : 'bg-festival-card border border-festival-border text-slate-400 hover:text-white hover:border-festival-blue/50'
                   }`}
                 >
                   <span className="hidden sm:inline">
@@ -164,26 +166,30 @@ export default function App() {
               <div className="bg-festival-card border border-festival-border rounded-xl p-4">
                 <button
                   onClick={handleGenerate}
-                  className="w-full py-3 rounded-xl font-bold text-white bg-gradient-to-r from-festival-fuchsia to-purple-700 hover:from-fuchsia-500 hover:to-purple-600 transition-all duration-150 shadow-glow-fuchsia text-base"
+                  className="w-full py-3 rounded-xl font-bold text-white transition-all duration-150 text-base"
+                  style={{
+                    background: 'linear-gradient(135deg, #2563eb, #0ea5e9)',
+                    boxShadow: '0 0 20px rgba(37,99,235,0.45)',
+                  }}
                 >
-                  Generate My Itinerary →
+                  Round Up My Schedule 🐑
                 </button>
                 {mustSeeCount > 0 ? (
                   <p className="mt-2 text-xs text-center text-slate-500">
-                    Optimizing for {mustSeeCount} must-see artist{mustSeeCount !== 1 ? 's' : ''} on {selectedDay}
+                    Herding {mustSeeCount} must-see sheep on {selectedDay}
                   </p>
                 ) : (
                   <p className="mt-2 text-xs text-center text-slate-600">
-                    Mark artists as Must See or Nice to See first for best results
+                    Tag some artists as Must See or Nice to See before rounding up
                   </p>
                 )}
               </div>
 
               {/* Quick tip */}
-              <div className="p-3 rounded-xl bg-festival-fuchsia/5 border border-festival-fuchsia/20">
+              <div className="p-3 rounded-xl bg-festival-blue/5 border border-festival-blue/20">
                 <p className="text-xs text-slate-500 leading-relaxed">
-                  <strong className="text-slate-400">Tip:</strong> The algorithm maximizes your
-                  must-see count. Marking artists as Avoid removes them entirely.
+                  <strong className="text-slate-400">Sheep tip:</strong> The algorithm maximizes your
+                  must-see count. Marking artists as Avoid removes them from the pasture entirely.
                 </p>
               </div>
             </div>
@@ -198,7 +204,7 @@ export default function App() {
                 onClick={handleBack}
                 className="flex items-center gap-2 px-4 py-2 rounded-xl bg-festival-card border border-festival-border text-slate-300 hover:text-white hover:border-slate-500 transition-colors text-sm"
               >
-                ← Back to Preferences
+                ← Back to the Pasture
               </button>
               <div className="flex gap-2">
                 {DAYS.map(day => (
@@ -211,8 +217,8 @@ export default function App() {
                     }}
                     className={`px-4 py-2 rounded-xl font-medium text-sm transition-all duration-150 ${
                       selectedDay === day
-                        ? 'bg-festival-fuchsia text-white'
-                        : 'bg-festival-card border border-festival-border text-slate-400 hover:text-white hover:border-festival-fuchsia/40'
+                        ? 'bg-festival-blue text-white'
+                        : 'bg-festival-card border border-festival-border text-slate-400 hover:text-white hover:border-festival-blue/40'
                     }`}
                   >
                     {day.slice(0, 3)}
@@ -228,7 +234,7 @@ export default function App() {
               {/* Left: timeline */}
               <div>
                 <h2 className="text-lg font-bold text-white mb-4">
-                  Your {selectedDay} Itinerary
+                  Your {selectedDay} Herd Route
                 </h2>
                 <ItineraryTimeline
                   items={itinerary.items}
@@ -241,7 +247,7 @@ export default function App() {
                 <ConflictPanel conflicts={itinerary.conflicts} />
 
                 <div className="bg-festival-card border border-festival-border rounded-xl p-4">
-                  <h3 className="font-semibold text-slate-300 text-sm mb-3">Adjust & Regenerate</h3>
+                  <h3 className="font-semibold text-slate-300 text-sm mb-3">Adjust & Re-herd</h3>
                   <PreferenceControls
                     preferences={userPrefs}
                     onChange={(prefs) => {
@@ -255,9 +261,10 @@ export default function App() {
                       const result = generateItinerary(EDC_2026_SETS, artistPreferences, userPrefs, selectedDay);
                       setItinerary(result);
                     }}
-                    className="mt-3 w-full py-2.5 rounded-xl font-semibold text-white bg-gradient-to-r from-festival-fuchsia to-purple-700 hover:from-fuchsia-500 hover:to-purple-600 transition-all duration-150 text-sm"
+                    className="mt-3 w-full py-2.5 rounded-xl font-semibold text-white transition-all duration-150 text-sm"
+                    style={{ background: 'linear-gradient(135deg, #2563eb, #0ea5e9)' }}
                   >
-                    Regenerate
+                    Re-herd the Flock 🐑
                   </button>
                 </div>
               </div>
@@ -270,7 +277,7 @@ export default function App() {
 
       {/* Footer */}
       <footer className="border-t border-[#1e1e2e] py-6 text-center text-xs text-slate-700">
-        <p>RaveRoute · EDC Las Vegas 2026 · Lineup data for planning purposes only</p>
+        <p>SheepHerder · EDC Las Vegas 2026 · Don't be a lost sheep.</p>
       </footer>
     </div>
     </PasscodeGate>

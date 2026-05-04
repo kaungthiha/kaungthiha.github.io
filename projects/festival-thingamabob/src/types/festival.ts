@@ -29,11 +29,20 @@ export type ItineraryItem = {
   endTime: Date;
   artist?: string;
   stage?: string;
+  genre?: string;
   fromStage?: string;
   toStage?: string;
   notes?: string;
   isPartial?: boolean;
   preferenceLevel?: PreferenceLevel;
+};
+
+export type MeetupPoint = {
+  id: string;
+  afterItemId: string;
+  time: Date;
+  location: string;
+  notes?: string;
 };
 
 export type ConflictExplanation = {

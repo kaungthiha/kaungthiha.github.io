@@ -2,34 +2,34 @@ import { useState } from 'react';
 
 const STEPS = [
   {
-    icon: '🎵',
-    title: 'Browse the Lineup',
+    icon: '🐑',
+    title: 'Survey the Pasture',
     description:
       'All EDC Las Vegas 2026 artists are pre-loaded. Browse by day — Friday, Saturday, or Sunday.',
-    accent: 'border-festival-fuchsia/30 bg-festival-fuchsia/5',
-    iconBg: 'bg-festival-fuchsia/10',
+    accent: 'border-festival-blue/30 bg-festival-blue/5',
+    iconBg: 'bg-festival-blue/10',
   },
   {
-    icon: '💜',
-    title: 'Pick Your Artists',
+    icon: '💙',
+    title: 'Tag Your Sheep',
     description:
-      'Tag each artist: Must See (💜), Nice to See (👍), Neutral (😐), or Avoid (🚫). Your preferences drive the optimizer.',
+      'Tag each artist: Must See (💙), Nice to See (👍), Neutral (😐), or Avoid (🚫). Your preferences drive the herding algorithm.',
     accent: 'border-purple-700/30 bg-purple-900/10',
     iconBg: 'bg-purple-900/20',
   },
   {
     icon: '⚙️',
-    title: 'Set Your Preferences',
+    title: 'Configure the Flock',
     description:
-      'Configure walk time between stages, whether to allow partial set attendance, and minimum time worth catching.',
+      'Set trekking time between stages, whether to allow late arrivals, and the minimum time worth herding for.',
     accent: 'border-festival-cyan/30 bg-festival-cyan/5',
     iconBg: 'bg-festival-cyan/10',
   },
   {
     icon: '🗺️',
-    title: 'Generate Your Route',
+    title: 'Herd Your Route',
     description:
-      'Hit Generate. The optimizer runs weighted interval scheduling to maximize your must-see score while respecting travel time.',
+      'Hit Round Up. The optimizer runs weighted interval scheduling to maximize your must-see score while keeping the flock together.',
     accent: 'border-green-700/30 bg-green-900/10',
     iconBg: 'bg-green-900/20',
   },
@@ -46,7 +46,7 @@ export function HowItWorks() {
       >
         <div className="flex items-center gap-3">
           <span className="text-xl">ℹ️</span>
-          <span className="font-semibold text-slate-300">How RaveRoute Works</span>
+          <span className="font-semibold text-slate-300">How SheepHerder Works</span>
         </div>
         <span className={`text-slate-600 transition-transform duration-200 ${open ? 'rotate-180' : ''}`}>
           ▼
@@ -76,7 +76,7 @@ export function HowItWorks() {
           <div className="p-4 bg-slate-900/50 rounded-xl border border-festival-border/50">
             <h4 className="text-sm font-semibold text-slate-300 mb-2">The Algorithm</h4>
             <p className="text-xs text-slate-500 leading-relaxed">
-              RaveRoute uses <strong className="text-slate-400">weighted interval scheduling with dynamic programming</strong>.
+              SheepHerder uses <strong className="text-slate-400">weighted interval scheduling with dynamic programming</strong>.
               Each set gets a score based on your preference (Must See = 100 pts, Nice = 40 pts, Neutral = 10 pts),
               plus a 10-point bonus for attending the full set. The DP table finds the maximum-score sequence of
               non-overlapping sets, accounting for your configured walk time between different stages.
@@ -89,10 +89,9 @@ export function HowItWorks() {
             </p>
           </div>
 
-          <div className="mt-3 p-3 bg-festival-fuchsia/5 border border-festival-fuchsia/20 rounded-xl">
+          <div className="mt-3 p-3 bg-festival-blue/5 border border-festival-blue/20 rounded-xl">
             <p className="text-xs text-slate-500">
-              <strong className="text-festival-fuchsia">Phase 2 coming:</strong> Interactive venue map with stage locations
-              for real walking-distance estimates, plus export to Apple/Google Calendar.
+              <strong className="text-festival-blue">Phase 2 coming:</strong> Interactive venue map so the flock knows exactly how far to trek between stages, plus export to Apple/Google Calendar.
             </p>
           </div>
         </div>

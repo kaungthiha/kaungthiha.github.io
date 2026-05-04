@@ -14,8 +14,8 @@ export function ConflictPanel({ conflicts }: ConflictPanelProps) {
       <div className="bg-festival-card border border-green-800/40 rounded-xl p-4 flex items-center gap-3">
         <span className="text-2xl">✅</span>
         <div>
-          <div className="font-semibold text-green-400">No Conflicts</div>
-          <div className="text-sm text-slate-500">All your must-see artists fit your itinerary.</div>
+          <div className="font-semibold text-green-400">Flock Intact 🐑</div>
+          <div className="text-sm text-slate-500">All your must-see sheep are safely herded in.</div>
         </div>
       </div>
     );
@@ -31,10 +31,10 @@ export function ConflictPanel({ conflicts }: ConflictPanelProps) {
           <span className="text-2xl">⚠️</span>
           <div className="text-left">
             <div className="font-semibold text-red-400">
-              {conflicts.length} Conflict{conflicts.length !== 1 ? 's' : ''}
+              {conflicts.length} Lost Sheep
             </div>
             <div className="text-xs text-slate-500">
-              Must-see artists that couldn't be scheduled
+              Must-see artists that slipped out of the herd
             </div>
           </div>
         </div>
@@ -56,7 +56,7 @@ export function ConflictPanel({ conflicts }: ConflictPanelProps) {
                     <div className="flex items-center gap-2 flex-wrap">
                       <span className="font-semibold text-white">{missed.artist}</span>
                       <span className="text-xs px-2 py-0.5 rounded-full bg-red-900/40 border border-red-700/50 text-red-400">
-                        missed
+                        🐑 lost sheep
                       </span>
                     </div>
                     <div className="text-xs text-slate-500 mt-0.5">
@@ -71,7 +71,7 @@ export function ConflictPanel({ conflicts }: ConflictPanelProps) {
                           <div className="flex items-center gap-2 flex-wrap">
                             <span className="font-semibold text-slate-200">{c.artist}</span>
                             <span className="text-xs px-2 py-0.5 rounded-full bg-green-900/40 border border-green-700/50 text-green-400">
-                              chosen
+                              herded ✓
                             </span>
                           </div>
                           <div className="text-xs text-slate-500 mt-0.5">

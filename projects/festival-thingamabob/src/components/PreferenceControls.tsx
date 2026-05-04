@@ -25,7 +25,7 @@ export function PreferenceControls({ preferences, onChange }: PreferenceControls
     <div className="bg-festival-card border border-festival-border rounded-xl overflow-hidden">
       <div className="px-4 py-2 bg-gradient-to-r from-festival-cyan/10 to-transparent border-b border-festival-border">
         <h3 className="text-sm font-semibold text-festival-cyan uppercase tracking-wider">
-          Settings
+          🐑 Herd Settings
         </h3>
       </div>
 
@@ -33,7 +33,7 @@ export function PreferenceControls({ preferences, onChange }: PreferenceControls
         {/* Walking buffer */}
         <div>
           <label className="block text-sm font-medium text-slate-300 mb-2">
-            Stage-to-Stage Walk Time
+            Trekking Time Between Stages
           </label>
           <div className="flex gap-2">
             {WALKING_OPTIONS.map(min => (
@@ -51,7 +51,7 @@ export function PreferenceControls({ preferences, onChange }: PreferenceControls
             ))}
           </div>
           <p className="mt-1.5 text-xs text-slate-600">
-            Estimated walk between different stages
+            How long does it take the flock to move between stages?
           </p>
         </div>
 
@@ -59,15 +59,15 @@ export function PreferenceControls({ preferences, onChange }: PreferenceControls
         <div>
           <div className="flex items-center justify-between">
             <div>
-              <label className="text-sm font-medium text-slate-300">Allow Partial Sets</label>
+              <label className="text-sm font-medium text-slate-300">Allow Late Arrival</label>
               <p className="text-xs text-slate-600 mt-0.5">
-                Arrive late to catch the end of a set
+                Dash across the pasture to catch the tail end
               </p>
             </div>
             <button
               onClick={togglePartial}
               className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors duration-200 focus:outline-none ${
-                preferences.allowPartialSets ? 'bg-festival-fuchsia' : 'bg-slate-700'
+                preferences.allowPartialSets ? 'bg-festival-blue' : 'bg-slate-700'
               }`}
             >
               <span
@@ -82,7 +82,7 @@ export function PreferenceControls({ preferences, onChange }: PreferenceControls
         {/* Minimum set time — only relevant when partial sets are on */}
         <div className={preferences.allowPartialSets ? '' : 'opacity-40 pointer-events-none'}>
           <label className="block text-sm font-medium text-slate-300 mb-2">
-            Minimum Set Time
+            Minimum Time Worth Herding For
           </label>
           <div className="flex gap-2">
             {MIN_SET_OPTIONS.map(min => (
@@ -91,7 +91,7 @@ export function PreferenceControls({ preferences, onChange }: PreferenceControls
                 onClick={() => setMinSet(min)}
                 className={`flex-1 py-2 rounded-lg border text-sm font-medium transition-all duration-150 ${
                   preferences.minimumSetMinutes === min
-                    ? 'bg-festival-fuchsia/20 border-festival-fuchsia text-festival-fuchsia'
+                    ? 'bg-festival-blue/20 border-festival-blue text-festival-blue'
                     : 'border-festival-border text-slate-400 hover:border-slate-500 hover:text-slate-300'
                 }`}
               >
@@ -100,7 +100,7 @@ export function PreferenceControls({ preferences, onChange }: PreferenceControls
             ))}
           </div>
           <p className="mt-1.5 text-xs text-slate-600">
-            Only attend if you can catch at least this many minutes
+            Not worth running for anything less, sheep logic
           </p>
         </div>
       </div>

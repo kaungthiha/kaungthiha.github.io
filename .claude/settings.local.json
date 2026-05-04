@@ -24,7 +24,14 @@
       "Bash(curl -s http://127.0.0.1:4321/pages/dsc-case-study.html -o /dev/null -w \"DSC: HTTP %{http_code}  bytes %{size_download}\\\\n\")",
       "Bash(curl -s http://127.0.0.1:4321/tools/attendance-tracker/ -o /dev/null -w \"Attendance: HTTP %{http_code}  bytes %{size_download}\\\\n\")",
       "Bash(curl -s http://127.0.0.1:4321/tools/festival-thingamabob/ -o /dev/null -w \"Festival: HTTP %{http_code}  bytes %{size_download}\\\\n\")",
-      "Bash(node --check assets/js/tree.js)"
+      "Bash(node --check assets/js/tree.js)",
+      "Bash(npm run *)",
+      "PowerShell(Get-Command node, npm, npx -ErrorAction SilentlyContinue)",
+      "PowerShell($env:PATH -split ';' | Where-Object { $_ -match 'node|npm' })",
+      "PowerShell(& \"C:\\\\Program Files\\\\nodejs\\\\npm.cmd\" --version 2>&1)",
+      "PowerShell(& \"C:\\\\Users\\\\kaung\\\\AppData\\\\Roaming\\\\nvm\\\\v22.14.0\\\\npm.cmd\" --version 2>&1)",
+      "PowerShell($env:PATH = \"C:\\\\Program Files\\\\nodejs;\" + $env:PATH; Set-Location \"c:\\\\Users\\\\kaung\\\\Documents\\\\Projects\\\\kaungthiha.github.io\\\\projects\\\\festival-thingamabob\"; npm run build 2>&1)",
+      "PowerShell($env:PATH = \"C:\\\\Program Files\\\\nodejs;\" + $env:PATH; Set-Location \"c:\\\\Users\\\\kaung\\\\Documents\\\\Projects\\\\kaungthiha.github.io\\\\projects\\\\festival-thingamabob\"; & \"C:\\\\Program Files\\\\nodejs\\\\npm.cmd\" run build 2>&1)"
     ]
   }
 }

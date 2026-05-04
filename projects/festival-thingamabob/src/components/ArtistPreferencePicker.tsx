@@ -10,7 +10,7 @@ interface ArtistPreferencePickerProps {
 }
 
 const LEVEL_BUTTONS: Array<{ level: PreferenceLevel; emoji: string; label: string; color: string; activeColor: string }> = [
-  { level: 'must-see', emoji: '💜', label: 'Must See', color: 'border-purple-700 text-purple-400 hover:bg-purple-900/40', activeColor: 'bg-purple-700/60 border-purple-400 text-white shadow-glow-purple' },
+  { level: 'must-see', emoji: '💙', label: 'Must See', color: 'border-blue-700 text-blue-400 hover:bg-blue-900/40', activeColor: 'bg-blue-700/60 border-blue-400 text-white shadow-glow-blue' },
   { level: 'nice-to-see', emoji: '👍', label: 'Nice', color: 'border-cyan-800 text-cyan-400 hover:bg-cyan-900/40', activeColor: 'bg-cyan-700/50 border-cyan-400 text-white' },
   { level: 'neutral', emoji: '😐', label: 'Neutral', color: 'border-slate-700 text-slate-400 hover:bg-slate-800/60', activeColor: 'bg-slate-700 border-slate-400 text-white' },
   { level: 'avoid', emoji: '🚫', label: 'Avoid', color: 'border-red-900 text-red-500 hover:bg-red-900/30', activeColor: 'bg-red-900/50 border-red-500 text-red-300' },
@@ -50,8 +50,8 @@ export function ArtistPreferencePicker({
       {(mustSeeCount > 0 || niceSeeCount > 0 || avoidCount > 0) && (
         <div className="flex flex-wrap gap-2 px-4 py-3 bg-festival-card border border-festival-border rounded-xl text-sm">
           {mustSeeCount > 0 && (
-            <span className="flex items-center gap-1 text-purple-400">
-              💜 <strong>{mustSeeCount}</strong> must-see
+            <span className="flex items-center gap-1 text-blue-400">
+              💙 <strong>{mustSeeCount}</strong> must-see
             </span>
           )}
           {niceSeeCount > 0 && (
@@ -70,8 +70,8 @@ export function ArtistPreferencePicker({
       {/* Artist list grouped by stage */}
       {Object.entries(byStage).map(([stage, stageSets]) => (
         <div key={stage} className="bg-festival-card border border-festival-border rounded-xl overflow-hidden">
-          <div className="px-4 py-2 bg-gradient-to-r from-festival-fuchsia/10 to-transparent border-b border-festival-border">
-            <h3 className="text-sm font-semibold text-festival-fuchsia uppercase tracking-wider">
+          <div className="px-4 py-2 bg-gradient-to-r from-festival-blue/10 to-transparent border-b border-festival-border">
+            <h3 className="text-sm font-semibold text-festival-blue uppercase tracking-wider">
               {stage}
             </h3>
           </div>
@@ -83,7 +83,7 @@ export function ArtistPreferencePicker({
                   key={s.id}
                   className={`px-4 py-3 flex flex-col sm:flex-row sm:items-center gap-3 transition-colors ${
                     currentLevel === 'must-see'
-                      ? 'bg-purple-900/10'
+                      ? 'bg-blue-900/10'
                       : currentLevel === 'avoid'
                       ? 'bg-red-900/5 opacity-60'
                       : ''

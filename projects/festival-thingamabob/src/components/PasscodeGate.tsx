@@ -41,19 +41,20 @@ export function PasscodeGate({ children }: PasscodeGateProps) {
       {/* Ambient glow blobs */}
       <div className="pointer-events-none fixed inset-0 overflow-hidden">
         <div className="absolute -top-32 -left-32 w-96 h-96 rounded-full opacity-20"
-          style={{ background: 'radial-gradient(circle, #c026d3 0%, transparent 70%)' }} />
+          style={{ background: 'radial-gradient(circle, #2563eb 0%, transparent 70%)' }} />
         <div className="absolute -bottom-32 -right-32 w-96 h-96 rounded-full opacity-15"
-          style={{ background: 'radial-gradient(circle, #06b6d4 0%, transparent 70%)' }} />
+          style={{ background: 'radial-gradient(circle, #38bdf8 0%, transparent 70%)' }} />
       </div>
 
       <div className="relative w-full max-w-sm">
         <div className="text-center mb-8">
+          <div className="text-4xl mb-1">🐑</div>
           <h1 className="text-4xl font-black mb-2" style={{
-            background: 'linear-gradient(135deg, #c026d3, #06b6d4)',
+            background: 'linear-gradient(135deg, #2563eb, #38bdf8)',
             WebkitBackgroundClip: 'text',
             WebkitTextFillColor: 'transparent',
           }}>
-            RaveRoute
+            SheepHerder
           </h1>
           <p className="text-slate-500 text-sm">EDC Las Vegas 2026</p>
         </div>
@@ -68,7 +69,7 @@ export function PasscodeGate({ children }: PasscodeGateProps) {
           }}
         >
           <p className="text-slate-300 text-sm text-center mb-5">
-            Enter the passcode to access the planner.
+            Enter the sheepfold passcode to join the herd.
           </p>
 
           <input
@@ -98,11 +99,11 @@ export function PasscodeGate({ children }: PasscodeGateProps) {
             className="mt-4 w-full py-3 rounded-xl font-bold text-white text-sm transition-all disabled:opacity-40 disabled:cursor-not-allowed"
             style={{
               background: value.trim()
-                ? 'linear-gradient(135deg, #c026d3, #7c3aed)'
+                ? 'linear-gradient(135deg, #2563eb, #0ea5e9)'
                 : '#1e1e2e',
             }}
           >
-            Let me in →
+            Baa me in 🐑
           </button>
         </form>
 
