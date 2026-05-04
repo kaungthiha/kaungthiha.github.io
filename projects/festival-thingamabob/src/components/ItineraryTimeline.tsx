@@ -111,6 +111,26 @@ function SetRow({ item }: { item: ItineraryItem }) {
   );
 }
 
+function ArrivalRow({ item }: { item: ItineraryItem }) {
+  const durationMins = getDurationMinutes(item.startTime, item.endTime);
+  return (
+    <div className="flex gap-4 px-4 py-3 rounded-xl border border-slate-800/60 bg-slate-900/30">
+      <div className="w-20 flex-shrink-0 text-right">
+        <div className="text-sm font-semibold text-slate-500">{formatTime(item.startTime)}</div>
+        <div className="text-xs text-slate-700 mt-0.5">{formatDuration(durationMins)}</div>
+      </div>
+      <div className="flex flex-col items-center flex-shrink-0 mt-1">
+        <div className="w-3 h-3 rounded-full bg-slate-700 border-2 border-slate-600 flex-shrink-0" />
+        <div className="w-0.5 flex-1 bg-slate-800 mt-1" />
+      </div>
+      <div className="flex-1 min-w-0 pb-1">
+        <div className="text-sm font-semibold text-slate-400">🐑 Sheep travel time</div>
+        <div className="text-xs text-slate-600 mt-0.5">Rolling to the festival — first set at {formatTime(item.endTime)}</div>
+      </div>
+    </div>
+  );
+}
+
 function TransitionRow({
   item,
   onAddMeetup,
@@ -328,6 +348,7 @@ export function ItineraryTimeline({ items, score }: ItineraryTimelineProps) {
 
           return (
             <div key={item.id}>
+              {item.type === 'arrival' && <ArrivalRow item={item} />}
               {item.type === 'set' && <SetRow item={item} />}
               {item.type === 'transition' && (
                 <TransitionRow

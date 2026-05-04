@@ -1,12 +1,12 @@
 import { useState } from 'react';
-import { FlockInfo, createTrip, joinTrip } from '../lib/flockApi';
+import { FlockInfo, FlockMemberData, createTrip, joinTrip, getFlockDetails } from '../lib/flockApi';
 
 interface FlockGateProps {
   onJoined: (info: FlockInfo) => void;
   onSkip: () => void;
 }
 
-type Mode = 'choose' | 'create' | 'join';
+type Mode = 'choose' | 'create' | 'join' | 'rejoin';
 
 export function FlockGate({ onJoined, onSkip }: FlockGateProps) {
   const [mode, setMode] = useState<Mode>('choose');
@@ -16,6 +16,12 @@ export function FlockGate({ onJoined, onSkip }: FlockGateProps) {
   const [error, setError] = useState('');
   const [pendingJoin, setPendingJoin] = useState<FlockInfo | null>(null);
   const [copied, setCopied] = useState(false);
+
+  // Rejoin state
+  const [rejoinCode, setRejoinCode] = useState('');
+  const [rejoinMembers, setRejoinMembers] = useState<FlockMemberData[] | null>(null);
+  const [rejoinLoading, setRejoinLoading] = useState(false);
+  const [rejoinError, setRejoinError] = useState('');
 
   async function handleCreate() {
     if (!name.trim()) return;
@@ -43,6 +49,29 @@ export function FlockGate({ onJoined, onSkip }: FlockGateProps) {
     onJoined(result);
   }
 
+  async function handleRejoinLookup() {
+    if (!rejoinCode.trim()) return;
+    setRejoinLoading(true);
+    setRejoinError('');
+    setRejoinMembers(null);
+    const details = await getFlockDetails(rejoinCode.trim().toUpperCase());
+    setRejoinLoading(false);
+    if (!details || details.members.length === 0) {
+      setRejoinError("Couldn't find that flock. Check the code and try again.");
+      return;
+    }
+    setRejoinMembers(details.members);
+  }
+
+  function handleRejoinSelect(member: FlockMemberData) {
+    onJoined({
+      tripCode: rejoinCode.trim().toUpperCase(),
+      memberId: member.id,
+      memberName: member.name,
+      isLeader: member.isLeader,
+    });
+  }
+
   function handleCopy() {
     if (!pendingJoin) return;
     navigator.clipboard.writeText(pendingJoin.tripCode).then(() => {
@@ -51,17 +80,29 @@ export function FlockGate({ onJoined, onSkip }: FlockGateProps) {
     });
   }
 
-  // After creating — show the code
+  function resetToChoose() {
+    setMode('choose');
+    setError('');
+    setName('');
+    setCode('');
+    setRejoinCode('');
+    setRejoinMembers(null);
+    setRejoinError('');
+  }
+
+  const glow = (
+    <div className="pointer-events-none fixed inset-0 overflow-hidden">
+      <div className="absolute -top-32 -left-32 w-96 h-96 rounded-full opacity-20"
+        style={{ background: 'radial-gradient(circle, #2563eb 0%, transparent 70%)' }} />
+      <div className="absolute -bottom-32 -right-32 w-96 h-96 rounded-full opacity-15"
+        style={{ background: 'radial-gradient(circle, #38bdf8 0%, transparent 70%)' }} />
+    </div>
+  );
+
   if (pendingJoin) {
     return (
       <div className="min-h-screen flex items-center justify-center px-4" style={{ backgroundColor: '#0a0a0f' }}>
-        <div className="pointer-events-none fixed inset-0 overflow-hidden">
-          <div className="absolute -top-32 -left-32 w-96 h-96 rounded-full opacity-20"
-            style={{ background: 'radial-gradient(circle, #2563eb 0%, transparent 70%)' }} />
-          <div className="absolute -bottom-32 -right-32 w-96 h-96 rounded-full opacity-15"
-            style={{ background: 'radial-gradient(circle, #38bdf8 0%, transparent 70%)' }} />
-        </div>
-
+        {glow}
         <div className="relative w-full max-w-sm text-center">
           <div className="text-4xl mb-2">🐑</div>
           <h2 className="text-2xl font-black text-white mb-1">Flock Created!</h2>
@@ -100,15 +141,9 @@ export function FlockGate({ onJoined, onSkip }: FlockGateProps) {
 
   return (
     <div className="min-h-screen flex items-center justify-center px-4" style={{ backgroundColor: '#0a0a0f' }}>
-      <div className="pointer-events-none fixed inset-0 overflow-hidden">
-        <div className="absolute -top-32 -left-32 w-96 h-96 rounded-full opacity-20"
-          style={{ background: 'radial-gradient(circle, #2563eb 0%, transparent 70%)' }} />
-        <div className="absolute -bottom-32 -right-32 w-96 h-96 rounded-full opacity-15"
-          style={{ background: 'radial-gradient(circle, #38bdf8 0%, transparent 70%)' }} />
-      </div>
+      {glow}
 
       <div className="relative w-full max-w-sm">
-        {/* Header */}
         <div className="text-center mb-8">
           <div className="text-4xl mb-1">🐑</div>
           <h1
@@ -145,26 +180,29 @@ export function FlockGate({ onJoined, onSkip }: FlockGateProps) {
                   Join an existing flock
                 </button>
               </div>
-              <button
-                onClick={onSkip}
-                className="w-full mt-4 text-xs text-slate-600 hover:text-slate-400 transition-colors py-1"
-              >
-                Skip — I'll herd solo
-              </button>
+              <div className="mt-4 pt-4 border-t border-slate-800 space-y-2">
+                <button
+                  onClick={() => setMode('rejoin')}
+                  className="w-full text-xs text-slate-500 hover:text-festival-cyan transition-colors py-1"
+                >
+                  Already in a flock? Restore my session →
+                </button>
+                <button
+                  onClick={onSkip}
+                  className="w-full text-xs text-slate-600 hover:text-slate-400 transition-colors py-1"
+                >
+                  Skip — I'll herd solo
+                </button>
+              </div>
             </>
           )}
 
           {mode === 'create' && (
             <>
-              <button
-                onClick={() => { setMode('choose'); setError(''); setName(''); }}
-                className="text-xs text-slate-600 hover:text-slate-400 mb-4 flex items-center gap-1 transition-colors"
-              >
+              <button onClick={resetToChoose} className="text-xs text-slate-600 hover:text-slate-400 mb-4 flex items-center gap-1 transition-colors">
                 ← Back
               </button>
-              <p className="text-slate-300 text-sm text-center mb-5">
-                What should the flock call you?
-              </p>
+              <p className="text-slate-300 text-sm text-center mb-5">What should the flock call you?</p>
               <input
                 type="text"
                 value={name}
@@ -174,11 +212,7 @@ export function FlockGate({ onJoined, onSkip }: FlockGateProps) {
                 maxLength={24}
                 autoFocus
                 className="w-full px-4 py-3 rounded-xl text-center text-white text-base outline-none transition-all mb-3"
-                style={{
-                  backgroundColor: '#0a0a0f',
-                  border: `1px solid ${name ? '#2563eb' : '#1e1e2e'}`,
-                  caretColor: '#2563eb',
-                }}
+                style={{ backgroundColor: '#0a0a0f', border: `1px solid ${name ? '#2563eb' : '#1e1e2e'}`, caretColor: '#2563eb' }}
               />
               {error && <p className="text-red-400 text-xs text-center mb-3">{error}</p>}
               <button
@@ -194,15 +228,10 @@ export function FlockGate({ onJoined, onSkip }: FlockGateProps) {
 
           {mode === 'join' && (
             <>
-              <button
-                onClick={() => { setMode('choose'); setError(''); setName(''); setCode(''); }}
-                className="text-xs text-slate-600 hover:text-slate-400 mb-4 flex items-center gap-1 transition-colors"
-              >
+              <button onClick={resetToChoose} className="text-xs text-slate-600 hover:text-slate-400 mb-4 flex items-center gap-1 transition-colors">
                 ← Back
               </button>
-              <p className="text-slate-300 text-sm text-center mb-5">
-                Enter your flock code and pick a name
-              </p>
+              <p className="text-slate-300 text-sm text-center mb-5">Enter your flock code and pick a name</p>
               <input
                 type="text"
                 value={code}
@@ -211,11 +240,7 @@ export function FlockGate({ onJoined, onSkip }: FlockGateProps) {
                 maxLength={6}
                 autoFocus
                 className="w-full px-4 py-3 rounded-xl text-center text-white text-lg tracking-widest outline-none transition-all mb-3 font-mono"
-                style={{
-                  backgroundColor: '#0a0a0f',
-                  border: `1px solid ${code ? '#2563eb' : '#1e1e2e'}`,
-                  caretColor: '#2563eb',
-                }}
+                style={{ backgroundColor: '#0a0a0f', border: `1px solid ${code ? '#2563eb' : '#1e1e2e'}`, caretColor: '#2563eb' }}
               />
               <input
                 type="text"
@@ -225,11 +250,7 @@ export function FlockGate({ onJoined, onSkip }: FlockGateProps) {
                 placeholder="Your name"
                 maxLength={24}
                 className="w-full px-4 py-3 rounded-xl text-center text-white text-base outline-none transition-all mb-3"
-                style={{
-                  backgroundColor: '#0a0a0f',
-                  border: `1px solid ${name ? '#2563eb' : '#1e1e2e'}`,
-                  caretColor: '#2563eb',
-                }}
+                style={{ backgroundColor: '#0a0a0f', border: `1px solid ${name ? '#2563eb' : '#1e1e2e'}`, caretColor: '#2563eb' }}
               />
               {error && <p className="text-red-400 text-xs text-center mb-3">{error}</p>}
               <button
@@ -240,6 +261,66 @@ export function FlockGate({ onJoined, onSkip }: FlockGateProps) {
               >
                 {loading ? 'Joining flock...' : 'Join Flock 🐑'}
               </button>
+            </>
+          )}
+
+          {mode === 'rejoin' && (
+            <>
+              <button onClick={resetToChoose} className="text-xs text-slate-600 hover:text-slate-400 mb-4 flex items-center gap-1 transition-colors">
+                ← Back
+              </button>
+              <p className="text-slate-300 text-sm text-center mb-1">Restore your session</p>
+              <p className="text-slate-600 text-xs text-center mb-5">Enter your flock code, then pick your name from the list</p>
+
+              {!rejoinMembers ? (
+                <>
+                  <input
+                    type="text"
+                    value={rejoinCode}
+                    onChange={e => setRejoinCode(e.target.value.toUpperCase())}
+                    onKeyDown={e => e.key === 'Enter' && handleRejoinLookup()}
+                    placeholder="Flock code (e.g. AB3XY7)"
+                    maxLength={6}
+                    autoFocus
+                    className="w-full px-4 py-3 rounded-xl text-center text-white text-lg tracking-widest outline-none transition-all mb-3 font-mono"
+                    style={{ backgroundColor: '#0a0a0f', border: `1px solid ${rejoinCode ? '#2563eb' : '#1e1e2e'}`, caretColor: '#2563eb' }}
+                  />
+                  {rejoinError && <p className="text-red-400 text-xs text-center mb-3">{rejoinError}</p>}
+                  <button
+                    onClick={handleRejoinLookup}
+                    disabled={!rejoinCode.trim() || rejoinLoading}
+                    className="w-full py-3 rounded-xl font-bold text-white text-sm disabled:opacity-40 disabled:cursor-not-allowed transition-all"
+                    style={{ background: rejoinCode.trim() ? 'linear-gradient(135deg, #2563eb, #0ea5e9)' : '#1e1e2e' }}
+                  >
+                    {rejoinLoading ? 'Finding flock...' : 'Find My Flock 🐑'}
+                  </button>
+                </>
+              ) : (
+                <>
+                  <p className="text-xs text-slate-500 text-center mb-3">Who are you?</p>
+                  <div className="space-y-2">
+                    {rejoinMembers.map(member => (
+                      <button
+                        key={member.id}
+                        onClick={() => handleRejoinSelect(member)}
+                        className="w-full flex items-center gap-3 px-4 py-3 rounded-xl border border-slate-700 hover:border-festival-blue/60 hover:bg-festival-blue/10 transition-all text-left"
+                      >
+                        <span className="text-base flex-shrink-0">{member.isLeader ? '👑' : '🐑'}</span>
+                        <span className="font-semibold text-slate-200 text-sm flex-1">{member.name}</span>
+                        {!member.hasGenerated && (
+                          <span className="text-xs text-slate-600">no schedule yet</span>
+                        )}
+                      </button>
+                    ))}
+                  </div>
+                  <button
+                    onClick={() => { setRejoinMembers(null); setRejoinCode(''); setRejoinError(''); }}
+                    className="w-full mt-3 text-xs text-slate-600 hover:text-slate-400 transition-colors py-1"
+                  >
+                    ← Try a different code
+                  </button>
+                </>
+              )}
             </>
           )}
         </div>

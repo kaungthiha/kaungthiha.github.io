@@ -3,12 +3,28 @@ import { UserPreferences } from '../types/festival';
 interface PreferenceControlsProps {
   preferences: UserPreferences;
   onChange: (prefs: UserPreferences) => void;
+  selectedDay: string;
 }
 
 const WALKING_OPTIONS = [5, 10, 15, 20] as const;
 const MIN_SET_OPTIONS = [20, 30, 45] as const;
 
-export function PreferenceControls({ preferences, onChange }: PreferenceControlsProps) {
+const START_TIME_OPTIONS: { label: string; value: string }[] = [
+  { label: 'Any time', value: '' },
+  { label: '5:00 PM', value: '17:00' },
+  { label: '6:00 PM', value: '18:00' },
+  { label: '7:00 PM', value: '19:00' },
+  { label: '8:00 PM', value: '20:00' },
+  { label: '9:00 PM', value: '21:00' },
+  { label: '10:00 PM', value: '22:00' },
+  { label: '11:00 PM', value: '23:00' },
+  { label: 'Midnight', value: '00:00' },
+  { label: '1:00 AM', value: '01:00' },
+  { label: '2:00 AM', value: '02:00' },
+  { label: '3:00 AM', value: '03:00' },
+];
+
+export function PreferenceControls({ preferences, onChange, selectedDay }: PreferenceControlsProps) {
   function setWalking(minutes: number) {
     onChange({ ...preferences, defaultWalkingMinutes: minutes });
   }
@@ -21,6 +37,18 @@ export function PreferenceControls({ preferences, onChange }: PreferenceControls
     onChange({ ...preferences, minimumSetMinutes: minutes });
   }
 
+  function setDayStart(value: string) {
+    const updated = { ...(preferences.dayStartTimes ?? {}) };
+    if (value) {
+      updated[selectedDay] = value;
+    } else {
+      delete updated[selectedDay];
+    }
+    onChange({ ...preferences, dayStartTimes: updated });
+  }
+
+  const currentStart = preferences.dayStartTimes?.[selectedDay] ?? '';
+
   return (
     <div className="bg-festival-card border border-festival-border rounded-xl overflow-hidden">
       <div className="px-4 py-2 bg-gradient-to-r from-festival-cyan/10 to-transparent border-b border-festival-border">
@@ -30,6 +58,25 @@ export function PreferenceControls({ preferences, onChange }: PreferenceControls
       </div>
 
       <div className="p-4 space-y-5">
+        {/* Day start time */}
+        <div>
+          <label className="block text-sm font-medium text-slate-300 mb-2">
+            Arriving at the Pasture
+          </label>
+          <select
+            value={currentStart}
+            onChange={e => setDayStart(e.target.value)}
+            className="w-full px-3 py-2 rounded-lg text-sm text-slate-200 border border-festival-border bg-[#0a0a0f] focus:border-festival-cyan focus:outline-none transition-colors"
+          >
+            {START_TIME_OPTIONS.map(opt => (
+              <option key={opt.value} value={opt.value}>{opt.label}</option>
+            ))}
+          </select>
+          <p className="mt-1.5 text-xs text-slate-600">
+            Sets before this time won't be scheduled — marked as sheep travel time
+          </p>
+        </div>
+
         {/* Walking buffer */}
         <div>
           <label className="block text-sm font-medium text-slate-300 mb-2">

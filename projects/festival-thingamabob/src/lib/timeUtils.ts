@@ -72,3 +72,26 @@ export function formatHourLabel(date: Date): string {
 export function isPostMidnight(date: Date): boolean {
   return date.getHours() < 6;
 }
+
+const FESTIVAL_BASE_DATES: Record<string, string> = {
+  'Friday': '2026-05-15',
+  'Saturday': '2026-05-16',
+  'Sunday': '2026-05-17',
+};
+
+/**
+ * Convert a "HH:MM" 24h start time to an absolute Date for the given festival day.
+ * HH >= 17 → evening of the festival date; HH < 17 → post-midnight (next calendar day).
+ */
+export function parseDayStartTime(day: string, timeHHMM: string): Date {
+  const [hh, mm] = timeHHMM.split(':').map(Number);
+  const baseStr = FESTIVAL_BASE_DATES[day] ?? FESTIVAL_BASE_DATES['Friday'];
+  const date = new Date(`${baseStr}T00:00:00`);
+  if (hh >= 17) {
+    date.setHours(hh, mm, 0, 0);
+  } else {
+    date.setDate(date.getDate() + 1);
+    date.setHours(hh, mm, 0, 0);
+  }
+  return date;
+}

@@ -20,11 +20,12 @@ export type UserPreferences = {
   defaultWalkingMinutes: number;
   allowPartialSets: boolean;
   minimumSetMinutes: number;
+  dayStartTimes?: Record<string, string>; // day → "HH:MM" 24h, e.g. "21:00" = 9 PM
 };
 
 export type ItineraryItem = {
   id: string;
-  type: "set" | "transition" | "break" | "conflict";
+  type: "set" | "transition" | "break" | "arrival" | "conflict";
   startTime: Date;
   endTime: Date;
   artist?: string;

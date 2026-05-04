@@ -7,7 +7,7 @@ import {
   GeneratedItinerary,
   PreferenceLevel,
 } from '../types/festival';
-import { getDurationMinutes, addMinutes } from './timeUtils';
+import { getDurationMinutes, addMinutes, parseDayStartTime } from './timeUtils';
 
 const PREFERENCE_SCORES: Record<PreferenceLevel, number> = {
   'must-see': 100,
@@ -73,10 +73,15 @@ export function generateItinerary(
   userPrefs: UserPreferences,
   selectedDay: string
 ): GeneratedItinerary {
-  // 1. Filter to selected day, remove "avoid" sets
+  // 1. Filter to selected day, remove "avoid" sets, apply day start threshold
+  const startThreshold = userPrefs.dayStartTimes?.[selectedDay]
+    ? parseDayStartTime(selectedDay, userPrefs.dayStartTimes[selectedDay])
+    : null;
+
   const daySets = sets
     .filter(s => s.day === selectedDay)
-    .filter(s => getPreferenceLevel(s.artist, preferences) !== 'avoid');
+    .filter(s => getPreferenceLevel(s.artist, preferences) !== 'avoid')
+    .filter(s => !startThreshold || s.startTime >= startThreshold);
 
   if (daySets.length === 0) {
     return { items: [], conflicts: [], score: 0 };
@@ -224,7 +229,21 @@ export function generateItinerary(
     });
   }
 
-  // 7. Detect conflicts: must-see sets that were NOT included
+  // 7. Prepend sheep travel / arrival block if a start threshold was set and the first set doesn't start at it
+  if (startThreshold && items.length > 0) {
+    const firstStart = items[0].startTime;
+    if (firstStart > startThreshold) {
+      items.unshift({
+        id: 'arrival-block',
+        type: 'arrival',
+        startTime: startThreshold,
+        endTime: firstStart,
+        notes: 'Sheep travel time — rolling to the festival',
+      });
+    }
+  }
+
+  // 8. Detect conflicts: must-see sets that were NOT included
   const mustSeeSets = daySets.filter(
     s => getPreferenceLevel(s.artist, preferences) === 'must-see'
   );

@@ -316,7 +316,7 @@ export default function App() {
                     </div>
 
                     <div className="space-y-4">
-                      <PreferenceControls preferences={userPrefs} onChange={setUserPrefs} />
+                      <PreferenceControls preferences={userPrefs} onChange={setUserPrefs} selectedDay={selectedDay} />
 
                       <div className="bg-festival-card border border-festival-border rounded-xl p-4">
                         <button
@@ -398,6 +398,7 @@ export default function App() {
                           <h3 className="font-semibold text-slate-300 text-sm mb-3">Adjust & Re-herd</h3>
                           <PreferenceControls
                             preferences={userPrefs}
+                            selectedDay={selectedDay}
                             onChange={(prefs) => {
                               setUserPrefs(prefs);
                               const result = generateItinerary(EDC_2026_SETS, artistPreferences, prefs, selectedDay);

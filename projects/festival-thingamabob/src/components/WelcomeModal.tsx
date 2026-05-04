@@ -16,7 +16,7 @@ const STEPS = [
   {
     icon: '🐑',
     title: 'Herd Your Flock',
-    body: 'Your flock code lives in the top bar — share it with friends so they can join. Tap it anytime to see everyone\'s schedules side-by-side, generate a shared Flock Route, and lock the schedule once you\'re all set.',
+    body: 'Share your flock code with friends so they can join. Tap the code in the top bar to see everyone\'s schedules side-by-side and lock the plan once you\'re set. On a new device? Use "Restore my session" on the flock screen, enter the code, and pick your name.',
   },
 ];
 
