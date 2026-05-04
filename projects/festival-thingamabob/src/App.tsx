@@ -23,6 +23,32 @@ import { FlockView } from './components/FlockView';
 import { WelcomeModal, shouldShowWelcome } from './components/WelcomeModal';
 
 const FLOCK_SESSION_KEY = 'sheepherder_flock';
+const PREFS_STORAGE_KEY = 'sheepherder_artist_prefs';
+const USER_PREFS_STORAGE_KEY = 'sheepherder_user_prefs';
+
+function loadArtistPreferences(): ArtistPreference[] {
+  try {
+    const stored = localStorage.getItem(PREFS_STORAGE_KEY);
+    if (!stored) return [];
+    return JSON.parse(stored) as ArtistPreference[];
+  } catch { return []; }
+}
+
+function saveArtistPreferences(prefs: ArtistPreference[]) {
+  try { localStorage.setItem(PREFS_STORAGE_KEY, JSON.stringify(prefs)); } catch { /* ignore */ }
+}
+
+function loadUserPrefs(): UserPreferences {
+  try {
+    const stored = localStorage.getItem(USER_PREFS_STORAGE_KEY);
+    if (!stored) return DEFAULT_PREFS;
+    return { ...DEFAULT_PREFS, ...JSON.parse(stored) };
+  } catch { return DEFAULT_PREFS; }
+}
+
+function saveUserPrefs(prefs: UserPreferences) {
+  try { localStorage.setItem(USER_PREFS_STORAGE_KEY, JSON.stringify(prefs)); } catch { /* ignore */ }
+}
 
 type AppStep = 'preferences' | 'itinerary';
 
@@ -46,8 +72,8 @@ function readFlockSession(): FlockInfo | null {
 export default function App() {
   const [step, setStep] = useState<AppStep>('preferences');
   const [selectedDay, setSelectedDay] = useState<string>('Friday');
-  const [artistPreferences, setArtistPreferences] = useState<ArtistPreference[]>([]);
-  const [userPrefs, setUserPrefs] = useState<UserPreferences>(DEFAULT_PREFS);
+  const [artistPreferences, setArtistPreferences] = useState<ArtistPreference[]>(loadArtistPreferences);
+  const [userPrefs, setUserPrefs] = useState<UserPreferences>(loadUserPrefs);
   const [itinerary, setItinerary] = useState<GeneratedItinerary | null>(null);
 
   const [showWelcome, setShowWelcome] = useState<boolean>(shouldShowWelcome);
@@ -66,13 +92,18 @@ export default function App() {
   const handlePreferenceChange = useCallback((artist: string, level: PreferenceLevel) => {
     setArtistPreferences(prev => {
       const existing = prev.find(p => p.artist === artist);
+      let next: ArtistPreference[];
       if (existing) {
         if (existing.level === level) {
-          return prev.map(p => p.artist === artist ? { ...p, level: 'neutral' } : p);
+          next = prev.map(p => p.artist === artist ? { ...p, level: 'neutral' } : p);
+        } else {
+          next = prev.map(p => p.artist === artist ? { ...p, level } : p);
         }
-        return prev.map(p => p.artist === artist ? { ...p, level } : p);
+      } else {
+        next = [...prev, { artist, level }];
       }
-      return [...prev, { artist, level }];
+      saveArtistPreferences(next);
+      return next;
     });
   }, []);
 
@@ -112,7 +143,11 @@ export default function App() {
     } else {
       delete updated[selectedDay];
     }
-    setUserPrefs(prev => ({ ...prev, firstSetByDay: updated }));
+    setUserPrefs(prev => {
+      const next = { ...prev, firstSetByDay: updated };
+      saveUserPrefs(next);
+      return next;
+    });
   }
 
   async function handleViewFlock() {
@@ -168,6 +203,7 @@ export default function App() {
       const nextPrefs = { ...prev, pinnedByDay: updated };
       const result = generateItinerary(EDC_2026_SETS, artistPreferences, nextPrefs, selectedDay);
       setItinerary(result);
+      saveUserPrefs(nextPrefs);
       return nextPrefs;
     });
   }
@@ -351,7 +387,7 @@ export default function App() {
                     </div>
 
                     <div className="space-y-4 order-1 lg:order-2">
-                      <PreferenceControls preferences={userPrefs} onChange={setUserPrefs} selectedDay={selectedDay} />
+                      <PreferenceControls preferences={userPrefs} onChange={(prefs) => { saveUserPrefs(prefs); setUserPrefs(prefs); }} selectedDay={selectedDay} />
 
                       <div className="bg-festival-card border border-festival-border rounded-xl p-4">
                         <button
@@ -443,6 +479,7 @@ export default function App() {
                             preferences={userPrefs}
                             selectedDay={selectedDay}
                             onChange={(prefs) => {
+                              saveUserPrefs(prefs);
                               setUserPrefs(prefs);
                               const result = generateItinerary(EDC_2026_SETS, artistPreferences, prefs, selectedDay);
                               setItinerary(result);
