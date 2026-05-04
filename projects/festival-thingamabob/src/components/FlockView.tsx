@@ -392,7 +392,7 @@ export function FlockView({
         {showFlockRoute && (
           <div className="border-t border-festival-border p-4">
             {flockItinerary && flockItinerary.items.length > 0 ? (
-              <ItineraryTimeline items={flockItinerary.items} score={flockItinerary.score} />
+              <ItineraryTimeline items={flockItinerary.items} />
             ) : (
               <div className="text-center py-10 text-slate-600 text-sm">
                 <div className="text-3xl mb-2">🌿</div>
