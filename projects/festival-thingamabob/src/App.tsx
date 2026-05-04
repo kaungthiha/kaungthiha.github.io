@@ -52,6 +52,10 @@ export default function App() {
 
   const [showWelcome, setShowWelcome] = useState<boolean>(shouldShowWelcome);
 
+  const inviteCode = useMemo(() => {
+    try { return new URLSearchParams(window.location.search).get('flock') ?? undefined; } catch { return undefined; }
+  }, []);
+
   // Flock state
   const [flockReady, setFlockReady] = useState<boolean>(() => readFlockSession() !== null);
   const [flockInfo, setFlockInfo] = useState<FlockInfo | null>(() => readFlockSession());
@@ -76,6 +80,11 @@ export default function App() {
     try { sessionStorage.setItem(FLOCK_SESSION_KEY, JSON.stringify(info)); } catch { /* ignore */ }
     setFlockInfo(info);
     setFlockReady(true);
+    try {
+      const url = new URL(window.location.href);
+      url.searchParams.delete('flock');
+      history.replaceState(null, '', url.toString());
+    } catch { /* ignore */ }
   }
 
   function handleFlockSkip() {
@@ -190,7 +199,7 @@ export default function App() {
   return (
     <>
       {!flockReady ? (
-        <FlockGate onJoined={handleFlockJoined} onSkip={handleFlockSkip} />
+        <FlockGate onJoined={handleFlockJoined} onSkip={handleFlockSkip} inviteCode={inviteCode} />
       ) : (
         <div className="min-h-screen" style={{ backgroundColor: '#0a0a0f' }}>
           {showWelcome && <WelcomeModal onDone={() => setShowWelcome(false)} />}

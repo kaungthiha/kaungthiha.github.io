@@ -4,14 +4,15 @@ import { FlockInfo, FlockMemberData, createTrip, joinTrip, getFlockDetails } fro
 interface FlockGateProps {
   onJoined: (info: FlockInfo) => void;
   onSkip: () => void;
+  inviteCode?: string;
 }
 
 type Mode = 'choose' | 'create' | 'join' | 'rejoin';
 
-export function FlockGate({ onJoined, onSkip }: FlockGateProps) {
-  const [mode, setMode] = useState<Mode>('choose');
+export function FlockGate({ onJoined, onSkip, inviteCode }: FlockGateProps) {
+  const [mode, setMode] = useState<Mode>(() => inviteCode ? 'join' : 'choose');
   const [name, setName] = useState('');
-  const [code, setCode] = useState('');
+  const [code, setCode] = useState(inviteCode ?? '');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [pendingJoin, setPendingJoin] = useState<FlockInfo | null>(null);
@@ -80,6 +81,16 @@ export function FlockGate({ onJoined, onSkip }: FlockGateProps) {
     });
   }
 
+  function handleCopyInviteLink() {
+    if (!pendingJoin) return;
+    const url = new URL(window.location.href);
+    url.searchParams.set('flock', pendingJoin.tripCode);
+    navigator.clipboard.writeText(url.toString()).then(() => {
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    });
+  }
+
   function resetToChoose() {
     setMode('choose');
     setError('');
@@ -119,12 +130,20 @@ export function FlockGate({ onJoined, onSkip }: FlockGateProps) {
             >
               {pendingJoin.tripCode}
             </div>
-            <button
-              onClick={handleCopy}
-              className="text-xs text-slate-500 hover:text-slate-300 transition-colors border border-slate-700 hover:border-slate-500 px-4 py-1.5 rounded-lg"
-            >
-              {copied ? '✓ Copied!' : '📋 Copy code'}
-            </button>
+            <div className="flex gap-2 justify-center flex-wrap">
+              <button
+                onClick={handleCopy}
+                className="text-xs text-slate-500 hover:text-slate-300 transition-colors border border-slate-700 hover:border-slate-500 px-4 py-1.5 rounded-lg"
+              >
+                {copied ? '✓ Copied!' : '📋 Copy code'}
+              </button>
+              <button
+                onClick={handleCopyInviteLink}
+                className="text-xs text-slate-500 hover:text-festival-cyan transition-colors border border-slate-700 hover:border-festival-blue/50 px-4 py-1.5 rounded-lg"
+              >
+                🔗 Copy invite link
+              </button>
+            </div>
           </div>
 
           <button

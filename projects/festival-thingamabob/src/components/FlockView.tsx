@@ -183,6 +183,16 @@ export function FlockView({
   const [lockLoading, setLockLoading] = useState(false);
   const [confirmLeave, setConfirmLeave] = useState(false);
   const [leaveLoading, setLeaveLoading] = useState(false);
+  const [copiedLink, setCopiedLink] = useState(false);
+
+  function handleCopyInviteLink() {
+    const url = new URL(window.location.href);
+    url.searchParams.set('flock', tripCode);
+    navigator.clipboard.writeText(url.toString()).then(() => {
+      setCopiedLink(true);
+      setTimeout(() => setCopiedLink(false), 2000);
+    });
+  }
 
   const memberItineraries = useMemo(
     () =>
@@ -319,7 +329,7 @@ export function FlockView({
           </div>
         )}
 
-        {/* Trip code */}
+        {/* Trip code + invite link */}
         <div className="ml-auto flex items-center gap-2">
           <span className="text-xs text-slate-600 hidden sm:inline">Flock:</span>
           <span
@@ -328,6 +338,13 @@ export function FlockView({
           >
             {tripCode}
           </span>
+          <button
+            onClick={handleCopyInviteLink}
+            className="text-xs px-2.5 py-1 rounded-lg border border-slate-700 hover:border-festival-blue/50 text-slate-500 hover:text-festival-cyan transition-colors"
+            title="Copy invite link"
+          >
+            {copiedLink ? '✓ Copied!' : '🔗 Invite'}
+          </button>
         </div>
       </div>
 
