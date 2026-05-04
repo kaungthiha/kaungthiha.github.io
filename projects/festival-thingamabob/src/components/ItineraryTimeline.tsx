@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { ItineraryItem, MeetupPoint, PreferenceLevel } from '../types/festival';
 import { formatTime, formatTimeRange, getDurationMinutes, formatDuration } from '../lib/timeUtils';
+import { InfoTip } from './InfoTip';
 
 interface ItineraryTimelineProps {
   items: ItineraryItem[];
@@ -285,7 +286,10 @@ export function ItineraryTimeline({ items, score }: ItineraryTimelineProps) {
         <div className="flex items-center gap-2 bg-festival-card border border-festival-border rounded-lg px-4 py-2">
           <span className="text-xl">🎯</span>
           <div>
-            <div className="text-xs text-slate-500 uppercase tracking-wide">Score</div>
+            <div className="flex items-center gap-1.5 text-xs text-slate-500 uppercase tracking-wide">
+              Score
+              <InfoTip text="Must See = 100 pts, Nice to See = 40 pts, Neutral = 10 pts, plus a 10 pt bonus for catching a full set. Higher is better." />
+            </div>
             <div className="text-lg font-bold text-white">{score}</div>
           </div>
         </div>

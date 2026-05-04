@@ -20,6 +20,7 @@ import { HowItWorks } from './components/HowItWorks';
 import { PasscodeGate } from './components/PasscodeGate';
 import { FlockGate } from './components/FlockGate';
 import { FlockView } from './components/FlockView';
+import { WelcomeModal, shouldShowWelcome } from './components/WelcomeModal';
 
 const FLOCK_SESSION_KEY = 'sheepherder_flock';
 
@@ -48,6 +49,8 @@ export default function App() {
   const [artistPreferences, setArtistPreferences] = useState<ArtistPreference[]>([]);
   const [userPrefs, setUserPrefs] = useState<UserPreferences>(DEFAULT_PREFS);
   const [itinerary, setItinerary] = useState<GeneratedItinerary | null>(null);
+
+  const [showWelcome, setShowWelcome] = useState<boolean>(shouldShowWelcome);
 
   // Flock state
   const [flockReady, setFlockReady] = useState<boolean>(() => readFlockSession() !== null);
@@ -140,6 +143,7 @@ export default function App() {
         <FlockGate onJoined={handleFlockJoined} onSkip={handleFlockSkip} />
       ) : (
         <div className="min-h-screen" style={{ backgroundColor: '#0a0a0f' }}>
+          {showWelcome && <WelcomeModal onDone={() => setShowWelcome(false)} />}
           {/* Header */}
           <header className="border-b border-[#1e1e2e] sticky top-0 z-50 backdrop-blur-md bg-[#0a0a0f]/90">
             <div className="max-w-6xl mx-auto px-4 py-4">
@@ -161,6 +165,14 @@ export default function App() {
                 </div>
 
                 <div className="flex items-center gap-3">
+                  <button
+                    onClick={() => setShowWelcome(true)}
+                    className="w-6 h-6 rounded-full border border-slate-700 hover:border-slate-500 text-slate-500 hover:text-slate-300 transition-colors flex items-center justify-center text-xs font-bold flex-shrink-0"
+                    title="How it works"
+                  >
+                    ?
+                  </button>
+
                   {flockInfo && (
                     <button
                       onClick={handleViewFlock}

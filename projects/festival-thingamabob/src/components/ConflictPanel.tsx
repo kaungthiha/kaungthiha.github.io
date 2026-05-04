@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { ConflictExplanation } from '../types/festival';
 import { formatTimeRange } from '../lib/timeUtils';
+import { InfoTip } from './InfoTip';
 
 interface ConflictPanelProps {
   conflicts: ConflictExplanation[];
@@ -30,8 +31,9 @@ export function ConflictPanel({ conflicts }: ConflictPanelProps) {
         <div className="flex items-center gap-3">
           <span className="text-2xl">⚠️</span>
           <div className="text-left">
-            <div className="font-semibold text-red-400">
+            <div className="flex items-center gap-2 font-semibold text-red-400">
               {conflicts.length} Lost Sheep
+              <InfoTip text="Must-see artists whose sets overlap with other sets the algorithm chose. Adjust preferences or walk time and regenerate to try to fit them in." />
             </div>
             <div className="text-xs text-slate-500">
               Must-see artists that slipped out of the herd
