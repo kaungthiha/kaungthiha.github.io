@@ -91,7 +91,6 @@ export function HowItWorks() {
 
           <div className="mt-3 p-3 bg-festival-blue/5 border border-festival-blue/20 rounded-xl">
             <p className="text-xs text-slate-500">
-              <strong className="text-festival-blue">Phase 2 coming:</strong> Interactive venue map so the flock knows exactly how far to trek between stages, plus export to Apple/Google Calendar.
             </p>
           </div>
         </div>

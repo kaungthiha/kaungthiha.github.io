@@ -6,12 +6,12 @@ const STEPS = [
   {
     icon: '💙',
     title: 'Tag the Lineup',
-    body: 'Browse artists by day and mark each one: 💙 Must See, 👍 Nice to See, 😐 Neutral, or 🚫 Avoid. Your must-see picks are what the schedule optimizer works hardest to fit in.',
+    body: 'Browse artists by day and mark each one: 💙 Must See, 👍 Nice to See, 😐 Neutral, or 🚫 Avoid. Use 🏁 for the very first artist for each day. Your 💙 must-see picks are what the schedule optimizer works hardest to fit in thus other selections might be deprioritized.',
   },
   {
     icon: '🗺️',
     title: 'Round Up Your Schedule',
-    body: "In Herd Settings, pick your First Set of the Day — that artist is guaranteed first and sets the start time. Set trekking time, then hit Round Up. Any must-sees that couldn't fit appear as Lost Sheep.",
+    body: "In Herd Settings, you can set estimated walk time between stages as well as thresholds for how much of a set you want to see to check if it is worth moving stages for. You can also pick your First Set of the Day instead of using the 🏁 — that artist is guaranteed first and sets the start time. Set trekking time, then hit Round Up. Any must-sees that couldn't fit appear as Lost Sheep.",
   },
   {
     icon: '🐑',

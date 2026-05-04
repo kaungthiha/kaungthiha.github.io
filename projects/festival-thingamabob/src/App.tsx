@@ -18,7 +18,6 @@ import { PreferenceControls } from './components/PreferenceControls';
 import { ItineraryTimeline } from './components/ItineraryTimeline';
 import { ConflictPanel } from './components/ConflictPanel';
 import { HowItWorks } from './components/HowItWorks';
-import { PasscodeGate } from './components/PasscodeGate';
 import { FlockGate } from './components/FlockGate';
 import { FlockView } from './components/FlockView';
 import { WelcomeModal, shouldShowWelcome } from './components/WelcomeModal';
@@ -149,6 +148,21 @@ export default function App() {
     setShowFlockView(false);
   }
 
+  function handlePinToggle(artist: string) {
+    setUserPrefs(prev => {
+      const currentPins = prev.pinnedByDay?.[selectedDay] ?? [];
+      const isAlreadyPinned = currentPins.includes(artist);
+      const nextPins = isAlreadyPinned
+        ? currentPins.filter(a => a !== artist)
+        : [...currentPins, artist];
+      const updated = { ...(prev.pinnedByDay ?? {}), [selectedDay]: nextPins };
+      const nextPrefs = { ...prev, pinnedByDay: updated };
+      const result = generateItinerary(EDC_2026_SETS, artistPreferences, nextPrefs, selectedDay);
+      setItinerary(result);
+      return nextPrefs;
+    });
+  }
+
   async function handleRemoveMember(memberId: string) {
     await removeMember(memberId);
     if (flockDetails) {
@@ -174,7 +188,7 @@ export default function App() {
   const mustSeeCount = dayPrefs.filter(p => p.level === 'must-see').length;
 
   return (
-    <PasscodeGate>
+    <>
       {!flockReady ? (
         <FlockGate onJoined={handleFlockJoined} onSkip={handleFlockSkip} />
       ) : (
@@ -400,11 +414,19 @@ export default function App() {
                         <h2 className="text-lg font-bold text-white mb-4">
                           Your {selectedDay} Herd Route
                         </h2>
-                        <ItineraryTimeline items={itinerary.items} score={itinerary.score} />
+                        <ItineraryTimeline
+                          items={itinerary.items}
+                          pinnedArtists={userPrefs.pinnedByDay?.[selectedDay] ?? []}
+                          onTogglePin={handlePinToggle}
+                        />
                       </div>
 
                       <div className="space-y-4 order-1 lg:order-2">
-                        <ConflictPanel conflicts={itinerary.conflicts} />
+                        <ConflictPanel
+                          conflicts={itinerary.conflicts}
+                          onForceIn={handlePinToggle}
+                          pinnedArtists={userPrefs.pinnedByDay?.[selectedDay] ?? []}
+                        />
 
                         <div className="bg-festival-card border border-festival-border rounded-xl p-4">
                           <h3 className="font-semibold text-slate-300 text-sm mb-3">Adjust & Re-herd</h3>
@@ -446,6 +468,6 @@ export default function App() {
           </footer>
         </div>
       )}
-    </PasscodeGate>
+    </>
   );
 }

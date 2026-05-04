@@ -1,11 +1,11 @@
 import { useState } from 'react';
 import { ItineraryItem, MeetupPoint, PreferenceLevel } from '../types/festival';
 import { formatTime, formatTimeRange, getDurationMinutes, formatDuration } from '../lib/timeUtils';
-import { InfoTip } from './InfoTip';
 
 interface ItineraryTimelineProps {
   items: ItineraryItem[];
-  score: number;
+  pinnedArtists?: string[];
+  onTogglePin?: (artist: string) => void;
 }
 
 function StageChip({ stage }: { stage: string }) {
@@ -43,7 +43,7 @@ function PreferenceBadge({ level }: { level: PreferenceLevel | undefined }) {
   return <span className={`text-xs ${styles[level] ?? ''}`}>{label}</span>;
 }
 
-function SetRow({ item }: { item: ItineraryItem }) {
+function SetRow({ item, isPinned, onTogglePin }: { item: ItineraryItem; isPinned?: boolean; onTogglePin?: () => void }) {
   const durationMins = getDurationMinutes(item.startTime, item.endTime);
   const isMustSee = item.preferenceLevel === 'must-see';
   const isNice = item.preferenceLevel === 'nice-to-see';
@@ -59,9 +59,11 @@ function SetRow({ item }: { item: ItineraryItem }) {
         </div>
       )}
       <div
-        className={`relative flex gap-4 px-4 py-4 rounded-xl border transition-all ${
+        className={`relative rounded-xl border transition-all ${
           isFirst
             ? 'bg-gradient-to-br from-amber-950/60 to-yellow-950/20 border-amber-500/70 shadow-[0_0_32px_rgba(245,158,11,0.18)]'
+            : isPinned
+            ? 'bg-slate-900/60 border-slate-600/60'
             : isMustSee
             ? 'bg-blue-950/30 border-blue-700/60 shadow-glow-blue'
             : isNice
@@ -69,57 +71,89 @@ function SetRow({ item }: { item: ItineraryItem }) {
             : 'bg-festival-card border-festival-border'
         }`}
       >
-        {/* Time column */}
-        <div className="w-20 flex-shrink-0 text-right">
-          <div className={`text-sm font-semibold ${isFirst ? 'text-amber-300' : isMustSee ? 'text-blue-300' : isNice ? 'text-cyan-300' : 'text-slate-300'}`}>
-            {formatTime(item.startTime)}
+        <div className="flex gap-4 px-4 pt-4 pb-4">
+          {/* Time column */}
+          <div className="w-20 flex-shrink-0 text-right">
+            <div className={`text-sm font-semibold ${isFirst ? 'text-amber-300' : isMustSee ? 'text-blue-300' : isNice ? 'text-cyan-300' : 'text-slate-300'}`}>
+              {formatTime(item.startTime)}
+            </div>
+            <div className="text-xs text-slate-600 mt-0.5">{formatDuration(durationMins)}</div>
           </div>
-          <div className="text-xs text-slate-600 mt-0.5">{formatDuration(durationMins)}</div>
+
+          {/* Dot connector */}
+          <div className="flex flex-col items-center flex-shrink-0 mt-1">
+            <div
+              className={`w-3 h-3 rounded-full border-2 flex-shrink-0 ${
+                isFirst
+                  ? 'bg-amber-400 border-amber-300 shadow-[0_0_10px_rgba(245,158,11,0.9)]'
+                  : isPinned
+                  ? 'bg-slate-400 border-slate-300'
+                  : isMustSee
+                  ? 'bg-blue-500 border-blue-400 shadow-[0_0_8px_rgba(37,99,235,0.8)]'
+                  : isNice
+                  ? 'bg-cyan-500 border-cyan-400'
+                  : 'bg-slate-600 border-slate-500'
+              }`}
+            />
+          </div>
+
+          {/* Content */}
+          <div className="flex-1 min-w-0">
+            <div className="flex flex-wrap items-center gap-2 mb-1">
+              <span className={`font-semibold ${isFirst ? 'text-amber-200' : isMustSee ? 'text-white' : isNice ? 'text-slate-100' : 'text-slate-200'}`}>
+                {item.artist}
+              </span>
+              {item.isPartial && (
+                <span className="text-xs px-1.5 py-0.5 rounded bg-amber-900/40 border border-amber-700/50 text-amber-400">
+                  partial
+                </span>
+              )}
+              <PreferenceBadge level={item.preferenceLevel} />
+            </div>
+            <div className="flex flex-wrap items-center gap-2">
+              {item.stage && <StageChip stage={item.stage} />}
+              {item.genre && (
+                <span className="text-xs px-2 py-0.5 rounded-full bg-slate-800/60 border border-slate-700/50 text-slate-400">
+                  {item.genre}
+                </span>
+              )}
+              <span className="text-xs text-slate-500">
+                {formatTimeRange(item.startTime, item.endTime)}
+              </span>
+            </div>
+            {item.notes && (
+              <p className="mt-1.5 text-xs text-slate-500 italic">{item.notes}</p>
+            )}
+          </div>
         </div>
 
-        {/* Dot connector */}
-        <div className="flex flex-col items-center flex-shrink-0 mt-1">
-          <div
-            className={`w-3 h-3 rounded-full border-2 flex-shrink-0 ${
-              isFirst
-                ? 'bg-amber-400 border-amber-300 shadow-[0_0_10px_rgba(245,158,11,0.9)]'
-                : isMustSee
-                ? 'bg-blue-500 border-blue-400 shadow-[0_0_8px_rgba(37,99,235,0.8)]'
-                : isNice
-                ? 'bg-cyan-500 border-cyan-400'
-                : 'bg-slate-600 border-slate-500'
-            }`}
-          />
-        </div>
-
-        {/* Content */}
-        <div className="flex-1 min-w-0">
-          <div className="flex flex-wrap items-center gap-2 mb-1">
-            <span className={`font-semibold ${isFirst ? 'text-amber-200' : isMustSee ? 'text-white' : isNice ? 'text-slate-100' : 'text-slate-200'}`}>
-              {item.artist}
-            </span>
-            {item.isPartial && (
-              <span className="text-xs px-1.5 py-0.5 rounded bg-amber-900/40 border border-amber-700/50 text-amber-400">
-                partial
-              </span>
-            )}
-            <PreferenceBadge level={item.preferenceLevel} />
+        {/* Override / pin strip — not shown on first-stop sets */}
+        {onTogglePin && !isFirst && (
+          <div className="px-4 pb-3 -mt-1">
+            <div className="border-t border-slate-800/50 pt-2 flex items-center gap-3">
+              {isPinned ? (
+                <>
+                  <span className="text-xs text-slate-400 flex-1">🔒 Locked in — <span className="text-slate-500">sheep &gt; computer</span></span>
+                  <button
+                    onClick={onTogglePin}
+                    className="text-xs text-slate-600 hover:text-red-400 transition-colors"
+                    title="Release — let algo decide"
+                  >
+                    Release
+                  </button>
+                </>
+              ) : (
+                <button
+                  onClick={onTogglePin}
+                  className="text-xs text-slate-700 hover:text-slate-400 transition-colors"
+                  title="Fight the algo — lock this set in no matter what"
+                >
+                  📌 Override algo
+                </button>
+              )}
+            </div>
           </div>
-          <div className="flex flex-wrap items-center gap-2">
-            {item.stage && <StageChip stage={item.stage} />}
-            {item.genre && (
-              <span className="text-xs px-2 py-0.5 rounded-full bg-slate-800/60 border border-slate-700/50 text-slate-400">
-                {item.genre}
-              </span>
-            )}
-            <span className="text-xs text-slate-500">
-              {formatTimeRange(item.startTime, item.endTime)}
-            </span>
-          </div>
-          {item.notes && (
-            <p className="mt-1.5 text-xs text-slate-500 italic">{item.notes}</p>
-          )}
-        </div>
+        )}
       </div>
     </div>
   );
@@ -281,7 +315,7 @@ function MeetupCard({
   );
 }
 
-export function ItineraryTimeline({ items, score }: ItineraryTimelineProps) {
+export function ItineraryTimeline({ items, pinnedArtists, onTogglePin }: ItineraryTimelineProps) {
   const [meetups, setMeetups] = useState<MeetupPoint[]>([]);
   const [addingAfter, setAddingAfter] = useState<string | null>(null);
 
@@ -317,17 +351,7 @@ export function ItineraryTimeline({ items, score }: ItineraryTimelineProps) {
     <div>
       {/* Score bar */}
       <div className="flex flex-wrap gap-4 mb-5 px-1">
-        <div className="flex items-center gap-2 bg-festival-card border border-festival-border rounded-lg px-4 py-2">
-          <span className="text-xl">🎯</span>
-          <div>
-            <div className="flex items-center gap-1.5 text-xs text-slate-500 uppercase tracking-wide">
-              Score
-              <InfoTip text="Must See = 100 pts, Nice to See = 40 pts, Neutral = 10 pts, plus a 10 pt bonus for catching a full set. Higher is better." />
-            </div>
-            <div className="text-lg font-bold text-white">{score}</div>
-          </div>
-        </div>
-        <div className="flex items-center gap-2 bg-festival-card border border-festival-border rounded-lg px-4 py-2">
+<div className="flex items-center gap-2 bg-festival-card border border-festival-border rounded-lg px-4 py-2">
           <span className="text-xl">🐑</span>
           <div>
             <div className="text-xs text-slate-500 uppercase tracking-wide">Sets</div>
@@ -363,7 +387,13 @@ export function ItineraryTimeline({ items, score }: ItineraryTimelineProps) {
           return (
             <div key={item.id}>
               {item.type === 'arrival' && <ArrivalRow item={item} />}
-              {item.type === 'set' && <SetRow item={item} />}
+              {item.type === 'set' && (
+                <SetRow
+                  item={item}
+                  isPinned={pinnedArtists?.includes(item.artist ?? '') ?? false}
+                  onTogglePin={onTogglePin && item.artist ? () => onTogglePin(item.artist!) : undefined}
+                />
+              )}
               {item.type === 'transition' && (
                 <TransitionRow
                   item={item}

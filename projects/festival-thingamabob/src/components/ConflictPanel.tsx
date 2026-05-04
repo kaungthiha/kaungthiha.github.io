@@ -5,9 +5,11 @@ import { InfoTip } from './InfoTip';
 
 interface ConflictPanelProps {
   conflicts: ConflictExplanation[];
+  onForceIn?: (artist: string) => void;
+  pinnedArtists?: string[];
 }
 
-export function ConflictPanel({ conflicts }: ConflictPanelProps) {
+export function ConflictPanel({ conflicts, onForceIn, pinnedArtists }: ConflictPanelProps) {
   const [expanded, setExpanded] = useState(true);
 
   if (conflicts.length === 0) {
@@ -50,6 +52,7 @@ export function ConflictPanel({ conflicts }: ConflictPanelProps) {
           {conflicts.map(conflict => {
             const missed = conflict.conflictingSets[0];
             const chosen = conflict.conflictingSets.slice(1);
+            const isForced = pinnedArtists?.includes(missed.artist) ?? false;
 
             return (
               <div key={conflict.id} className="px-4 py-4">
@@ -57,9 +60,28 @@ export function ConflictPanel({ conflicts }: ConflictPanelProps) {
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 flex-wrap">
                       <span className="font-semibold text-white">{missed.artist}</span>
-                      <span className="text-xs px-2 py-0.5 rounded-full bg-red-900/40 border border-red-700/50 text-red-400">
-                        🐑 lost sheep
-                      </span>
+                      {isForced ? (
+                        <span className="text-xs px-2 py-0.5 rounded-full bg-amber-900/40 border border-amber-700/50 text-amber-400">
+                          🔒 override active
+                        </span>
+                      ) : (
+                        <span className="text-xs px-2 py-0.5 rounded-full bg-red-900/40 border border-red-700/50 text-red-400">
+                          🐑 sheep we'll miss
+                        </span>
+                      )}
+                      {onForceIn && (
+                        <button
+                          onClick={() => onForceIn(missed.artist)}
+                          className={`text-xs px-2 py-0.5 rounded-full border transition-colors ${
+                            isForced
+                              ? 'border-slate-700 text-slate-600 hover:border-red-700/50 hover:text-red-400'
+                              : 'border-amber-700/50 bg-amber-900/20 text-amber-400 hover:bg-amber-900/40'
+                          }`}
+                          title={isForced ? 'Remove override — let algo decide' : 'Fight the algo — force this set in, sheep > computer'}
+                        >
+                          {isForced ? 'Release' : '✊ fight the algo'}
+                        </button>
+                      )}
                     </div>
                     <div className="text-xs text-slate-500 mt-0.5">
                       {missed.stage} · {formatTimeRange(missed.startTime, missed.endTime)}

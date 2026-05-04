@@ -22,6 +22,7 @@ export type UserPreferences = {
   minimumSetMinutes: number;
   dayStartTimes?: Record<string, string>; // day → "HH:MM" 24h, e.g. "21:00" = 9 PM
   firstSetByDay?: Record<string, string>;  // day → artist name, forced first set
+  pinnedByDay?: Record<string, string[]>;  // day → artist names, user overrides
 };
 
 export type ItineraryItem = {

@@ -240,7 +240,7 @@ export function FlockView({
       {isLocked && !isLeader && (
         <div className="mb-4 px-4 py-3 bg-blue-950/20 border border-blue-700/30 rounded-xl flex items-center gap-3 text-xs text-blue-300">
           <span className="text-base">🔒</span>
-          <span>The flock leader has locked the schedule — no changes needed. Enjoy the show.</span>
+          <span>The flock leader has locked the schedule — no changes or internet needed. Time to rage.</span>
         </div>
       )}
 

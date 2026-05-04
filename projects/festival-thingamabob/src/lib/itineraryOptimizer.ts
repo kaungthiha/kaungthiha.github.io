@@ -110,9 +110,10 @@ export function generateItinerary(
     const level = getPreferenceLevel(current.artist, preferences);
     const baseScore = PREFERENCE_SCORES[level];
 
-    // Force-include first set by giving it an enormous seed score
+    // Force-include first set and user-pinned overrides
     const isForced = !!firstSetEntry && current.id === firstSetEntry.id;
-    dp[i] = { score: (isForced ? 50000 : 0) + baseScore + 10, prevIndex: -1, partial: false };
+    const isPinned = (userPrefs.pinnedByDay?.[selectedDay] ?? []).includes(current.artist);
+    dp[i] = { score: (isForced || isPinned ? 50000 : 0) + baseScore + 10, prevIndex: -1, partial: false };
 
     for (let j = i - 1; j >= 0; j--) {
       const prev = sorted[j];
