@@ -3,7 +3,7 @@ import { useState } from 'react';
 const STEPS = [
   {
     icon: '🐑',
-    title: '',
+    title: 'BAAAAA',
     description:
       'All EDC Las Vegas 2026 artists are pre-loaded. Gah bless the redditors who made it into a csv. Browse by day — Friday, Saturday, or Sunday.',
     accent: 'border-festival-blue/30 bg-festival-blue/5',
@@ -11,7 +11,7 @@ const STEPS = [
   },
   {
     icon: '💙',
-    title: 'Tag Your Sheep',
+    title: 'BAAAAAAA',
     description:
       'Tag each artist: Must See (💙), Nice to See (👍), Neutral (😐), or Avoid (🚫). Your preferences drive the herding algorithm.',
     accent: 'border-purple-700/30 bg-purple-900/10',
@@ -27,7 +27,7 @@ const STEPS = [
   },
   {
     icon: '🗺️',
-    title: '',
+    title: 'BAAAAAAA',
     description:
       'Hit Round Up. The optimizer runs weighted interval scheduling to maximize your must-see score. The math is entirely AI generated so idk.',
     accent: 'border-green-700/30 bg-green-900/10',
