@@ -21,6 +21,8 @@ interface FlockViewProps {
   isLeader: boolean;
   isLocked: boolean;
   onLockToggle: (lock: boolean) => Promise<void>;
+  onLeave: () => Promise<void>;
+  onRemoveMember: (memberId: string) => Promise<void>;
   onBack: () => void;
 }
 
@@ -72,13 +74,19 @@ function MemberColumn({
   member,
   setSets,
   isCurrentUser,
+  canRemove,
   artistAttendance,
+  onRemove,
 }: {
   member: FlockMemberData;
   setSets: ItineraryItem[];
   isCurrentUser: boolean;
+  canRemove: boolean;
   artistAttendance: Record<string, string[]>;
+  onRemove: () => void;
 }) {
+  const [confirmRemove, setConfirmRemove] = useState(false);
+
   return (
     <div
       className={`min-w-[200px] w-[220px] flex-shrink-0 rounded-xl border overflow-hidden flex flex-col ${
@@ -93,12 +101,37 @@ function MemberColumn({
       >
         <div className="flex items-center gap-2 min-w-0">
           <span className="text-base flex-shrink-0">{member.isLeader ? '👑' : '🐑'}</span>
-          <div className="min-w-0">
+          <div className="flex-1 min-w-0">
             <div className={`font-semibold text-sm truncate ${isCurrentUser ? 'text-blue-300' : 'text-slate-200'}`}>
               {member.name}
               {isCurrentUser && <span className="ml-1 text-xs font-normal text-blue-400/60">(you)</span>}
             </div>
           </div>
+          {canRemove && !confirmRemove && (
+            <button
+              onClick={() => setConfirmRemove(true)}
+              className="text-slate-700 hover:text-red-400 transition-colors text-xs flex-shrink-0 px-1"
+              title="Remove from flock"
+            >
+              ✕
+            </button>
+          )}
+          {canRemove && confirmRemove && (
+            <div className="flex items-center gap-1 flex-shrink-0">
+              <button
+                onClick={onRemove}
+                className="text-xs px-1.5 py-0.5 rounded bg-red-900/40 border border-red-700/50 text-red-400 hover:bg-red-900/70 transition-colors"
+              >
+                Remove
+              </button>
+              <button
+                onClick={() => setConfirmRemove(false)}
+                className="text-xs text-slate-600 hover:text-slate-400 transition-colors px-1"
+              >
+                ✕
+              </button>
+            </div>
+          )}
         </div>
         {member.hasGenerated && (
           <div className="mt-1 text-xs text-slate-600">{setSets.length} sets</div>
@@ -141,11 +174,15 @@ export function FlockView({
   isLeader,
   isLocked,
   onLockToggle,
+  onLeave,
+  onRemoveMember,
   onBack,
 }: FlockViewProps) {
   const [selectedDay, setSelectedDay] = useState(initialDay);
   const [showFlockRoute, setShowFlockRoute] = useState(false);
   const [lockLoading, setLockLoading] = useState(false);
+  const [confirmLeave, setConfirmLeave] = useState(false);
+  const [leaveLoading, setLeaveLoading] = useState(false);
 
   const memberItineraries = useMemo(
     () =>
@@ -189,6 +226,12 @@ export function FlockView({
     setLockLoading(true);
     await onLockToggle(!isLocked);
     setLockLoading(false);
+  }
+
+  async function handleLeave() {
+    setLeaveLoading(true);
+    await onLeave();
+    setLeaveLoading(false);
   }
 
   return (
@@ -249,6 +292,33 @@ export function FlockView({
           </button>
         )}
 
+        {/* Leave flock */}
+        {!confirmLeave ? (
+          <button
+            onClick={() => setConfirmLeave(true)}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs border border-slate-700 text-slate-500 hover:border-red-700/50 hover:text-red-400 transition-colors"
+          >
+            Leave Flock
+          </button>
+        ) : (
+          <div className="flex items-center gap-2">
+            <span className="text-xs text-slate-500">Leave flock?</span>
+            <button
+              onClick={handleLeave}
+              disabled={leaveLoading}
+              className="text-xs px-2.5 py-1 rounded-lg bg-red-900/40 border border-red-700/50 text-red-400 hover:bg-red-900/70 transition-colors disabled:opacity-50"
+            >
+              {leaveLoading ? '...' : 'Yes, leave'}
+            </button>
+            <button
+              onClick={() => setConfirmLeave(false)}
+              className="text-xs text-slate-600 hover:text-slate-400 transition-colors"
+            >
+              Cancel
+            </button>
+          </div>
+        )}
+
         {/* Trip code */}
         <div className="ml-auto flex items-center gap-2">
           <span className="text-xs text-slate-600 hidden sm:inline">Flock:</span>
@@ -286,15 +356,20 @@ export function FlockView({
         </div>
       ) : (
         <div className="flex gap-3 overflow-x-auto pb-4">
-          {memberItineraries.map(({ member, itinerary }) => (
-            <MemberColumn
-              key={member.id}
-              member={member}
-              setSets={itinerary.items.filter(i => i.type === 'set')}
-              isCurrentUser={member.id === currentMemberId}
-              artistAttendance={artistAttendance}
-            />
-          ))}
+          {memberItineraries.map(({ member, itinerary }) => {
+            const isCurrentUser = member.id === currentMemberId;
+            return (
+              <MemberColumn
+                key={member.id}
+                member={member}
+                setSets={itinerary.items.filter(i => i.type === 'set')}
+                isCurrentUser={isCurrentUser}
+                canRemove={isLeader && !isCurrentUser}
+                artistAttendance={artistAttendance}
+                onRemove={() => onRemoveMember(member.id)}
+              />
+            );
+          })}
         </div>
       )}
 

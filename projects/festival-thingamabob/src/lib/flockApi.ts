@@ -165,6 +165,15 @@ export async function getFlockDetails(tripCode: string): Promise<FlockDetails | 
   }
 }
 
+export async function removeMember(memberId: string): Promise<boolean> {
+  const { error } = await supabase
+    .from('flock_members')
+    .delete()
+    .eq('id', memberId)
+  if (error) console.error('[removeMember]', error)
+  return !error
+}
+
 export async function lockFlock(tripCode: string): Promise<boolean> {
   const { error } = await supabase
     .from('trips')

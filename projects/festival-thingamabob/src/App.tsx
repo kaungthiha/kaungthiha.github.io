@@ -11,6 +11,7 @@ import {
   unlockFlock,
   saveFlockCache,
   loadFlockCache,
+  removeMember,
 } from './lib/flockApi';
 import { ArtistPreferencePicker } from './components/ArtistPreferencePicker';
 import { PreferenceControls } from './components/PreferenceControls';
@@ -125,6 +126,31 @@ export default function App() {
     }
   }
 
+  async function handleLeave() {
+    if (!flockInfo) return;
+    await removeMember(flockInfo.memberId);
+    try { sessionStorage.removeItem(FLOCK_SESSION_KEY); } catch { /* ignore */ }
+    if (flockInfo.tripCode) {
+      try { localStorage.removeItem(`sheepherder_flock_cache_${flockInfo.tripCode}`); } catch { /* ignore */ }
+    }
+    setFlockInfo(null);
+    setFlockDetails(null);
+    setFlockReady(false);
+    setShowFlockView(false);
+  }
+
+  async function handleRemoveMember(memberId: string) {
+    await removeMember(memberId);
+    if (flockDetails) {
+      const updated: FlockDetails = {
+        ...flockDetails,
+        members: flockDetails.members.filter(m => m.id !== memberId),
+      };
+      setFlockDetails(updated);
+      if (flockInfo) saveFlockCache(flockInfo.tripCode, updated);
+    }
+  }
+
   const dayArtists = useMemo(
     () => EDC_2026_SETS.filter(s => s.day === selectedDay).map(s => s.artist),
     [selectedDay],
@@ -236,6 +262,8 @@ export default function App() {
                     isLeader={flockInfo.isLeader}
                     isLocked={flockDetails?.isLocked ?? false}
                     onLockToggle={handleLockToggle}
+                    onLeave={handleLeave}
+                    onRemoveMember={handleRemoveMember}
                     onBack={() => setShowFlockView(false)}
                   />
                 )}
