@@ -32,28 +32,11 @@ function scoreSet(
   return baseScore + fullBonus;
 }
 
-/**
- * Returns true if we can transition from set A to set B given walking time.
- * Same stage: no walking time needed.
- * Different stage: need walkingMinutes between A end and B start.
- */
-function canTransition(
-  a: FestivalSet,
-  b: FestivalSet,
-  walkingMinutes: number
-): boolean {
-  if (a.stage === b.stage) {
-    // Same stage: just need A to end before B starts
-    return a.endTime <= b.startTime;
-  }
-  const arrivalAtB = addMinutes(a.endTime, walkingMinutes);
-  return arrivalAtB <= b.startTime;
+function canTransition(a: FestivalSet, b: FestivalSet, walkingMinutes: number): boolean {
+  if (a.stage === b.stage) return a.endTime <= b.startTime;
+  return addMinutes(a.endTime, walkingMinutes) <= b.startTime;
 }
 
-/**
- * For partial set support: can we catch at least `minimumSetMinutes` of set B
- * after walking from A?
- */
 function canCatchPartial(
   a: FestivalSet,
   b: FestivalSet,
@@ -63,8 +46,75 @@ function canCatchPartial(
   const walkTime = a.stage === b.stage ? 0 : walkingMinutes;
   const arrivalAtB = addMinutes(a.endTime, walkTime);
   if (arrivalAtB >= b.endTime) return false;
-  const remainingMinutes = getDurationMinutes(arrivalAtB, b.endTime);
-  return remainingMinutes >= minimumSetMinutes;
+  return getDurationMinutes(arrivalAtB, b.endTime) >= minimumSetMinutes;
+}
+
+/**
+ * DP over a subset of sets to find the best chain.
+ * Returns { selectedIndices, partialFlags, score }.
+ */
+function dpChain(
+  sorted: FestivalSet[],
+  preferences: ArtistPreference[],
+  walkingMinutes: number,
+  allowPartialSets: boolean,
+  minimumSetMinutes: number,
+  forcedIds: Set<string>
+): { selectedIndices: number[]; partialFlags: boolean[]; score: number } {
+  const n = sorted.length;
+  if (n === 0) return { selectedIndices: [], partialFlags: [], score: 0 };
+
+  const dp: Array<{ score: number; prevIndex: number; partial: boolean }> = new Array(n);
+
+  for (let i = 0; i < n; i++) {
+    const current = sorted[i];
+    const level = getPreferenceLevel(current.artist, preferences);
+    const baseScore = PREFERENCE_SCORES[level];
+    const pinBoost = forcedIds.has(current.id) ? 50000 : 0;
+
+    dp[i] = { score: pinBoost + baseScore + 10, prevIndex: -1, partial: false };
+
+    for (let j = i - 1; j >= 0; j--) {
+      const prev = sorted[j];
+      if (getPreferenceLevel(prev.artist, preferences) === 'avoid') continue;
+
+      if (canTransition(prev, current, walkingMinutes)) {
+        const candidate = dp[j].score + pinBoost + baseScore + 10;
+        if (candidate > dp[i].score) {
+          dp[i] = { score: candidate, prevIndex: j, partial: false };
+        }
+      } else if (allowPartialSets) {
+        if (canCatchPartial(prev, current, walkingMinutes, minimumSetMinutes)) {
+          const candidate = dp[j].score + pinBoost + baseScore - 5;
+          if (candidate > dp[i].score) {
+            dp[i] = { score: candidate, prevIndex: j, partial: true };
+          }
+        }
+      }
+    }
+  }
+
+  // Find best end — but if there are forced sets, we need to ensure we pick the chain
+  // that covers the most forced sets with the highest score.
+  let bestScore = -Infinity;
+  let bestEnd = 0;
+  for (let i = 0; i < n; i++) {
+    if (dp[i].score > bestScore) {
+      bestScore = dp[i].score;
+      bestEnd = i;
+    }
+  }
+
+  const selectedIndices: number[] = [];
+  const partialFlags: boolean[] = [];
+  let cur = bestEnd;
+  while (cur !== -1) {
+    selectedIndices.unshift(cur);
+    partialFlags.unshift(dp[cur].partial);
+    cur = dp[cur].prevIndex;
+  }
+
+  return { selectedIndices, partialFlags, score: bestScore };
 }
 
 export function generateItinerary(
@@ -73,12 +123,10 @@ export function generateItinerary(
   userPrefs: UserPreferences,
   selectedDay: string
 ): GeneratedItinerary {
-  // 1. Filter to selected day, remove "avoid" sets
   const allDaySets = sets
     .filter(s => s.day === selectedDay)
     .filter(s => getPreferenceLevel(s.artist, preferences) !== 'avoid');
 
-  // Resolve first set: overrides day start time when set
   const firstSetArtist = userPrefs.firstSetByDay?.[selectedDay];
   const firstSetEntry = firstSetArtist
     ? (allDaySets.find(s => s.artist === firstSetArtist) ?? null)
@@ -96,80 +144,96 @@ export function generateItinerary(
     return { items: [], conflicts: [], score: 0 };
   }
 
-  // 2. Sort by start time
   const sorted = [...daySets].sort((a, b) => a.startTime.getTime() - b.startTime.getTime());
+  const pinnedArtists = userPrefs.pinnedByDay?.[selectedDay] ?? [];
 
-  const n = sorted.length;
+  // Build the set of forced IDs: first set + user pins
+  const forcedIds = new Set<string>();
+  if (firstSetEntry) forcedIds.add(firstSetEntry.id);
+  for (const artist of pinnedArtists) {
+    const found = sorted.find(s => s.artist === artist);
+    if (found) forcedIds.add(found.id);
+  }
 
-  // 3. For each set, find which previous sets it's compatible with
-  // dp[i] = { score, prevIndex } — best score achievable ending at set i
-  const dp: Array<{ score: number; prevIndex: number; partial: boolean }> = new Array(n);
+  // If no pins, run standard DP
+  if (forcedIds.size === 0) {
+    const { selectedIndices, partialFlags, score } = dpChain(
+      sorted, preferences, userPrefs.defaultWalkingMinutes,
+      userPrefs.allowPartialSets, userPrefs.minimumSetMinutes, forcedIds
+    );
+    return buildResult(
+      sorted, selectedIndices, partialFlags, score,
+      preferences, userPrefs, daySets, firstSetEntry, startThreshold
+    );
+  }
 
-  for (let i = 0; i < n; i++) {
-    const current = sorted[i];
-    const level = getPreferenceLevel(current.artist, preferences);
-    const baseScore = PREFERENCE_SCORES[level];
+  // With forced sets: run DP with high boost — the boost (50000) ensures forced sets
+  // will be chosen over any conflicting non-forced set in the optimal chain.
+  // However, mutually-conflicting forced sets need special handling:
+  // keep all forced sets that don't conflict with each other (prefer user's last pin).
+  const forcedSets = sorted.filter(s => forcedIds.has(s.id));
 
-    // Force-include first set and user-pinned overrides
-    const isForced = !!firstSetEntry && current.id === firstSetEntry.id;
-    const isPinned = (userPrefs.pinnedByDay?.[selectedDay] ?? []).includes(current.artist);
-    dp[i] = { score: (isForced || isPinned ? 50000 : 0) + baseScore + 10, prevIndex: -1, partial: false };
+  // Remove mutual conflicts among forced sets: sort by start time,
+  // greedily keep forced sets that don't overlap with already-kept ones.
+  const resolvedForced: FestivalSet[] = [];
+  for (const fs of forcedSets) {
+    const conflicts = resolvedForced.some(kept => {
+      const walkNeeded = kept.stage === fs.stage ? 0 : userPrefs.defaultWalkingMinutes;
+      const aBeforeB = addMinutes(kept.endTime, walkNeeded) > fs.startTime && kept.startTime < fs.endTime;
+      const bBeforeA = addMinutes(fs.endTime, walkNeeded) > kept.startTime && fs.startTime < kept.endTime;
+      return aBeforeB || bBeforeA;
+    });
+    if (!conflicts) resolvedForced.push(fs);
+  }
 
-    for (let j = i - 1; j >= 0; j--) {
-      const prev = sorted[j];
-      const prevLevel = getPreferenceLevel(prev.artist, preferences);
-      if (prevLevel === 'avoid') continue;
+  const resolvedForcedIds = new Set(resolvedForced.map(s => s.id));
 
-      // Try full transition
-      if (canTransition(prev, current, userPrefs.defaultWalkingMinutes)) {
-        const candidate = dp[j].score + baseScore + 10;
-        if (candidate > dp[i].score) {
-          dp[i] = { score: candidate, prevIndex: j, partial: false };
-        }
-      } else if (userPrefs.allowPartialSets) {
-        // Try partial attendance of current set
-        if (canCatchPartial(prev, current, userPrefs.defaultWalkingMinutes, userPrefs.minimumSetMinutes)) {
-          // Partial: lower score (no full bonus, small penalty)
-          const candidate = dp[j].score + baseScore - 5;
-          if (candidate > dp[i].score) {
-            dp[i] = { score: candidate, prevIndex: j, partial: true };
-          }
-        }
-      }
+  // Remove sets that conflict with any resolved forced set (they can't be chosen)
+  const eligibleSets = sorted.filter(s => {
+    if (resolvedForcedIds.has(s.id)) return true; // keep forced
+    for (const forced of resolvedForced) {
+      const walkNeeded = forced.stage === s.stage ? 0 : userPrefs.defaultWalkingMinutes;
+      // s conflicts with forced if they overlap (considering walk time)
+      const overlaps = forced.startTime < s.endTime && s.startTime < forced.endTime;
+      // also exclude sets that can't be reached after forced (or before forced)
+      if (overlaps) return false;
     }
-  }
+    return true;
+  });
 
-  // 4. Find the best ending set
-  let bestScore = -Infinity;
-  let bestEnd = 0;
-  for (let i = 0; i < n; i++) {
-    if (dp[i].score > bestScore) {
-      bestScore = dp[i].score;
-      bestEnd = i;
-    }
-  }
+  const { selectedIndices, partialFlags, score } = dpChain(
+    eligibleSets, preferences, userPrefs.defaultWalkingMinutes,
+    userPrefs.allowPartialSets, userPrefs.minimumSetMinutes, resolvedForcedIds
+  );
 
-  // 5. Backtrack to get the selected set indices
-  const selectedIndices: number[] = [];
-  let cur = bestEnd;
-  while (cur !== -1) {
-    selectedIndices.unshift(cur);
-    cur = dp[cur].prevIndex;
-  }
+  return buildResult(
+    eligibleSets, selectedIndices, partialFlags, score,
+    preferences, userPrefs, daySets, firstSetEntry, startThreshold
+  );
+}
 
+function buildResult(
+  sorted: FestivalSet[],
+  selectedIndices: number[],
+  partialFlags: boolean[],
+  score: number,
+  preferences: ArtistPreference[],
+  userPrefs: UserPreferences,
+  daySets: FestivalSet[],
+  firstSetEntry: FestivalSet | null,
+  startThreshold: Date | null
+): GeneratedItinerary {
   const selectedSets = selectedIndices.map(i => sorted[i]);
   const selectedIds = new Set(selectedSets.map(s => s.id));
 
-  // 6. Build itinerary items with transitions
   const items: ItineraryItem[] = [];
   let itemCounter = 0;
 
   for (let idx = 0; idx < selectedSets.length; idx++) {
     const festSet = selectedSets[idx];
-    const isPartial = dp[selectedIndices[idx]].partial;
+    const isPartial = partialFlags[idx];
     const level = getPreferenceLevel(festSet.artist, preferences);
 
-    // Determine actual start (may be late if partial)
     let actualStart = festSet.startTime;
     if (idx > 0 && isPartial) {
       const prev = selectedSets[idx - 1];
@@ -177,7 +241,6 @@ export function generateItinerary(
       actualStart = addMinutes(prev.endTime, walkTime);
     }
 
-    // Add transition row if needed
     if (idx > 0) {
       const prev = selectedSets[idx - 1];
       const prevEndTime = prev.endTime;
@@ -187,7 +250,6 @@ export function generateItinerary(
         const transitionEnd = addMinutes(prevEndTime, walkTime);
 
         if (transitionEnd <= actualStart) {
-          // There might be a gap — add break if > 5 min
           items.push({
             id: `transition-${++itemCounter}`,
             type: 'transition',
@@ -210,7 +272,6 @@ export function generateItinerary(
           }
         }
       } else {
-        // Same stage — check for gap
         const gapMinutes = getDurationMinutes(prevEndTime, actualStart);
         if (gapMinutes > 2) {
           items.push({
@@ -241,7 +302,6 @@ export function generateItinerary(
     });
   }
 
-  // 7. Prepend sheep travel / arrival block if a start threshold was set and the first set doesn't start at it
   if (startThreshold && items.length > 0) {
     const firstStart = items[0].startTime;
     if (firstStart > startThreshold) {
@@ -257,7 +317,6 @@ export function generateItinerary(
     }
   }
 
-  // 8. Detect conflicts: must-see sets that were NOT included
   const mustSeeSets = daySets.filter(
     s => getPreferenceLevel(s.artist, preferences) === 'must-see'
   );
@@ -267,11 +326,9 @@ export function generateItinerary(
   let conflictCounter = 0;
 
   for (const missed of missedMustSee) {
-    // Find which selected set(s) conflict with this missed set
-    const conflicting = selectedSets.filter(sel => {
-      // Overlap check
-      return sel.startTime < missed.endTime && missed.startTime < sel.endTime;
-    });
+    const conflicting = selectedSets.filter(sel =>
+      sel.startTime < missed.endTime && missed.startTime < sel.endTime
+    );
 
     if (conflicting.length > 0) {
       conflicts.push({
@@ -283,7 +340,6 @@ export function generateItinerary(
         chosenSetId: conflicting[0]?.id,
       });
     } else {
-      // Not overlapping directly but still missed — travel time issue
       conflicts.push({
         id: `conflict-${++conflictCounter}`,
         conflictingSets: [missed],
@@ -293,9 +349,5 @@ export function generateItinerary(
     }
   }
 
-  return {
-    items,
-    conflicts,
-    score: bestScore,
-  };
+  return { items, conflicts, score };
 }

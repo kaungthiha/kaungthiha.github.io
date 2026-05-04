@@ -26,16 +26,16 @@ export function ConflictPanel({ conflicts, onForceIn, pinnedArtists }: ConflictP
 
   return (
     <div className="bg-festival-card border border-red-800/40 rounded-xl overflow-hidden">
-      <button
+      <div
+        className="px-4 py-3 flex items-center justify-between hover:bg-red-900/10 transition-colors cursor-pointer"
         onClick={() => setExpanded(!expanded)}
-        className="w-full px-4 py-3 flex items-center justify-between hover:bg-red-900/10 transition-colors"
       >
         <div className="flex items-center gap-3">
           <span className="text-2xl">⚠️</span>
           <div className="text-left">
             <div className="flex items-center gap-2 font-semibold text-red-400">
               {conflicts.length} Lost Sheep
-              <InfoTip text="Must-see artists whose sets overlap with other sets the algorithm chose. Adjust preferences or walk time and regenerate to try to fit them in." />
+              <InfoTip text="Must-see artists whose sets overlap with other sets the algorithm chose. Use 'fight the algo' to force them in, or adjust preferences and re-herd." />
             </div>
             <div className="text-xs text-slate-500">
               Must-see artists that slipped out of the herd
@@ -45,7 +45,7 @@ export function ConflictPanel({ conflicts, onForceIn, pinnedArtists }: ConflictP
         <span className={`text-slate-500 transition-transform ${expanded ? 'rotate-180' : ''}`}>
           ▼
         </span>
-      </button>
+      </div>
 
       {expanded && (
         <div className="border-t border-festival-border divide-y divide-festival-border/50">
