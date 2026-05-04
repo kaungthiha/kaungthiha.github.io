@@ -14,8 +14,8 @@ export function ConflictPanel({ conflicts }: ConflictPanelProps) {
       <div className="bg-festival-card border border-green-800/40 rounded-xl p-4 flex items-center gap-3">
         <span className="text-2xl">✅</span>
         <div>
-          <div className="font-semibold text-green-400">Flock Intact 🐑</div>
-          <div className="text-sm text-slate-500">All your must-see sheep are safely herded in.</div>
+          <div className="font-semibold text-green-400">Flock Intact 🐑 </div>
+          <div className="text-sm text-slate-500">All your must-see sheep are good.</div>
         </div>
       </div>
     );

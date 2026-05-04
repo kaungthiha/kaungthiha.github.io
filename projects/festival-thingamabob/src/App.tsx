@@ -76,7 +76,7 @@ export default function App() {
                 🐑 SheepHerder
               </h1>
               <p className="text-xs text-slate-500 mt-0.5 hidden sm:block">
-                EDC Las Vegas 2026 — Herd your flock, don't lose a single sheep
+                EDC Las Vegas 2026 — Where do the sheep go when the lights go out
               </p>
             </div>
 
@@ -189,7 +189,7 @@ export default function App() {
               <div className="p-3 rounded-xl bg-festival-blue/5 border border-festival-blue/20">
                 <p className="text-xs text-slate-500 leading-relaxed">
                   <strong className="text-slate-400">Sheep tip:</strong> The algorithm maximizes your
-                  must-see count. Marking artists as Avoid removes them from the pasture entirely.
+                  must-see count. Marking artists as Avoid removes them entirely.
                 </p>
               </div>
             </div>

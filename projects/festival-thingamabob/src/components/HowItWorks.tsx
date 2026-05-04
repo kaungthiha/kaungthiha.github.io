@@ -3,9 +3,9 @@ import { useState } from 'react';
 const STEPS = [
   {
     icon: '🐑',
-    title: 'Survey the Pasture',
+    title: '',
     description:
-      'All EDC Las Vegas 2026 artists are pre-loaded. Browse by day — Friday, Saturday, or Sunday.',
+      'All EDC Las Vegas 2026 artists are pre-loaded. Gah bless the redditors who made it into a csv. Browse by day — Friday, Saturday, or Sunday.',
     accent: 'border-festival-blue/30 bg-festival-blue/5',
     iconBg: 'bg-festival-blue/10',
   },
@@ -19,17 +19,17 @@ const STEPS = [
   },
   {
     icon: '⚙️',
-    title: 'Configure the Flock',
+    title: 'Configure your settings',
     description:
-      'Set trekking time between stages, whether to allow late arrivals, and the minimum time worth herding for.',
+      'Set trekking time between stages, whether to allow late arrivals, and the minimum wait times.',
     accent: 'border-festival-cyan/30 bg-festival-cyan/5',
     iconBg: 'bg-festival-cyan/10',
   },
   {
     icon: '🗺️',
-    title: 'Herd Your Route',
+    title: '',
     description:
-      'Hit Round Up. The optimizer runs weighted interval scheduling to maximize your must-see score while keeping the flock together.',
+      'Hit Round Up. The optimizer runs weighted interval scheduling to maximize your must-see score. The math is entirely AI generated so idk.',
     accent: 'border-green-700/30 bg-green-900/10',
     iconBg: 'bg-green-900/20',
   },

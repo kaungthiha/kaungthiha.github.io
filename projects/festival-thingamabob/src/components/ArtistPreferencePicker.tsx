@@ -10,9 +10,9 @@ interface ArtistPreferencePickerProps {
 }
 
 const LEVEL_BUTTONS: Array<{ level: PreferenceLevel; emoji: string; label: string; color: string; activeColor: string }> = [
-  { level: 'must-see', emoji: '💙', label: 'Must See', color: 'border-blue-700 text-blue-400 hover:bg-blue-900/40', activeColor: 'bg-blue-700/60 border-blue-400 text-white shadow-glow-blue' },
-  { level: 'nice-to-see', emoji: '👍', label: 'Nice', color: 'border-cyan-800 text-cyan-400 hover:bg-cyan-900/40', activeColor: 'bg-cyan-700/50 border-cyan-400 text-white' },
-  { level: 'neutral', emoji: '😐', label: 'Neutral', color: 'border-slate-700 text-slate-400 hover:bg-slate-800/60', activeColor: 'bg-slate-700 border-slate-400 text-white' },
+  { level: 'must-see', emoji: '💙', label: 'WE MUST SEE', color: 'border-blue-700 text-blue-400 hover:bg-blue-900/40', activeColor: 'bg-blue-700/60 border-blue-400 text-white shadow-glow-blue' },
+  { level: 'nice-to-see', emoji: '👍', label: 'Good to see but could get tenders otherwise', color: 'border-cyan-800 text-cyan-400 hover:bg-cyan-900/40', activeColor: 'bg-cyan-700/50 border-cyan-400 text-white' },
+  { level: 'neutral', emoji: '😐', label: 'Eh', color: 'border-slate-700 text-slate-400 hover:bg-slate-800/60', activeColor: 'bg-slate-700 border-slate-400 text-white' },
   { level: 'avoid', emoji: '🚫', label: 'Avoid', color: 'border-red-900 text-red-500 hover:bg-red-900/30', activeColor: 'bg-red-900/50 border-red-500 text-red-300' },
 ];
 
@@ -51,7 +51,7 @@ export function ArtistPreferencePicker({
         <div className="flex flex-wrap gap-2 px-4 py-3 bg-festival-card border border-festival-border rounded-xl text-sm">
           {mustSeeCount > 0 && (
             <span className="flex items-center gap-1 text-blue-400">
-              💙 <strong>{mustSeeCount}</strong> must-see
+              💙 <strong>{mustSeeCount}</strong> WE MUST SEE
             </span>
           )}
           {niceSeeCount > 0 && (

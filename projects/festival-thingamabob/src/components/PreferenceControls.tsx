@@ -51,7 +51,7 @@ export function PreferenceControls({ preferences, onChange }: PreferenceControls
             ))}
           </div>
           <p className="mt-1.5 text-xs text-slate-600">
-            How long does it take the flock to move between stages?
+            How long does it take da sheep to roll between stages?
           </p>
         </div>
 
@@ -61,7 +61,7 @@ export function PreferenceControls({ preferences, onChange }: PreferenceControls
             <div>
               <label className="text-sm font-medium text-slate-300">Allow Late Arrival</label>
               <p className="text-xs text-slate-600 mt-0.5">
-                Dash across the pasture to catch the tail end
+                Run to catch the other half of the show gdmnit
               </p>
             </div>
             <button
@@ -82,7 +82,7 @@ export function PreferenceControls({ preferences, onChange }: PreferenceControls
         {/* Minimum set time — only relevant when partial sets are on */}
         <div className={preferences.allowPartialSets ? '' : 'opacity-40 pointer-events-none'}>
           <label className="block text-sm font-medium text-slate-300 mb-2">
-            Minimum Time Worth Herding For
+            Minimum Time @ Stage worth trekking for
           </label>
           <div className="flex gap-2">
             {MIN_SET_OPTIONS.map(min => (
