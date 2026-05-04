@@ -73,15 +73,24 @@ export function generateItinerary(
   userPrefs: UserPreferences,
   selectedDay: string
 ): GeneratedItinerary {
-  // 1. Filter to selected day, remove "avoid" sets, apply day start threshold
-  const startThreshold = userPrefs.dayStartTimes?.[selectedDay]
-    ? parseDayStartTime(selectedDay, userPrefs.dayStartTimes[selectedDay])
+  // 1. Filter to selected day, remove "avoid" sets
+  const allDaySets = sets
+    .filter(s => s.day === selectedDay)
+    .filter(s => getPreferenceLevel(s.artist, preferences) !== 'avoid');
+
+  // Resolve first set: overrides day start time when set
+  const firstSetArtist = userPrefs.firstSetByDay?.[selectedDay];
+  const firstSetEntry = firstSetArtist
+    ? (allDaySets.find(s => s.artist === firstSetArtist) ?? null)
     : null;
 
-  const daySets = sets
-    .filter(s => s.day === selectedDay)
-    .filter(s => getPreferenceLevel(s.artist, preferences) !== 'avoid')
-    .filter(s => !startThreshold || s.startTime >= startThreshold);
+  const startThreshold: Date | null = firstSetEntry
+    ? firstSetEntry.startTime
+    : (userPrefs.dayStartTimes?.[selectedDay]
+        ? parseDayStartTime(selectedDay, userPrefs.dayStartTimes[selectedDay])
+        : null);
+
+  const daySets = allDaySets.filter(s => !startThreshold || s.startTime >= startThreshold);
 
   if (daySets.length === 0) {
     return { items: [], conflicts: [], score: 0 };
@@ -101,8 +110,9 @@ export function generateItinerary(
     const level = getPreferenceLevel(current.artist, preferences);
     const baseScore = PREFERENCE_SCORES[level];
 
-    // Start with this set alone (full)
-    dp[i] = { score: baseScore + 10, prevIndex: -1, partial: false };
+    // Force-include first set by giving it an enormous seed score
+    const isForced = !!firstSetEntry && current.id === firstSetEntry.id;
+    dp[i] = { score: (isForced ? 50000 : 0) + baseScore + 10, prevIndex: -1, partial: false };
 
     for (let j = i - 1; j >= 0; j--) {
       const prev = sorted[j];
@@ -222,6 +232,7 @@ export function generateItinerary(
       stage: festSet.stage,
       genre: festSet.genre,
       isPartial,
+      isFirstSet: !!firstSetEntry && festSet.id === firstSetEntry.id,
       preferenceLevel: level,
       notes: isPartial
         ? `Arriving late — catching last ${getDurationMinutes(actualStart, festSet.endTime)} min`
@@ -238,7 +249,9 @@ export function generateItinerary(
         type: 'arrival',
         startTime: startThreshold,
         endTime: firstStart,
-        notes: 'Sheep travel time — rolling to the festival',
+        notes: firstSetEntry
+          ? `Rolling to see ${firstSetEntry.artist}`
+          : 'Rolling to the festival',
       });
     }
   }

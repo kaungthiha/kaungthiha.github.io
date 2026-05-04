@@ -21,6 +21,7 @@ export type UserPreferences = {
   allowPartialSets: boolean;
   minimumSetMinutes: number;
   dayStartTimes?: Record<string, string>; // day → "HH:MM" 24h, e.g. "21:00" = 9 PM
+  firstSetByDay?: Record<string, string>;  // day → artist name, forced first set
 };
 
 export type ItineraryItem = {
@@ -35,6 +36,7 @@ export type ItineraryItem = {
   toStage?: string;
   notes?: string;
   isPartial?: boolean;
+  isFirstSet?: boolean;
   preferenceLevel?: PreferenceLevel;
 };
 

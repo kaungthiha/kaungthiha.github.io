@@ -1,6 +1,7 @@
 import { useState, useMemo, useCallback } from 'react';
 import { ArtistPreference, PreferenceLevel, UserPreferences, GeneratedItinerary } from './types/festival';
 import { EDC_2026_SETS, DAYS } from './lib/sampleData';
+import { formatTime } from './lib/timeUtils';
 import { generateItinerary } from './lib/itineraryOptimizer';
 import {
   FlockInfo,
@@ -156,6 +157,14 @@ export default function App() {
     [selectedDay],
   );
 
+  const daySetOptions = useMemo(
+    () => EDC_2026_SETS
+      .filter(s => s.day === selectedDay)
+      .sort((a, b) => a.startTime.getTime() - b.startTime.getTime())
+      .map(s => ({ artist: s.artist, time: formatTime(s.startTime) })),
+    [selectedDay],
+  );
+
   const dayPrefs = useMemo(
     () => artistPreferences.filter(p => dayArtists.includes(p.artist)),
     [artistPreferences, dayArtists],
@@ -297,7 +306,7 @@ export default function App() {
 
                 {step === 'preferences' && (
                   <div className="grid grid-cols-1 lg:grid-cols-[1fr_280px] gap-6">
-                    <div>
+                    <div className="order-2 lg:order-1">
                       <div className="flex items-center justify-between mb-4">
                         <h2 className="text-lg font-bold text-white">
                           {selectedDay === 'Friday' ? 'Friday, May 15' : selectedDay === 'Saturday' ? 'Saturday, May 16' : 'Sunday, May 17'}
@@ -315,8 +324,8 @@ export default function App() {
                       />
                     </div>
 
-                    <div className="space-y-4">
-                      <PreferenceControls preferences={userPrefs} onChange={setUserPrefs} selectedDay={selectedDay} />
+                    <div className="space-y-4 order-1 lg:order-2">
+                      <PreferenceControls preferences={userPrefs} onChange={setUserPrefs} selectedDay={selectedDay} daySetOptions={daySetOptions} />
 
                       <div className="bg-festival-card border border-festival-border rounded-xl p-4">
                         <button
@@ -384,14 +393,14 @@ export default function App() {
                     </div>
 
                     <div className="grid grid-cols-1 lg:grid-cols-[1fr_380px] gap-6">
-                      <div>
+                      <div className="order-2 lg:order-1">
                         <h2 className="text-lg font-bold text-white mb-4">
                           Your {selectedDay} Herd Route
                         </h2>
                         <ItineraryTimeline items={itinerary.items} score={itinerary.score} />
                       </div>
 
-                      <div className="space-y-4">
+                      <div className="space-y-4 order-1 lg:order-2">
                         <ConflictPanel conflicts={itinerary.conflicts} />
 
                         <div className="bg-festival-card border border-festival-border rounded-xl p-4">
@@ -399,6 +408,7 @@ export default function App() {
                           <PreferenceControls
                             preferences={userPrefs}
                             selectedDay={selectedDay}
+                            daySetOptions={daySetOptions}
                             onChange={(prefs) => {
                               setUserPrefs(prefs);
                               const result = generateItinerary(EDC_2026_SETS, artistPreferences, prefs, selectedDay);

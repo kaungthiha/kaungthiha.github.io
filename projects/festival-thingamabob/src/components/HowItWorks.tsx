@@ -5,7 +5,7 @@ const STEPS = [
     icon: '🐑',
     title: 'BAAAAA',
     description:
-      'All EDC Las Vegas 2026 artists are pre-loaded. Gah bless the redditors who made it into a csv. Browse by day — Friday, Saturday, or Sunday.',
+      'All EDC Las Vegas 2026 artists are pre-loaded. Gah bless the redditor John Ta who made it into a csv. Browse by day — Friday, Saturday, or Sunday.',
     accent: 'border-festival-blue/30 bg-festival-blue/5',
     iconBg: 'bg-festival-blue/10',
   },

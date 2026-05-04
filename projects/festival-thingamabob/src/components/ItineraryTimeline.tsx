@@ -47,65 +47,79 @@ function SetRow({ item }: { item: ItineraryItem }) {
   const durationMins = getDurationMinutes(item.startTime, item.endTime);
   const isMustSee = item.preferenceLevel === 'must-see';
   const isNice = item.preferenceLevel === 'nice-to-see';
+  const isFirst = item.isFirstSet;
 
   return (
-    <div
-      className={`relative flex gap-4 px-4 py-4 rounded-xl border transition-all ${
-        isMustSee
-          ? 'bg-blue-950/30 border-blue-700/60 shadow-glow-blue'
-          : isNice
-          ? 'bg-cyan-950/20 border-cyan-800/40'
-          : 'bg-festival-card border-festival-border'
-      }`}
-    >
-      {/* Time column */}
-      <div className="w-20 flex-shrink-0 text-right">
-        <div className={`text-sm font-semibold ${isMustSee ? 'text-blue-300' : isNice ? 'text-cyan-300' : 'text-slate-300'}`}>
-          {formatTime(item.startTime)}
-        </div>
-        <div className="text-xs text-slate-600 mt-0.5">{formatDuration(durationMins)}</div>
-      </div>
-
-      {/* Dot connector */}
-      <div className="flex flex-col items-center flex-shrink-0 mt-1">
-        <div
-          className={`w-3 h-3 rounded-full border-2 flex-shrink-0 ${
-            isMustSee
-              ? 'bg-blue-500 border-blue-400 shadow-[0_0_8px_rgba(37,99,235,0.8)]'
-              : isNice
-              ? 'bg-cyan-500 border-cyan-400'
-              : 'bg-slate-600 border-slate-500'
-          }`}
-        />
-      </div>
-
-      {/* Content */}
-      <div className="flex-1 min-w-0">
-        <div className="flex flex-wrap items-center gap-2 mb-1">
-          <span className={`font-semibold ${isMustSee ? 'text-white' : isNice ? 'text-slate-100' : 'text-slate-200'}`}>
-            {item.artist}
-          </span>
-          {item.isPartial && (
-            <span className="text-xs px-1.5 py-0.5 rounded bg-amber-900/40 border border-amber-700/50 text-amber-400">
-              partial
-            </span>
-          )}
-          <PreferenceBadge level={item.preferenceLevel} />
-        </div>
-        <div className="flex flex-wrap items-center gap-2">
-          {item.stage && <StageChip stage={item.stage} />}
-          {item.genre && (
-            <span className="text-xs px-2 py-0.5 rounded-full bg-slate-800/60 border border-slate-700/50 text-slate-400">
-              {item.genre}
-            </span>
-          )}
-          <span className="text-xs text-slate-500">
-            {formatTimeRange(item.startTime, item.endTime)}
+    <div className={isFirst ? 'mt-4' : undefined}>
+      {isFirst && (
+        <div className="flex justify-center mb-[-10px] relative z-10">
+          <span className="text-xs font-black tracking-widest px-4 py-1 rounded-full bg-amber-400 text-black shadow-lg">
+            ✦ FIRST STOP ✦
           </span>
         </div>
-        {item.notes && (
-          <p className="mt-1.5 text-xs text-slate-500 italic">{item.notes}</p>
-        )}
+      )}
+      <div
+        className={`relative flex gap-4 px-4 py-4 rounded-xl border transition-all ${
+          isFirst
+            ? 'bg-gradient-to-br from-amber-950/60 to-yellow-950/20 border-amber-500/70 shadow-[0_0_32px_rgba(245,158,11,0.18)]'
+            : isMustSee
+            ? 'bg-blue-950/30 border-blue-700/60 shadow-glow-blue'
+            : isNice
+            ? 'bg-cyan-950/20 border-cyan-800/40'
+            : 'bg-festival-card border-festival-border'
+        }`}
+      >
+        {/* Time column */}
+        <div className="w-20 flex-shrink-0 text-right">
+          <div className={`text-sm font-semibold ${isFirst ? 'text-amber-300' : isMustSee ? 'text-blue-300' : isNice ? 'text-cyan-300' : 'text-slate-300'}`}>
+            {formatTime(item.startTime)}
+          </div>
+          <div className="text-xs text-slate-600 mt-0.5">{formatDuration(durationMins)}</div>
+        </div>
+
+        {/* Dot connector */}
+        <div className="flex flex-col items-center flex-shrink-0 mt-1">
+          <div
+            className={`w-3 h-3 rounded-full border-2 flex-shrink-0 ${
+              isFirst
+                ? 'bg-amber-400 border-amber-300 shadow-[0_0_10px_rgba(245,158,11,0.9)]'
+                : isMustSee
+                ? 'bg-blue-500 border-blue-400 shadow-[0_0_8px_rgba(37,99,235,0.8)]'
+                : isNice
+                ? 'bg-cyan-500 border-cyan-400'
+                : 'bg-slate-600 border-slate-500'
+            }`}
+          />
+        </div>
+
+        {/* Content */}
+        <div className="flex-1 min-w-0">
+          <div className="flex flex-wrap items-center gap-2 mb-1">
+            <span className={`font-semibold ${isFirst ? 'text-amber-200' : isMustSee ? 'text-white' : isNice ? 'text-slate-100' : 'text-slate-200'}`}>
+              {item.artist}
+            </span>
+            {item.isPartial && (
+              <span className="text-xs px-1.5 py-0.5 rounded bg-amber-900/40 border border-amber-700/50 text-amber-400">
+                partial
+              </span>
+            )}
+            <PreferenceBadge level={item.preferenceLevel} />
+          </div>
+          <div className="flex flex-wrap items-center gap-2">
+            {item.stage && <StageChip stage={item.stage} />}
+            {item.genre && (
+              <span className="text-xs px-2 py-0.5 rounded-full bg-slate-800/60 border border-slate-700/50 text-slate-400">
+                {item.genre}
+              </span>
+            )}
+            <span className="text-xs text-slate-500">
+              {formatTimeRange(item.startTime, item.endTime)}
+            </span>
+          </div>
+          {item.notes && (
+            <p className="mt-1.5 text-xs text-slate-500 italic">{item.notes}</p>
+          )}
+        </div>
       </div>
     </div>
   );
@@ -125,7 +139,7 @@ function ArrivalRow({ item }: { item: ItineraryItem }) {
       </div>
       <div className="flex-1 min-w-0 pb-1">
         <div className="text-sm font-semibold text-slate-400">🐑 Sheep travel time</div>
-        <div className="text-xs text-slate-600 mt-0.5">Rolling to the festival — first set at {formatTime(item.endTime)}</div>
+        <div className="text-xs text-slate-600 mt-0.5">{item.notes} — first set at {formatTime(item.endTime)}</div>
       </div>
     </div>
   );

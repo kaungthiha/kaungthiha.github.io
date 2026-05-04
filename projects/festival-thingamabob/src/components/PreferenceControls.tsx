@@ -4,6 +4,7 @@ interface PreferenceControlsProps {
   preferences: UserPreferences;
   onChange: (prefs: UserPreferences) => void;
   selectedDay: string;
+  daySetOptions: { artist: string; time: string }[];
 }
 
 const WALKING_OPTIONS = [5, 10, 15, 20] as const;
@@ -24,7 +25,7 @@ const START_TIME_OPTIONS: { label: string; value: string }[] = [
   { label: '3:00 AM', value: '03:00' },
 ];
 
-export function PreferenceControls({ preferences, onChange, selectedDay }: PreferenceControlsProps) {
+export function PreferenceControls({ preferences, onChange, selectedDay, daySetOptions }: PreferenceControlsProps) {
   function setWalking(minutes: number) {
     onChange({ ...preferences, defaultWalkingMinutes: minutes });
   }
@@ -37,6 +38,16 @@ export function PreferenceControls({ preferences, onChange, selectedDay }: Prefe
     onChange({ ...preferences, minimumSetMinutes: minutes });
   }
 
+  function setFirstSet(artist: string) {
+    const updated = { ...(preferences.firstSetByDay ?? {}) };
+    if (artist) {
+      updated[selectedDay] = artist;
+    } else {
+      delete updated[selectedDay];
+    }
+    onChange({ ...preferences, firstSetByDay: updated });
+  }
+
   function setDayStart(value: string) {
     const updated = { ...(preferences.dayStartTimes ?? {}) };
     if (value) {
@@ -47,6 +58,7 @@ export function PreferenceControls({ preferences, onChange, selectedDay }: Prefe
     onChange({ ...preferences, dayStartTimes: updated });
   }
 
+  const currentFirstSet = preferences.firstSetByDay?.[selectedDay] ?? '';
   const currentStart = preferences.dayStartTimes?.[selectedDay] ?? '';
 
   return (
@@ -58,24 +70,46 @@ export function PreferenceControls({ preferences, onChange, selectedDay }: Prefe
       </div>
 
       <div className="p-4 space-y-5">
-        {/* Day start time */}
+        {/* First Set */}
         <div>
           <label className="block text-sm font-medium text-slate-300 mb-2">
-            Arriving at the Pasture
+            First Set of the Day
           </label>
           <select
-            value={currentStart}
-            onChange={e => setDayStart(e.target.value)}
-            className="w-full px-3 py-2 rounded-lg text-sm text-slate-200 border border-festival-border bg-[#0a0a0f] focus:border-festival-cyan focus:outline-none transition-colors"
+            value={currentFirstSet}
+            onChange={e => setFirstSet(e.target.value)}
+            className="w-full px-3 py-2 rounded-lg text-sm text-slate-200 border border-festival-border bg-[#0a0a0f] focus:border-amber-500/60 focus:outline-none transition-colors"
           >
-            {START_TIME_OPTIONS.map(opt => (
-              <option key={opt.value} value={opt.value}>{opt.label}</option>
+            <option value="">None — start anywhere</option>
+            {daySetOptions.map(opt => (
+              <option key={opt.artist} value={opt.artist}>{opt.time} — {opt.artist}</option>
             ))}
           </select>
           <p className="mt-1.5 text-xs text-slate-600">
-            Sets before this time won't be scheduled — marked as sheep travel time
+            This set is guaranteed first — everything before it becomes sheep travel time
           </p>
         </div>
+
+        {/* Day start time — only shown when no first set is pinned */}
+        {!currentFirstSet && (
+          <div>
+            <label className="block text-sm font-medium text-slate-300 mb-2">
+              Arriving at the Pasture
+            </label>
+            <select
+              value={currentStart}
+              onChange={e => setDayStart(e.target.value)}
+              className="w-full px-3 py-2 rounded-lg text-sm text-slate-200 border border-festival-border bg-[#0a0a0f] focus:border-festival-cyan focus:outline-none transition-colors"
+            >
+              {START_TIME_OPTIONS.map(opt => (
+                <option key={opt.value} value={opt.value}>{opt.label}</option>
+              ))}
+            </select>
+            <p className="mt-1.5 text-xs text-slate-600">
+              Sets before this time won't be scheduled
+            </p>
+          </div>
+        )}
 
         {/* Walking buffer */}
         <div>

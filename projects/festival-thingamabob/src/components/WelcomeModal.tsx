@@ -11,7 +11,7 @@ const STEPS = [
   {
     icon: '🗺️',
     title: 'Round Up Your Schedule',
-    body: "Set your trekking time between stages, then hit Round Up. The optimizer builds the best conflict-free itinerary it can. Any must-sees that didn't make it appear as Lost Sheep — tweak your tags or walk time and regenerate.",
+    body: "In Herd Settings, pick your First Set of the Day — that artist is guaranteed first and sets the start time. Set trekking time, then hit Round Up. Any must-sees that couldn't fit appear as Lost Sheep.",
   },
   {
     icon: '🐑',
