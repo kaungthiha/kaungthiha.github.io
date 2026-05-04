@@ -192,10 +192,7 @@ export function generateItinerary(
   const eligibleSets = sorted.filter(s => {
     if (resolvedForcedIds.has(s.id)) return true; // keep forced
     for (const forced of resolvedForced) {
-      const walkNeeded = forced.stage === s.stage ? 0 : userPrefs.defaultWalkingMinutes;
-      // s conflicts with forced if they overlap (considering walk time)
       const overlaps = forced.startTime < s.endTime && s.startTime < forced.endTime;
-      // also exclude sets that can't be reached after forced (or before forced)
       if (overlaps) return false;
     }
     return true;
