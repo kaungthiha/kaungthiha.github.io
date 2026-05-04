@@ -32,6 +32,7 @@ export async function createTrip(memberName: string): Promise<FlockInfo | null> 
       .single()
 
     if (tripError) {
+      console.error('[createTrip] insert trips error:', tripError)
       if (tripError.code === '23505') continue
       return null
     }
@@ -42,21 +43,31 @@ export async function createTrip(memberName: string): Promise<FlockInfo | null> 
       .select('id')
       .single()
 
-    if (memberError || !member) return null
+    if (memberError || !member) {
+      console.error('[createTrip] insert flock_members error:', memberError)
+      return null
+    }
 
     return { tripCode, memberId: member.id, memberName }
   }
   return null
 }
 
-export async function joinTrip(tripCode: string, memberName: string): Promise<FlockInfo | null> {
+export async function joinTrip(tripCode: string, memberName: string): Promise<{ result: FlockInfo | null; error: string | null }> {
+  const normalized = tripCode.toUpperCase().trim()
   const { data: trip, error: tripError } = await supabase
     .from('trips')
     .select('id')
-    .eq('trip_code', tripCode.toUpperCase().trim())
+    .eq('trip_code', normalized)
     .single()
 
-  if (tripError || !trip) return null
+  if (tripError || !trip) {
+    console.error('[joinTrip] select trips error:', tripError)
+    const msg = tripError?.code === 'PGRST116'
+      ? `No flock found with code "${normalized}"`
+      : `Supabase error: ${tripError?.message ?? 'unknown'}`
+    return { result: null, error: msg }
+  }
 
   const { data: member, error: memberError } = await supabase
     .from('flock_members')
@@ -64,9 +75,12 @@ export async function joinTrip(tripCode: string, memberName: string): Promise<Fl
     .select('id')
     .single()
 
-  if (memberError || !member) return null
+  if (memberError || !member) {
+    console.error('[joinTrip] insert flock_members error:', memberError)
+    return { result: null, error: memberError?.message ?? 'Failed to join flock' }
+  }
 
-  return { tripCode: tripCode.toUpperCase().trim(), memberId: member.id, memberName }
+  return { result: { tripCode: normalized, memberId: member.id, memberName }, error: null }
 }
 
 export async function savePreferences(

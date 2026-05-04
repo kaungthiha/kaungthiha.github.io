@@ -34,10 +34,10 @@ export function FlockGate({ onJoined, onSkip }: FlockGateProps) {
     if (!name.trim() || !code.trim()) return;
     setLoading(true);
     setError('');
-    const result = await joinTrip(code.trim(), name.trim());
+    const { result, error: joinError } = await joinTrip(code.trim(), name.trim());
     setLoading(false);
     if (!result) {
-      setError("Couldn't find that flock. Check the code and try again.");
+      setError(joinError ?? "Couldn't find that flock. Check the code and try again.");
       return;
     }
     onJoined(result);
