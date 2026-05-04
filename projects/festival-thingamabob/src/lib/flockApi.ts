@@ -11,6 +11,7 @@ export type FlockInfo = {
   tripCode: string
   memberId: string
   memberName: string
+  isLeader: boolean
 }
 
 export type FlockMemberData = {
@@ -20,6 +21,29 @@ export type FlockMemberData = {
   artistPreferences: ArtistPreference[]
   userPrefs: UserPreferences | null
   hasGenerated: boolean
+  isLeader: boolean
+}
+
+export type FlockDetails = {
+  members: FlockMemberData[]
+  isLocked: boolean
+  lockedAt: Date | null
+}
+
+const CACHE_KEY = (code: string) => `sheepherder_flock_cache_${code}`
+
+export function saveFlockCache(tripCode: string, details: FlockDetails): void {
+  try {
+    localStorage.setItem(CACHE_KEY(tripCode), JSON.stringify({ details, cachedAt: new Date().toISOString() }))
+  } catch { /* ignore */ }
+}
+
+export function loadFlockCache(tripCode: string): FlockDetails | null {
+  try {
+    const stored = localStorage.getItem(CACHE_KEY(tripCode))
+    if (!stored) return null
+    return (JSON.parse(stored) as { details: FlockDetails }).details
+  } catch { return null }
 }
 
 export async function createTrip(memberName: string): Promise<FlockInfo | null> {
@@ -39,7 +63,7 @@ export async function createTrip(memberName: string): Promise<FlockInfo | null> 
 
     const { data: member, error: memberError } = await supabase
       .from('flock_members')
-      .insert({ trip_id: trip.id, name: memberName })
+      .insert({ trip_id: trip.id, name: memberName, is_leader: true })
       .select('id')
       .single()
 
@@ -48,7 +72,7 @@ export async function createTrip(memberName: string): Promise<FlockInfo | null> 
       return null
     }
 
-    return { tripCode, memberId: member.id, memberName }
+    return { tripCode, memberId: member.id, memberName, isLeader: true }
   }
   return null
 }
@@ -71,7 +95,7 @@ export async function joinTrip(tripCode: string, memberName: string): Promise<{ 
 
   const { data: member, error: memberError } = await supabase
     .from('flock_members')
-    .insert({ trip_id: trip.id, name: memberName })
+    .insert({ trip_id: trip.id, name: memberName, is_leader: false })
     .select('id')
     .single()
 
@@ -80,7 +104,7 @@ export async function joinTrip(tripCode: string, memberName: string): Promise<{ 
     return { result: null, error: memberError?.message ?? 'Failed to join flock' }
   }
 
-  return { result: { tripCode: normalized, memberId: member.id, memberName }, error: null }
+  return { result: { tripCode: normalized, memberId: member.id, memberName, isLeader: false }, error: null }
 }
 
 export async function savePreferences(
@@ -101,27 +125,60 @@ export async function savePreferences(
     .eq('id', memberId)
 }
 
-export async function getFlockMembers(tripCode: string): Promise<FlockMemberData[]> {
-  const { data: trip } = await supabase
+export async function getFlockDetails(tripCode: string): Promise<FlockDetails | null> {
+  const { data: trip, error: tripError } = await supabase
     .from('trips')
-    .select('id')
+    .select('*')
     .eq('trip_code', tripCode)
     .single()
 
-  if (!trip) return []
+  if (tripError || !trip) {
+    console.error('[getFlockDetails] trip error:', tripError)
+    return null
+  }
 
-  const { data: members } = await supabase
+  const { data: members, error: membersError } = await supabase
     .from('flock_members')
-    .select('id, name, selected_day, artist_preferences, user_prefs, has_generated')
-    .eq('trip_id', trip.id)
+    .select('id, name, selected_day, artist_preferences, user_prefs, has_generated, is_leader')
+    .eq('trip_id', (trip as Record<string, unknown>).id as string)
     .order('created_at', { ascending: true })
 
-  return (members ?? []).map(m => ({
-    id: m.id,
-    name: m.name,
-    selectedDay: (m.selected_day as string) ?? null,
-    artistPreferences: (m.artist_preferences as ArtistPreference[]) ?? [],
-    userPrefs: (m.user_prefs as UserPreferences) ?? null,
-    hasGenerated: (m.has_generated as boolean) ?? false,
-  }))
+  if (membersError) console.error('[getFlockDetails] members error:', membersError)
+
+  const tripRow = trip as Record<string, unknown>
+
+  return {
+    members: (members ?? []).map(m => {
+      const row = m as Record<string, unknown>
+      return {
+        id: row.id as string,
+        name: row.name as string,
+        selectedDay: (row.selected_day as string) ?? null,
+        artistPreferences: (row.artist_preferences as ArtistPreference[]) ?? [],
+        userPrefs: (row.user_prefs as UserPreferences) ?? null,
+        hasGenerated: (row.has_generated as boolean) ?? false,
+        isLeader: (row.is_leader as boolean) ?? false,
+      }
+    }),
+    isLocked: !!(tripRow.locked_at),
+    lockedAt: tripRow.locked_at ? new Date(tripRow.locked_at as string) : null,
+  }
+}
+
+export async function lockFlock(tripCode: string): Promise<boolean> {
+  const { error } = await supabase
+    .from('trips')
+    .update({ locked_at: new Date().toISOString() })
+    .eq('trip_code', tripCode)
+  if (error) console.error('[lockFlock]', error)
+  return !error
+}
+
+export async function unlockFlock(tripCode: string): Promise<boolean> {
+  const { error } = await supabase
+    .from('trips')
+    .update({ locked_at: null })
+    .eq('trip_code', tripCode)
+  if (error) console.error('[unlockFlock]', error)
+  return !error
 }

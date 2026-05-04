@@ -2,7 +2,16 @@ import { useState, useMemo, useCallback } from 'react';
 import { ArtistPreference, PreferenceLevel, UserPreferences, GeneratedItinerary } from './types/festival';
 import { EDC_2026_SETS, DAYS } from './lib/sampleData';
 import { generateItinerary } from './lib/itineraryOptimizer';
-import { FlockInfo, FlockMemberData, savePreferences, getFlockMembers } from './lib/flockApi';
+import {
+  FlockInfo,
+  FlockDetails,
+  savePreferences,
+  getFlockDetails,
+  lockFlock,
+  unlockFlock,
+  saveFlockCache,
+  loadFlockCache,
+} from './lib/flockApi';
 import { ArtistPreferencePicker } from './components/ArtistPreferencePicker';
 import { PreferenceControls } from './components/PreferenceControls';
 import { ItineraryTimeline } from './components/ItineraryTimeline';
@@ -25,7 +34,9 @@ const DEFAULT_PREFS: UserPreferences = {
 function readFlockSession(): FlockInfo | null {
   try {
     const stored = sessionStorage.getItem(FLOCK_SESSION_KEY);
-    return stored ? (JSON.parse(stored) as FlockInfo) : null;
+    if (!stored) return null;
+    const info = JSON.parse(stored) as FlockInfo;
+    return { ...info, isLeader: info.isLeader ?? false };
   } catch {
     return null;
   }
@@ -38,11 +49,11 @@ export default function App() {
   const [userPrefs, setUserPrefs] = useState<UserPreferences>(DEFAULT_PREFS);
   const [itinerary, setItinerary] = useState<GeneratedItinerary | null>(null);
 
-  // Flock state — restored from sessionStorage on first render
+  // Flock state
   const [flockReady, setFlockReady] = useState<boolean>(() => readFlockSession() !== null);
   const [flockInfo, setFlockInfo] = useState<FlockInfo | null>(() => readFlockSession());
   const [showFlockView, setShowFlockView] = useState(false);
-  const [flockMembers, setFlockMembers] = useState<FlockMemberData[]>([]);
+  const [flockDetails, setFlockDetails] = useState<FlockDetails | null>(null);
   const [flockLoading, setFlockLoading] = useState(false);
 
   const handlePreferenceChange = useCallback((artist: string, level: PreferenceLevel) => {
@@ -84,11 +95,31 @@ export default function App() {
 
   async function handleViewFlock() {
     if (!flockInfo) return;
-    setFlockLoading(true);
     setShowFlockView(true);
-    const members = await getFlockMembers(flockInfo.tripCode);
-    setFlockMembers(members);
+    setFlockLoading(true);
+
+    // Show cached data immediately while fetching
+    const cached = loadFlockCache(flockInfo.tripCode);
+    if (cached) setFlockDetails(cached);
+
+    const details = await getFlockDetails(flockInfo.tripCode);
     setFlockLoading(false);
+    if (details) {
+      setFlockDetails(details);
+      saveFlockCache(flockInfo.tripCode, details);
+    }
+  }
+
+  async function handleLockToggle(lock: boolean) {
+    if (!flockInfo) return;
+    const ok = lock
+      ? await lockFlock(flockInfo.tripCode)
+      : await unlockFlock(flockInfo.tripCode);
+    if (ok && flockDetails) {
+      const updated: FlockDetails = { ...flockDetails, isLocked: lock, lockedAt: lock ? new Date() : null };
+      setFlockDetails(updated);
+      saveFlockCache(flockInfo.tripCode, updated);
+    }
   }
 
   const dayArtists = useMemo(
@@ -130,7 +161,6 @@ export default function App() {
                 </div>
 
                 <div className="flex items-center gap-3">
-                  {/* Flock indicator + view button */}
                   {flockInfo && (
                     <button
                       onClick={handleViewFlock}
@@ -142,7 +172,6 @@ export default function App() {
                     </button>
                   )}
 
-                  {/* Step indicator */}
                   <div className="flex items-center gap-2 text-xs">
                     <button
                       onClick={() => { if (step === 'itinerary') { setStep('preferences'); setShowFlockView(false); } }}
@@ -174,24 +203,27 @@ export default function App() {
 
           <main className="max-w-6xl mx-auto px-4 py-6 pb-16">
 
-            {/* Flock view overlay */}
+            {/* Flock view */}
             {showFlockView && flockInfo && (
               <div>
                 <h2 className="text-lg font-bold text-white mb-4">
                   Your Flock
                   <span className="text-slate-500 font-normal ml-2 text-base">side-by-side view</span>
                 </h2>
-                {flockLoading ? (
+                {flockLoading && !flockDetails ? (
                   <div className="text-center py-20 text-slate-500">
                     <div className="text-4xl mb-3 animate-pulse">🐑</div>
                     <p>Rounding up the flock...</p>
                   </div>
                 ) : (
                   <FlockView
-                    members={flockMembers}
+                    members={flockDetails?.members ?? []}
                     currentMemberId={flockInfo.memberId}
                     initialDay={selectedDay}
                     tripCode={flockInfo.tripCode}
+                    isLeader={flockInfo.isLeader}
+                    isLocked={flockDetails?.isLocked ?? false}
+                    onLockToggle={handleLockToggle}
                     onBack={() => setShowFlockView(false)}
                   />
                 )}
@@ -200,7 +232,6 @@ export default function App() {
 
             {!showFlockView && (
               <>
-                {/* Day selector */}
                 {step === 'preferences' && (
                   <div className="mb-6">
                     <div className="flex gap-2">
