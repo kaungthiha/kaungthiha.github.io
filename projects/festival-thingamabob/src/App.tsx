@@ -192,6 +192,22 @@ export default function App() {
     setShowFlockView(false);
   }
 
+  function handleSwap(outgoingArtist: string, incoming: import('./types/festival').FestivalSet) {
+    setUserPrefs(prev => {
+      // Remove the outgoing artist from pins (if it was pinned), add the incoming one
+      const currentPins = prev.pinnedByDay?.[selectedDay] ?? [];
+      const withoutOld = currentPins.filter(a => a !== outgoingArtist);
+      const nextPins = withoutOld.includes(incoming.artist)
+        ? withoutOld
+        : [...withoutOld, incoming.artist];
+      const nextPrefs = { ...prev, pinnedByDay: { ...(prev.pinnedByDay ?? {}), [selectedDay]: nextPins } };
+      const result = generateItinerary(EDC_2026_SETS, artistPreferences, nextPrefs, selectedDay);
+      setItinerary(result);
+      saveUserPrefs(nextPrefs);
+      return nextPrefs;
+    });
+  }
+
   function handlePinToggle(artist: string) {
     setUserPrefs(prev => {
       const currentPins = prev.pinnedByDay?.[selectedDay] ?? [];
@@ -461,8 +477,10 @@ export default function App() {
                         </h2>
                         <ItineraryTimeline
                           items={itinerary.items}
+                          allDaySets={EDC_2026_SETS.filter(s => s.day === selectedDay)}
                           pinnedArtists={userPrefs.pinnedByDay?.[selectedDay] ?? []}
                           onTogglePin={handlePinToggle}
+                          onSwap={handleSwap}
                         />
                       </div>
 

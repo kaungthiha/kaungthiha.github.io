@@ -1,11 +1,14 @@
 import { useState } from 'react';
-import { ItineraryItem, MeetupPoint, PreferenceLevel } from '../types/festival';
+import { FestivalSet, ItineraryItem, MeetupPoint, PreferenceLevel } from '../types/festival';
 import { formatTime, formatTimeRange, getDurationMinutes, formatDuration } from '../lib/timeUtils';
+import { SwapModal } from './SwapModal';
 
 interface ItineraryTimelineProps {
   items: ItineraryItem[];
+  allDaySets?: FestivalSet[];
   pinnedArtists?: string[];
   onTogglePin?: (artist: string) => void;
+  onSwap?: (outgoingArtist: string, incoming: FestivalSet) => void;
 }
 
 function StageChip({ stage }: { stage: string }) {
@@ -43,7 +46,7 @@ function PreferenceBadge({ level }: { level: PreferenceLevel | undefined }) {
   return <span className={`text-xs ${styles[level] ?? ''}`}>{label}</span>;
 }
 
-function SetRow({ item, isPinned, onTogglePin }: { item: ItineraryItem; isPinned?: boolean; onTogglePin?: () => void }) {
+function SetRow({ item, isPinned, onTogglePin, onSwap }: { item: ItineraryItem; isPinned?: boolean; onTogglePin?: () => void; onSwap?: () => void }) {
   const durationMins = getDurationMinutes(item.startTime, item.endTime);
   const isMustSee = item.preferenceLevel === 'must-see';
   const isNice = item.preferenceLevel === 'nice-to-see';
@@ -127,29 +130,44 @@ function SetRow({ item, isPinned, onTogglePin }: { item: ItineraryItem; isPinned
           </div>
         </div>
 
-        {/* Override / pin strip — not shown on first-stop sets */}
-        {onTogglePin && !isFirst && (
+        {/* Action strip — not shown on first-stop sets */}
+        {!isFirst && (onTogglePin || onSwap) && (
           <div className="px-4 pb-3 -mt-1">
             <div className="border-t border-slate-800/50 pt-2 flex items-center gap-3">
               {isPinned ? (
                 <>
                   <span className="text-xs text-slate-400 flex-1">🔒 Locked in — <span className="text-slate-500">sheep &gt; computer</span></span>
-                  <button
-                    onClick={onTogglePin}
-                    className="text-xs text-slate-600 hover:text-red-400 transition-colors"
-                    title="Release — let algo decide"
-                  >
-                    Release
-                  </button>
+                  {onTogglePin && (
+                    <button
+                      onClick={onTogglePin}
+                      className="text-xs text-slate-600 hover:text-red-400 transition-colors"
+                      title="Release — let algo decide"
+                    >
+                      Release
+                    </button>
+                  )}
                 </>
               ) : (
-                <button
-                  onClick={onTogglePin}
-                  className="text-xs text-slate-700 hover:text-slate-400 transition-colors"
-                  title="Fight the algo — lock this set in no matter what"
-                >
-                  📌 Override algo
-                </button>
+                <>
+                  {onTogglePin && (
+                    <button
+                      onClick={onTogglePin}
+                      className="text-xs text-slate-700 hover:text-slate-400 transition-colors"
+                      title="Fight the algo — lock this set in no matter what"
+                    >
+                      📌 Override algo
+                    </button>
+                  )}
+                  {onSwap && (
+                    <button
+                      onClick={onSwap}
+                      className="text-xs text-slate-700 hover:text-festival-cyan transition-colors ml-auto"
+                      title="Swap this set for something nearby"
+                    >
+                      ⇄ Swap set
+                    </button>
+                  )}
+                </>
               )}
             </div>
           </div>
@@ -315,9 +333,12 @@ function MeetupCard({
   );
 }
 
-export function ItineraryTimeline({ items, pinnedArtists, onTogglePin }: ItineraryTimelineProps) {
+export function ItineraryTimeline({ items, allDaySets, pinnedArtists, onTogglePin, onSwap }: ItineraryTimelineProps) {
   const [meetups, setMeetups] = useState<MeetupPoint[]>([]);
   const [addingAfter, setAddingAfter] = useState<string | null>(null);
+  const [swappingItem, setSwappingItem] = useState<ItineraryItem | null>(null);
+
+  const scheduledArtists = items.filter(i => i.type === 'set').map(i => i.artist ?? '');
 
   function addMeetup(afterItemId: string, location: string, notes: string) {
     const item = items.find(i => i.id === afterItemId);
@@ -392,6 +413,7 @@ export function ItineraryTimeline({ items, pinnedArtists, onTogglePin }: Itinera
                   item={item}
                   isPinned={pinnedArtists?.includes(item.artist ?? '') ?? false}
                   onTogglePin={onTogglePin && item.artist ? () => onTogglePin(item.artist!) : undefined}
+                  onSwap={onSwap && allDaySets && item.artist ? () => setSwappingItem(item) : undefined}
                 />
               )}
               {item.type === 'transition' && (
@@ -421,6 +443,19 @@ export function ItineraryTimeline({ items, pinnedArtists, onTogglePin }: Itinera
           );
         })}
       </div>
+
+      {swappingItem && allDaySets && onSwap && (
+        <SwapModal
+          item={swappingItem}
+          allSets={allDaySets}
+          currentItineraryArtists={scheduledArtists}
+          onConfirm={incoming => {
+            onSwap(swappingItem.artist!, incoming);
+            setSwappingItem(null);
+          }}
+          onClose={() => setSwappingItem(null)}
+        />
+      )}
     </div>
   );
 }
