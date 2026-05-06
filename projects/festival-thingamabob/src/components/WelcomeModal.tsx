@@ -6,17 +6,22 @@ const STEPS = [
   {
     icon: '💙',
     title: 'Tag the Lineup',
-    body: 'Browse artists by day and mark each one: 💙 Must See, 👍 Nice to See, 😐 Neutral, or 🚫 Avoid. Use 🏁 for the very first artist for each day. Your 💙 must-see picks are what the schedule optimizer works hardest to fit in thus other selections might be deprioritized.',
+    body: 'Browse artists by day and mark each one: 💙 Must See, 👍 Nice to See, 😐 Neutral, or 🚫 Avoid. Use 🏁 for the very first artist for each day. Your 💙 must-see picks are what the schedule optimizer works hardest to fit in — other selections may be deprioritized.',
   },
   {
     icon: '🗺️',
     title: 'Round Up Your Schedule',
-    body: "In Herd Settings, you can set estimated walk time between stages as well as thresholds for how much of a set you want to see to check if it is worth moving stages for. You can also pick your First Set of the Day instead of using the 🏁 — that artist is guaranteed first and sets the start time. Set trekking time, then hit Round Up. Any must-sees that couldn't fit appear as Lost Sheep.",
+    body: "In Herd Settings, set your estimated walk time between stages and the minimum amount of a set worth catching. You can also pin your First Set of the Day — that artist is guaranteed first and anchors your start time. Hit Round Up. Any must-sees that couldn't fit appear as Lost Sheep.",
   },
   {
     icon: '🐑',
     title: 'Herd Your Flock',
-    body: 'Share your flock code with friends so they can join. Tap the code in the top bar to see everyone\'s schedules side-by-side and lock the plan once you\'re set. On a new device? Use "Restore my session" on the flock screen, enter the code, and pick your name.',
+    body: "Create a flock and share your 6-character code with friends. They join, pick their artists, and you all see each other's schedules side-by-side. The leader can lock the plan once everyone's set. Shared sets are highlighted so you know who you'll run into.",
+  },
+  {
+    icon: '🔁',
+    title: 'Switching Devices? No Problem.',
+    body: "If you picked your artists on one device and want to continue on another — phone, laptop, whatever — just tap \"Rejoin my flock\" on the opening screen, enter your flock code, and pick your name. Your full schedule and artist picks will load automatically.",
   },
 ];
 

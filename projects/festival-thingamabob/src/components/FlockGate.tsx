@@ -18,6 +18,7 @@ export function FlockGate({ onJoined, onSkip, inviteCode }: FlockGateProps) {
   const [error, setError] = useState('');
   const [pendingJoin, setPendingJoin] = useState<FlockInfo | null>(null);
   const [copied, setCopied] = useState(false);
+  const [cooldown, setCooldown] = useState(false);
 
   // Rejoin state
   const [rejoinCode, setRejoinCode] = useState('');
@@ -26,7 +27,9 @@ export function FlockGate({ onJoined, onSkip, inviteCode }: FlockGateProps) {
   const [rejoinError, setRejoinError] = useState('');
 
   async function handleCreate() {
-    if (!name.trim()) return;
+    if (!name.trim() || cooldown) return;
+    setCooldown(true);
+    setTimeout(() => setCooldown(false), 2000);
     setLoading(true);
     setError('');
     const result = await createTrip(name.trim());
@@ -39,7 +42,9 @@ export function FlockGate({ onJoined, onSkip, inviteCode }: FlockGateProps) {
   }
 
   async function handleJoin() {
-    if (!name.trim() || !code.trim()) return;
+    if (!name.trim() || !code.trim() || cooldown) return;
+    setCooldown(true);
+    setTimeout(() => setCooldown(false), 2000);
     setLoading(true);
     setError('');
     const { result, error: joinError } = await joinTrip(code.trim(), name.trim());
@@ -52,7 +57,9 @@ export function FlockGate({ onJoined, onSkip, inviteCode }: FlockGateProps) {
   }
 
   async function handleRejoinLookup() {
-    if (!rejoinCode.trim()) return;
+    if (!rejoinCode.trim() || cooldown) return;
+    setCooldown(true);
+    setTimeout(() => setCooldown(false), 2000);
     setRejoinLoading(true);
     setRejoinError('');
     setRejoinMembers(null);
@@ -238,14 +245,15 @@ export function FlockGate({ onJoined, onSkip, inviteCode }: FlockGateProps) {
                 >
                   Join an existing flock
                 </button>
-              </div>
-              <div className="mt-4 pt-4 border-t border-slate-800 space-y-2">
                 <button
                   onClick={() => setMode('rejoin')}
-                  className="w-full text-xs text-slate-500 hover:text-festival-cyan transition-colors py-1"
+                  className="w-full py-3 rounded-xl font-semibold text-festival-cyan text-sm border border-festival-blue/40 hover:border-festival-blue hover:bg-festival-blue/10 transition-all"
                 >
-                  Have a code? Restore my session →
+                  🔁 Rejoin my flock
+                  <span className="block text-xs font-normal text-slate-500 mt-0.5">Have a code from another device? Pick up where you left off.</span>
                 </button>
+              </div>
+              <div className="mt-4 pt-4 border-t border-slate-800">
                 <button
                   onClick={onSkip}
                   className="w-full text-xs text-slate-600 hover:text-slate-400 transition-colors py-1"
@@ -276,7 +284,7 @@ export function FlockGate({ onJoined, onSkip, inviteCode }: FlockGateProps) {
               {error && <p className="text-red-400 text-xs text-center mb-3">{error}</p>}
               <button
                 onClick={handleCreate}
-                disabled={!name.trim() || loading}
+                disabled={!name.trim() || loading || cooldown}
                 className="w-full py-3 rounded-xl font-bold text-white text-sm disabled:opacity-40 disabled:cursor-not-allowed transition-all"
                 style={{ background: name.trim() ? 'linear-gradient(135deg, #2563eb, #0ea5e9)' : '#1e1e2e' }}
               >
@@ -314,7 +322,7 @@ export function FlockGate({ onJoined, onSkip, inviteCode }: FlockGateProps) {
               {error && <p className="text-red-400 text-xs text-center mb-3">{error}</p>}
               <button
                 onClick={handleJoin}
-                disabled={!name.trim() || !code.trim() || loading}
+                disabled={!name.trim() || !code.trim() || loading || cooldown}
                 className="w-full py-3 rounded-xl font-bold text-white text-sm disabled:opacity-40 disabled:cursor-not-allowed transition-all"
                 style={{ background: name.trim() && code.trim() ? 'linear-gradient(135deg, #2563eb, #0ea5e9)' : '#1e1e2e' }}
               >
@@ -347,7 +355,7 @@ export function FlockGate({ onJoined, onSkip, inviteCode }: FlockGateProps) {
                   {rejoinError && <p className="text-red-400 text-xs text-center mb-3">{rejoinError}</p>}
                   <button
                     onClick={handleRejoinLookup}
-                    disabled={!rejoinCode.trim() || rejoinLoading}
+                    disabled={!rejoinCode.trim() || rejoinLoading || cooldown}
                     className="w-full py-3 rounded-xl font-bold text-white text-sm disabled:opacity-40 disabled:cursor-not-allowed transition-all"
                     style={{ background: rejoinCode.trim() ? 'linear-gradient(135deg, #2563eb, #0ea5e9)' : '#1e1e2e' }}
                   >
