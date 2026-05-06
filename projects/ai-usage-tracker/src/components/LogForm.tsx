@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { LogEntry, AITool, UseCase, WorkflowStage, AIOutputType, VerificationLevel, ValueRating } from '../types';
+import { getBenchmark, getSourcesForBenchmark } from '../data/benchmarkReferences';
 
 const TOOLS: AITool[] = ['Gemini', 'ChatGPT', 'Claude', 'Claude Code', 'Copilot', 'Other'];
 
@@ -95,6 +96,89 @@ function ChipButton({ selected, onClick, color = 'blue', children, sub }: ChipBu
       <div>{children}</div>
       {sub && <div className="text-xs opacity-60 mt-0.5">{sub}</div>}
     </button>
+  );
+}
+
+const CONFIDENCE_STYLES = {
+  high:   { label: 'High confidence', color: 'text-dc-green border-dc-green/40 bg-dc-green/10' },
+  medium: { label: 'Medium confidence', color: 'text-dc-amber border-dc-amber/40 bg-dc-amber/10' },
+  low:    { label: 'Low confidence', color: 'text-dc-muted border-dc-border bg-dc-surface' },
+};
+
+function BenchmarkCard({ useCase }: { useCase: UseCase }) {
+  const bench = getBenchmark(useCase);
+  if (!bench) return null;
+  const sources = getSourcesForBenchmark(bench);
+  const conf = CONFIDENCE_STYLES[bench.confidence];
+  const rangeLabel = bench.lowMinutes < 60
+    ? `${bench.lowMinutes}–${bench.highMinutes >= 60 ? `${Math.round(bench.highMinutes / 60 * 10) / 10}h` : `${bench.highMinutes}m`}`
+    : `${Math.round(bench.lowMinutes / 60 * 10) / 10}–${Math.round(bench.highMinutes / 60 * 10) / 10}h`;
+  const medLabel = bench.medianMinutes >= 60
+    ? `${Math.round(bench.medianMinutes / 60 * 10) / 10}h`
+    : `${bench.medianMinutes}m`;
+
+  return (
+    <div className="rounded-xl border border-dc-border bg-dc-surface/60 p-4 space-y-3">
+      <div className="flex items-start justify-between gap-3">
+        <div>
+          <div className="text-xs font-semibold text-dc-subtext uppercase tracking-wider mb-1">Research Benchmark</div>
+          <div className="text-sm font-bold text-dc-text">{useCase}</div>
+        </div>
+        <span className={`flex-shrink-0 text-xs px-2 py-0.5 rounded-full border font-medium ${conf.color}`}>
+          {conf.label}
+        </span>
+      </div>
+
+      <div className="flex items-end gap-4">
+        <div>
+          <div className="text-xs text-dc-muted mb-0.5">Expected range</div>
+          <div className="text-lg font-black text-dc-blue">{rangeLabel}</div>
+        </div>
+        <div>
+          <div className="text-xs text-dc-muted mb-0.5">Median</div>
+          <div className="text-base font-bold text-dc-subtext">{medLabel}</div>
+        </div>
+      </div>
+
+      {/* Visual band */}
+      <div className="space-y-1">
+        <div className="flex justify-between text-xs text-dc-muted">
+          <span>{bench.lowMinutes}m</span>
+          <span className="text-dc-blue font-semibold">↑ median {medLabel}</span>
+          <span>{bench.highMinutes >= 60 ? `${Math.round(bench.highMinutes / 60 * 10) / 10}h` : `${bench.highMinutes}m`}</span>
+        </div>
+        <div className="h-2 rounded-full bg-dc-border/30 relative overflow-hidden">
+          <div
+            className="absolute h-full rounded-full bg-dc-blue/30"
+            style={{
+              left: '0%',
+              width: '100%',
+            }}
+          />
+          <div
+            className="absolute top-0 h-full w-0.5 bg-dc-blue"
+            style={{
+              left: `${((bench.medianMinutes - bench.lowMinutes) / (bench.highMinutes - bench.lowMinutes)) * 100}%`,
+            }}
+          />
+        </div>
+      </div>
+
+      <p className="text-xs text-dc-muted leading-relaxed">{bench.caveat}</p>
+
+      {sources.length > 0 && (
+        <div className="pt-1 border-t border-dc-border/40">
+          <div className="text-xs text-dc-border mb-1">Sources</div>
+          <div className="space-y-0.5">
+            {sources.slice(0, 3).map(s => (
+              <div key={s.id} className="text-xs text-dc-muted">
+                {s.publisher} ({s.year}) — <span className="text-dc-border italic">{s.relevance.slice(0, 80)}{s.relevance.length > 80 ? '…' : ''}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
   );
 }
 
@@ -227,6 +311,10 @@ export function LogForm({ analystName, onSubmit }: LogFormProps) {
                 ))}
               </div>
             </div>
+
+            {useCase && useCase !== 'Other' && (
+              <BenchmarkCard useCase={useCase as UseCase} />
+            )}
           </>
         )}
 

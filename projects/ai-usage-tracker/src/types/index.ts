@@ -64,3 +64,36 @@ export interface AggStats {
   wouldUseAgainPct: number;
   recentWeekEntries: number;
 }
+
+// Benchmark classification for a single log entry
+export type BenchmarkPosition = 'above' | 'within' | 'below' | 'unknown';
+
+export interface BenchmarkClassification {
+  position: BenchmarkPosition;
+  benchmarkMedian: number;
+  benchmarkLow: number;
+  benchmarkHigh: number;
+  gap: number; // timeSavedMinutes - benchmarkMedian (positive = above, negative = below)
+}
+
+// Per-analyst aggregate model
+export interface UserSummary {
+  analystName: string;
+  totalEntries: number;
+  totalTimeSavedHours: number;
+  avgValueRating: number;
+  wouldUseAgainPct: number;
+  wouldStandardizePct: number;
+  heavyVerificationPct: number;
+  directUsePct: number; // verificationLevel === 'none'
+  topTool: string;
+  topUseCase: string;
+  topStage: WorkflowStage;
+  calibrationRate: number; // pct of logs where self-reported time is within benchmark band
+  aboveBandPct: number;
+  belowBandPct: number;
+  byTool: Record<string, number>;
+  byStage: Record<string, number>;
+  byUseCase: Record<string, { count: number; timeSaved: number; avgValue: number }>;
+  recentWeekEntries: number;
+}

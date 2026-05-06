@@ -1,4 +1,5 @@
-import { AggStats } from '../types';
+import { AggStats, LogEntry, UserSummary } from '../types';
+import { classifyBenchmark, computeCalibrationRate } from '../lib/storage';
 
 interface Insight {
   type: 'win' | 'flag' | 'tip';
@@ -6,9 +7,11 @@ interface Insight {
   body: string;
 }
 
-function deriveInsights(stats: AggStats): Insight[] {
+function deriveInsights(stats: AggStats, entries: LogEntry[], userSummaries: UserSummary[]): Insight[] {
   if (stats.totalEntries < 3) return [];
   const insights: Insight[] = [];
+
+  // ── Team-level rules ─────────────────────────────────────────────────────
 
   // High-value use cases
   const highValue = Object.entries(stats.byUseCase)
@@ -33,7 +36,7 @@ function deriveInsights(stats: AggStats): Insight[] {
     insights.push({
       type: 'flag',
       title: `Only ${stats.wouldUseAgainPct}% of workflows would be repeated`,
-      body: 'A lot of assists aren\'t landing. Consider auditing which use cases are driving this and refining the approach.',
+      body: "A lot of assists aren't landing. Consider auditing which use cases are driving this and refining the approach.",
     });
   }
 
@@ -42,8 +45,8 @@ function deriveInsights(stats: AggStats): Insight[] {
   if (heavyPct >= 25) {
     insights.push({
       type: 'flag',
-      title: `${heavyPct}% of logs require heavy review`,
-      body: 'High verification burden suggests the AI output needs more refinement before it\'s trustworthy. Better prompts or a validation checklist could help.',
+      title: `${heavyPct}% of logs require heavy review — verification tax hotspot`,
+      body: 'High verification burden erodes time savings. Better prompts, explicit constraints, or a validation checklist could reduce the review load.',
     });
   }
 
@@ -54,8 +57,8 @@ function deriveInsights(stats: AggStats): Insight[] {
   if (lowValue.length > 0) {
     insights.push({
       type: 'flag',
-      title: `"${lowValue[0][0]}" is consistently low-value`,
-      body: `Avg ${Math.round(lowValue[0][1].avgValue * 10) / 10}/5 — may not be the right fit for AI, or the current approach needs rethinking.`,
+      title: `"${lowValue[0][0]}" is a habit without payoff`,
+      body: `Avg ${Math.round(lowValue[0][1].avgValue * 10) / 10}/5 over ${lowValue[0][1].count} logs — AI may not be the right fit here, or the approach needs rethinking.`,
     });
   }
 
@@ -93,6 +96,161 @@ function deriveInsights(stats: AggStats): Insight[] {
     });
   }
 
+  // ── Edit-heavy sweet spot ─────────────────────────────────────────────────
+  const editedOutputEntries = entries.filter(e => e.outputType === 'Edited / improved my text' && e.verificationLevel !== 'heavy');
+  if (editedOutputEntries.length >= 2) {
+    const avgValue = editedOutputEntries.reduce((s, e) => s + e.valueRating, 0) / editedOutputEntries.length;
+    if (avgValue >= 3.5) {
+      insights.push({
+        type: 'win',
+        title: 'Edit-heavy workflows are a sweet spot',
+        body: `${editedOutputEntries.length} logs where AI edited or improved your text — avg value ${Math.round(avgValue * 10) / 10}/5 with low verification burden. A high-ROI pattern worth repeating.`,
+      });
+    }
+  }
+
+  // ── Direct-use candidates ─────────────────────────────────────────────────
+  const directUseNoVerify = entries.filter(e => e.verificationLevel === 'none' && e.wouldUseAgain && e.valueRating >= 4);
+  if (directUseNoVerify.length >= 2) {
+    const ucCounts: Record<string, number> = {};
+    for (const e of directUseNoVerify) ucCounts[e.useCase] = (ucCounts[e.useCase] ?? 0) + 1;
+    const topUC = Object.entries(ucCounts).sort((a, b) => b[1] - a[1])[0];
+    insights.push({
+      type: 'win',
+      title: `Direct-use candidate: "${topUC[0]}"`,
+      body: `${topUC[1]} log${topUC[1] > 1 ? 's' : ''} where AI output was used directly with no verification, high value, and marked repeatable. Strong signal for a trusted workflow.`,
+    });
+  }
+
+  // ── Sensitive direct-use warning ──────────────────────────────────────────
+  const sensitiveDirect = entries.filter(e => {
+    const isSensitive = e.useCase === 'SQL / query writing' || e.useCase === 'Data cleaning / transformation' || e.useCase === 'Ad-hoc analysis';
+    return isSensitive && e.verificationLevel === 'none';
+  });
+  if (sensitiveDirect.length >= 2) {
+    insights.push({
+      type: 'flag',
+      title: 'SQL/analysis outputs used directly without verification',
+      body: `${sensitiveDirect.length} logs where data-critical AI output (queries, analysis) had no verification step. Even light review catches logic errors before they affect downstream reports.`,
+    });
+  }
+
+  // ── Communication low-friction ────────────────────────────────────────────
+  const commEntries = entries.filter(e => e.workflowStage === 'Communicate');
+  if (commEntries.length >= 3) {
+    const avgValue = commEntries.reduce((s, e) => s + e.valueRating, 0) / commEntries.length;
+    const lightOrNone = commEntries.filter(e => e.verificationLevel !== 'heavy').length;
+    const lowFrictionPct = Math.round((lightOrNone / commEntries.length) * 100);
+    if (avgValue >= 3.5 && lowFrictionPct >= 60) {
+      insights.push({
+        type: 'win',
+        title: 'Communication stage: low friction, high value',
+        body: `${commEntries.length} Communicate-stage logs, avg ${Math.round(avgValue * 10) / 10}/5, ${lowFrictionPct}% light-or-no review. AI is fitting naturally into writing and summarization work.`,
+      });
+    }
+  }
+
+  // ── Reuse gap ─────────────────────────────────────────────────────────────
+  const highValueNoStandardize = Object.entries(stats.byUseCase)
+    .filter(([, d]) => d.avgValue >= 4 && d.count >= 3);
+  const standardizeByUC: Record<string, number> = {};
+  for (const e of entries) {
+    if (e.wouldStandardize) standardizeByUC[e.useCase] = (standardizeByUC[e.useCase] ?? 0) + 1;
+  }
+  const reusableButNotFlagged = highValueNoStandardize.filter(([uc]) => !standardizeByUC[uc]);
+  if (reusableButNotFlagged.length > 0) {
+    insights.push({
+      type: 'tip',
+      title: `Reuse gap: ${reusableButNotFlagged.length} high-value use case${reusableButNotFlagged.length > 1 ? 's' : ''} not flagged for standardization`,
+      body: `"${reusableButNotFlagged[0][0]}" has avg ${Math.round(reusableButNotFlagged[0][1].avgValue * 10) / 10}/5 but no standardization flags. Review if these workflows are teachable to the broader team.`,
+    });
+  }
+
+  // ── Underused bright spot ─────────────────────────────────────────────────
+  const underused = Object.entries(stats.byUseCase)
+    .filter(([, d]) => d.count >= 1 && d.count <= 2 && d.avgValue >= 4.5);
+  if (underused.length > 0) {
+    insights.push({
+      type: 'tip',
+      title: `Underused bright spot: "${underused[0][0]}"`,
+      body: `Only ${underused[0][1].count} log${underused[0][1].count > 1 ? 's' : ''} but avg ${Math.round(underused[0][1].avgValue * 10) / 10}/5 — exceptionally high value with low volume. May be underutilized.`,
+    });
+  }
+
+  // ── Benchmark: above band ─────────────────────────────────────────────────
+  const aboveBand = entries.filter(e => classifyBenchmark(e)?.position === 'above');
+  if (aboveBand.length >= 2) {
+    const ucCounts: Record<string, number> = {};
+    for (const e of aboveBand) ucCounts[e.useCase] = (ucCounts[e.useCase] ?? 0) + 1;
+    const topUC = Object.entries(ucCounts).sort((a, b) => b[1] - a[1])[0];
+    insights.push({
+      type: 'win',
+      title: `Above-benchmark savings: "${topUC[0]}"`,
+      body: `${aboveBand.length} log${aboveBand.length > 1 ? 's' : ''} reported time savings above the research band. This team is outperforming typical baselines — likely due to workflow maturity or tooling familiarity.`,
+    });
+  }
+
+  // ── Benchmark: below band ─────────────────────────────────────────────────
+  const belowBand = entries.filter(e => classifyBenchmark(e)?.position === 'below');
+  if (belowBand.length >= 3) {
+    const totalWithBench = entries.filter(e => classifyBenchmark(e) !== null && e.timeSavedMinutes > 0).length;
+    const belowPct = totalWithBench > 0 ? Math.round((belowBand.length / totalWithBench) * 100) : 0;
+    if (belowPct >= 30) {
+      insights.push({
+        type: 'flag',
+        title: `${belowPct}% of logs below benchmark band`,
+        body: "A significant share of reported savings falls below what research suggests is typical. This may reflect over-logging marginal assists, or tasks that aren't yet a good AI fit.",
+      });
+    }
+  }
+
+  // ── Low calibration ───────────────────────────────────────────────────────
+  const calRate = computeCalibrationRate(entries);
+  if (entries.length >= 8 && calRate < 40) {
+    insights.push({
+      type: 'flag',
+      title: `Low calibration rate: only ${calRate}% of logs match research benchmarks`,
+      body: 'Most reported savings are outside the expected research bands — either consistently high or low. Worth discussing with the team whether time estimates are being logged accurately.',
+    });
+  }
+
+  // ── User concentration risk ───────────────────────────────────────────────
+  if (userSummaries.length >= 2) {
+    const topUser = userSummaries[0];
+    const topUserPct = Math.round((topUser.totalEntries / stats.totalEntries) * 100);
+    if (topUserPct >= 50 && stats.totalEntries >= 10) {
+      insights.push({
+        type: 'flag',
+        title: `User concentration risk: ${topUser.analystName} accounts for ${topUserPct}% of logs`,
+        body: 'Insight quality depends on broad participation. Encourage other team members to log their AI workflows for more representative patterns.',
+      });
+    }
+  }
+
+  // ── User needs enablement ──────────────────────────────────────────────────
+  if (userSummaries.length >= 2) {
+    const needsSupport = userSummaries.filter(u => u.totalEntries >= 3 && u.avgValueRating <= 2.5 && u.wouldUseAgainPct < 50);
+    if (needsSupport.length > 0) {
+      insights.push({
+        type: 'flag',
+        title: `${needsSupport[0].analystName} may need enablement support`,
+        body: `Avg value ${needsSupport[0].avgValueRating}/5 and ${needsSupport[0].wouldUseAgainPct}% would-repeat rate over ${needsSupport[0].totalEntries} logs. Targeted guidance on prompt design or use case selection could help.`,
+      });
+    }
+  }
+
+  // ── User power pattern ────────────────────────────────────────────────────
+  if (userSummaries.length >= 2) {
+    const powerUser = userSummaries.find(u => u.totalEntries >= 5 && u.avgValueRating >= 4 && u.wouldUseAgainPct >= 75 && u.wouldStandardizePct >= 30);
+    if (powerUser) {
+      insights.push({
+        type: 'win',
+        title: `${powerUser.analystName} shows a power-user pattern`,
+        body: `${powerUser.totalEntries} logs, avg ${powerUser.avgValueRating}/5, ${powerUser.wouldUseAgainPct}% repeat rate, ${powerUser.wouldStandardizePct}% flagged for standardization. A strong candidate to lead a prompt library or knowledge-share session.`,
+      });
+    }
+  }
+
   return insights;
 }
 
@@ -102,8 +260,14 @@ const INSIGHT_STYLES = {
   tip:  { border: 'border-dc-blue/40',   bg: 'bg-dc-blue/5',   icon: '💡', color: 'text-dc-blue' },
 };
 
-export function InsightsPanel({ stats }: { stats: AggStats }) {
-  const insights = deriveInsights(stats);
+interface InsightsPanelProps {
+  stats: AggStats;
+  entries: LogEntry[];
+  userSummaries: UserSummary[];
+}
+
+export function InsightsPanel({ stats, entries, userSummaries }: InsightsPanelProps) {
+  const insights = deriveInsights(stats, entries, userSummaries);
 
   if (stats.totalEntries < 3) {
     return (
@@ -127,15 +291,29 @@ export function InsightsPanel({ stats }: { stats: AggStats }) {
     );
   }
 
+  const wins = insights.filter(i => i.type === 'win');
+  const flags = insights.filter(i => i.type === 'flag');
+  const tips = insights.filter(i => i.type === 'tip');
+  const sorted = [...flags, ...tips, ...wins]; // flags first for attention
+
   return (
     <div className="space-y-3">
       <div className="bg-dc-card border border-dc-border rounded-2xl overflow-hidden">
         <div className="px-5 py-4 border-b border-dc-border">
-          <h3 className="text-sm font-bold text-dc-text">Auto Insights</h3>
-          <p className="text-xs text-dc-muted mt-0.5">Patterns from your logs — {stats.totalEntries} entries analyzed</p>
+          <div className="flex items-center justify-between">
+            <div>
+              <h3 className="text-sm font-bold text-dc-text">Auto Insights</h3>
+              <p className="text-xs text-dc-muted mt-0.5">Patterns from your logs — {stats.totalEntries} entries analyzed</p>
+            </div>
+            <div className="flex items-center gap-2 text-xs">
+              {flags.length > 0 && <span className="text-dc-amber">{flags.length} flag{flags.length > 1 ? 's' : ''}</span>}
+              {wins.length > 0 && <span className="text-dc-green">{wins.length} win{wins.length > 1 ? 's' : ''}</span>}
+              {tips.length > 0 && <span className="text-dc-blue">{tips.length} tip{tips.length > 1 ? 's' : ''}</span>}
+            </div>
+          </div>
         </div>
         <div className="divide-y divide-dc-border/50">
-          {insights.map((insight, i) => {
+          {sorted.map((insight, i) => {
             const s = INSIGHT_STYLES[insight.type];
             return (
               <div key={i} className={`px-5 py-4 ${s.bg} border-l-2 ${s.border}`}>

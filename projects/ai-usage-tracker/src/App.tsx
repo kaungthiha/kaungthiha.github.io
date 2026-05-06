@@ -1,12 +1,14 @@
 import { useState, useMemo } from 'react';
 import { LogEntry } from './types';
-import { loadEntries, addEntry, deleteEntry, exportCSV, importCSV, computeStats, generateSeedData, saveEntries } from './lib/storage';
+import { loadEntries, addEntry, deleteEntry, exportCSV, importCSV, computeStats, generateSeedData, saveEntries, computeUserSummaries } from './lib/storage';
 import { LogForm } from './components/LogForm';
 import { Dashboard } from './components/Dashboard';
 import { LogHistory } from './components/LogHistory';
 import { InsightsPanel } from './components/InsightsPanel';
+import { UserBreakdown } from './components/UserBreakdown';
+import { BenchmarkCalibration } from './components/BenchmarkCalibration';
 
-type Tab = 'log' | 'dashboard' | 'history' | 'insights';
+type Tab = 'log' | 'dashboard' | 'insights' | 'analysts' | 'benchmarks' | 'history';
 
 const ANALYST_KEY = 'dc_analyst_name';
 
@@ -85,6 +87,7 @@ export default function App() {
   const [hasSeed, setHasSeed] = useState(false);
 
   const stats = useMemo(() => computeStats(entries), [entries]);
+  const userSummaries = useMemo(() => computeUserSummaries(entries), [entries]);
 
   function handleIdentityConfirm(name: string) {
     saveAnalystName(name);
@@ -131,6 +134,8 @@ export default function App() {
     { id: 'log', label: 'Log' },
     { id: 'dashboard', label: 'Dashboard', badge: stats.totalEntries > 0 ? stats.totalEntries : undefined },
     { id: 'insights', label: 'Insights' },
+    { id: 'analysts', label: 'Analysts', badge: userSummaries.length > 1 ? userSummaries.length : undefined },
+    { id: 'benchmarks', label: 'Benchmarks' },
     { id: 'history', label: 'History' },
   ];
 
@@ -263,7 +268,7 @@ export default function App() {
           <div>
             <div className="mb-5">
               <h2 className="text-xl font-black text-dc-text">Dashboard</h2>
-              <p className="text-sm text-dc-muted mt-1">How the team is using AI — and where it's actually working.</p>
+              <p className="text-sm text-dc-muted mt-1">Snapshots about how the team is using AI</p>
             </div>
             <Dashboard stats={stats} entries={entries} />
           </div>
@@ -273,9 +278,49 @@ export default function App() {
           <div>
             <div className="mb-5">
               <h2 className="text-xl font-black text-dc-text">Insights</h2>
-              <p className="text-sm text-dc-muted mt-1">Auto-generated patterns from your logs.</p>
+              <p className="text-sm text-dc-muted mt-1">Auto-generated patterns from logs.</p>
             </div>
-            <InsightsPanel stats={stats} />
+            <InsightsPanel stats={stats} entries={entries} userSummaries={userSummaries} />
+          </div>
+        )}
+
+        {activeTab === 'analysts' && (
+          <div>
+            <div className="mb-5">
+              <h2 className="text-xl font-black text-dc-text">Analyst Breakdown</h2>
+              <p className="text-sm text-dc-muted mt-1">Per-analyst usage patterns, tool preferences, and stage distribution.</p>
+            </div>
+            {userSummaries.length === 0 ? (
+              <div className="bg-dc-card border border-dc-border rounded-2xl p-12 text-center">
+                <div className="text-4xl mb-3">👥</div>
+                <p className="text-sm text-dc-muted">No logs yet. Log some AI assists to see per-analyst breakdowns.</p>
+              </div>
+            ) : userSummaries.length === 1 ? (
+              <div className="bg-dc-card border border-dc-border rounded-2xl p-8 text-center">
+                <div className="text-3xl mb-3">👤</div>
+                <p className="text-sm text-dc-text font-semibold mb-1">Only one analyst logged so far</p>
+                <p className="text-xs text-dc-muted">Multi-analyst comparisons unlock when more team members log their workflows.</p>
+              </div>
+            ) : (
+              <UserBreakdown summaries={userSummaries} />
+            )}
+          </div>
+        )}
+
+        {activeTab === 'benchmarks' && (
+          <div>
+            <div className="mb-5">
+              <h2 className="text-xl font-black text-dc-text">Benchmark Calibration</h2>
+              <p className="text-sm text-dc-muted mt-1">How reported time savings compare to published research baselines.</p>
+            </div>
+            {entries.length === 0 ? (
+              <div className="bg-dc-card border border-dc-border rounded-2xl p-12 text-center">
+                <div className="text-4xl mb-3">📊</div>
+                <p className="text-sm text-dc-muted">Log some AI assists to compare against research benchmarks.</p>
+              </div>
+            ) : (
+              <BenchmarkCalibration entries={entries} />
+            )}
           </div>
         )}
 
@@ -291,7 +336,7 @@ export default function App() {
       </main>
 
       <footer className="border-t border-dc-border py-5 text-center text-xs text-dc-border">
-        Data Compass · AI Usage Tracker · Capital One · All data stays in your browser.
+        Data Compass · AI Usage Tracker · Capital One · All data stays in local storage.
       </footer>
     </div>
   );

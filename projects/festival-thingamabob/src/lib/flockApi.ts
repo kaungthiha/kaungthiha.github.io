@@ -46,6 +46,35 @@ export function loadFlockCache(tripCode: string): FlockDetails | null {
   } catch { return null }
 }
 
+export interface CachedFlockEntry {
+  tripCode: string
+  memberNames: string[]
+  cachedAt: string
+}
+
+export function loadAllFlockCaches(): CachedFlockEntry[] {
+  try {
+    const prefix = 'sheepherder_flock_cache_'
+    const results: CachedFlockEntry[] = []
+    for (let i = 0; i < localStorage.length; i++) {
+      const key = localStorage.key(i)
+      if (!key?.startsWith(prefix)) continue
+      const tripCode = key.slice(prefix.length)
+      const raw = localStorage.getItem(key)
+      if (!raw) continue
+      const parsed = JSON.parse(raw) as { details: FlockDetails; cachedAt: string }
+      results.push({
+        tripCode,
+        memberNames: parsed.details.members.map(m => m.name),
+        cachedAt: parsed.cachedAt,
+      })
+    }
+    return results.sort((a, b) => new Date(b.cachedAt).getTime() - new Date(a.cachedAt).getTime())
+  } catch {
+    return []
+  }
+}
+
 export async function createTrip(memberName: string): Promise<FlockInfo | null> {
   for (let attempt = 0; attempt < 3; attempt++) {
     const tripCode = generateTripCode()
@@ -162,6 +191,32 @@ export async function getFlockDetails(tripCode: string): Promise<FlockDetails | 
     }),
     isLocked: !!(tripRow.locked_at),
     lockedAt: tripRow.locked_at ? new Date(tripRow.locked_at as string) : null,
+  }
+}
+
+export interface MemberPrefsData {
+  artistPreferences: ArtistPreference[]
+  userPrefs: UserPreferences | null
+  selectedDay: string | null
+}
+
+export async function getMemberData(memberId: string): Promise<MemberPrefsData | null> {
+  const { data, error } = await supabase
+    .from('flock_members')
+    .select('artist_preferences, user_prefs, selected_day')
+    .eq('id', memberId)
+    .single()
+
+  if (error || !data) {
+    console.error('[getMemberData]', error)
+    return null
+  }
+
+  const row = data as Record<string, unknown>
+  return {
+    artistPreferences: (row.artist_preferences as ArtistPreference[]) ?? [],
+    userPrefs: (row.user_prefs as UserPreferences) ?? null,
+    selectedDay: (row.selected_day as string) ?? null,
   }
 }
 

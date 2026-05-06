@@ -7,6 +7,7 @@ import {
   FlockDetails,
   savePreferences,
   getFlockDetails,
+  getMemberData,
   lockFlock,
   unlockFlock,
   saveFlockCache,
@@ -107,7 +108,7 @@ export default function App() {
     });
   }, []);
 
-  function handleFlockJoined(info: FlockInfo) {
+  async function handleFlockJoined(info: FlockInfo) {
     try { sessionStorage.setItem(FLOCK_SESSION_KEY, JSON.stringify(info)); } catch { /* ignore */ }
     setFlockInfo(info);
     setFlockReady(true);
@@ -116,6 +117,23 @@ export default function App() {
       url.searchParams.delete('flock');
       history.replaceState(null, '', url.toString());
     } catch { /* ignore */ }
+
+    // Hydrate picks from Supabase — covers cross-device rejoin
+    const remote = await getMemberData(info.memberId);
+    if (remote) {
+      if (remote.artistPreferences.length > 0) {
+        setArtistPreferences(remote.artistPreferences);
+        saveArtistPreferences(remote.artistPreferences);
+      }
+      if (remote.userPrefs) {
+        const merged = { ...DEFAULT_PREFS, ...remote.userPrefs };
+        setUserPrefs(merged);
+        saveUserPrefs(merged);
+      }
+      if (remote.selectedDay) {
+        setSelectedDay(remote.selectedDay);
+      }
+    }
   }
 
   function handleFlockSkip() {

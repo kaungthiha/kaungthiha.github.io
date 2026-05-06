@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { FlockInfo, FlockMemberData, createTrip, joinTrip, getFlockDetails } from '../lib/flockApi';
+import { FlockInfo, FlockMemberData, CachedFlockEntry, createTrip, joinTrip, getFlockDetails, loadAllFlockCaches } from '../lib/flockApi';
 
 interface FlockGateProps {
   onJoined: (info: FlockInfo) => void;
@@ -11,6 +11,7 @@ type Mode = 'choose' | 'create' | 'join' | 'rejoin';
 
 export function FlockGate({ onJoined, onSkip, inviteCode }: FlockGateProps) {
   const [mode, setMode] = useState<Mode>(() => inviteCode ? 'join' : 'choose');
+  const [cachedFlocks] = useState<CachedFlockEntry[]>(() => loadAllFlockCaches());
   const [name, setName] = useState('');
   const [code, setCode] = useState(inviteCode ?? '');
   const [loading, setLoading] = useState(false);
@@ -70,6 +71,23 @@ export function FlockGate({ onJoined, onSkip, inviteCode }: FlockGateProps) {
       memberId: member.id,
       memberName: member.name,
       isLeader: member.isLeader,
+    });
+  }
+
+  function handleQuickRejoin(cached: CachedFlockEntry) {
+    setRejoinCode(cached.tripCode);
+    setMode('rejoin');
+    // Auto-fetch the member list immediately
+    setRejoinLoading(true);
+    setRejoinError('');
+    setRejoinMembers(null);
+    getFlockDetails(cached.tripCode).then(details => {
+      setRejoinLoading(false);
+      if (!details || details.members.length === 0) {
+        setRejoinError("Couldn't find that flock. It may have expired.");
+        return;
+      }
+      setRejoinMembers(details.members);
     });
   }
 
@@ -184,6 +202,28 @@ export function FlockGate({ onJoined, onSkip, inviteCode }: FlockGateProps) {
               <p className="text-slate-300 text-sm text-center mb-5">
                 Planning with a crew? Herd together to compare itineraries.
               </p>
+
+              {/* Cached flocks — quick rejoin */}
+              {cachedFlocks.length > 0 && (
+                <div className="mb-4">
+                  <p className="text-xs text-slate-500 mb-2 text-center">Recent flocks on this device</p>
+                  <div className="space-y-2">
+                    {cachedFlocks.map(c => (
+                      <button
+                        key={c.tripCode}
+                        onClick={() => handleQuickRejoin(c)}
+                        className="w-full flex items-center gap-3 px-4 py-2.5 rounded-xl border border-slate-700 hover:border-festival-blue/60 hover:bg-festival-blue/10 transition-all text-left"
+                      >
+                        <span className="font-mono font-bold text-festival-cyan tracking-wider text-sm flex-shrink-0">{c.tripCode}</span>
+                        <span className="text-xs text-slate-400 flex-1 truncate">{c.memberNames.slice(0, 3).join(', ')}{c.memberNames.length > 3 ? ` +${c.memberNames.length - 3}` : ''}</span>
+                        <span className="text-xs text-slate-600 flex-shrink-0">Rejoin →</span>
+                      </button>
+                    ))}
+                  </div>
+                  <div className="my-4 border-t border-slate-800" />
+                </div>
+              )}
+
               <div className="space-y-3">
                 <button
                   onClick={() => setMode('create')}
@@ -204,7 +244,7 @@ export function FlockGate({ onJoined, onSkip, inviteCode }: FlockGateProps) {
                   onClick={() => setMode('rejoin')}
                   className="w-full text-xs text-slate-500 hover:text-festival-cyan transition-colors py-1"
                 >
-                  Already in a flock? Restore my session →
+                  Have a code? Restore my session →
                 </button>
                 <button
                   onClick={onSkip}

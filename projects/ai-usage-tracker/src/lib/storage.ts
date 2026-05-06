@@ -1,4 +1,5 @@
-import { LogEntry, AggStats, VerificationLevel, WorkflowStage, AIOutputType } from '../types';
+import { LogEntry, AggStats, VerificationLevel, WorkflowStage, AIOutputType, BenchmarkClassification, BenchmarkPosition, UserSummary } from '../types';
+import { getBenchmark } from '../data/benchmarkReferences';
 
 const STORAGE_KEY = 'dc_ai_usage_logs';
 
@@ -164,6 +165,130 @@ export function computeStats(entries: LogEntry[]): AggStats {
     wouldUseAgainPct: Math.round((wouldUseAgainCount / entries.length) * 100),
     recentWeekEntries,
   };
+}
+
+// ── Benchmark utilities ──────────────────────────────────────────────────────
+
+export function classifyBenchmark(entry: LogEntry): BenchmarkClassification | null {
+  const bench = getBenchmark(entry.useCase);
+  if (!bench) return null;
+  let position: BenchmarkPosition;
+  if (entry.timeSavedMinutes === 0) {
+    position = 'unknown';
+  } else if (entry.timeSavedMinutes < bench.lowMinutes) {
+    position = 'below';
+  } else if (entry.timeSavedMinutes > bench.highMinutes) {
+    position = 'above';
+  } else {
+    position = 'within';
+  }
+  return {
+    position,
+    benchmarkMedian: bench.medianMinutes,
+    benchmarkLow: bench.lowMinutes,
+    benchmarkHigh: bench.highMinutes,
+    gap: entry.timeSavedMinutes - bench.medianMinutes,
+  };
+}
+
+export function computeCalibrationRate(entries: LogEntry[]): number {
+  const withBench = entries.filter(e => e.timeSavedMinutes > 0);
+  if (withBench.length === 0) return 0;
+  const withinCount = withBench.filter(e => {
+    const c = classifyBenchmark(e);
+    return c?.position === 'within';
+  }).length;
+  return Math.round((withinCount / withBench.length) * 100);
+}
+
+export function computeAboveBandPct(entries: LogEntry[]): number {
+  const withBench = entries.filter(e => e.timeSavedMinutes > 0);
+  if (withBench.length === 0) return 0;
+  const above = withBench.filter(e => classifyBenchmark(e)?.position === 'above').length;
+  return Math.round((above / withBench.length) * 100);
+}
+
+export function computeBelowBandPct(entries: LogEntry[]): number {
+  const withBench = entries.filter(e => e.timeSavedMinutes > 0);
+  if (withBench.length === 0) return 0;
+  const below = withBench.filter(e => classifyBenchmark(e)?.position === 'below').length;
+  return Math.round((below / withBench.length) * 100);
+}
+
+// ── User summaries ───────────────────────────────────────────────────────────
+
+export function computeUserSummaries(entries: LogEntry[]): UserSummary[] {
+  const byName: Record<string, LogEntry[]> = {};
+  for (const e of entries) {
+    if (!byName[e.analystName]) byName[e.analystName] = [];
+    byName[e.analystName].push(e);
+  }
+
+  const oneWeekAgo = Date.now() - 7 * 24 * 60 * 60 * 1000;
+
+  return Object.entries(byName).map(([analystName, userEntries]) => {
+    const total = userEntries.length;
+    const byTool: Record<string, number> = {};
+    const byStage: Record<string, number> = {};
+    const byUseCase: Record<string, { count: number; timeSaved: number; avgValue: number; _sum: number }> = {};
+    let totalSaved = 0;
+    let totalValue = 0;
+    let wouldUseAgainCount = 0;
+    let wouldStandardizeCount = 0;
+    let heavyVerifyCount = 0;
+    let directUseCount = 0;
+    let recentWeek = 0;
+
+    for (const e of userEntries) {
+      byTool[e.tool] = (byTool[e.tool] ?? 0) + 1;
+      byStage[e.workflowStage] = (byStage[e.workflowStage] ?? 0) + 1;
+      if (!byUseCase[e.useCase]) byUseCase[e.useCase] = { count: 0, timeSaved: 0, avgValue: 0, _sum: 0 };
+      byUseCase[e.useCase].count++;
+      byUseCase[e.useCase].timeSaved += e.timeSavedMinutes;
+      byUseCase[e.useCase]._sum += e.valueRating;
+      totalSaved += e.timeSavedMinutes;
+      totalValue += e.valueRating;
+      if (e.wouldUseAgain) wouldUseAgainCount++;
+      if (e.wouldStandardize) wouldStandardizeCount++;
+      if (e.verificationLevel === 'heavy') heavyVerifyCount++;
+      if (e.verificationLevel === 'none') directUseCount++;
+      if (new Date(e.timestamp).getTime() > oneWeekAgo) recentWeek++;
+    }
+
+    for (const uc of Object.values(byUseCase)) {
+      uc.avgValue = uc._sum / uc.count;
+    }
+
+    const topTool = Object.entries(byTool).sort((a, b) => b[1] - a[1])[0]?.[0] ?? '';
+    const topUseCase = Object.entries(byUseCase).sort((a, b) => b[1].count - a[1].count)[0]?.[0] ?? '';
+    const topStage = (Object.entries(byStage).sort((a, b) => b[1] - a[1])[0]?.[0] ?? 'Other') as WorkflowStage;
+
+    const cleanByUseCase: Record<string, { count: number; timeSaved: number; avgValue: number }> = {};
+    for (const [k, v] of Object.entries(byUseCase)) {
+      cleanByUseCase[k] = { count: v.count, timeSaved: v.timeSaved, avgValue: v.avgValue };
+    }
+
+    return {
+      analystName,
+      totalEntries: total,
+      totalTimeSavedHours: Math.round((totalSaved / 60) * 10) / 10,
+      avgValueRating: Math.round((totalValue / total) * 10) / 10,
+      wouldUseAgainPct: Math.round((wouldUseAgainCount / total) * 100),
+      wouldStandardizePct: Math.round((wouldStandardizeCount / total) * 100),
+      heavyVerificationPct: Math.round((heavyVerifyCount / total) * 100),
+      directUsePct: Math.round((directUseCount / total) * 100),
+      topTool,
+      topUseCase,
+      topStage,
+      calibrationRate: computeCalibrationRate(userEntries),
+      aboveBandPct: computeAboveBandPct(userEntries),
+      belowBandPct: computeBelowBandPct(userEntries),
+      byTool,
+      byStage,
+      byUseCase: cleanByUseCase,
+      recentWeekEntries: recentWeek,
+    };
+  }).sort((a, b) => b.totalEntries - a.totalEntries);
 }
 
 const WORKFLOW_STAGES: WorkflowStage[] = ['Build', 'Validate', 'Communicate', 'Explore', 'Other'];
