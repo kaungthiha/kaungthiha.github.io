@@ -257,7 +257,6 @@ export function LogForm({ analystName, onSubmit }: LogFormProps) {
           </div>
           <div>
             <h2 className="font-bold text-dc-text text-base">Log an AI Assist</h2>
-            <p className="text-xs text-dc-muted">No prompts. No data. Just the pattern.</p>
           </div>
         </div>
 

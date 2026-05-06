@@ -212,7 +212,7 @@ export function Dashboard({ stats, entries }: DashboardProps) {
 
         <div className="bg-dc-card border border-dc-border rounded-2xl p-5">
           <h3 className="text-sm font-bold text-dc-text mb-0.5">AI Output Type</h3>
-          <p className="text-xs text-dc-muted mb-4">What the AI actually produced</p>
+          <p className="text-xs text-dc-muted mb-4">What the AI produced</p>
           <ResponsiveContainer width="100%" height={170}>
             <BarChart data={outputData} layout="vertical" margin={{ left: 0, right: 16 }}>
               <XAxis type="number" tick={{ fontSize: 11, fill: '#64748b' }} tickLine={false} axisLine={false} />
