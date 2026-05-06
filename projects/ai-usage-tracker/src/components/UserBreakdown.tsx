@@ -112,6 +112,12 @@ function hexToRgb(hex: string): string {
   return `${r},${g},${b}`;
 }
 
+function AnalystDot(props: unknown) {
+  const { cx, cy, payload } = props as { cx: number; cy: number; payload: UserSummary & { color: string } };
+  const r = Math.max(8, Math.min(22, payload.totalEntries * 2.5));
+  return <circle cx={cx} cy={cy} r={r} fill={payload.color} fillOpacity={0.7} stroke={payload.color} strokeWidth={1.5} />;
+}
+
 interface UserBreakdownProps {
   summaries: UserSummary[];
 }
@@ -148,7 +154,7 @@ export function UserBreakdown({ summaries }: UserBreakdownProps) {
               </tr>
             </thead>
             <tbody className="divide-y divide-dc-border/50">
-              {summaries.map((s, i) => (
+              {summaries.map((s) => (
                 <tr key={s.analystName} className="hover:bg-dc-surface/60 transition-colors">
                   <td className="px-5 py-3">
                     <div className="flex items-center gap-2">
@@ -221,12 +227,7 @@ export function UserBreakdown({ summaries }: UserBreakdownProps) {
                 label={{ value: 'Avg Value', angle: -90, position: 'insideLeft', offset: 10, fontSize: 11, fill: '#475569' }}
               />
               <Tooltip content={<CustomTooltip />} />
-              <Scatter data={scatterData} shape={({ cx, cy, payload }: { cx?: number; cy?: number; payload: typeof scatterData[0] }) => {
-                const r = Math.max(8, Math.min(22, payload.totalEntries * 2.5));
-                return (
-                  <circle cx={cx} cy={cy} r={r} fill={payload.color} fillOpacity={0.7} stroke={payload.color} strokeWidth={1.5} />
-                );
-              }}>
+              <Scatter data={scatterData} shape={<AnalystDot />}>
                 {scatterData.map((entry, i) => (
                   <Cell key={i} fill={entry.color} />
                 ))}
