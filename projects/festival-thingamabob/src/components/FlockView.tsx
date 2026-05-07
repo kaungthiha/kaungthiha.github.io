@@ -3,8 +3,9 @@ import { FlockMemberData } from '../lib/flockApi';
 import { EDC_2026_SETS, DAYS } from '../lib/sampleData';
 import { generateItinerary } from '../lib/itineraryOptimizer';
 import { generateFlockItinerary } from '../lib/flockItinerary';
-import { UserPreferences, ItineraryItem } from '../types/festival';
+import { FestivalSet, UserPreferences, ItineraryItem } from '../types/festival';
 import { formatTime } from '../lib/timeUtils';
+import { SwapModal } from './SwapModal';
 
 const DEFAULT_PREFS: UserPreferences = {
   defaultWalkingMinutes: 10,
@@ -290,15 +291,30 @@ function buildFlockStops(
   });
 }
 
-// Small popover that opens when clicking a missing member's avatar
-function MissingPopover({ status, onClose }: { status: MemberStatus; onClose: () => void }) {
+// Small popover that opens when clicking a missing member's avatar.
+// `dotIndex` is the 0-based position of this dot in the row, used to
+// anchor the popover so it never clips out of the panel on the left.
+function MissingPopover({
+  status,
+  dotIndex,
+  onClose,
+}: {
+  status: MemberStatus;
+  dotIndex: number;
+  onClose: () => void;
+}) {
+  // First dot: anchor left edge to the dot. Others: center on the dot.
+  const posClass = dotIndex === 0
+    ? 'left-0'
+    : 'left-1/2 -translate-x-1/2';
+
   return (
     <div
-      className="absolute z-20 bottom-full mb-2 left-1/2 -translate-x-1/2 w-44 rounded-xl border border-festival-border shadow-lg text-xs"
+      className={`absolute z-20 bottom-full mb-2 ${posClass} w-44 rounded-xl border border-festival-border shadow-lg text-xs`}
       style={{ backgroundColor: '#1b1f2c' }}
       onClick={e => e.stopPropagation()}
     >
-      <div className="px-3 py-2.5">
+      <div className="px-3 py-2.5 pr-6">
         <div className="font-semibold text-festival-text mb-1">{status.member.name}</div>
         {status.elsewhereArtist ? (
           <>
@@ -322,7 +338,7 @@ function MissingPopover({ status, onClose }: { status: MemberStatus; onClose: ()
   );
 }
 
-function MemberDot({ status }: { status: MemberStatus }) {
+function MemberDot({ status, dotIndex }: { status: MemberStatus; dotIndex: number }) {
   const [open, setOpen] = useState(false);
   const color = memberColor(status.memberIndex);
 
@@ -346,66 +362,109 @@ function MemberDot({ status }: { status: MemberStatus }) {
       >
         {status.member.name[0].toUpperCase()}
       </div>
-      {/* small "missing" indicator */}
       <div className="absolute -bottom-0.5 -right-0.5 w-2 h-2 rounded-full bg-festival-pink-bright border border-festival-surface" />
-      {open && <MissingPopover status={status} onClose={() => setOpen(false)} />}
+      {open && (
+        <MissingPopover
+          status={status}
+          dotIndex={dotIndex}
+          onClose={() => setOpen(false)}
+        />
+      )}
     </div>
   );
 }
 
-function RouteSetCard({ stop }: { stop: FlockStop }) {
+function RouteSetCard({
+  stop,
+  isLeader,
+  allDaySets,
+  scheduledArtists,
+  onSwap,
+}: {
+  stop: FlockStop;
+  isLeader: boolean;
+  allDaySets: FestivalSet[];
+  scheduledArtists: string[];
+  onSwap?: (outgoing: string, incoming: FestivalSet) => void;
+}) {
+  const [swapping, setSwapping] = useState(false);
   const { item, memberStatuses = [], allPresent } = stop;
   const presentCount = memberStatuses.filter(s => s.attending).length;
   const totalTracked = memberStatuses.length;
 
   return (
-    <div
-      className="rounded-xl border px-3 py-3 transition-all"
-      style={{
-        backgroundColor: allPresent ? 'rgba(0,165,114,0.07)' : '#1b1f2c',
-        borderColor: allPresent ? 'rgba(78,222,163,0.3)' : '#424754',
-      }}
-    >
-      {/* Time + artist */}
-      <div className="flex items-start justify-between gap-2 mb-2">
-        <div className="min-w-0">
-          <div className="text-xs text-festival-muted mb-0.5">{formatTime(item.startTime)}</div>
-          <div className="font-bold text-festival-text font-display text-sm leading-tight">{item.artist}</div>
-          {item.stage && (
-            <div className="flex items-center gap-1 mt-0.5">
-              <div
-                className="w-1.5 h-1.5 rounded-full flex-shrink-0"
-                style={{ backgroundColor: allPresent ? '#4edea3' : '#8c909f' }}
-              />
-              <span className="text-xs text-festival-muted">{item.stage}</span>
-            </div>
-          )}
+    <>
+      <div
+        className="rounded-xl border px-3 py-3 transition-all"
+        style={{
+          backgroundColor: allPresent ? 'rgba(0,165,114,0.07)' : '#1b1f2c',
+          borderColor: allPresent ? 'rgba(78,222,163,0.3)' : '#424754',
+        }}
+      >
+        {/* Time + artist + badge */}
+        <div className="flex items-start justify-between gap-2 mb-2">
+          <div className="min-w-0">
+            <div className="text-xs text-festival-muted mb-0.5">{formatTime(item.startTime)}</div>
+            <div className="font-bold text-festival-text font-display text-sm leading-tight">{item.artist}</div>
+            {item.stage && (
+              <div className="flex items-center gap-1 mt-0.5">
+                <div
+                  className="w-1.5 h-1.5 rounded-full flex-shrink-0"
+                  style={{ backgroundColor: allPresent ? '#4edea3' : '#8c909f' }}
+                />
+                <span className="text-xs text-festival-muted">{item.stage}</span>
+              </div>
+            )}
+          </div>
+          <div className="flex items-center gap-2 flex-shrink-0">
+            {isLeader && item.artist && onSwap && (
+              <button
+                onClick={() => setSwapping(true)}
+                className="text-xs text-festival-muted hover:text-festival-green transition-colors"
+                title="Swap this set for another"
+              >
+                ⇄
+              </button>
+            )}
+            {allPresent && totalTracked > 0 && (
+              <span
+                className="text-xs font-bold px-2 py-0.5 rounded-full"
+                style={{ backgroundColor: 'rgba(78,222,163,0.15)', color: '#4edea3', fontSize: '10px' }}
+              >
+                all in
+              </span>
+            )}
+            {!allPresent && totalTracked > 0 && (
+              <span className="text-xs text-festival-muted">
+                {presentCount}/{totalTracked}
+              </span>
+            )}
+          </div>
         </div>
-        {/* Flock-together badge */}
-        {allPresent && totalTracked > 0 && (
-          <span
-            className="text-xs font-bold px-2 py-0.5 rounded-full flex-shrink-0"
-            style={{ backgroundColor: 'rgba(78,222,163,0.15)', color: '#4edea3', fontSize: '10px' }}
-          >
-            all in
-          </span>
-        )}
-        {!allPresent && totalTracked > 0 && (
-          <span className="text-xs text-festival-muted flex-shrink-0">
-            {presentCount}/{totalTracked}
-          </span>
+
+        {/* Member dots */}
+        {memberStatuses.length > 0 && (
+          <div className="flex items-center gap-1.5 flex-wrap">
+            {memberStatuses.map((s, idx) => (
+              <MemberDot key={s.member.id} status={s} dotIndex={idx} />
+            ))}
+          </div>
         )}
       </div>
 
-      {/* Member dots row */}
-      {memberStatuses.length > 0 && (
-        <div className="flex items-center gap-1.5 flex-wrap">
-          {memberStatuses.map(s => (
-            <MemberDot key={s.member.id} status={s} />
-          ))}
-        </div>
+      {swapping && item.artist && onSwap && (
+        <SwapModal
+          item={item}
+          allSets={allDaySets}
+          currentItineraryArtists={scheduledArtists}
+          onConfirm={incoming => {
+            onSwap(item.artist!, incoming);
+            setSwapping(false);
+          }}
+          onClose={() => setSwapping(false)}
+        />
       )}
-    </div>
+    </>
   );
 }
 
@@ -413,14 +472,30 @@ function FlockRoutePanel({
   flockItems,
   memberItineraries,
   members,
+  isLeader,
+  selectedDay,
+  onFlockSwap,
 }: {
   flockItems: ItineraryItem[];
   memberItineraries: { member: FlockMemberData; itinerary: { items: ItineraryItem[] } }[];
   members: FlockMemberData[];
+  isLeader: boolean;
+  selectedDay: string;
+  onFlockSwap: (outgoing: string, incoming: FestivalSet) => void;
 }) {
   const stops = useMemo(
     () => buildFlockStops(flockItems, memberItineraries, members),
     [flockItems, memberItineraries, members],
+  );
+
+  const allDaySets = useMemo(
+    () => EDC_2026_SETS.filter(s => s.day === selectedDay),
+    [selectedDay],
+  );
+
+  const scheduledArtists = useMemo(
+    () => flockItems.filter(i => i.type === 'set').map(i => i.artist ?? ''),
+    [flockItems],
   );
 
   if (stops.length === 0) {
@@ -435,7 +510,16 @@ function FlockRoutePanel({
     <div className="space-y-1.5">
       {stops.map(stop => {
         if (stop.kind === 'set') {
-          return <RouteSetCard key={stop.item.id} stop={stop} />;
+          return (
+            <RouteSetCard
+              key={stop.item.id}
+              stop={stop}
+              isLeader={isLeader}
+              allDaySets={allDaySets}
+              scheduledArtists={scheduledArtists}
+              onSwap={isLeader ? onFlockSwap : undefined}
+            />
+          );
         }
         if (stop.kind === 'transition') {
           return (
@@ -528,10 +612,31 @@ export function FlockView({
     [artistAttendance],
   );
 
-  const flockItinerary = useMemo(
-    () => generateFlockItinerary(members.filter(m => m.hasGenerated), selectedDay),
-    [members, selectedDay],
-  );
+  const [flockPinnedByDay, setFlockPinnedByDay] = useState<Record<string, string[]>>({});
+
+  const flockItinerary = useMemo(() => {
+    const base = generateFlockItinerary(members.filter(m => m.hasGenerated), selectedDay);
+    const pinned = flockPinnedByDay[selectedDay] ?? [];
+    if (pinned.length === 0) return base;
+    const flockPrefs = base.items
+      .filter(i => i.type === 'set')
+      .map((i: ItineraryItem) => ({ artist: i.artist ?? '', level: i.preferenceLevel ?? 'neutral' as const }));
+    return generateItinerary(
+      EDC_2026_SETS,
+      flockPrefs,
+      { defaultWalkingMinutes: 10, allowPartialSets: false, minimumSetMinutes: 20, pinnedByDay: flockPinnedByDay },
+      selectedDay,
+    );
+  }, [members, selectedDay, flockPinnedByDay]);
+
+  function handleFlockSwap(outgoing: string, incoming: FestivalSet) {
+    setFlockPinnedByDay(prev => {
+      const current = prev[selectedDay] ?? [];
+      const without = current.filter(a => a !== outgoing);
+      const next = without.includes(incoming.artist) ? without : [...without, incoming.artist];
+      return { ...prev, [selectedDay]: next };
+    });
+  }
 
   async function handleLockToggle() {
     setLockLoading(true);
@@ -737,6 +842,9 @@ export function FlockView({
                 flockItems={flockItinerary.items}
                 memberItineraries={memberItineraries}
                 members={members}
+                isLeader={isLeader}
+                selectedDay={selectedDay}
+                onFlockSwap={handleFlockSwap}
               />
             </div>
           </div>

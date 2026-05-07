@@ -352,15 +352,6 @@ export default function App() {
                     <span className="hidden sm:inline">Herding</span>
                   </button>
 
-                  {/* The Pen */}
-                  <button
-                    className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium text-festival-muted hover:text-festival-text transition-all"
-                  >
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
-                      <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>
-                    </svg>
-                    <span className="hidden sm:inline">The Pen</span>
-                  </button>
                 </nav>
 
                 {/* Right icons */}
