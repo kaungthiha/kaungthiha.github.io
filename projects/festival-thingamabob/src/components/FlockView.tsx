@@ -2,6 +2,7 @@ import { useState, useMemo } from 'react';
 import { FlockMemberData } from '../lib/flockApi';
 import { EDC_2026_SETS, DAYS } from '../lib/sampleData';
 import { generateItinerary } from '../lib/itineraryOptimizer';
+import { generateFlockItinerary } from '../lib/flockItinerary';
 import { UserPreferences, ItineraryItem } from '../types/festival';
 import { formatTime } from '../lib/timeUtils';
 
@@ -191,26 +192,26 @@ function FlockPowerBar({ members }: { members: FlockMemberData[] }) {
   const pct = total > 0 ? Math.round((withSchedule / total) * 100) : 0;
 
   return (
-    <div className="flex items-center gap-4 px-4 py-4 rounded-xl border border-festival-border/60 mb-4"
+    <div className="flex items-center gap-3 px-3 py-3 rounded-xl border border-festival-border/60 mb-3"
       style={{ backgroundColor: '#1b1f2c' }}
     >
-      <div className="w-10 h-10 rounded-full border-2 border-festival-green/50 bg-festival-green/10 flex items-center justify-center flex-shrink-0">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" className="text-festival-green">
+      <div className="w-8 h-8 rounded-full border-2 border-festival-green/50 bg-festival-green/10 flex items-center justify-center flex-shrink-0">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" className="text-festival-green">
           <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" /><circle cx="9" cy="7" r="4" /><path d="M23 21v-2a4 4 0 0 0-3-3.87" /><path d="M16 3.13a4 4 0 0 1 0 7.75" />
         </svg>
       </div>
       <div className="flex-1 min-w-0">
-        <div className="flex items-center justify-between mb-1.5">
-          <span className="text-sm font-semibold text-festival-text font-display">Flock Power</span>
-          <span className="text-xs text-festival-muted">{withSchedule}/{total} Together</span>
+        <div className="flex items-center justify-between mb-1">
+          <span className="text-xs font-semibold text-festival-text font-display">Flock Power</span>
+          <span className="text-xs text-festival-muted">{withSchedule}/{total} synced</span>
         </div>
-        <div className="h-2 rounded-full bg-festival-border overflow-hidden">
+        <div className="h-1.5 rounded-full bg-festival-border overflow-hidden">
           <div
             className="h-full rounded-full transition-all duration-500"
             style={{
               width: `${pct}%`,
               background: 'linear-gradient(90deg, #00a572, #4edea3)',
-              boxShadow: '0 0 8px rgba(78,222,163,0.5)',
+              boxShadow: '0 0 6px rgba(78,222,163,0.5)',
             }}
           />
         </div>
@@ -219,205 +220,249 @@ function FlockPowerBar({ members }: { members: FlockMemberData[] }) {
   );
 }
 
-type FlockRouteStop =
-  | { kind: 'set'; time: string; artist: string; stage: string; members: string[]; isMatch: boolean; minsLeft?: number }
-  | { kind: 'trek'; label: string; destination: string }
-  | { kind: 'graze'; time: string; location: string }
-  | { kind: 'meetup'; time: string; location: string; label: string };
-
-function buildFlockRoute(
-  memberItineraries: { member: FlockMemberData; itinerary: { items: ItineraryItem[] } }[],
-  artistAttendance: Record<string, string[]>,
-): FlockRouteStop[] {
-  const stops: FlockRouteStop[] = [];
-  const seen = new Set<string>();
-
-  // Collect all set items from the flock itinerary sorted by time
-  const allItems: ItineraryItem[] = [];
-  for (const { itinerary } of memberItineraries) {
-    for (const item of itinerary.items) {
-      allItems.push(item);
-    }
-  }
-  allItems.sort((a, b) => new Date(a.startTime).getTime() - new Date(b.startTime).getTime());
-
-  let prevStage: string | null = null;
-
-  for (const item of allItems) {
-    if (item.type === 'set' && item.artist && !seen.has(item.artist)) {
-      seen.add(item.artist);
-      const attendees = artistAttendance[item.artist] ?? [];
-      const isMatch = attendees.length > 1;
-
-      if (prevStage && item.stage && prevStage !== item.stage) {
-        stops.push({ kind: 'trek', label: '15 mins to', destination: item.stage });
-      }
-
-      stops.push({
-        kind: 'set',
-        time: formatTime(item.startTime),
-        artist: item.artist,
-        stage: item.stage ?? '',
-        members: attendees,
-        isMatch,
-      });
-      prevStage = item.stage ?? null;
-    } else if (item.type === 'break') {
-      const timeStr = formatTime(item.startTime);
-      const note = item.notes ?? 'Grazing Time';
-      if (!seen.has(`graze-${timeStr}`)) {
-        seen.add(`graze-${timeStr}`);
-        stops.push({ kind: 'graze', time: timeStr, location: note });
-      }
-    }
-  }
-
-  return stops;
+// Per-member status at a given set: either attending it or at something else
+interface MemberStatus {
+  member: FlockMemberData;
+  memberIndex: number;
+  attending: boolean;
+  // if not attending, what are they doing at this time?
+  elsewhereArtist?: string;
+  elsewhereStage?: string;
 }
 
-function FlockRoutePanel({
-  memberItineraries,
-  artistAttendance,
-}: {
-  memberItineraries: { member: FlockMemberData; itinerary: { items: ItineraryItem[] } }[];
-  artistAttendance: Record<string, string[]>;
-}) {
-  const stops = useMemo(
-    () => buildFlockRoute(memberItineraries, artistAttendance),
-    [memberItineraries, artistAttendance],
+// One stop in the primary flock itinerary
+interface FlockStop {
+  kind: 'set' | 'transition' | 'break';
+  item: ItineraryItem;
+  // for set stops: per-member attendance breakdown
+  memberStatuses?: MemberStatus[];
+  allPresent?: boolean;
+}
+
+function buildFlockStops(
+  flockItems: ItineraryItem[],
+  memberItineraries: { member: FlockMemberData; itinerary: { items: ItineraryItem[] } }[],
+  allMembers: FlockMemberData[],
+): FlockStop[] {
+  return flockItems.map(item => {
+    if (item.type !== 'set') return { kind: item.type as 'transition' | 'break', item };
+
+    const startMs = new Date(item.startTime).getTime();
+    const endMs = new Date(item.endTime).getTime();
+
+    const statuses: MemberStatus[] = allMembers
+      .filter(m => m.hasGenerated)
+      .map(member => {
+        const memberIdx = allMembers.indexOf(member);
+        const theirItinerary = memberItineraries.find(mi => mi.member.id === member.id);
+        if (!theirItinerary) return { member, memberIndex: memberIdx, attending: false };
+
+        // Check if this member has this exact artist in their schedule
+        const attending = theirItinerary.itinerary.items.some(
+          i => i.type === 'set' && i.artist === item.artist,
+        );
+
+        if (attending) return { member, memberIndex: memberIdx, attending: true };
+
+        // Find what they ARE doing at the flock set's start time
+        const overlap = theirItinerary.itinerary.items.find(i => {
+          if (i.type !== 'set') return false;
+          const s = new Date(i.startTime).getTime();
+          const e = new Date(i.endTime).getTime();
+          return s < endMs && e > startMs;
+        });
+
+        return {
+          member,
+          memberIndex: memberIdx,
+          attending: false,
+          elsewhereArtist: overlap?.artist,
+          elsewhereStage: overlap?.stage,
+        };
+      });
+
+    return {
+      kind: 'set',
+      item,
+      memberStatuses: statuses,
+      allPresent: statuses.every(s => s.attending),
+    };
+  });
+}
+
+// Small popover that opens when clicking a missing member's avatar
+function MissingPopover({ status, onClose }: { status: MemberStatus; onClose: () => void }) {
+  return (
+    <div
+      className="absolute z-20 bottom-full mb-2 left-1/2 -translate-x-1/2 w-44 rounded-xl border border-festival-border shadow-lg text-xs"
+      style={{ backgroundColor: '#1b1f2c' }}
+      onClick={e => e.stopPropagation()}
+    >
+      <div className="px-3 py-2.5">
+        <div className="font-semibold text-festival-text mb-1">{status.member.name}</div>
+        {status.elsewhereArtist ? (
+          <>
+            <div className="text-festival-muted">at that time:</div>
+            <div className="font-semibold text-festival-pink mt-0.5">{status.elsewhereArtist}</div>
+            {status.elsewhereStage && (
+              <div className="text-festival-muted">{status.elsewhereStage}</div>
+            )}
+          </>
+        ) : (
+          <div className="text-festival-muted">No conflicting set — free agent</div>
+        )}
+      </div>
+      <button
+        onClick={onClose}
+        className="absolute top-1.5 right-2 text-festival-muted hover:text-festival-text"
+      >
+        ✕
+      </button>
+    </div>
   );
+}
+
+function MemberDot({ status }: { status: MemberStatus }) {
+  const [open, setOpen] = useState(false);
+  const color = memberColor(status.memberIndex);
+
+  if (status.attending) {
+    return (
+      <div
+        className={`w-6 h-6 rounded-full border-2 ${color.border} ${color.bg} ${color.text} flex items-center justify-center text-xs font-bold flex-shrink-0`}
+        title={status.member.name}
+      >
+        {status.member.name[0].toUpperCase()}
+      </div>
+    );
+  }
 
   return (
-    <div className="space-y-0">
-      <div className="pb-2 space-y-0">
-        {stops.length === 0 ? (
-          <div className="py-10 text-center text-festival-muted text-sm">
-            No members have generated schedules yet
-          </div>
-        ) : (
-          stops.map((stop, i) => {
-            if (stop.kind === 'trek') {
-              return (
-                <div key={i} className="flex items-center gap-3 py-2 pl-1">
-                  <div className="w-5 flex-shrink-0 flex justify-center">
-                    <div className="w-0.5 h-6 bg-festival-border/50" />
-                  </div>
-                  <div className="flex items-center gap-2 text-xs text-festival-muted italic">
-                    <span>🐾</span>
-                    <span>Trekking Time: {stop.label} {stop.destination}</span>
-                  </div>
-                </div>
-              );
-            }
+    <div className="relative flex-shrink-0" onClick={() => setOpen(v => !v)}>
+      <div
+        className="w-6 h-6 rounded-full border-2 border-festival-border bg-festival-card-low flex items-center justify-center text-xs font-bold cursor-pointer hover:border-festival-muted transition-colors"
+        style={{ color: '#424754' }}
+        title={`${status.member.name} is elsewhere — click to see`}
+      >
+        {status.member.name[0].toUpperCase()}
+      </div>
+      {/* small "missing" indicator */}
+      <div className="absolute -bottom-0.5 -right-0.5 w-2 h-2 rounded-full bg-festival-pink-bright border border-festival-surface" />
+      {open && <MissingPopover status={status} onClose={() => setOpen(false)} />}
+    </div>
+  );
+}
 
-            if (stop.kind === 'graze') {
-              return (
-                <div key={i} className="flex items-center gap-3 py-3 rounded-lg px-3 my-1"
-                  style={{ backgroundColor: 'rgba(78,222,163,0.06)', border: '1px solid rgba(78,222,163,0.15)' }}
-                >
-                  <span className="text-base">🌿</span>
-                  <div>
-                    <span className="text-xs font-bold text-festival-green">{stop.time && `Grazing Time • ${stop.time}`}</span>
-                    <div className="text-xs text-festival-muted mt-0.5">{stop.location}</div>
-                  </div>
-                </div>
-              );
-            }
+function RouteSetCard({ stop }: { stop: FlockStop }) {
+  const { item, memberStatuses = [], allPresent } = stop;
+  const presentCount = memberStatuses.filter(s => s.attending).length;
+  const totalTracked = memberStatuses.length;
 
-            if (stop.kind === 'meetup') {
-              return (
-                <div key={i} className="flex items-start gap-3 py-3 px-3 rounded-lg my-1"
-                  style={{ backgroundColor: 'rgba(173,198,255,0.05)', border: '1px solid rgba(173,198,255,0.15)' }}
-                >
-                  <div className="w-5 h-5 rounded-full bg-festival-border flex items-center justify-center mt-0.5 flex-shrink-0">
-                    <div className="w-2 h-2 rounded-full bg-festival-muted" />
-                  </div>
-                  <div>
-                    <div className="text-xs text-festival-muted">{stop.time}</div>
-                    <div className="text-sm font-semibold text-festival-text">{stop.location}</div>
-                    <div className="text-xs text-festival-muted mt-0.5">{stop.label}</div>
-                  </div>
-                </div>
-              );
-            }
-
-            // set stop
-            return (
-              <div key={i} className="flex items-start gap-3 py-2">
-                {/* Timeline dot */}
-                <div className="flex flex-col items-center flex-shrink-0 mt-1" style={{ width: '20px' }}>
-                  {stop.isMatch ? (
-                    <div className="w-4 h-4 rounded-full flex items-center justify-center flex-shrink-0"
-                      style={{ backgroundColor: '#4edea3', boxShadow: '0 0 8px rgba(78,222,163,0.6)' }}
-                    >
-                      <div className="w-1.5 h-1.5 rounded-full bg-festival-surface" />
-                    </div>
-                  ) : (
-                    <div className="w-3 h-3 rounded-full border-2 border-festival-border bg-festival-card-low flex-shrink-0" />
-                  )}
-                </div>
-
-                {/* Content */}
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2 mb-0.5">
-                    <span className="text-xs font-bold text-festival-muted">{stop.time}</span>
-                    {stop.isMatch && (
-                      <span className="text-xs font-bold px-2 py-0.5 rounded-full text-festival-surface"
-                        style={{ backgroundColor: '#4edea3', fontSize: '10px' }}
-                      >
-                        FLOCK MATCH
-                      </span>
-                    )}
-                    {!stop.isMatch && stop.members.length > 0 && (
-                      <span className="text-xs text-festival-pink-bright font-semibold">Flock Splits</span>
-                    )}
-                  </div>
-
-                  {stop.isMatch ? (
-                    <div className="rounded-xl p-3 border border-festival-green/25"
-                      style={{ backgroundColor: 'rgba(0,165,114,0.08)' }}
-                    >
-                      <div className="font-bold text-festival-text font-display text-sm mb-1">{stop.artist}</div>
-                      <div className="flex items-center gap-1.5 mb-1.5">
-                        <div className="w-2 h-2 rounded-full"
-                          style={{ backgroundColor: '#4edea3', boxShadow: '0 0 5px rgba(78,222,163,0.7)' }}
-                        />
-                        <span className="text-xs text-festival-muted">{stop.stage}</span>
-                      </div>
-                      <div className="h-1.5 rounded-full overflow-hidden" style={{ backgroundColor: '#1b1f2c' }}>
-                        <div className="h-full rounded-full w-3/5"
-                          style={{ background: 'linear-gradient(90deg, #00a572, #4edea3)' }}
-                        />
-                      </div>
-                    </div>
-                  ) : (
-                    <div className="space-y-1">
-                      {stop.members.map((memberName, mi) => (
-                        <div key={mi} className="flex items-center gap-2">
-                          <div className="w-1 h-6 rounded-full flex-shrink-0"
-                            style={{ backgroundColor: '#ffafd3' }}
-                          />
-                          <div>
-                            <div className="text-sm font-semibold text-festival-text">{stop.artist}</div>
-                            <div className="text-xs text-festival-muted">{stop.stage} • {memberName}</div>
-                          </div>
-                        </div>
-                      ))}
-                      {stop.members.length === 0 && (
-                        <div>
-                          <div className="text-sm font-semibold text-festival-text">{stop.artist}</div>
-                          <div className="text-xs text-festival-muted">{stop.stage}</div>
-                        </div>
-                      )}
-                    </div>
-                  )}
-                </div>
-              </div>
-            );
-          })
+  return (
+    <div
+      className="rounded-xl border px-3 py-3 transition-all"
+      style={{
+        backgroundColor: allPresent ? 'rgba(0,165,114,0.07)' : '#1b1f2c',
+        borderColor: allPresent ? 'rgba(78,222,163,0.3)' : '#424754',
+      }}
+    >
+      {/* Time + artist */}
+      <div className="flex items-start justify-between gap-2 mb-2">
+        <div className="min-w-0">
+          <div className="text-xs text-festival-muted mb-0.5">{formatTime(item.startTime)}</div>
+          <div className="font-bold text-festival-text font-display text-sm leading-tight">{item.artist}</div>
+          {item.stage && (
+            <div className="flex items-center gap-1 mt-0.5">
+              <div
+                className="w-1.5 h-1.5 rounded-full flex-shrink-0"
+                style={{ backgroundColor: allPresent ? '#4edea3' : '#8c909f' }}
+              />
+              <span className="text-xs text-festival-muted">{item.stage}</span>
+            </div>
+          )}
+        </div>
+        {/* Flock-together badge */}
+        {allPresent && totalTracked > 0 && (
+          <span
+            className="text-xs font-bold px-2 py-0.5 rounded-full flex-shrink-0"
+            style={{ backgroundColor: 'rgba(78,222,163,0.15)', color: '#4edea3', fontSize: '10px' }}
+          >
+            all in
+          </span>
+        )}
+        {!allPresent && totalTracked > 0 && (
+          <span className="text-xs text-festival-muted flex-shrink-0">
+            {presentCount}/{totalTracked}
+          </span>
         )}
       </div>
 
+      {/* Member dots row */}
+      {memberStatuses.length > 0 && (
+        <div className="flex items-center gap-1.5 flex-wrap">
+          {memberStatuses.map(s => (
+            <MemberDot key={s.member.id} status={s} />
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+function FlockRoutePanel({
+  flockItems,
+  memberItineraries,
+  members,
+}: {
+  flockItems: ItineraryItem[];
+  memberItineraries: { member: FlockMemberData; itinerary: { items: ItineraryItem[] } }[];
+  members: FlockMemberData[];
+}) {
+  const stops = useMemo(
+    () => buildFlockStops(flockItems, memberItineraries, members),
+    [flockItems, memberItineraries, members],
+  );
+
+  if (stops.length === 0) {
+    return (
+      <div className="py-10 text-center text-festival-muted text-sm">
+        No members have generated schedules yet
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-1.5">
+      {stops.map(stop => {
+        if (stop.kind === 'set') {
+          return <RouteSetCard key={stop.item.id} stop={stop} />;
+        }
+        if (stop.kind === 'transition') {
+          return (
+            <div key={stop.item.id} className="flex items-center gap-2 px-2 py-1">
+              <div className="w-4 flex justify-center flex-shrink-0">
+                <div className="w-px h-5 bg-festival-border/50" />
+              </div>
+              <span className="text-xs text-festival-muted italic">
+                🐾 {stop.item.notes ?? `Trek to ${stop.item.toStage}`}
+              </span>
+            </div>
+          );
+        }
+        if (stop.kind === 'break') {
+          return (
+            <div key={stop.item.id} className="flex items-center gap-2 px-3 py-2 rounded-lg"
+              style={{ backgroundColor: 'rgba(78,222,163,0.05)', border: '1px solid rgba(78,222,163,0.12)' }}
+            >
+              <span className="text-sm">🌿</span>
+              <span className="text-xs font-semibold text-festival-green">
+                Grazing Time · {formatTime(stop.item.startTime)}
+              </span>
+            </div>
+          );
+        }
+        return null;
+      })}
     </div>
   );
 }
@@ -481,6 +526,11 @@ export function FlockView({
   const sharedCount = useMemo(
     () => Object.values(artistAttendance).filter(names => names.length > 1).length,
     [artistAttendance],
+  );
+
+  const flockItinerary = useMemo(
+    () => generateFlockItinerary(members.filter(m => m.hasGenerated), selectedDay),
+    [members, selectedDay],
   );
 
   async function handleLockToggle() {
@@ -684,8 +734,9 @@ export function FlockView({
             <div className="flex-1 overflow-y-auto px-3 py-3" style={{ scrollbarWidth: 'thin' }}>
               <FlockPowerBar members={members} />
               <FlockRoutePanel
+                flockItems={flockItinerary.items}
                 memberItineraries={memberItineraries}
-                artistAttendance={artistAttendance}
+                members={members}
               />
             </div>
           </div>
