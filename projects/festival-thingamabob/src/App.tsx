@@ -271,88 +271,128 @@ export default function App() {
       {!flockReady ? (
         <FlockGate onJoined={handleFlockJoined} onSkip={handleFlockSkip} inviteCode={inviteCode} />
       ) : (
-        <div className="min-h-screen" style={{ backgroundColor: '#0a0a0f' }}>
+        <div className="min-h-screen" style={{ backgroundColor: '#0f131f' }}>
           {showWelcome && <WelcomeModal onDone={() => setShowWelcome(false)} />}
           {/* Header */}
-          <header className="border-b border-[#1e1e2e] sticky top-0 z-50 backdrop-blur-md bg-[#0a0a0f]/90">
-            <div className="max-w-6xl mx-auto px-4 py-4">
-              <div className="flex items-center justify-between gap-4">
-                <div>
-                  <h1
-                    className="text-2xl sm:text-3xl font-black leading-none flex items-center gap-2"
-                    style={{
-                      background: 'linear-gradient(135deg, #2563eb, #38bdf8)',
-                      WebkitBackgroundClip: 'text',
-                      WebkitTextFillColor: 'transparent',
-                    }}
-                  >
-                    🐑 SheepHerder
-                  </h1>
-                  <p className="text-xs text-slate-500 mt-0.5 hidden sm:block">
-                    EDC Las Vegas 2026 — Where do the sheep go when the lights go out
-                  </p>
-                </div>
+          <header className="border-b border-festival-border/40 sticky top-0 z-50 backdrop-blur-md" style={{ backgroundColor: 'rgba(15,19,31,0.92)' }}>
+            <div className="max-w-6xl mx-auto px-5 py-3">
+              <div className="flex items-center gap-6">
+                {/* Wordmark */}
+                <button
+                  onClick={() => { setShowFlockView(false); setStep('preferences'); }}
+                  className="text-xl font-black leading-none font-display flex-shrink-0"
+                  style={{ color: '#adc6ff' }}
+                >
+                  SheepHerder
+                </button>
 
-                <div className="flex items-center gap-3">
+                {/* Nav */}
+                <nav className="flex items-center gap-1 flex-1">
+                  {/* Grazing */}
                   <button
-                    onClick={() => setShowWelcome(true)}
-                    className="w-6 h-6 rounded-full border border-slate-700 hover:border-slate-500 text-slate-500 hover:text-slate-300 transition-colors flex items-center justify-center text-xs font-bold flex-shrink-0"
-                    title="How it works"
+                    onClick={() => { setShowFlockView(false); setStep('preferences'); }}
+                    className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium transition-all ${
+                      step === 'preferences' && !showFlockView
+                        ? 'text-festival-surface font-semibold'
+                        : 'text-festival-muted hover:text-festival-text'
+                    }`}
+                    style={step === 'preferences' && !showFlockView ? {
+                      background: 'linear-gradient(135deg, #4d8eff22, #adc6ff22)',
+                      border: '1px solid rgba(173,198,255,0.25)',
+                      color: '#adc6ff',
+                    } : {}}
                   >
-                    ?
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                      <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+                    </svg>
+                    <span className="hidden sm:inline">Grazing</span>
                   </button>
 
-                  {flockInfo && (
-                    <button
-                      onClick={handleViewFlock}
-                      className="flex items-center gap-2 px-3 py-1.5 rounded-lg border border-festival-blue/30 bg-festival-blue/10 hover:bg-festival-blue/20 transition-colors text-xs"
-                    >
-                      <span className="text-festival-cyan font-mono font-bold tracking-wider">{flockInfo.tripCode}</span>
-                      <span className="text-slate-400 hidden sm:inline">View Flock</span>
-                      <span className="text-slate-400">🐑</span>
-                    </button>
-                  )}
+                  {/* Flock */}
+                  <button
+                    onClick={() => { if (flockInfo) { handleViewFlock(); } }}
+                    disabled={!flockInfo}
+                    className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium transition-all disabled:opacity-40 disabled:cursor-not-allowed ${
+                      showFlockView
+                        ? 'font-semibold'
+                        : 'text-festival-muted hover:text-festival-text'
+                    }`}
+                    style={showFlockView ? {
+                      background: 'linear-gradient(135deg, #4d8eff, #adc6ff)',
+                      color: '#0f131f',
+                      boxShadow: '0 0 12px rgba(77,142,255,0.35)',
+                    } : {}}
+                  >
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+                    </svg>
+                    <span className="hidden sm:inline">Flock</span>
+                    {flockInfo && (
+                      <span className="text-xs font-mono font-bold opacity-70 hidden md:inline">{flockInfo.tripCode}</span>
+                    )}
+                  </button>
 
-                  <div className="flex items-center gap-2 text-xs">
-                    <button
-                      onClick={() => { if (step === 'itinerary') { setStep('preferences'); setShowFlockView(false); } }}
-                      className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg transition-colors ${
-                        step === 'preferences' && !showFlockView
-                          ? 'bg-festival-blue text-white font-semibold'
-                          : 'text-slate-500 hover:text-slate-300 cursor-pointer'
-                      }`}
-                    >
-                      <span>1</span>
-                      <span className="hidden sm:inline">Preferences</span>
-                    </button>
-                    <span className="text-slate-700">→</span>
-                    <div
-                      className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg ${
-                        step === 'itinerary' && !showFlockView
-                          ? 'bg-festival-blue text-white font-semibold'
-                          : 'text-slate-700'
-                      }`}
-                    >
-                      <span>2</span>
-                      <span className="hidden sm:inline">Itinerary</span>
-                    </div>
-                  </div>
+                  {/* Herding */}
+                  <button
+                    onClick={() => { setShowFlockView(false); if (step !== 'itinerary') return; }}
+                    className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium transition-all ${
+                      step === 'itinerary' && !showFlockView
+                        ? 'font-semibold'
+                        : 'text-festival-muted hover:text-festival-text'
+                    }`}
+                    style={step === 'itinerary' && !showFlockView ? {
+                      background: 'linear-gradient(135deg, #4d8eff22, #adc6ff22)',
+                      border: '1px solid rgba(173,198,255,0.25)',
+                      color: '#adc6ff',
+                    } : {}}
+                  >
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                      <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+                    </svg>
+                    <span className="hidden sm:inline">Herding</span>
+                  </button>
+
+                  {/* The Pen */}
+                  <button
+                    className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium text-festival-muted hover:text-festival-text transition-all"
+                  >
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>
+                    </svg>
+                    <span className="hidden sm:inline">The Pen</span>
+                  </button>
+                </nav>
+
+                {/* Right icons */}
+                <div className="flex items-center gap-2 flex-shrink-0">
+                  <button
+                    onClick={() => setShowWelcome(true)}
+                    className="w-8 h-8 rounded-full border border-festival-border/50 text-festival-muted hover:text-festival-text transition-colors flex items-center justify-center"
+                    title="How it works"
+                  >
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/>
+                    </svg>
+                  </button>
+                  <button
+                    className="w-8 h-8 rounded-full border border-festival-border/50 text-festival-muted hover:text-festival-text transition-colors flex items-center justify-center"
+                  >
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                      <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+                    </svg>
+                  </button>
                 </div>
               </div>
             </div>
           </header>
 
-          <main className="max-w-6xl mx-auto px-4 py-6 pb-16">
+          <main className="max-w-6xl mx-auto px-5 py-8 pb-20">
 
             {/* Flock view */}
             {showFlockView && flockInfo && (
               <div>
-                <h2 className="text-lg font-bold text-white mb-4">
-                  Your Flock
-                  <span className="text-slate-500 font-normal ml-2 text-base">side-by-side view</span>
-                </h2>
                 {flockLoading && !flockDetails ? (
-                  <div className="text-center py-20 text-slate-500">
+                  <div className="text-center py-20 text-festival-muted">
                     <div className="text-4xl mb-3 animate-pulse">🐑</div>
                     <p>Rounding up the flock...</p>
                   </div>
@@ -545,7 +585,7 @@ export default function App() {
             )}
           </main>
 
-          <footer className="border-t border-[#1e1e2e] py-6 text-center text-xs text-slate-700">
+          <footer className="border-t border-festival-border/30 py-6 text-center text-xs text-festival-muted/40">
             <p>SheepHerder · EDC Las Vegas 2026 · Don't be a lost sheep.</p>
           </footer>
         </div>
