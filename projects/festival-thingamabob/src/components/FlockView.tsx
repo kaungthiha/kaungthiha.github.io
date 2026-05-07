@@ -159,7 +159,7 @@ function MemberColumn({
       </div>
 
       {/* Timeline */}
-      <div className="p-1.5 space-y-0.5 overflow-y-auto flex-1" style={{ maxHeight: '460px' }}>
+      <div className="p-1.5 space-y-0.5 overflow-y-auto flex-1">
         {!member.hasGenerated ? (
           <div className="py-10 text-center">
             <p className="text-xs text-festival-muted opacity-50">Still grazing,<br />no schedule yet</p>
@@ -277,11 +277,9 @@ function buildFlockRoute(
 
 function FlockRoutePanel({
   memberItineraries,
-  members,
   artistAttendance,
 }: {
   memberItineraries: { member: FlockMemberData; itinerary: { items: ItineraryItem[] } }[];
-  members: FlockMemberData[];
   artistAttendance: Record<string, string[]>;
 }) {
   const stops = useMemo(
@@ -290,26 +288,8 @@ function FlockRoutePanel({
   );
 
   return (
-    <div className="flex flex-col gap-0 rounded-xl border border-festival-border/60 overflow-hidden"
-      style={{ backgroundColor: '#171b28' }}
-    >
-      <div className="px-4 pt-4 pb-3 border-b border-festival-border/40"
-        style={{ backgroundColor: '#1b1f2c' }}
-      >
-        <div className="flex items-center gap-2 mb-0.5">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" className="text-festival-green">
-            <polyline points="22 12 18 12 15 21 9 3 6 12 2 12" />
-          </svg>
-          <h3 className="font-bold text-festival-green font-display text-base">Flock Route</h3>
-        </div>
-        <p className="text-xs text-festival-muted leading-relaxed">
-          The optimal path to keep the flock together based on overlapping favorites.
-        </p>
-      </div>
-
-      <FlockPowerBar members={members} />
-
-      <div className="px-4 pb-4 space-y-0">
+    <div className="space-y-0">
+      <div className="pb-2 space-y-0">
         {stops.length === 0 ? (
           <div className="py-10 text-center text-festival-muted text-sm">
             No members have generated schedules yet
@@ -438,16 +418,6 @@ function FlockRoutePanel({
         )}
       </div>
 
-      <div className="px-4 pb-4 pt-1">
-        <button className="w-full py-3 rounded-xl text-sm font-semibold text-festival-text border border-festival-border/60 flex items-center justify-center gap-2 hover:border-festival-blue/40 hover:bg-festival-blue/5 transition-all"
-          style={{ backgroundColor: '#1b1f2c' }}
-        >
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
-            <polygon points="3 11 22 2 13 21 11 13 3 11" />
-          </svg>
-          View Route on Map
-        </button>
-      </div>
     </div>
   );
 }
@@ -654,34 +624,31 @@ export function FlockView({
           <p className="text-sm mt-1 text-festival-muted">Share the flock code to bring the herd together</p>
         </div>
       ) : (
-        <div className="grid grid-cols-1 xl:grid-cols-[1fr_360px] gap-6">
-          {/* Left: Flock View + member columns */}
-          <div>
-            <div className="flex items-center gap-2 mb-4">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" className="text-festival-blue">
-                <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" /><circle cx="9" cy="7" r="4" /><path d="M23 21v-2a4 4 0 0 0-3-3.87" /><path d="M16 3.13a4 4 0 0 1 0 7.75" />
-              </svg>
-              <h2 className="text-lg font-bold text-festival-blue font-display">The Flock View</h2>
+        <div className="grid grid-cols-1 xl:grid-cols-[1fr_340px] gap-4" style={{ height: 'calc(100vh - 260px)', minHeight: '480px' }}>
+
+          {/* Left: member columns — fixed-height scrollable pane */}
+          <div className="rounded-xl border border-festival-border/50 overflow-hidden flex flex-col" style={{ backgroundColor: '#171b28' }}>
+            {/* Pane header */}
+            <div className="px-4 py-3 border-b border-festival-border/40 flex items-center justify-between flex-shrink-0" style={{ backgroundColor: '#1b1f2c' }}>
+              <div className="flex items-center gap-2">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" className="text-festival-blue">
+                  <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" /><circle cx="9" cy="7" r="4" /><path d="M23 21v-2a4 4 0 0 0-3-3.87" /><path d="M16 3.13a4 4 0 0 1 0 7.75" />
+                </svg>
+                <h2 className="text-sm font-bold text-festival-blue font-display">The Flock View</h2>
+              </div>
+              <div className="flex items-center gap-3 text-xs text-festival-muted">
+                <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-sm border-l-2 border-festival-green inline-block" />Together</span>
+                <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-sm border-l-2 border-festival-blue/60 inline-block" />Must See</span>
+                {sharedCount > 0 && (
+                  <span className="px-2 py-0.5 rounded-full border border-festival-green/25 text-festival-green font-semibold" style={{ backgroundColor: 'rgba(78,222,163,0.08)' }}>
+                    ×{sharedCount} shared
+                  </span>
+                )}
+              </div>
             </div>
 
-            {/* Legend */}
-            <div className="flex flex-wrap gap-4 mb-4 text-xs text-festival-muted">
-              <span className="flex items-center gap-1.5">
-                <span className="w-2.5 h-2.5 rounded-sm border-l-2 border-festival-green bg-emerald-950/40 inline-block" />
-                Together
-              </span>
-              <span className="flex items-center gap-1.5">
-                <span className="w-2.5 h-2.5 rounded-sm border-l-2 border-festival-blue/60 bg-blue-950/30 inline-block" />
-                Must See
-              </span>
-              <span className="flex items-center gap-1.5">
-                <span className="w-2.5 h-2.5 rounded-sm border-l-2 border-slate-600 bg-slate-900/30 inline-block" />
-                Nice to See
-              </span>
-            </div>
-
-            {/* Member column scroll */}
-            <div className="flex gap-3 overflow-x-auto pb-4">
+            {/* Horizontally scrollable columns */}
+            <div className="flex gap-2 overflow-x-auto overflow-y-hidden flex-1 p-3 pb-2" style={{ scrollbarWidth: 'thin' }}>
               {memberItineraries.map(({ member, itinerary }, index) => {
                 const isCurrentUser = member.id === currentMemberId;
                 return (
@@ -700,12 +667,29 @@ export function FlockView({
             </div>
           </div>
 
-          {/* Right: Flock Route */}
-          <FlockRoutePanel
-            memberItineraries={memberItineraries}
-            members={members}
-            artistAttendance={artistAttendance}
-          />
+          {/* Right: Flock Route — fixed-height scrollable pane */}
+          <div className="rounded-xl border border-festival-border/60 overflow-hidden flex flex-col" style={{ backgroundColor: '#171b28' }}>
+            {/* Route pane header */}
+            <div className="px-4 py-3 border-b border-festival-border/40 flex-shrink-0" style={{ backgroundColor: '#1b1f2c' }}>
+              <div className="flex items-center gap-2 mb-0.5">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" className="text-festival-green">
+                  <polyline points="22 12 18 12 15 21 9 3 6 12 2 12" />
+                </svg>
+                <h3 className="font-bold text-festival-green font-display text-sm">Flock Route</h3>
+              </div>
+              <p className="text-xs text-festival-muted">Optimal path based on overlapping favorites.</p>
+            </div>
+
+            {/* Scrollable route content */}
+            <div className="flex-1 overflow-y-auto px-3 py-3" style={{ scrollbarWidth: 'thin' }}>
+              <FlockPowerBar members={members} />
+              <FlockRoutePanel
+                memberItineraries={memberItineraries}
+                artistAttendance={artistAttendance}
+              />
+            </div>
+          </div>
+
         </div>
       )}
     </div>
