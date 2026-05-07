@@ -1,0 +1,29 @@
+Date,Analyst,Tool,Use Case,Workflow Stage,Output Type,Time Saved (min),Value Rating,Verification,Would Use Again,Would Standardize,Notes
+5/6/2026,Kaung,Gemini,SQL / query writing,Build,Code / query,30,4,light,Yes,Yes,Verified a window function logic for a rolling 7-day average
+5/5/2026,Kaung,Gemini,SQL / query writing,Validate,Explanation / breakdown,20,4,light,Yes,Yes,Checked whether a LEFT JOIN vs INNER JOIN gave correct results for nulls
+5/2/2026,Kaung,Gemini,Ad-hoc analysis,Explore,Explanation / breakdown,25,3,light,Yes,No,Brainstormed approaches for segmenting users by activity quartile
+5/1/2026,Kaung,Gemini,SQL / query writing,Build,Code / query,45,5,light,Yes,Yes,Generated a CTE chain for a complex multi-step funnel query
+4/30/2026,Kaung,Gemini,Code review / debugging,Validate,Troubleshooting steps,30,4,heavy,Yes,No,Debugged a Python script that was dropping rows unexpectedly during a merge
+4/29/2026,Kaung,Gemini,SQL / query writing,Validate,Explanation / breakdown,15,3,light,Yes,No,Sanity-checked date truncation logic in a daily aggregation query
+4/28/2026,Kaung,Gemini,Ad-hoc analysis,Explore,Structured outline,20,3,light,Yes,No,Explored how to frame a trend analysis for a stakeholder ask
+4/25/2026,Kaung,Gemini,SQL / query writing,Build,Code / query,60,5,light,Yes,Yes,Wrote a query to calculate customer lifetime value with spend bucketing
+4/24/2026,Kaung,Gemini,Code review / debugging,Validate,Troubleshooting steps,20,4,heavy,Yes,No,Traced a logic error in a CASE WHEN that was misclassifying edge cases
+4/23/2026,Kaung,Gemini,SQL / query writing,Validate,Explanation / breakdown,15,3,light,Yes,No,Verified aggregate filter placement (HAVING vs WHERE)
+4/22/2026,Kaung,Gemini,Ad-hoc analysis,Explore,Explanation / breakdown,30,4,light,Yes,Yes,Asked Gemini to critique my approach before presenting to the team
+4/21/2026,Kaung,Gemini,SQL / query writing,Build,Code / query,45,4,light,Yes,Yes,Translated a business rule into a SQL expression with COALESCE fallback
+4/18/2026,Kaung,Gemini,Code review / debugging,Build,Code / query,30,4,light,Yes,No,Generated a small Python snippet to reformat a date column for Tableau
+4/17/2026,Kaung,Gemini,SQL / query writing,Validate,Explanation / breakdown,20,3,heavy,Yes,No,Cross-checked subquery vs join performance explanation
+4/16/2026,Kaung,Gemini,Ad-hoc analysis,Explore,Structured outline,25,4,light,Yes,Yes,Used Gemini to brainstorm KPIs for a new product team request
+4/15/2026,Kaung,Gemini,SQL / query writing,Build,Code / query,60,5,none,Yes,Yes,Built a deduplication query using ROW_NUMBER with partition logic
+4/14/2026,Kaung,Gemini,Code review / debugging,Validate,Troubleshooting steps,15,3,heavy,Yes,No,Debugged an off-by-one error in a date range filter
+4/11/2026,Kaung,Gemini,SQL / query writing,Build,Code / query,30,4,light,Yes,Yes,Generated UNPIVOT equivalent logic in standard SQL
+4/10/2026,Kaung,Gemini,SQL / query writing,Validate,Explanation / breakdown,20,4,light,Yes,No,Verified that a GROUP BY was handling multi-column keys correctly
+4/9/2026,Kaung,Gemini,Ad-hoc analysis,Explore,Explanation / breakdown,20,3,light,Yes,No,Early brainstorm on how to approach a churn prediction framing problem
+4/8/2026,Kaung,Gemini,Code review / debugging,Build,Code / query,25,4,light,Yes,No,Quick snippet to flatten a JSON column in BigQuery
+4/7/2026,Kaung,Gemini,SQL / query writing,Build,Code / query,45,5,light,Yes,Yes,Wrote a query comparing month-over-month revenue by region with YoY delta
+4/4/2026,Kaung,Gemini,SQL / query writing,Validate,Explanation / breakdown,15,3,light,Yes,No,Asked why DISTINCT was not reducing row count as expected
+4/3/2026,Kaung,Gemini,Ad-hoc analysis,Explore,Structured outline,30,4,light,Yes,Yes,Brainstormed dimensions to cut a campaign performance analysis
+4/2/2026,Kaung,Gemini,Code review / debugging,Validate,Troubleshooting steps,20,3,heavy,No,No,Script was producing NaN in a ratio column — Gemini explanation was partially helpful
+4/1/2026,Kaung,Gemini,SQL / query writing,Build,Code / query,60,5,none,Yes,Yes,Generated a full cohort retention matrix query from scratch
+3/31/2026,Kaung,Gemini,SQL / query writing,Validate,Explanation / breakdown,20,4,light,Yes,No,Validated that a self-join approach was the right call for a comparison table
+3/28/2026,Kaung,Gemini,Code review / debugging,Build,Code / query,15,3,light,Yes,No,Small regex snippet to extract a product code from a string column

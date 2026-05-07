@@ -470,7 +470,7 @@ export function LogForm({ analystName, onSubmit }: LogFormProps) {
             onClick={() => setStep(s => (s + 1) as Step)}
             disabled={!stepValid[step]}
             className="flex-1 py-2.5 rounded-xl font-bold text-sm text-white transition-all disabled:opacity-40 disabled:cursor-not-allowed"
-            style={stepValid[step] ? { background: 'linear-gradient(135deg, #3b82f6, #6366f1)' } : { background: '#1f2d45' }}
+            style={stepValid[step] ? { background: '#0067ff', boxShadow: 'inset 0 0.5px 0 rgba(255,255,255,0.15)' } : { background: '#242a35' }}
           >
             Next →
           </button>
@@ -484,7 +484,7 @@ export function LogForm({ analystName, onSubmit }: LogFormProps) {
                 ? 'bg-dc-green/30 border border-dc-green text-dc-green'
                 : 'text-white disabled:opacity-40 disabled:cursor-not-allowed'
             }`}
-            style={allValid && !submitted ? { background: 'linear-gradient(135deg, #10b981, #3b82f6)' } : {}}
+            style={allValid && !submitted ? { background: '#0067ff', boxShadow: 'inset 0 0.5px 0 rgba(255,255,255,0.15)' } : {}}
           >
             {submitted ? '✓ Logged!' : 'Submit log →'}
           </button>

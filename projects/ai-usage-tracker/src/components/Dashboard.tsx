@@ -5,26 +5,26 @@ import {
 import { AggStats, LogEntry } from '../types';
 
 const TOOL_COLORS: Record<string, string> = {
-  Gemini:       '#3b82f6',
-  ChatGPT:      '#10b981',
-  Claude:       '#f59e0b',
-  'Claude Code':'#a78bfa',
-  Copilot:      '#22d3ee',
-  Other:        '#64748b',
+  Gemini:       '#0067ff',
+  ChatGPT:      '#4cd6ff',
+  Claude:       '#b3c5ff',
+  'Claude Code':'#007d9a',
+  Copilot:      '#4cd6ff',
+  Other:        '#8c90a1',
 };
 
 const STAGE_COLORS: Record<string, string> = {
-  Build:       '#6366f1',
-  Validate:    '#f59e0b',
-  Communicate: '#10b981',
-  Explore:     '#22d3ee',
-  Other:       '#64748b',
+  Build:       '#0067ff',
+  Validate:    '#b3c5ff',
+  Communicate: '#4cd6ff',
+  Explore:     '#007d9a',
+  Other:       '#8c90a1',
 };
 
 const VERIFICATION_COLORS = {
-  none:  '#10b981',
-  light: '#3b82f6',
-  heavy: '#ef4444',
+  none:  '#4cd6ff',
+  light: '#0067ff',
+  heavy: '#ffb4aa',
 };
 
 function StatCard({ label, value, sub, accent = '#3b82f6' }: { label: string; value: string; sub?: string; accent?: string }) {
@@ -117,11 +117,11 @@ export function Dashboard({ stats, entries }: DashboardProps) {
     <div className="space-y-5">
       {/* KPI row */}
       <div className="grid grid-cols-2 lg:grid-cols-5 gap-3">
-        <StatCard label="Total Logs"    value={String(stats.totalEntries)}          sub={`${stats.recentWeekEntries} this week`}    accent="#3b82f6" />
-        <StatCard label="Hours Saved"   value={`${stats.totalTimeSavedHours}h`}     sub="self-reported"                             accent="#10b981" />
-        <StatCard label="Avg Value"     value={`${stats.avgValueRating}/5`}         sub="across all logs"                           accent="#f59e0b" />
-        <StatCard label="Use Again"     value={`${stats.wouldUseAgainPct}%`}        sub="would repeat"                              accent="#22d3ee" />
-        <StatCard label="Standardize"   value={String(stats.standardizeCount)}      sub="worth teaching"                            accent="#a78bfa" />
+        <StatCard label="Total Logs"    value={String(stats.totalEntries)}          sub={`${stats.recentWeekEntries} this week`}    accent="#0067ff" />
+        <StatCard label="Hours Saved"   value={`${stats.totalTimeSavedHours}h`}     sub="self-reported"                             accent="#4cd6ff" />
+        <StatCard label="Avg Value"     value={`${stats.avgValueRating}/5`}         sub="across all logs"                           accent="#b3c5ff" />
+        <StatCard label="Use Again"     value={`${stats.wouldUseAgainPct}%`}        sub="would repeat"                              accent="#4cd6ff" />
+        <StatCard label="Standardize"   value={String(stats.standardizeCount)}      sub="worth teaching"                            accent="#0067ff" />
       </div>
 
       {/* Analyst contributions */}
@@ -160,8 +160,8 @@ export function Dashboard({ stats, entries }: DashboardProps) {
             <BarChart data={useCaseData} layout="vertical" margin={{ left: 0, right: 16 }}>
               <XAxis type="number" tick={{ fontSize: 11, fill: '#64748b' }} tickLine={false} axisLine={false} />
               <YAxis dataKey="name" type="category" width={140} tick={{ fontSize: 11, fill: '#94a3b8' }} tickLine={false} axisLine={false} />
-              <Tooltip content={<CustomTooltip />} cursor={{ fill: 'rgba(59,130,246,0.07)' }} />
-              <Bar dataKey="timeSaved" name="Hours saved" fill="#3b82f6" radius={[0, 4, 4, 0]} />
+              <Tooltip content={<CustomTooltip />} cursor={{ fill: 'rgba(0,103,255,0.07)' }} />
+              <Bar dataKey="timeSaved" name="Hours saved" fill="#0067ff" radius={[0, 4, 4, 0]} />
             </BarChart>
           </ResponsiveContainer>
         </div>
@@ -202,7 +202,7 @@ export function Dashboard({ stats, entries }: DashboardProps) {
             <BarChart data={stageData} margin={{ left: 0, right: 8 }}>
               <XAxis dataKey="name" tick={{ fontSize: 11, fill: '#94a3b8' }} tickLine={false} axisLine={false} />
               <YAxis tick={{ fontSize: 11, fill: '#64748b' }} tickLine={false} axisLine={false} />
-              <Tooltip content={<CustomTooltip />} cursor={{ fill: 'rgba(99,102,241,0.07)' }} />
+              <Tooltip content={<CustomTooltip />} cursor={{ fill: 'rgba(0,103,255,0.07)' }} />
               <Bar dataKey="count" name="Logs" radius={[4, 4, 0, 0]}>
                 {stageData.map((entry, i) => <Cell key={i} fill={entry.fill} />)}
               </Bar>
@@ -217,8 +217,8 @@ export function Dashboard({ stats, entries }: DashboardProps) {
             <BarChart data={outputData} layout="vertical" margin={{ left: 0, right: 16 }}>
               <XAxis type="number" tick={{ fontSize: 11, fill: '#64748b' }} tickLine={false} axisLine={false} />
               <YAxis dataKey="name" type="category" width={145} tick={{ fontSize: 11, fill: '#94a3b8' }} tickLine={false} axisLine={false} />
-              <Tooltip content={<CustomTooltip />} cursor={{ fill: 'rgba(34,211,238,0.07)' }} />
-              <Bar dataKey="count" name="Logs" fill="#22d3ee" radius={[0, 4, 4, 0]} />
+              <Tooltip content={<CustomTooltip />} cursor={{ fill: 'rgba(76,214,255,0.07)' }} />
+              <Bar dataKey="count" name="Logs" fill="#4cd6ff" radius={[0, 4, 4, 0]} />
             </BarChart>
           </ResponsiveContainer>
         </div>
@@ -255,9 +255,9 @@ export function Dashboard({ stats, entries }: DashboardProps) {
             <p className="text-xs text-dc-muted mb-2">Avg rating per category (min 2 logs)</p>
             <ResponsiveContainer width="100%" height={200}>
               <RadarChart data={radarData}>
-                <PolarGrid stroke="#1f2d45" />
-                <PolarAngleAxis dataKey="subject" tick={{ fontSize: 10, fill: '#94a3b8' }} />
-                <Radar name="Avg Value" dataKey="avgValue" stroke="#6366f1" fill="#6366f1" fillOpacity={0.25} strokeWidth={2} />
+                <PolarGrid stroke="#424655" />
+                <PolarAngleAxis dataKey="subject" tick={{ fontSize: 10, fill: '#c2c6d8' }} />
+                <Radar name="Avg Value" dataKey="avgValue" stroke="#0067ff" fill="#0067ff" fillOpacity={0.2} strokeWidth={2} />
                 <Tooltip content={<CustomTooltip />} />
               </RadarChart>
             </ResponsiveContainer>

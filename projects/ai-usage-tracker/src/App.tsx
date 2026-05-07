@@ -23,13 +23,13 @@ function IdentityGate({ onConfirm }: { onConfirm: (name: string) => void }) {
   const [name, setName] = useState('');
   const trimmed = name.trim();
   return (
-    <div className="min-h-screen flex items-center justify-center px-4" style={{ backgroundColor: '#0b0f1a' }}>
+    <div className="min-h-screen flex items-center justify-center px-4" style={{ backgroundColor: '#080e18' }}>
       {/* Brand glow */}
       <div className="pointer-events-none fixed inset-0 overflow-hidden">
         <div className="absolute -top-40 -left-40 w-96 h-96 rounded-full opacity-10"
-          style={{ background: 'radial-gradient(circle, #004879 0%, transparent 70%)' }} />
+          style={{ background: 'radial-gradient(circle, #0067ff 0%, transparent 70%)' }} />
         <div className="absolute -bottom-40 -right-40 w-96 h-96 rounded-full opacity-10"
-          style={{ background: 'radial-gradient(circle, #D22E1E 0%, transparent 70%)' }} />
+          style={{ background: 'radial-gradient(circle, #4cd6ff 0%, transparent 70%)' }} />
       </div>
 
       <div className="relative w-full max-w-sm text-center">
@@ -60,9 +60,9 @@ function IdentityGate({ onConfirm }: { onConfirm: (name: string) => void }) {
             autoFocus
             className="w-full px-4 py-3 rounded-xl text-center text-white text-base outline-none transition-all mb-3"
             style={{
-              backgroundColor: '#0b0f1a',
-              border: `1.5px solid ${trimmed ? '#004879' : '#1f2d45'}`,
-              caretColor: '#004879',
+              backgroundColor: '#080e18',
+              border: `1.5px solid ${trimmed ? '#0067ff' : '#424655'}`,
+              caretColor: '#0067ff',
             }}
           />
           <button
@@ -140,9 +140,9 @@ export default function App() {
   ];
 
   return (
-    <div className="min-h-screen" style={{ backgroundColor: '#0b0f1a' }}>
+    <div className="min-h-screen" style={{ backgroundColor: '#080e18' }}>
       {/* Header */}
-      <header className="border-b border-dc-border sticky top-0 z-50 backdrop-blur-md" style={{ backgroundColor: 'rgba(11,15,26,0.92)' }}>
+      <header className="border-b border-dc-border sticky top-0 z-50 backdrop-blur-md" style={{ backgroundColor: 'rgba(8,14,24,0.92)' }}>
         <div className="max-w-5xl mx-auto px-4 py-4">
           <div className="flex items-center justify-between gap-4">
             {/* Brand */}
@@ -208,14 +208,14 @@ export default function App() {
                     : 'text-dc-muted hover:text-dc-text hover:bg-dc-surface'
                 }`}
                 style={activeTab === tab.id ? {
-                  background: 'rgba(0,72,121,0.25)',
-                  borderColor: 'rgba(0,72,121,0.5)',
+                  background: 'rgba(0,103,255,0.15)',
+                  borderColor: 'rgba(0,103,255,0.4)',
                 } : {}}
               >
                 {tab.label}
                 {tab.badge !== undefined && (
                   <span className={`text-xs px-1.5 py-0.5 rounded-full font-semibold ${
-                    activeTab === tab.id ? 'bg-dc-navy/40 text-white/70' : 'bg-dc-surface text-dc-muted'
+                    activeTab === tab.id ? 'bg-dc-blue/20 text-dc-indigo' : 'bg-dc-surface text-dc-muted'
                   }`}>
                     {tab.badge}
                   </span>
@@ -237,7 +237,7 @@ export default function App() {
         {/* Demo seed banner */}
         {entries.length === 0 && !hasSeed && (
           <div className="mb-6 px-5 py-4 rounded-2xl border flex items-center justify-between gap-4 flex-wrap"
-            style={{ background: 'rgba(0,72,121,0.08)', borderColor: 'rgba(0,72,121,0.25)' }}>
+            style={{ background: 'rgba(0,103,255,0.06)', borderColor: 'rgba(0,103,255,0.2)' }}>
             <div>
               <div className="text-sm font-bold text-dc-text">Try the demo</div>
               <div className="text-xs text-dc-muted mt-0.5">Load 28 sample logs across 5 analysts to explore the dashboard.</div>

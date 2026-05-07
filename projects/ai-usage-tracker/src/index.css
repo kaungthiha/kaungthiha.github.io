@@ -4,28 +4,56 @@
 
 @layer base {
   body {
-    background-color: #0b0f1a;
-    color: #e2e8f0;
+    background-color: #080e18;
+    color: #dde2f1;
     font-family: 'Inter', system-ui, sans-serif;
     -webkit-font-smoothing: antialiased;
+  }
+
+  h1, h2, h3 {
+    font-family: 'Work Sans', 'Inter', system-ui, sans-serif;
   }
 
   * {
     box-sizing: border-box;
   }
 
-  ::-webkit-scrollbar {
-    width: 6px;
-    height: 6px;
-  }
+  ::-webkit-scrollbar { width: 6px; height: 6px; }
   ::-webkit-scrollbar-track { background: transparent; }
-  ::-webkit-scrollbar-thumb { background: #1f2d45; border-radius: 3px; }
-  ::-webkit-scrollbar-thumb:hover { background: #2d3f5f; }
+  ::-webkit-scrollbar-thumb { background: #424655; border-radius: 3px; }
+  ::-webkit-scrollbar-thumb:hover { background: #8c90a1; }
+}
+
+@layer components {
+  /* Glassmorphic card — Level 1 elevation */
+  .glass-card {
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.07);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+  }
+
+  /* Primary button inner glow */
+  .btn-primary {
+    background-color: #0067ff;
+    color: #faf8ff;
+    border-radius: 0.5rem;
+    box-shadow: inset 0 0.5px 0 rgba(255,255,255,0.15);
+  }
+  .btn-primary:hover {
+    background-color: #0055d5;
+  }
 }
 
 @layer utilities {
   .text-gradient {
-    background: linear-gradient(135deg, #3b82f6, #22d3ee);
+    background: linear-gradient(135deg, #0067ff, #4cd6ff);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  .text-gradient-brand {
+    background: linear-gradient(135deg, #004879, #D22E1E);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
