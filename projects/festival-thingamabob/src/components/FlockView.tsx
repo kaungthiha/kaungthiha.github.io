@@ -3,7 +3,7 @@ import { FlockMemberData } from '../lib/flockApi';
 import { EDC_2026_SETS, DAYS } from '../lib/sampleData';
 import { generateItinerary } from '../lib/itineraryOptimizer';
 import { generateFlockItinerary } from '../lib/flockItinerary';
-import { FestivalSet, UserPreferences, ItineraryItem } from '../types/festival';
+import { FestivalSet, UserPreferences, ItineraryItem, MeetupPoint } from '../types/festival';
 import { formatTime } from '../lib/timeUtils';
 import { SwapModal } from './SwapModal';
 
@@ -20,9 +20,13 @@ interface FlockViewProps {
   tripCode: string;
   isLeader: boolean;
   isLocked: boolean;
+  flockPinnedByDay: Record<string, string[]>;
+  meetups: MeetupPoint[];
   onLockToggle: (lock: boolean) => Promise<void>;
   onLeave: () => Promise<void>;
   onRemoveMember: (memberId: string) => Promise<void>;
+  onFlockPinnedChange: (pinnedByDay: Record<string, string[]>) => Promise<void>;
+  onMeetupsChange: (meetups: MeetupPoint[]) => Promise<void>;
   onBack: () => void;
 }
 
@@ -468,21 +472,83 @@ function RouteSetCard({
   );
 }
 
+function MeetupForm({ onSave, onCancel }: { onSave: (location: string, notes: string) => void; onCancel: () => void }) {
+  const [location, setLocation] = useState('');
+  const [notes, setNotes] = useState('');
+  return (
+    <div className="rounded-xl border border-amber-500/30 px-3 py-3 space-y-2"
+      style={{ backgroundColor: 'rgba(245,158,11,0.06)' }}
+    >
+      <div className="text-xs font-semibold text-amber-300">📍 Set Meetup Point</div>
+      <input
+        className="w-full rounded-lg px-2.5 py-1.5 text-xs border border-festival-border bg-festival-card text-festival-text placeholder:text-festival-muted focus:outline-none focus:border-amber-500/50"
+        placeholder="Location (e.g. Circuit Grounds entrance)"
+        value={location}
+        onChange={e => setLocation(e.target.value)}
+        autoFocus
+      />
+      <input
+        className="w-full rounded-lg px-2.5 py-1.5 text-xs border border-festival-border bg-festival-card text-festival-text placeholder:text-festival-muted focus:outline-none focus:border-amber-500/50"
+        placeholder="Notes (optional)"
+        value={notes}
+        onChange={e => setNotes(e.target.value)}
+      />
+      <div className="flex gap-2">
+        <button
+          disabled={!location.trim()}
+          onClick={() => { if (location.trim()) onSave(location.trim(), notes.trim()); }}
+          className="text-xs px-3 py-1.5 rounded-lg font-semibold text-amber-900 disabled:opacity-40 transition-colors"
+          style={{ backgroundColor: '#f59e0b' }}
+        >
+          Save
+        </button>
+        <button onClick={onCancel} className="text-xs text-festival-muted hover:text-festival-text transition-colors">
+          Cancel
+        </button>
+      </div>
+    </div>
+  );
+}
+
+function FlockMeetupCard({ meetup, canRemove, onRemove }: { meetup: MeetupPoint; canRemove: boolean; onRemove: () => void }) {
+  return (
+    <div className="flex items-start gap-2 rounded-xl border border-amber-500/25 px-3 py-2.5"
+      style={{ backgroundColor: 'rgba(245,158,11,0.07)' }}
+    >
+      <span className="text-base flex-shrink-0 mt-0.5">📍</span>
+      <div className="flex-1 min-w-0">
+        <div className="text-xs font-semibold text-amber-300">{meetup.location}</div>
+        {meetup.notes && <div className="text-xs text-festival-muted mt-0.5">{meetup.notes}</div>}
+        <div className="text-xs text-festival-muted/60 mt-0.5">{formatTime(meetup.time)}</div>
+      </div>
+      {canRemove && (
+        <button onClick={onRemove} className="text-festival-muted/40 hover:text-red-400 transition-colors text-xs flex-shrink-0 mt-0.5">✕</button>
+      )}
+    </div>
+  );
+}
+
 function FlockRoutePanel({
   flockItems,
   memberItineraries,
   members,
   isLeader,
   selectedDay,
+  meetups,
   onFlockSwap,
+  onMeetupsChange,
 }: {
   flockItems: ItineraryItem[];
   memberItineraries: { member: FlockMemberData; itinerary: { items: ItineraryItem[] } }[];
   members: FlockMemberData[];
   isLeader: boolean;
   selectedDay: string;
+  meetups: MeetupPoint[];
   onFlockSwap: (outgoing: string, incoming: FestivalSet) => void;
+  onMeetupsChange: (meetups: MeetupPoint[]) => void;
 }) {
+  const [addingAfter, setAddingAfter] = useState<string | null>(null);
+
   const stops = useMemo(
     () => buildFlockStops(flockItems, memberItineraries, members),
     [flockItems, memberItineraries, members],
@@ -498,6 +564,18 @@ function FlockRoutePanel({
     [flockItems],
   );
 
+  function addMeetup(afterItemId: string, location: string, notes: string) {
+    const item = flockItems.find(i => i.id === afterItemId);
+    const time = item ? new Date(item.endTime) : new Date();
+    const next: MeetupPoint = { id: `meetup-${Date.now()}`, afterItemId, time, location, notes: notes || undefined };
+    onMeetupsChange([...meetups, next]);
+    setAddingAfter(null);
+  }
+
+  function removeMeetup(id: string) {
+    onMeetupsChange(meetups.filter(m => m.id !== id));
+  }
+
   if (stops.length === 0) {
     return (
       <div className="py-10 text-center text-festival-muted text-sm">
@@ -509,43 +587,74 @@ function FlockRoutePanel({
   return (
     <div className="space-y-1.5">
       {stops.map(stop => {
-        if (stop.kind === 'set') {
-          return (
-            <RouteSetCard
-              key={stop.item.id}
-              stop={stop}
-              isLeader={isLeader}
-              allDaySets={allDaySets}
-              scheduledArtists={scheduledArtists}
-              onSwap={isLeader ? onFlockSwap : undefined}
-            />
-          );
-        }
-        if (stop.kind === 'transition') {
-          return (
-            <div key={stop.item.id} className="flex items-center gap-2 px-2 py-1">
-              <div className="w-4 flex justify-center flex-shrink-0">
-                <div className="w-px h-5 bg-festival-border/50" />
+        const stopMeetups = meetups.filter(m => m.afterItemId === stop.item.id);
+        const isAddingHere = addingAfter === stop.item.id;
+
+        return (
+          <div key={stop.item.id}>
+            {stop.kind === 'set' && (
+              <RouteSetCard
+                stop={stop}
+                isLeader={isLeader}
+                allDaySets={allDaySets}
+                scheduledArtists={scheduledArtists}
+                onSwap={isLeader ? onFlockSwap : undefined}
+              />
+            )}
+            {stop.kind === 'transition' && (
+              <div className="flex items-center gap-2 px-2 py-1">
+                <div className="w-4 flex justify-center flex-shrink-0">
+                  <div className="w-px h-5 bg-festival-border/50" />
+                </div>
+                <span className="text-xs text-festival-muted italic flex-1">
+                  🐾 {stop.item.notes ?? `Trek to ${stop.item.toStage}`}
+                </span>
+                {isLeader && (
+                  <button
+                    onClick={() => setAddingAfter(isAddingHere ? null : stop.item.id)}
+                    className="text-xs text-festival-muted/50 hover:text-amber-400 transition-colors flex-shrink-0"
+                    title="Add meetup point here"
+                  >
+                    📍
+                  </button>
+                )}
               </div>
-              <span className="text-xs text-festival-muted italic">
-                🐾 {stop.item.notes ?? `Trek to ${stop.item.toStage}`}
-              </span>
-            </div>
-          );
-        }
-        if (stop.kind === 'break') {
-          return (
-            <div key={stop.item.id} className="flex items-center gap-2 px-3 py-2 rounded-lg"
-              style={{ backgroundColor: 'rgba(78,222,163,0.05)', border: '1px solid rgba(78,222,163,0.12)' }}
-            >
-              <span className="text-sm">🌿</span>
-              <span className="text-xs font-semibold text-festival-green">
-                Grazing Time · {formatTime(stop.item.startTime)}
-              </span>
-            </div>
-          );
-        }
-        return null;
+            )}
+            {stop.kind === 'break' && (
+              <div className="flex items-center gap-2 px-3 py-2 rounded-lg"
+                style={{ backgroundColor: 'rgba(78,222,163,0.05)', border: '1px solid rgba(78,222,163,0.12)' }}
+              >
+                <span className="text-sm">🌿</span>
+                <span className="text-xs font-semibold text-festival-green flex-1">
+                  Grazing Time · {formatTime(stop.item.startTime)}
+                </span>
+                {isLeader && (
+                  <button
+                    onClick={() => setAddingAfter(isAddingHere ? null : stop.item.id)}
+                    className="text-xs text-festival-muted/50 hover:text-amber-400 transition-colors flex-shrink-0"
+                    title="Add meetup point here"
+                  >
+                    📍
+                  </button>
+                )}
+              </div>
+            )}
+            {isAddingHere && (
+              <MeetupForm
+                onSave={(loc, notes) => addMeetup(stop.item.id, loc, notes)}
+                onCancel={() => setAddingAfter(null)}
+              />
+            )}
+            {stopMeetups.map(m => (
+              <FlockMeetupCard
+                key={m.id}
+                meetup={m}
+                canRemove={isLeader}
+                onRemove={() => removeMeetup(m.id)}
+              />
+            ))}
+          </div>
+        );
       })}
     </div>
   );
@@ -560,9 +669,13 @@ export function FlockView({
   tripCode,
   isLeader,
   isLocked,
+  flockPinnedByDay,
+  meetups,
   onLockToggle,
   onLeave,
   onRemoveMember,
+  onFlockPinnedChange,
+  onMeetupsChange,
   onBack,
 }: FlockViewProps) {
   const [selectedDay, setSelectedDay] = useState(initialDay);
@@ -612,8 +725,6 @@ export function FlockView({
     [artistAttendance],
   );
 
-  const [flockPinnedByDay, setFlockPinnedByDay] = useState<Record<string, string[]>>({});
-
   const flockItinerary = useMemo(() => {
     const base = generateFlockItinerary(members.filter(m => m.hasGenerated), selectedDay);
     const pinned = flockPinnedByDay[selectedDay] ?? [];
@@ -630,12 +741,10 @@ export function FlockView({
   }, [members, selectedDay, flockPinnedByDay]);
 
   function handleFlockSwap(outgoing: string, incoming: FestivalSet) {
-    setFlockPinnedByDay(prev => {
-      const current = prev[selectedDay] ?? [];
-      const without = current.filter(a => a !== outgoing);
-      const next = without.includes(incoming.artist) ? without : [...without, incoming.artist];
-      return { ...prev, [selectedDay]: next };
-    });
+    const current = flockPinnedByDay[selectedDay] ?? [];
+    const without = current.filter((a: string) => a !== outgoing);
+    const next = without.includes(incoming.artist) ? without : [...without, incoming.artist];
+    onFlockPinnedChange({ ...flockPinnedByDay, [selectedDay]: next });
   }
 
   async function handleLockToggle() {
@@ -844,7 +953,9 @@ export function FlockView({
                 members={members}
                 isLeader={isLeader}
                 selectedDay={selectedDay}
+                meetups={meetups}
                 onFlockSwap={handleFlockSwap}
+                onMeetupsChange={onMeetupsChange}
               />
             </div>
           </div>

@@ -13,7 +13,10 @@ import {
   saveFlockCache,
   loadFlockCache,
   removeMember,
-} from './lib/flockApi';
+  saveFlockPinned,
+  saveTripMeetups,
+} from './lib/flockApi'
+import { MeetupPoint } from './types/festival';
 import { ArtistPreferencePicker } from './components/ArtistPreferencePicker';
 import { PreferenceControls } from './components/PreferenceControls';
 import { ItineraryTimeline } from './components/ItineraryTimeline';
@@ -89,6 +92,8 @@ export default function App() {
   const [showFlockView, setShowFlockView] = useState(false);
   const [flockDetails, setFlockDetails] = useState<FlockDetails | null>(null);
   const [flockLoading, setFlockLoading] = useState(false);
+  const [flockPinnedByDay, setFlockPinnedByDay] = useState<Record<string, string[]>>({});
+  const [flockMeetups, setFlockMeetups] = useState<MeetupPoint[]>([]);
 
   const handlePreferenceChange = useCallback((artist: string, level: PreferenceLevel) => {
     setArtistPreferences(prev => {
@@ -175,13 +180,41 @@ export default function App() {
 
     // Show cached data immediately while fetching
     const cached = loadFlockCache(flockInfo.tripCode);
-    if (cached) setFlockDetails(cached);
+    if (cached) {
+      setFlockDetails(cached);
+      setFlockPinnedByDay(cached.flockPinnedByDay ?? {});
+      setFlockMeetups(cached.meetups ?? []);
+    }
 
     const details = await getFlockDetails(flockInfo.tripCode);
     setFlockLoading(false);
     if (details) {
       setFlockDetails(details);
+      setFlockPinnedByDay(details.flockPinnedByDay ?? {});
+      setFlockMeetups(details.meetups ?? []);
       saveFlockCache(flockInfo.tripCode, details);
+    }
+  }
+
+  async function handleFlockPinnedChange(pinnedByDay: Record<string, string[]>) {
+    if (!flockInfo) return;
+    setFlockPinnedByDay(pinnedByDay);
+    await saveFlockPinned(flockInfo.tripCode, pinnedByDay);
+    if (flockDetails) {
+      const updated: FlockDetails = { ...flockDetails, flockPinnedByDay: pinnedByDay };
+      setFlockDetails(updated);
+      saveFlockCache(flockInfo.tripCode, updated);
+    }
+  }
+
+  async function handleFlockMeetupsChange(meetups: MeetupPoint[]) {
+    if (!flockInfo) return;
+    setFlockMeetups(meetups);
+    await saveTripMeetups(flockInfo.tripCode, meetups);
+    if (flockDetails) {
+      const updated: FlockDetails = { ...flockDetails, meetups };
+      setFlockDetails(updated);
+      saveFlockCache(flockInfo.tripCode, updated);
     }
   }
 
@@ -395,9 +428,13 @@ export default function App() {
                     tripCode={flockInfo.tripCode}
                     isLeader={flockInfo.isLeader}
                     isLocked={flockDetails?.isLocked ?? false}
+                    flockPinnedByDay={flockPinnedByDay}
+                    meetups={flockMeetups}
                     onLockToggle={handleLockToggle}
                     onLeave={handleLeave}
                     onRemoveMember={handleRemoveMember}
+                    onFlockPinnedChange={handleFlockPinnedChange}
+                    onMeetupsChange={handleFlockMeetupsChange}
                     onBack={() => setShowFlockView(false)}
                   />
                 )}

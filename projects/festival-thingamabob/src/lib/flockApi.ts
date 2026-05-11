@@ -1,5 +1,5 @@
 import { supabase } from './supabase'
-import { ArtistPreference, UserPreferences } from '../types/festival'
+import { ArtistPreference, UserPreferences, MeetupPoint } from '../types/festival'
 
 const CODE_CHARS = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'
 
@@ -28,6 +28,8 @@ export type FlockDetails = {
   members: FlockMemberData[]
   isLocked: boolean
   lockedAt: Date | null
+  flockPinnedByDay: Record<string, string[]>
+  meetups: MeetupPoint[]
 }
 
 const CACHE_KEY = (code: string) => `sheepherder_flock_cache_${code}`
@@ -176,6 +178,9 @@ export async function getFlockDetails(tripCode: string): Promise<FlockDetails | 
 
   const tripRow = trip as Record<string, unknown>
 
+  const rawMeetups = ((tripRow.meetups as { id: string; afterItemId: string; time: string; location: string; notes?: string }[]) ?? [])
+    .map(m => ({ ...m, time: new Date(m.time) }))
+
   return {
     members: (members ?? []).map(m => {
       const row = m as Record<string, unknown>
@@ -191,6 +196,8 @@ export async function getFlockDetails(tripCode: string): Promise<FlockDetails | 
     }),
     isLocked: !!(tripRow.locked_at),
     lockedAt: tripRow.locked_at ? new Date(tripRow.locked_at as string) : null,
+    flockPinnedByDay: (tripRow.flock_pinned as Record<string, string[]>) ?? {},
+    meetups: rawMeetups,
   }
 }
 
@@ -245,4 +252,21 @@ export async function unlockFlock(tripCode: string): Promise<boolean> {
     .eq('trip_code', tripCode)
   if (error) console.error('[unlockFlock]', error)
   return !error
+}
+
+export async function saveFlockPinned(tripCode: string, pinnedByDay: Record<string, string[]>): Promise<void> {
+  const { error } = await supabase
+    .from('trips')
+    .update({ flock_pinned: pinnedByDay })
+    .eq('trip_code', tripCode)
+  if (error) console.error('[saveFlockPinned]', error)
+}
+
+export async function saveTripMeetups(tripCode: string, meetups: MeetupPoint[]): Promise<void> {
+  const serializable = meetups.map(m => ({ ...m, time: m.time.toISOString() }))
+  const { error } = await supabase
+    .from('trips')
+    .update({ meetups: serializable })
+    .eq('trip_code', tripCode)
+  if (error) console.error('[saveTripMeetups]', error)
 }
