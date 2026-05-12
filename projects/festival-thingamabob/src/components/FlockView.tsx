@@ -593,13 +593,26 @@ function FlockRoutePanel({
         return (
           <div key={stop.item.id}>
             {stop.kind === 'set' && (
-              <RouteSetCard
-                stop={stop}
-                isLeader={isLeader}
-                allDaySets={allDaySets}
-                scheduledArtists={scheduledArtists}
-                onSwap={isLeader ? onFlockSwap : undefined}
-              />
+              <>
+                <RouteSetCard
+                  stop={stop}
+                  isLeader={isLeader}
+                  allDaySets={allDaySets}
+                  scheduledArtists={scheduledArtists}
+                  onSwap={isLeader ? onFlockSwap : undefined}
+                />
+                {isLeader && (
+                  <div className="flex justify-end px-1">
+                    <button
+                      onClick={() => setAddingAfter(isAddingHere ? null : stop.item.id)}
+                      className="text-xs text-festival-muted/40 hover:text-amber-400 transition-colors"
+                      title="Add meetup point after this set"
+                    >
+                      📍 meetup
+                    </button>
+                  </div>
+                )}
+              </>
             )}
             {stop.kind === 'transition' && (
               <div className="flex items-center gap-2 px-2 py-1">
