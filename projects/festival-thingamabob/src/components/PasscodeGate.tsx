@@ -69,7 +69,7 @@ export function PasscodeGate({ children }: PasscodeGateProps) {
           }}
         >
           <p className="text-slate-300 text-sm text-center mb-5">
-            Enter the sheepfold passcode to join the herd.
+            EDC just ended and it's time for us to sleep. See you next year!
           </p>
 
           <input
