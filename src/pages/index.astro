@@ -62,6 +62,12 @@ import Base from '../layouts/Base.astro';
       </li>
     </ul>
 
+    <!-- Primary call to action — the goal is product roles, so make the path obvious -->
+    <a class="identity-cta" href="/contact/">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M4 4h16v16H4z" fill="none"/><path d="M22 6 12 13 2 6"/><path d="M2 6h20v12H2z"/></svg>
+      Get in touch
+    </a>
+
     <!-- Weather mood — sits beneath socials in identity column -->
     <div class="weather-control" role="group" aria-label="Background weather">
       <span class="weather-control-label">Mood</span>
@@ -257,7 +263,7 @@ import Base from '../layouts/Base.astro';
             <p>I spent my formative years in Myanmar thinking I'd be a writer or the next Jimmy Neutron (that cowlick was <em>iconic</em>). Half-fittingly, I was initially an English + Philosophy major with law school aspirations. The latter is on the backburner for now, but we'll see where things go.</p>
 
             <h3 class="about-subhead">What I'm Up To</h3>
-            <p>Nowadays, I like playing around with data to build cool products. I've had a bunch of experiences close to product (prod ops + data products) but never a formal PM position — though I'm trying to change that. In the meantime, I take a product-minded approach in my day-to-day work, plus the small utilities I'm cooking alongside AI dev tools. That ranges from drafting scoping docs and PRDs to socializing analyses across my C1 org. Across every job, the awesome product people I've met all connect dots across multiple facets of a business — which is why I ask a lot of questions to build context.</p>
+            <p>Nowadays, I like playing around with data to build cool products. I co-founded <strong>AskCyborg</strong>, an AI financial-research tool, where I shipped the MVP and owned the roadmap — and I keep that product reflex in my day-to-day at Capital One, from drafting scoping docs and PRDs to socializing analyses across the org, plus the small utilities I'm cooking alongside AI dev tools. The awesome product people I've met all connect dots across multiple facets of a business, which is why I ask a lot of questions to build context. A formal PM title is the next box to check; the work's already pointed that way.</p>
             <p>I've also got a solid grasp of <strong>Python</strong> and <strong>Java</strong>, and I'm pretty handy with <strong>SQL</strong>, <strong>R</strong>, and <strong>Tableau</strong>. Lately I'm digging into the data engineering side <em>(shoutout to Zach Wilson, who is putting out some awesome stuff)</em>. </p>
 
             <h3 class="about-subhead">Technical Skills</h3>
@@ -581,4 +587,46 @@ import Base from '../layouts/Base.astro';
     navLinks.forEach(l => l.classList.toggle('is-active', l.dataset.navTarget === 'tools'));
   }());
 </script>
+
+<!-- WebGL forest hero — bundled, code-split ES module island.
+     Dynamically imported on idle so the Three.js + EZ-Tree bundle never
+     blocks first paint or initial Lighthouse metrics. -->
+<script>
+  const host = document.getElementById('tree-canvas-host');
+  if (host) {
+    // Dynamic import → Vite code-splits the Three.js + EZ-Tree bundle into
+    // its own chunk that only downloads when this boot callback runs.
+    const boot = () => import('../scripts/forest').then((m) => m.initForest(host));
+    if ('requestIdleCallback' in window) {
+      window.requestIdleCallback(boot, { timeout: 2000 });
+    } else {
+      setTimeout(boot, 200);
+    }
+  }
+</script>
+
+<style>
+  /* Primary contact CTA in the identity column */
+  .identity-cta {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin: 0.25rem 0 0.5rem;
+    padding: 0.55rem 1.1rem;
+    font-family: var(--font-ui, 'Inter', sans-serif);
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: #fff;
+    text-decoration: none;
+    border-radius: var(--r-pill, 9999px);
+    background: var(--accent-gradient, linear-gradient(135deg, #2480fd, #22d1ff));
+    box-shadow: 0 4px 14px rgba(0, 89, 187, 0.25);
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+  }
+  .identity-cta:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 6px 20px rgba(0, 89, 187, 0.35);
+  }
+  .identity-cta svg { width: 15px; height: 15px; }
+</style>
 </Base>
