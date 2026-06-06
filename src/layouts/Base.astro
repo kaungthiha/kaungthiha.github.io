@@ -96,10 +96,10 @@ const ogImageAbs = new URL(ogImage, Astro.site).toString();
     <slot />
   </main>
 
-  <!-- JavaScript: Three.js + ambient effects, deferred so they never block paint -->
-  <script src="https://unpkg.com/three@0.158.0/build/three.min.js" defer></script>
+  <!-- Ambient effects (site-wide, deferred so they never block paint).
+       The WebGL forest is NOT loaded here — it's a code-split island loaded
+       only on the homepage, where #tree-canvas-host exists. -->
   <script src="/assets/js/weather.js" defer></script>
-  <script src="/assets/js/tree.js" defer></script>
   <script src="/assets/js/ripple.js" defer></script>
 
   <!-- GoatCounter — privacy-friendly, cookieless analytics (site-wide) -->

@@ -1,6 +1,7 @@
 // @ts-check
 import { defineConfig } from 'astro/config';
 import sitemap from '@astrojs/sitemap';
+import { fileURLToPath } from 'node:url';
 
 // https://astro.build/config
 export default defineConfig({
@@ -23,6 +24,26 @@ export default defineConfig({
   integrations: [
     sitemap(),
   ],
+
+  vite: {
+    resolve: {
+      alias: {
+        // Bypass the package `exports` gate to import EZ-Tree from source, so
+        // its textures are bundled by Vite (and externalized below) rather than
+        // pulled in pre-base64-inlined from build/ez-tree.es.js.
+        'ez-tree-src': fileURLToPath(
+          new URL('./node_modules/@dgreenheck/ez-tree/src/lib/index.js', import.meta.url),
+        ),
+      },
+    },
+    build: {
+      // EZ-Tree (imported from source) brings bark/leaf textures. Emit them as
+      // separate files rather than base64-inlining, so the browser fetches only
+      // what's referenced at runtime (we disable bark textures, so just leaves)
+      // and caches them independently of the JS.
+      assetsInlineLimit: 0,
+    },
+  },
 
   // The three live tools (attendance-tracker, festival-thingamabob, ai-usage-tracker)
   // are pre-built static apps copied into `public/tools/`. Astro copies `public/`
