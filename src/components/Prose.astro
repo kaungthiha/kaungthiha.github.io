@@ -1,0 +1,63 @@
+---
+/**
+ * Prose — a centered, editorial-styled content column for simple pages
+ * (contact, privacy-policy, etc.). Replaces the old Bootstrap `page` layout
+ * with styling that matches editorial.css tokens.
+ */
+export interface Props {
+  heading: string;
+  eyebrow?: string;
+}
+const { heading, eyebrow } = Astro.props;
+---
+
+<div class="prose-shell">
+  <header class="prose-head">
+    {eyebrow && <span class="prose-eyebrow">{eyebrow}</span>}
+    <h1 class="prose-title">{heading}</h1>
+  </header>
+  <div class="prose-body">
+    <slot />
+  </div>
+</div>
+
+<style>
+  .prose-shell {
+    max-width: 760px;
+    margin: 0 auto;
+    padding: clamp(5rem, 4rem + 6vw, 7rem) clamp(1rem, 0.5rem + 1.5vw, 1.5rem) 4rem;
+  }
+  .prose-eyebrow {
+    display: inline-block;
+    font-family: var(--font-ui, 'Inter', sans-serif);
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--primary, #0059bb);
+    margin-bottom: 0.5rem;
+  }
+  .prose-title {
+    font-family: var(--font-sans, 'Plus Jakarta Sans', sans-serif);
+    font-size: clamp(2rem, 1.4rem + 2.4vw, 2.625rem);
+    font-weight: 800;
+    line-height: 1.1;
+    color: var(--text-strong, #171d27);
+    margin: 0 0 1.75rem;
+  }
+  .prose-body {
+    font-family: var(--font-ui, 'Inter', sans-serif);
+    font-size: 1.0625rem;
+    line-height: 1.7;
+    color: var(--text-body, #4a5260);
+  }
+  .prose-body :global(h3) {
+    font-family: var(--font-sans, 'Plus Jakarta Sans', sans-serif);
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--text-strong, #171d27);
+    margin: 2rem 0 0.5rem;
+  }
+  .prose-body :global(p) { margin: 0 0 1rem; }
+  .prose-body :global(a) { color: var(--primary, #0059bb); }
+</style>
