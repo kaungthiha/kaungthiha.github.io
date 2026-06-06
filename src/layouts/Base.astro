@@ -1,0 +1,111 @@
+---
+/**
+ * Base layout — replaces the Jekyll `default.html`.
+ * Carries over: head/meta, weather backdrops, slim non-home nav,
+ * and the deferred Three.js + asset scripts.
+ *
+ * Real metadata (title, description, Open Graph, Twitter Card) replaces the
+ * old `{% seo %}` tag and the placeholder "My Website" description.
+ */
+export interface Props {
+  title?: string;
+  description?: string;
+  /** Show the slim "back to portfolio" chrome (true on every page except home). */
+  slimNav?: boolean;
+  /** Absolute path to the social-share image. */
+  ogImage?: string;
+}
+
+const {
+  title = 'Kaung Thiha',
+  description = 'Kaung Thiha — Associate at Capital One on Data Products & Experiences. Product-minded builder blending data and product. Tools, case studies, and product analyses.',
+  slimNav = true,
+  ogImage = '/assets/images/about.jpg',
+} = Astro.props;
+
+const siteName = "KT's Portfolio";
+const fullTitle = title === 'Kaung Thiha' ? `${title} | ${siteName}` : `${title} | ${siteName}`;
+const canonical = new URL(Astro.url.pathname, Astro.site).toString();
+const ogImageAbs = new URL(ogImage, Astro.site).toString();
+---
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+  <link rel="icon" href="/favicon.ico" />
+  <link rel="canonical" href={canonical} />
+
+  <title>{fullTitle}</title>
+  <meta name="description" content={description} />
+  <meta name="author" content="Kaung Thiha" />
+
+  <!-- Open Graph -->
+  <meta property="og:type" content="website" />
+  <meta property="og:site_name" content={siteName} />
+  <meta property="og:title" content={fullTitle} />
+  <meta property="og:description" content={description} />
+  <meta property="og:url" content={canonical} />
+  <meta property="og:image" content={ogImageAbs} />
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content={fullTitle} />
+  <meta name="twitter:description" content={description} />
+  <meta name="twitter:image" content={ogImageAbs} />
+
+  <!-- Editorial Portfolio CSS -->
+  <link href="/assets/css/editorial.css" rel="stylesheet" />
+  <link href="/assets/css/weather.css" rel="stylesheet" />
+  <link href="/assets/css/custom.css" rel="stylesheet" />
+
+  <!-- Font Awesome (used by inner project pages) -->
+  <link
+    rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
+  />
+</head>
+
+<body class={slimNav ? '' : 'layout-home'}>
+  <a class="skip-link" href="#main">Skip to content</a>
+
+  <!-- Weather backdrops (populated lazily by weather.js) -->
+  <div class="weather-bg weather-bg--sunny" aria-hidden="true"></div>
+  <div class="weather-bg weather-bg--rainy" aria-hidden="true"></div>
+  <div class="weather-bg weather-bg--snowy" aria-hidden="true"></div>
+
+  {slimNav && (
+    <!-- Slim chrome on non-home pages — keeps brand presence + a way back -->
+    <nav class="editorial-topnav editorial-topnav--slim" aria-label="Site">
+      <div class="topnav-brand">
+        <a href="/">
+          <span class="topnav-brand-mark" aria-hidden="true"></span>
+          <span class="topnav-brand-text">Kaung Thiha</span>
+        </a>
+      </div>
+      <a class="topnav-link topnav-link--back" href="/">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true" style="width:14px;height:14px;margin-right:0.35rem;"><path d="M19 12H5m6-6-6 6 6 6"/></svg>
+        Back to portfolio
+      </a>
+    </nav>
+  )}
+
+  <!-- Main Content -->
+  <main id="main">
+    <slot />
+  </main>
+
+  <!-- JavaScript: Three.js + ambient effects, deferred so they never block paint -->
+  <script src="https://unpkg.com/three@0.158.0/build/three.min.js" defer></script>
+  <script src="/assets/js/weather.js" defer></script>
+  <script src="/assets/js/tree.js" defer></script>
+  <script src="/assets/js/ripple.js" defer></script>
+
+  <!-- GoatCounter — privacy-friendly, cookieless analytics (site-wide) -->
+  <script
+    data-goatcounter="https://orangepanda.goatcounter.com/count"
+    async
+    src="//gc.zgo.at/count.js"></script>
+</body>
+</html>

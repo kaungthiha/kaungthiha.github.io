@@ -1,0 +1,55 @@
+---
+import Base from './Base.astro';
+import Prose from '../components/Prose.astro';
+
+const { frontmatter } = Astro.props;
+const title = frontmatter?.title ?? 'Writeup';
+const description = frontmatter?.description ?? `${title} — a project writeup by Kaung Thiha.`;
+const eyebrow = Array.isArray(frontmatter?.categories)
+  ? frontmatter.categories.join(' · ')
+  : frontmatter?.categories;
+---
+
+<Base title={title} description={description}>
+  <Prose heading={title} eyebrow={eyebrow}>
+    {frontmatter?.image && (
+      <img class="post-hero" src={`/${frontmatter.image}`} alt={title} />
+    )}
+    <slot />
+  </Prose>
+</Base>
+
+<style>
+  .post-hero {
+    width: 100%;
+    border-radius: var(--r-lg, 1rem);
+    margin-bottom: 2rem;
+  }
+  /* Code blocks from the R writeup */
+  :global(.prose-body pre) {
+    background: #0f131f;
+    color: #dfe2f3;
+    padding: 1rem 1.25rem;
+    border-radius: var(--r-md, 0.75rem);
+    overflow-x: auto;
+    font-size: 0.85rem;
+    line-height: 1.5;
+    margin: 1rem 0;
+  }
+  :global(.prose-body code) {
+    font-family: 'JetBrains Mono', ui-monospace, 'SF Mono', Menlo, monospace;
+  }
+  :global(.prose-body :not(pre) > code) {
+    background: var(--surface-container, #e8eff4);
+    padding: 0.1rem 0.35rem;
+    border-radius: 4px;
+    font-size: 0.9em;
+  }
+  :global(.prose-body img) {
+    max-width: 100%;
+    height: auto;
+    border-radius: var(--r-md, 0.75rem);
+    margin: 1rem 0;
+    display: block;
+  }
+</style>
