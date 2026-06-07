@@ -281,9 +281,12 @@ body::after {
 }
 
 /* Ambient forest background — fixed full viewport, behind all content.
-   Tweak `--forest-opacity` below to dial down/up the visual presence. */
+   Tweak `--forest-opacity` below to dial down/up the visual presence.
+   On the landing hero the forest is faint (gives the WebGL scene time to
+   load, keeps the intro clean); once the user scrolls toward the work it
+   becomes more present (body.scrolled-past-hero, set by JS). */
 .tree-canvas-host {
-  --forest-opacity: 0.48;
+  --forest-opacity: 0.16;
   position: fixed;
   inset: 0;
   width: 100vw;
@@ -292,10 +295,12 @@ body::after {
   z-index: -1;             /* sits below content & nav, above body bloom (-3) and weather-bg (-2) */
   pointer-events: none;
   opacity: var(--forest-opacity);
+  transition: opacity 0.8s ease;
   /* Soft centre-fade: forest detail lives at the edges, reading zone stays clean */
   mask-image: radial-gradient(ellipse 58% 78% at 52% 50%, rgba(0,0,0,0.10) 0%, rgba(0,0,0,0.42) 42%, rgba(0,0,0,0.88) 68%, black 100%);
   -webkit-mask-image: radial-gradient(ellipse 58% 78% at 52% 50%, rgba(0,0,0,0.10) 0%, rgba(0,0,0,0.42) 42%, rgba(0,0,0,0.88) 68%, black 100%);
 }
+body.scrolled-past-hero .tree-canvas-host { --forest-opacity: 0.48; }
 .tree-canvas-host canvas {
   display: block;
   width: 100% !important;
@@ -312,14 +317,126 @@ body::after {
 }
 
 @media (max-width: 720px) {
+  body.scrolled-past-hero .tree-canvas-host { --forest-opacity: 0.38; }
   .tree-canvas-host {
-    --forest-opacity: 0.38;
     mask-image: none;
     -webkit-mask-image: none;
   }
 }
 @media (prefers-reduced-motion: reduce) {
-  .tree-canvas-host { --forest-opacity: 0.35; }
+  body.scrolled-past-hero .tree-canvas-host { --forest-opacity: 0.32; }
+}
+
+/* ==========================================================================
+   Landing hero — full-screen intro above the flippable work shell
+   ========================================================================== */
+
+.hero-intro {
+  position: relative;
+  min-height: 100vh;
+  min-height: 100dvh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: calc(var(--nav-height) + 1rem) var(--gutter) 2rem;
+  text-align: center;
+}
+
+.hero-intro-inner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1.25rem;
+  /* Slight upward bias so the scroll cue has room below */
+  margin-top: -2rem;
+  max-width: 36rem;
+}
+
+.hero-portrait {
+  width: clamp(150px, 22vw, 260px);
+  height: clamp(150px, 22vw, 260px);
+  border-radius: 50%;
+  object-fit: cover;
+  border: 5px solid white;
+  box-shadow: 0 16px 48px rgba(36, 128, 253, 0.22);
+}
+
+.hero-name {
+  font-family: var(--font-sans);
+  font-size: clamp(2rem, 1.4rem + 2.6vw, 3rem);
+  font-weight: 800;
+  line-height: 1.08;
+  letter-spacing: -0.02em;
+  color: var(--text-strong);
+  margin: 0;
+}
+.hero-name .burmese {
+  display: block;
+  font-size: 0.42em;
+  font-weight: 400;
+  color: var(--text-body);
+  margin-top: 0.5rem;
+  letter-spacing: 0;
+}
+/* The weather line inside the hero name uses the existing
+   .identity-weather-line typography (caption under the Burmese). */
+
+.hero-socials {
+  display: flex;
+  gap: 0.6rem;
+  margin: 0.25rem 0 0;
+  padding: 0;
+  list-style: none;
+  justify-content: center;
+}
+.hero-socials a {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  background: white;
+  color: var(--on-surface-variant);
+  box-shadow: var(--shadow-soft);
+  transition: transform 0.2s ease, color 0.2s ease, box-shadow 0.2s ease;
+}
+.hero-socials a:hover {
+  color: var(--primary);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-lift);
+}
+.hero-socials svg { width: 20px; height: 20px; }
+
+/* Scroll cue */
+.hero-scroll-cue {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.35rem;
+  margin-top: 1.5rem;
+  color: var(--on-surface-variant);
+  text-decoration: none;
+  font-family: var(--font-ui);
+  font-size: var(--fs-label-caps);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  transition: color 0.2s ease, transform 0.2s ease;
+}
+.hero-scroll-cue:hover { color: var(--primary); }
+.hero-scroll-cue svg {
+  width: 26px;
+  height: 26px;
+  animation: scroll-bounce 1.8s ease-in-out infinite;
+}
+@keyframes scroll-bounce {
+  0%, 100% { transform: translateY(0); }
+  50%      { transform: translateY(6px); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .hero-scroll-cue svg { animation: none; }
 }
 
 /* Local weather line — a subtle secondary identity caption that sits under
@@ -421,6 +538,22 @@ body[data-face="back"] .flip-toggle svg { transform: rotate(180deg); }
 }
 .identity-col::-webkit-scrollbar { width: 4px; }
 .identity-col::-webkit-scrollbar-thumb { background: rgba(0, 89, 187, 0.2); border-radius: 2px; }
+
+/* Slim variant — identity now lives in the hero; this column carries only the
+   flip controls, centred vertically beside the card. */
+.identity-col--slim {
+  justify-content: center;
+  align-items: stretch;
+  gap: 0.85rem;
+}
+.identity-col-eyebrow {
+  font-family: var(--font-sans);
+  font-weight: 800;
+  font-size: 1.0625rem;
+  letter-spacing: -0.01em;
+  color: var(--text-strong);
+  margin: 0 0 0.25rem;
+}
 
 .identity-portrait {
   width: clamp(120px, 18vw, 160px);
