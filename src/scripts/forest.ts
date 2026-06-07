@@ -307,9 +307,11 @@ export function initForest(host: HTMLElement): void {
   }
 
   // Far pale → near darker. All sit behind the background tree band (z ≥ -14).
-  buildRidge({ z: -19, width: 80, baseY: 0.5, height: 9, segments: 22, color: 0xbcd0e2, opacity: 0.55, seedShift: 0 });
-  buildRidge({ z: -17.5, width: 72, baseY: 0.2, height: 7, segments: 20, color: 0x9db4c8, opacity: 0.6, seedShift: 11 });
-  buildRidge({ z: -16, width: 64, baseY: 0.0, height: 5, segments: 18, color: 0x7e93a6, opacity: 0.62, seedShift: 23 });
+  // Raised well above the tree canopy and taller, so the ridge line clearly
+  // reads on the horizon instead of hiding behind the background trees.
+  buildRidge({ z: -19, width: 96, baseY: 3.5, height: 13, segments: 22, color: 0xa9c1d8, opacity: 0.8, seedShift: 0 });
+  buildRidge({ z: -17.5, width: 88, baseY: 3.0, height: 11, segments: 20, color: 0x88a3bd, opacity: 0.85, seedShift: 11 });
+  buildRidge({ z: -16, width: 80, baseY: 2.5, height: 9, segments: 18, color: 0x6c8398, opacity: 0.9, seedShift: 23 });
 
   // ── Ground ─────────────────────────────────────────────────────────
   const ground = new THREE.Mesh(
