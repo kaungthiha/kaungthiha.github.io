@@ -41,6 +41,7 @@ import Base from '../layouts/Base.astro';
     <h1 class="identity-name">
       I'm Kaung
       <span class="burmese">(ကောင်းသီဟ)</span>
+      <span class="identity-weather-line local-weather-status" aria-live="polite">Checking the weather in Arlington, Virginia…</span>
       <span class="blurb"></span>
     </h1>
     <p class="identity-bio"></p>
@@ -61,10 +62,6 @@ import Base from '../layouts/Base.astro';
         </a>
       </li>
     </ul>
-
-    <!-- Local weather — auto-resolved for Arlington, VA (no user selector).
-         weather.js fills this in and drives the page mood + ambient forest. -->
-    <p class="local-weather-status" aria-live="polite">Checking the weather in Arlington, Virginia…</p>
 
     <!-- Primary flip CTA — desktop, sits above mood selector -->
     <button class="identity-flip" type="button" id="flip-toggle-primary" data-face-label="front" aria-label="See the person behind the work" aria-pressed="false">

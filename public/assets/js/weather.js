@@ -175,18 +175,19 @@
 
       current = mode;
 
+      const detail = { mode, phrase: phrase || PHRASE[mode] || mode, source: 'arlington-weather' };
+      // Persist the latest state so a listener that registers AFTER this fired
+      // (e.g. the lazily-imported forest) can pick it up on boot — no second
+      // event needed.
+      window.KTWeatherState = detail;
       // Broadcast for the forest (and any other listeners).
-      window.dispatchEvent(
-        new CustomEvent('weather:change', {
-          detail: { mode, phrase: phrase || PHRASE[mode] || mode, source: 'arlington-weather' },
-        }),
-      );
+      window.dispatchEvent(new CustomEvent('weather:change', { detail }));
     }
 
     // Snippet text (only on pages that have it). Fallback keeps its own copy.
     if (statusEl && !silentSnippet) {
       statusEl.textContent =
-        `Today it's really ${phrase || PHRASE[mode] || mode} where I am in Arlington, Virginia.`;
+        `It's really ${phrase || PHRASE[mode] || mode} in Arlington, Virginia!`;
     }
   }
 
@@ -241,7 +242,7 @@
         if (!current) {
           applyMode('sunny', 'calm', { silentSnippet: true });
           if (statusEl) {
-            statusEl.textContent = 'Today it feels calm where I am in Arlington, Virginia.';
+            statusEl.textContent = 'It feels calm in Arlington, Virginia.';
           }
         }
       });
