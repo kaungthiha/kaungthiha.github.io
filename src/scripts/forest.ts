@@ -1,25 +1,79 @@
 /* ──────────────────────────────────────────────────────────────────────
    Ambient procedural forest — EZ-Tree + Three.js (bundled ES module).
 
-   Higher-fidelity successor to the old hand-rolled tree.js. Trees come from
-   @dgreenheck/ez-tree presets (textured bark + leaf billboards). Keeps the
-   proven scene scaffolding: sky gradient, hemisphere/sun lighting, fog,
-   wind sway, weather integration, dpr cap, tab-visibility pause, and a
-   graceful WebGL / SVG fallback.
+   A miniature living diorama: many small, varied trees distributed across
+   depth bands and biased toward the edges so the central reading area stays
+   clear. Per-tree material variation (warm bark hues, leaf colour variance,
+   background desaturation) keeps it from reading as one grey blob.
 
-   prefers-reduced-motion: the forest still renders in full (rich hero) but
+   Keeps the proven scaffolding: sky gradient, hemisphere/sun lighting, fog,
+   gentle wind sway, weather integration, dpr cap, tab-visibility pause, and
+   a graceful WebGL / SVG fallback.
+
+   prefers-reduced-motion: the forest still renders in full (rich scene) but
    ALL motion is frozen — no wind, no camera drift, a single static frame.
    ────────────────────────────────────────────────────────────────────── */
 
 import * as THREE from 'three';
 // `ez-tree-src` is a Vite alias (see astro.config.mjs) pointing at EZ-Tree's
 // SOURCE entry instead of the pre-bundled build/ez-tree.es.js, which
-// base64-inlines every bark/leaf texture into a 3.9 MB blob. From source,
-// Vite externalizes the textures as real files (assetsInlineLimit: 0), and
-// disabling bark.textured means the heavy bark PBR maps are never fetched.
+// base64-inlines every bark/leaf texture into a 3.9 MB blob.
 import { Tree, TreePreset } from 'ez-tree-src';
 
-type WeatherMode = 'sunny' | 'rainy' | 'snowy';
+// Internal weather modes the forest understands. The weather driver maps
+// real conditions onto these; unknown modes fall back to 'sunny'.
+type WeatherMode =
+  | 'sunny'
+  | 'clear'
+  | 'cloudy'
+  | 'rainy'
+  | 'stormy'
+  | 'snowy'
+  | 'foggy'
+  | 'windy'
+  | 'hot'
+  | 'cold';
+
+// Per-mode atmosphere: lighting tints, sky top colour, fog density/colour,
+// ground colour, and a wind multiplier. Kept as plain data so a mode change
+// is a cheap uniform/material update + one render — never a regenerate.
+interface Atmosphere {
+  hemiSky: number;
+  hemiGround: number;
+  hemiInt: number;
+  sunInt: number;
+  skyTop: number;
+  skyBot: number;
+  fog: number;
+  fogColor: number;
+  ground: number;
+  wind: number; // multiplier on the base wind strength
+}
+
+const ATMOS: Record<WeatherMode, Atmosphere> = {
+  sunny:  { hemiSky: 0xc5e8ff, hemiGround: 0x8aab60, hemiInt: 1.05, sunInt: 1.5, skyTop: 0x9ec9e8, skyBot: 0xdaeef6, fog: 0.032, fogColor: 0xc8ddef, ground: 0x6f8f55, wind: 1.0 },
+  clear:  { hemiSky: 0xcdecff, hemiGround: 0x8fb064, hemiInt: 1.08, sunInt: 1.6, skyTop: 0x96c6ea, skyBot: 0xe0f1f9, fog: 0.030, fogColor: 0xcfe3f2, ground: 0x71925a, wind: 0.9 },
+  cloudy: { hemiSky: 0xb9c6d6, hemiGround: 0x839472, hemiInt: 0.92, sunInt: 0.85, skyTop: 0xaebccb, skyBot: 0xd6dee6, fog: 0.040, fogColor: 0xc2ccd6, ground: 0x66805a, wind: 1.1 },
+  rainy:  { hemiSky: 0x9fb6c8, hemiGround: 0x6f7f64, hemiInt: 0.82, sunInt: 0.6,  skyTop: 0x7d92a4, skyBot: 0xaab9c6, fog: 0.050, fogColor: 0x9fb0bf, ground: 0x5a7048, wind: 1.4 },
+  stormy: { hemiSky: 0x7c8a9c, hemiGround: 0x5a6553, hemiInt: 0.66, sunInt: 0.4,  skyTop: 0x5d6b7d, skyBot: 0x8593a1, fog: 0.064, fogColor: 0x7e8c99, ground: 0x4d5f43, wind: 1.9 },
+  snowy:  { hemiSky: 0xdfeefc, hemiGround: 0xb9c6c4, hemiInt: 1.0,  sunInt: 0.9,  skyTop: 0xc4d6e6, skyBot: 0xeef5fb, fog: 0.052, fogColor: 0xd5e2ee, ground: 0xb9c6c4, wind: 0.8 },
+  foggy:  { hemiSky: 0xcdd4d8, hemiGround: 0x9aa69a, hemiInt: 0.9,  sunInt: 0.55, skyTop: 0xc3ccce, skyBot: 0xdde2e2, fog: 0.085, fogColor: 0xd2d8d8, ground: 0x73876a, wind: 0.7 },
+  windy:  { hemiSky: 0xc1dcef, hemiGround: 0x88a468, hemiInt: 1.0,  sunInt: 1.25, skyTop: 0x9cc4e2, skyBot: 0xdcecf5, fog: 0.034, fogColor: 0xc6dcec, ground: 0x6d8d56, wind: 2.4 },
+  hot:    { hemiSky: 0xffe7c2, hemiGround: 0x9c9a52, hemiInt: 1.1,  sunInt: 1.7,  skyTop: 0xbcd6e6, skyBot: 0xf6ecd9, fog: 0.026, fogColor: 0xe6dcc8, ground: 0x8a9450, wind: 0.9 },
+  cold:   { hemiSky: 0xd2e6f6, hemiGround: 0x8c9aa0, hemiInt: 0.95, sunInt: 1.0,  skyTop: 0xaecadd, skyBot: 0xe2eef6, fog: 0.044, fogColor: 0xccdbe7, ground: 0x6a7f63, wind: 1.2 },
+};
+
+// Small deterministic PRNG so a given seed always lays out the same forest.
+function mulberry32(seed: number): () => number {
+  let a = seed >>> 0;
+  return () => {
+    a |= 0;
+    a = (a + 0x6d2b79f5) | 0;
+    let t = Math.imul(a ^ (a >>> 15), 1 | a);
+    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
 
 export function initForest(host: HTMLElement): void {
   const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -40,17 +94,27 @@ export function initForest(host: HTMLElement): void {
     }
   }
 
+  // A little cluster of stylised trees rather than one blob, so the no-WebGL
+  // fallback still reads as a "small forest".
   function renderFallback(mode: WeatherMode = 'sunny'): void {
-    const p = {
-      sunny: { c: '#5fa052', t: '#8b6f47' },
-      rainy: { c: '#3e6f3a', t: '#6f5638' },
-      snowy: { c: '#cfdde3', t: '#6f5638' },
-    }[mode];
-    host.innerHTML = `<svg class="tree-fallback" viewBox="0 0 100 120" aria-hidden="true">
-      <rect x="46" y="74" width="8" height="38" rx="2" fill="${p.t}"/>
-      <circle cx="50" cy="52" r="28" fill="${p.c}" opacity="0.85"/>
-      <circle cx="34" cy="62" r="14" fill="${p.c}" opacity="0.7"/>
-      <circle cx="66" cy="62" r="14" fill="${p.c}" opacity="0.7"/>
+    const warm = mode === 'snowy' ? '#cfdde3' : mode === 'foggy' ? '#9fb0a6' : '#6f9a54';
+    const cool = mode === 'snowy' ? '#a9bcc6' : '#4f7d42';
+    const bark = '#7a5a3c';
+    const tree = (x: number, y: number, s: number, c: string) => `
+      <g transform="translate(${x} ${y}) scale(${s})">
+        <rect x="-2" y="0" width="4" height="20" rx="1.5" fill="${bark}"/>
+        <circle cx="0" cy="-6" r="13" fill="${c}" opacity="0.9"/>
+        <circle cx="-8" cy="2" r="8" fill="${c}" opacity="0.75"/>
+        <circle cx="8" cy="2" r="8" fill="${c}" opacity="0.75"/>
+      </g>`;
+    host.innerHTML = `<svg class="tree-fallback" viewBox="0 0 200 120" preserveAspectRatio="xMidYMax meet" aria-hidden="true">
+      ${tree(28, 70, 0.7, cool)}
+      ${tree(168, 66, 0.8, cool)}
+      ${tree(60, 86, 1.0, warm)}
+      ${tree(140, 88, 0.95, warm)}
+      ${tree(100, 92, 1.15, warm)}
+      ${tree(14, 96, 0.55, warm)}
+      ${tree(186, 94, 0.6, warm)}
     </svg>`;
   }
 
@@ -65,11 +129,11 @@ export function initForest(host: HTMLElement): void {
 
   // ── Scene ──────────────────────────────────────────────────────────
   const scene = new THREE.Scene();
-  scene.fog = new THREE.FogExp2(0xc8ddef, 0.034);
+  scene.fog = new THREE.FogExp2(0xc8ddef, 0.032);
 
-  const camera = new THREE.PerspectiveCamera(42, 1, 0.1, 120);
-  camera.position.set(0, 1.9, 13);
-  camera.lookAt(0, 1.6, 0);
+  const camera = new THREE.PerspectiveCamera(46, 1, 0.1, 140);
+  camera.position.set(0, 2.2, 14);
+  camera.lookAt(0, 1.4, 0);
 
   const renderer = new THREE.WebGLRenderer({
     alpha: true,
@@ -91,63 +155,43 @@ export function initForest(host: HTMLElement): void {
 
   // ── Lighting ───────────────────────────────────────────────────────
   const hemi = new THREE.HemisphereLight(0xc5e8ff, 0x8aab60, 1.05);
-  const sun = new THREE.DirectionalLight(0xfff5e0, 1.4);
+  const sun = new THREE.DirectionalLight(0xfff5e0, 1.5);
   sun.position.set(5, 9, 4);
   scene.add(hemi, sun);
 
-  // ── Sky gradient plane (carried from the original scene) ───────────
+  // ── Sky gradient plane ─────────────────────────────────────────────
   const SKY_UNI = {
     uTop: { value: new THREE.Color(0x9ec9e8) },
     uBot: { value: new THREE.Color(0xdaeef6) },
     uOpacity: { value: 0.22 },
   };
   const sky = new THREE.Mesh(
-    new THREE.PlaneGeometry(90, 55, 1, 6),
+    new THREE.PlaneGeometry(120, 60, 1, 6),
     new THREE.ShaderMaterial({
       uniforms: SKY_UNI,
       vertexShader: `varying float vNY;
-        void main(){ vNY=(position.y+27.5)/55.0; gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.0); }`,
+        void main(){ vNY=(position.y+30.0)/60.0; gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.0); }`,
       fragmentShader: `uniform vec3 uTop; uniform vec3 uBot; uniform float uOpacity; varying float vNY;
         void main(){ float t=clamp(vNY,0.0,1.0); gl_FragColor=vec4(mix(uBot,uTop,t),uOpacity*t); }`,
       transparent: true,
       depthWrite: false,
     }),
   );
-  sky.position.set(0, 4, -16);
+  sky.position.set(0, 5, -20);
   scene.add(sky);
 
   // ── Ground ─────────────────────────────────────────────────────────
   const ground = new THREE.Mesh(
-    new THREE.CircleGeometry(40, 48),
+    new THREE.CircleGeometry(50, 48),
     new THREE.MeshStandardMaterial({ color: 0x6f8f55, roughness: 1 }),
   );
   ground.rotation.x = -Math.PI / 2;
   ground.position.y = -0.02;
   scene.add(ground);
 
-  // ── Trees (EZ-Tree presets) ────────────────────────────────────────
-  // Fewer, simpler trees on weaker devices keeps the polygon budget sane.
-  const layout: Array<{ preset: keyof typeof TreePreset; x: number; z: number; s: number; seed: number }> =
-    quality === 'low'
-      ? [
-          { preset: 'Oak Medium', x: -3.2, z: -2, s: 0.5, seed: 41 },
-          { preset: 'Aspen Medium', x: 3.4, z: -3, s: 0.46, seed: 7 },
-          { preset: 'Pine Medium', x: 0.2, z: -6, s: 0.5, seed: 88 },
-        ]
-      : [
-          { preset: 'Oak Large', x: -4.5, z: -3, s: 0.5, seed: 41 },
-          { preset: 'Aspen Medium', x: 4.2, z: -2.5, s: 0.48, seed: 7 },
-          { preset: 'Pine Large', x: 1.8, z: -7, s: 0.52, seed: 88 },
-          { preset: 'Ash Medium', x: -2.2, z: -6.5, s: 0.46, seed: 23 },
-          { preset: 'Bush 2', x: 2.6, z: 0.5, s: 0.55, seed: 5 },
-          { preset: 'Bush 1', x: -3.6, z: 1.2, s: 0.6, seed: 99 },
-        ];
-
-  const windMats: THREE.Material[] = [];
-
-  // Wind: gentle vertex sway injected into each tree material. Skipped
-  // entirely under reduced-motion (uStr stays 0, tick never runs).
-  const WIND = { uTime: { value: 0 }, uStr: { value: reduceMotion ? 0 : 0.02 } };
+  // ── Wind (shared uniforms, injected per material) ──────────────────
+  const BASE_WIND = reduceMotion ? 0 : 0.02;
+  const WIND = { uTime: { value: 0 }, uStr: { value: BASE_WIND } };
   function applyWind(mat: THREE.Material) {
     mat.onBeforeCompile = (shader) => {
       shader.uniforms.uTime = WIND.uTime;
@@ -157,56 +201,132 @@ export function initForest(host: HTMLElement): void {
         shader.vertexShader.replace(
           '#include <begin_vertex>',
           `#include <begin_vertex>
-           float wh = clamp(position.y / 6.0, 0.0, 1.0);
+           float wh = clamp(position.y / 5.0, 0.0, 1.0);
            transformed.x += sin(uTime*1.3 + position.y*0.6) * uStr * wh;
            transformed.z += cos(uTime*0.9 + position.x*0.5) * uStr * 0.5 * wh;`,
         );
     };
-    windMats.push(mat);
   }
 
-  for (const item of layout) {
-    const tree = new Tree();
-    const preset = TreePreset[item.preset];
-    tree.loadFromJson(preset);
-    tree.options.seed = item.seed;
-    // Flat-shaded, tinted bark instead of 1K PBR textures: keeps the stylized
-    // toon look that matches the site and avoids fetching ~2.5 MB of bark maps.
-    // (Leaf billboards stay textured — only 4 small PNGs.)
-    tree.options.bark.textured = false;
-    tree.options.bark.flatShading = true;
-    tree.generate();
-    tree.scale.setScalar(item.s);
-    tree.position.set(item.x, 0, item.z);
-    tree.rotation.y = item.seed % 6;
-    tree.traverse((o) => {
+  // ── Forest composition ─────────────────────────────────────────────
+  // Depth bands, edge-biased, with a cleared central reading corridor.
+  // Counts scale with device tier (high 18–28, medium 12–18, low 6–10).
+  type Band = 'foreground' | 'midground' | 'background';
+  const PRESETS: Record<Band, Array<keyof typeof TreePreset>> = {
+    foreground: ['Bush 1', 'Bush 2', 'Bush 3', 'Aspen Small'],
+    midground: ['Oak Small', 'Aspen Small', 'Pine Small', 'Ash Small', 'Oak Medium', 'Aspen Medium'],
+    background: ['Pine Medium', 'Pine Small', 'Aspen Small', 'Ash Small'],
+  };
+  const COUNTS: Record<typeof quality, Record<Band, number>> = {
+    high: { foreground: 6, midground: 12, background: 8 },
+    medium: { foreground: 4, midground: 8, background: 5 },
+    low: { foreground: 2, midground: 5, background: 3 },
+  };
+
+  // Warm, non-grey bark hues + leaf colour variance. Background trees get
+  // desaturated/cooler so depth reads clearly.
+  const BARK_HUES = [0x6b4f34, 0x7a5a3c, 0x5e4a39, 0x836547, 0x6f5034];
+  const LEAF_HUES = [0x4e7a3a, 0x5f8f42, 0x6fa04b, 0x789a3f, 0x86a94e, 0x57863c];
+  const BARK_BG = [0x5a5246, 0x615747, 0x554f44];
+  const LEAF_BG = [0x55704a, 0x5e7850, 0x647d57];
+
+  const rng = mulberry32(20260606);
+  const pick = <T>(arr: T[]) => arr[Math.floor(rng() * arr.length)];
+
+  // Place a tree avoiding the central reading corridor (|x| < clearHalf near
+  // the camera). Edge bias: push |x| outward. Returns world position.
+  function placement(band: Band): { x: number; z: number } {
+    const zRange: Record<Band, [number, number]> = {
+      foreground: [0, -2.5],
+      midground: [-3, -7],
+      background: [-8, -14],
+    };
+    const [z0, z1] = zRange[band];
+    const z = z0 + rng() * (z1 - z0);
+    // Wider spread further back; keep a clear center near the camera.
+    const spread = band === 'background' ? 16 : band === 'midground' ? 11 : 8;
+    const clearHalf = band === 'foreground' ? 3.4 : band === 'midground' ? 2.2 : 0;
+    let x = (rng() - 0.5) * 2 * spread;
+    if (Math.abs(x) < clearHalf) x += (x >= 0 ? 1 : -1) * clearHalf;
+    return { x, z };
+  }
+
+  function tintTree(tree: any, band: Band) {
+    const barkPool = band === 'background' ? BARK_BG : BARK_HUES;
+    const leafPool = band === 'background' ? LEAF_BG : LEAF_HUES;
+    const barkColor = new THREE.Color(pick(barkPool));
+    const leafColor = new THREE.Color(pick(leafPool));
+    // Slight per-tree value jitter so neighbours differ.
+    const jitter = 0.9 + rng() * 0.2;
+    barkColor.multiplyScalar(jitter);
+    tree.traverse((o: any) => {
       const mesh = o as THREE.Mesh;
-      if (mesh.isMesh && mesh.material) {
-        const mats = Array.isArray(mesh.material) ? mesh.material : [mesh.material];
-        mats.forEach(applyWind);
-      }
+      if (!mesh.isMesh || !mesh.material) return;
+      const mats = Array.isArray(mesh.material) ? mesh.material : [mesh.material];
+      mats.forEach((m: any) => {
+        // Leaf materials are typically transparent/alpha-tested billboards;
+        // bark materials are opaque. Tint accordingly, then add wind.
+        if (m.transparent || m.alphaTest > 0) {
+          if (m.color) m.color.copy(leafColor);
+        } else {
+          if (m.color) m.color.copy(barkColor);
+          if ('roughness' in m) m.roughness = 0.8 + rng() * 0.2;
+        }
+        applyWind(m);
+      });
     });
-    scene.add(tree);
   }
 
-  // ── Weather tinting (lighting + sky shift; carried in spirit) ──────
-  function applyImmediate(mode: WeatherMode): void {
-    if (mode === 'snowy') {
-      hemi.color.set(0xdfeefc);
-      ground.material.color.set(0xb9c6c4);
-      SKY_UNI.uTop.value.set(0xc4d6e6);
-    } else if (mode === 'rainy') {
-      hemi.color.set(0x9fb6c8);
-      ground.material.color.set(0x5a7048);
-      SKY_UNI.uTop.value.set(0x7d92a4);
-    } else {
-      hemi.color.set(0xc5e8ff);
-      ground.material.color.set(0x6f8f55);
-      SKY_UNI.uTop.value.set(0x9ec9e8);
+  const trees: any[] = [];
+  function buildBand(band: Band, count: number) {
+    for (let i = 0; i < count; i++) {
+      const tree = new Tree();
+      tree.loadFromJson(TreePreset[pick(PRESETS[band])]);
+      tree.options.seed = Math.floor(rng() * 100000);
+      tree.options.bark.textured = false;
+      tree.options.bark.flatShading = true;
+      tree.generate();
+
+      // Small scales; smaller still in the background. Vary per-tree.
+      const baseScale =
+        band === 'foreground' ? 0.22 : band === 'midground' ? 0.3 : 0.34;
+      const s = baseScale * (0.75 + rng() * 0.6);
+      tree.scale.setScalar(s);
+
+      const { x, z } = placement(band);
+      tree.position.set(x, 0, z);
+      tree.rotation.y = rng() * Math.PI * 2;
+
+      tintTree(tree, band);
+      scene.add(tree);
+      trees.push(tree);
     }
   }
-  function setMode(mode: WeatherMode): void {
-    applyImmediate(mode);
+
+  const counts = COUNTS[quality];
+  buildBand('background', counts.background);
+  buildBand('midground', counts.midground);
+  buildBand('foreground', counts.foreground);
+
+  // ── Weather atmosphere (cheap material/uniform update + one render) ─
+  function normalizeMode(mode: string): WeatherMode {
+    return (mode in ATMOS ? mode : 'sunny') as WeatherMode;
+  }
+  function applyImmediate(mode: WeatherMode): void {
+    const a = ATMOS[mode];
+    hemi.color.setHex(a.hemiSky);
+    hemi.groundColor.setHex(a.hemiGround);
+    hemi.intensity = a.hemiInt;
+    sun.intensity = a.sunInt;
+    SKY_UNI.uTop.value.setHex(a.skyTop);
+    SKY_UNI.uBot.value.setHex(a.skyBot);
+    (scene.fog as THREE.FogExp2).density = a.fog;
+    (scene.fog as THREE.FogExp2).color.setHex(a.fogColor);
+    (ground.material as THREE.MeshStandardMaterial).color.setHex(a.ground);
+    WIND.uStr.value = reduceMotion ? 0 : BASE_WIND * a.wind;
+  }
+  function setMode(mode: string): void {
+    applyImmediate(normalizeMode(mode));
     renderOnce();
   }
 
@@ -233,8 +353,8 @@ export function initForest(host: HTMLElement): void {
     const t = clock.getElapsedTime();
     WIND.uTime.value = t;
     // Subtle camera drift for life; disabled under reduced-motion.
-    camera.position.x = Math.sin(t * 0.12) * 0.5;
-    camera.lookAt(0, 1.6, 0);
+    camera.position.x = Math.sin(t * 0.1) * 0.6;
+    camera.lookAt(0, 1.4, 0);
     renderOnce();
     raf = requestAnimationFrame(tick);
   }
@@ -256,7 +376,7 @@ export function initForest(host: HTMLElement): void {
   });
 
   window.addEventListener('weather:change', (e) =>
-    setMode((e as CustomEvent).detail.mode as WeatherMode),
+    setMode((e as CustomEvent).detail.mode),
   );
   (window as any).TreeScene = { setMode, updateForestState: setMode };
 
