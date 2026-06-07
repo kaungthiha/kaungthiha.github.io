@@ -70,10 +70,18 @@ const ogImageAbs = new URL(ogImage, Astro.site).toString();
 <body class={slimNav ? '' : 'layout-home'}>
   <a class="skip-link" href="#main">Skip to content</a>
 
-  <!-- Weather backdrops (populated lazily by weather.js) -->
+  <!-- Weather backdrops. Gradient-only modes are empty; only rainy/stormy/snowy
+       get particle children, populated lazily by weather.js. -->
   <div class="weather-bg weather-bg--sunny" aria-hidden="true"></div>
+  <div class="weather-bg weather-bg--clear" aria-hidden="true"></div>
+  <div class="weather-bg weather-bg--cloudy" aria-hidden="true"></div>
   <div class="weather-bg weather-bg--rainy" aria-hidden="true"></div>
+  <div class="weather-bg weather-bg--stormy" aria-hidden="true"></div>
   <div class="weather-bg weather-bg--snowy" aria-hidden="true"></div>
+  <div class="weather-bg weather-bg--foggy" aria-hidden="true"></div>
+  <div class="weather-bg weather-bg--windy" aria-hidden="true"></div>
+  <div class="weather-bg weather-bg--hot" aria-hidden="true"></div>
+  <div class="weather-bg weather-bg--cold" aria-hidden="true"></div>
 
   {slimNav && (
     <!-- Slim chrome on non-home pages — keeps brand presence + a way back -->
