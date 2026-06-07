@@ -225,7 +225,7 @@ export function initForest(host: HTMLElement): void {
   const BASE_WIND = reduceMotion ? 0 : 0.045;
   const WIND = { uTime: { value: 0 }, uStr: { value: BASE_WIND } };
   // Leaf wind base strength (the EZ-Tree leaf shader uses a Vector3); the
-  // weather multiplier and per-tree click rustle scale on top of this.
+  // weather multiplier scales on top of this.
   const LEAF_WIND_BASE = reduceMotion ? 0 : 1.1;
   let leafWindMul = 1; // updated by weather mode
   function applyWind(mat: THREE.Material) {
@@ -288,10 +288,9 @@ export function initForest(host: HTMLElement): void {
     return { x, z };
   }
 
-  // Per-tree leaf material refs so we can drive their wind each frame and
-  // spike a localized rustle on click. EZ-Tree stashes the compiled shader on
-  // material.userData.shader; we also wrap onBeforeCompile to be sure.
-  interface LeafEntry { mat: any; rustle: number }
+  // Per-tree leaf material refs so we can drive their wind each frame.
+  // EZ-Tree stashes the compiled shader on material.userData.shader.
+  interface LeafEntry { mat: any }
   const leafEntries: LeafEntry[] = [];
 
   function tintTree(tree: any, band: Band) {
@@ -318,9 +317,7 @@ export function initForest(host: HTMLElement): void {
           m.map = leafTexture(leafType);
           if (m.color) m.color.copy(leafColor);
           m.needsUpdate = true;
-          // Tag the owning tree so a click can find which leaves to rustle.
-          mesh.userData.leafEntry = { mat: m, rustle: 0 } as LeafEntry;
-          leafEntries.push(mesh.userData.leafEntry);
+          leafEntries.push({ mat: m });
         } else {
           if (m.color) m.color.copy(barkColor);
           if ('roughness' in m) m.roughness = 0.8 + rng() * 0.2;
@@ -421,7 +418,6 @@ export function initForest(host: HTMLElement): void {
   // ── Render / animation ─────────────────────────────────────────────
   let raf = 0;
   const clock = new THREE.Clock();
-  let prevT = 0;
 
   function renderOnce(): void {
     renderer.render(scene, camera);
@@ -429,19 +425,15 @@ export function initForest(host: HTMLElement): void {
 
   function tick(): void {
     const t = clock.getElapsedTime();
-    const dt = Math.min(0.05, t - prevT); // clamp to avoid huge steps after pause
-    prevT = t;
     WIND.uTime.value = t;
 
     // Drive each leaf material's own wind shader: advance time and set a
-    // strength that combines the weather wind with a per-tree click rustle
-    // that decays back to rest.
+    // strength scaled by the current weather wind multiplier.
+    const strength = LEAF_WIND_BASE * leafWindMul;
     for (const e of leafEntries) {
       const shader = e.mat.userData?.shader;
       if (!shader) continue;
       if (shader.uniforms.uTime) shader.uniforms.uTime.value = t;
-      if (e.rustle > 0) e.rustle = Math.max(0, e.rustle - dt * 1.6);
-      const strength = LEAF_WIND_BASE * (leafWindMul + e.rustle);
       if (shader.uniforms.uWindStrength) {
         shader.uniforms.uWindStrength.value.set(strength, strength * 0.35, strength);
       }
@@ -474,36 +466,6 @@ export function initForest(host: HTMLElement): void {
     setMode((e as CustomEvent).detail.mode),
   );
   (window as any).TreeScene = { setMode, updateForestState: setMode };
-
-  // ── Click-to-rustle ────────────────────────────────────────────────
-  // The canvas sits behind content (pointer-events: none), so we listen on
-  // the window, raycast from the click into the scene, and if a leaf mesh is
-  // hit, spike that tree's rustle. Disabled under reduced-motion.
-  if (!reduceMotion) {
-    const raycaster = new THREE.Raycaster();
-    const ndc = new THREE.Vector2();
-    const leafMeshes: THREE.Mesh[] = [];
-    scene.traverse((o: any) => {
-      if (o.isMesh && o.userData?.leafEntry) leafMeshes.push(o);
-    });
-
-    window.addEventListener('pointerdown', (ev: PointerEvent) => {
-      // Ignore clicks on real UI (links/buttons/cards) — only "empty" clicks
-      // over the ambient scene should rustle.
-      const target = ev.target as HTMLElement;
-      if (target.closest('a, button, input, textarea, [role="button"], .card-face, .identity-col'))
-        return;
-      ndc.x = (ev.clientX / window.innerWidth) * 2 - 1;
-      ndc.y = -(ev.clientY / window.innerHeight) * 2 + 1;
-      raycaster.setFromCamera(ndc, camera);
-      const hits = raycaster.intersectObjects(leafMeshes, false);
-      if (hits.length) {
-        const entry = (hits[0].object as any).userData.leafEntry as LeafEntry;
-        entry.rustle = 2.6; // strong gust that decays in ~1.5s
-        start(); // ensure the loop is running to animate the decay
-      }
-    });
-  }
 
   // ── Boot ───────────────────────────────────────────────────────────
   resize();
