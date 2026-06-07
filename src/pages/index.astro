@@ -62,12 +62,6 @@ import Base from '../layouts/Base.astro';
       </li>
     </ul>
 
-    <!-- Primary call to action — the goal is product roles, so make the path obvious -->
-    <a class="identity-cta" href="/contact/">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M4 4h16v16H4z" fill="none"/><path d="M22 6 12 13 2 6"/><path d="M2 6h20v12H2z"/></svg>
-      Get in touch
-    </a>
-
     <!-- Local weather — auto-resolved for Arlington, VA (no user selector).
          weather.js fills this in and drives the page mood + ambient forest. -->
     <p class="local-weather-status" aria-live="polite">Checking the weather in Arlington, Virginia…</p>
@@ -588,29 +582,4 @@ import Base from '../layouts/Base.astro';
     }
   }
 </script>
-
-<style>
-  /* Primary contact CTA in the identity column */
-  .identity-cta {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.5rem;
-    margin: 0.25rem 0 0.5rem;
-    padding: 0.55rem 1.1rem;
-    font-family: var(--font-ui, 'Inter', sans-serif);
-    font-size: 0.875rem;
-    font-weight: 600;
-    color: #fff;
-    text-decoration: none;
-    border-radius: var(--r-pill, 9999px);
-    background: var(--accent-gradient, linear-gradient(135deg, #2480fd, #22d1ff));
-    box-shadow: 0 4px 14px rgba(0, 89, 187, 0.25);
-    transition: transform 0.15s ease, box-shadow 0.15s ease;
-  }
-  .identity-cta:hover {
-    transform: translateY(-1px);
-    box-shadow: 0 6px 20px rgba(0, 89, 187, 0.35);
-  }
-  .identity-cta svg { width: 15px; height: 15px; }
-</style>
 </Base>
