@@ -93,6 +93,306 @@ function mulberry32(seed: number): () => number {
   };
 }
 
+type Quality = 'high' | 'medium' | 'low';
+
+// ──────────────────────────────────────────────────────────────────────
+// Ambient layers — small, self-contained scene-local managers that add
+// quiet life (clouds, birds, motes) on top of the forest/mountains. Each
+// owns its own THREE.Group, reacts to weather via setMode, animates in
+// update(t, dt), and has a dispose path. They never touch unrelated scene
+// state and never rebuild geometry on a mode change (just opacity/colour/
+// speed). All motion is gated by reduced-motion and device tier.
+// ──────────────────────────────────────────────────────────────────────
+interface AmbientLayer {
+  setMode(mode: WeatherMode): void;
+  update(t: number, dt: number): void;
+  dispose(): void;
+}
+
+// ── Clouds / mist ──────────────────────────────────────────────────────
+// A few large, soft, transparent planes that sit behind the mountains and
+// drift slowly. Per-mode opacity/colour/speed give the sky weather life
+// without volumetrics or postprocessing.
+interface CloudCfg { opacity: number; color: number; speed: number; }
+const CLOUD_MODE_CONFIG: Record<WeatherMode, CloudCfg> = {
+  sunny:  { opacity: 0.16, color: 0xffffff, speed: 0.7 },
+  clear:  { opacity: 0.10, color: 0xffffff, speed: 0.6 },
+  cloudy: { opacity: 0.38, color: 0xd5dde6, speed: 0.8 },
+  rainy:  { opacity: 0.42, color: 0x9eacba, speed: 1.0 },
+  stormy: { opacity: 0.55, color: 0x6f7d8d, speed: 1.3 },
+  snowy:  { opacity: 0.32, color: 0xe8f1f8, speed: 0.5 },
+  foggy:  { opacity: 0.50, color: 0xd4dadb, speed: 0.35 },
+  windy:  { opacity: 0.28, color: 0xdce8f2, speed: 1.8 },
+  hot:    { opacity: 0.20, color: 0xffead0, speed: 0.55 },
+  cold:   { opacity: 0.22, color: 0xddeaf3, speed: 0.45 },
+};
+
+// Soft radial alpha so the plane reads as a blurry cloud, not a rectangle.
+function makeCloudTexture(): THREE.CanvasTexture {
+  const s = 128;
+  const c = document.createElement('canvas');
+  c.width = c.height = s;
+  const ctx = c.getContext('2d')!;
+  const g = ctx.createRadialGradient(s / 2, s / 2, 0, s / 2, s / 2, s / 2);
+  g.addColorStop(0, 'rgba(255,255,255,1)');
+  g.addColorStop(0.5, 'rgba(255,255,255,0.55)');
+  g.addColorStop(1, 'rgba(255,255,255,0)');
+  ctx.fillStyle = g;
+  ctx.fillRect(0, 0, s, s);
+  const tex = new THREE.CanvasTexture(c);
+  tex.colorSpace = THREE.SRGBColorSpace;
+  return tex;
+}
+
+function createCloudLayer(scene: THREE.Scene, quality: Quality, reduceMotion: boolean): AmbientLayer {
+  const group = new THREE.Group();
+  group.renderOrder = -5;
+  scene.add(group);
+
+  const count = quality === 'high' ? 5 : quality === 'medium' ? 3 : 2;
+  const tex = makeCloudTexture();
+  const rng = mulberry32(31337);
+
+  interface CloudItem { mat: THREE.MeshBasicMaterial; baseX: number; drift: number; phase: number; }
+  const clouds: CloudItem[] = [];
+
+  for (let i = 0; i < count; i++) {
+    const mat = new THREE.MeshBasicMaterial({
+      map: tex, color: 0xffffff, transparent: true, opacity: 0.18,
+      depthWrite: false, fog: false,
+    });
+    const w = 14 + rng() * 10;
+    const h = 4 + rng() * 2.5;
+    const mesh = new THREE.Mesh(new THREE.PlaneGeometry(w, h), mat);
+    const baseX = (rng() - 0.5) * 36;
+    // Sit above the ridge line, behind the mountains/sky.
+    mesh.position.set(baseX, 7 + rng() * 5, -22 - rng() * 4);
+    group.add(mesh);
+    clouds.push({ mat, baseX, drift: 0.04 + rng() * 0.05, phase: rng() * Math.PI * 2 });
+  }
+
+  let speedMul = 0.7;
+  let targetOpacity = 0.18;
+
+  return {
+    setMode(mode) {
+      const c = CLOUD_MODE_CONFIG[mode];
+      speedMul = c.speed;
+      targetOpacity = c.opacity;
+      for (const cl of clouds) {
+        cl.mat.color.setHex(c.color);
+        cl.mat.opacity = c.opacity;
+      }
+    },
+    update(t) {
+      if (reduceMotion) return;
+      void targetOpacity; // set in setMode; opacity is not animated per-frame
+      // Drift each cloud mesh (group children) slowly along x — no allocations.
+      for (let i = 0; i < clouds.length; i++) {
+        const mesh = group.children[i] as THREE.Mesh;
+        const cl = clouds[i];
+        mesh.position.x = cl.baseX + Math.sin(t * cl.drift * speedMul + cl.phase) * 4;
+      }
+    },
+    dispose() {
+      scene.remove(group);
+      for (const cl of clouds) cl.mat.dispose();
+      group.children.forEach((m) => (m as THREE.Mesh).geometry?.dispose());
+      tex.dispose();
+    },
+  };
+}
+
+// ── Birds ──────────────────────────────────────────────────────────────
+// A handful of tiny distant "V" silhouettes that glide along seeded
+// elliptical paths, high above the mountains and clear of the centre
+// reading zone. One InstancedMesh = one draw call. Hidden in harsh weather.
+const BIRD_COUNT: Record<Quality, number> = { high: 7, medium: 4, low: 2 };
+const BIRD_HARSH: WeatherMode[] = ['rainy', 'stormy', 'snowy', 'foggy'];
+
+function makeBirdGeometry(): THREE.BufferGeometry {
+  // A flat two-triangle "V" (chevron), ~1 unit wide, pointing -z.
+  const g = new THREE.BufferGeometry();
+  const v = new Float32Array([
+    0, 0, 0,  -0.5, 0.12, 0.18,  -0.42, 0.0, 0.16,   // left wing
+    0, 0, 0,   0.42, 0.0, 0.16,   0.5, 0.12, 0.18,   // right wing
+  ]);
+  g.setAttribute('position', new THREE.BufferAttribute(v, 3));
+  return g;
+}
+
+interface BirdSlot { cx: number; cy: number; cz: number; rx: number; rz: number; speed: number; phase: number; tilt: number; }
+function makeBirdSlots(count: number): BirdSlot[] {
+  const rng = mulberry32(8675309);
+  const slots: BirdSlot[] = [];
+  for (let i = 0; i < count; i++) {
+    const side = rng() < 0.5 ? -1 : 1;
+    slots.push({
+      cx: side * (8 + rng() * 8),        // biased to the sides, clear of centre
+      cy: 8.5 + rng() * 4.5,             // high, above the ridge
+      cz: -20 - rng() * 6,               // far back
+      rx: 4 + rng() * 4,
+      rz: 2 + rng() * 2.5,
+      speed: 0.12 + rng() * 0.1,
+      phase: rng() * Math.PI * 2,
+      tilt: 0.8 + rng() * 0.5,
+    });
+  }
+  return slots;
+}
+
+function createBirdLayer(scene: THREE.Scene, quality: Quality, reduceMotion: boolean): AmbientLayer {
+  const group = new THREE.Group();
+  scene.add(group);
+
+  const count = BIRD_COUNT[quality];
+  const geometry = makeBirdGeometry();
+  const material = new THREE.MeshBasicMaterial({
+    color: 0x2f3d4a, transparent: true, opacity: 0.42,
+    side: THREE.DoubleSide, depthWrite: false, fog: true,
+  });
+  const mesh = new THREE.InstancedMesh(geometry, material, count);
+  mesh.frustumCulled = false;
+  group.add(mesh);
+
+  const slots = makeBirdSlots(count);
+  // Reused temporaries — never allocate inside update().
+  const _m = new THREE.Matrix4();
+  const _pos = new THREE.Vector3();
+  const _quat = new THREE.Quaternion();
+  const _scl = new THREE.Vector3(1, 1, 1);
+  const _e = new THREE.Euler();
+
+  let active = !reduceMotion;
+  let speedMul = 1;
+  let baseOpacity = 0.42;
+
+  function writeMatrices(t: number): void {
+    for (let i = 0; i < count; i++) {
+      const s = slots[i];
+      const a = t * s.speed * speedMul + s.phase;
+      _pos.set(s.cx + Math.cos(a) * s.rx, s.cy + Math.sin(a * 1.3) * 0.6, s.cz + Math.sin(a) * s.rz);
+      // Bank along the path: yaw toward travel, slight roll.
+      _e.set(0, -a, Math.sin(a * 2) * 0.15 * s.tilt);
+      _quat.setFromEuler(_e);
+      _m.compose(_pos, _quat, _scl);
+      mesh.setMatrixAt(i, _m);
+    }
+    mesh.instanceMatrix.needsUpdate = true;
+  }
+
+  // Lay down an initial static pose so a reduced-motion / single-frame
+  // render still shows birds in place.
+  writeMatrices(0);
+
+  return {
+    setMode(mode) {
+      const harsh = BIRD_HARSH.includes(mode);
+      active = !reduceMotion && !harsh;
+      speedMul = mode === 'windy' ? 1.6 : mode === 'hot' ? 0.75 : 1;
+      baseOpacity = mode === 'cloudy' ? 0.3 : mode === 'snowy' ? 0.22 : 0.42;
+      material.opacity = harsh ? 0 : baseOpacity;
+      group.visible = !harsh;
+    },
+    update(t) {
+      if (!active) return;
+      writeMatrices(t);
+    },
+    dispose() {
+      scene.remove(group);
+      geometry.dispose();
+      material.dispose();
+    },
+  };
+}
+
+// ── Ground life (motes / pollen / fireflies) ───────────────────────────
+// A single THREE.Points cloud of tiny specks that wander slowly near the
+// forest edges in pleasant weather. High tier only; off in harsh weather
+// and under reduced motion. One draw call, soft additive points.
+const GROUNDLIFE_COUNT: Record<Quality, number> = { high: 32, medium: 0, low: 0 };
+const GROUNDLIFE_OK: WeatherMode[] = ['sunny', 'clear', 'hot'];
+
+function makeMoteTexture(): THREE.CanvasTexture {
+  const s = 32;
+  const c = document.createElement('canvas');
+  c.width = c.height = s;
+  const ctx = c.getContext('2d')!;
+  const g = ctx.createRadialGradient(s / 2, s / 2, 0, s / 2, s / 2, s / 2);
+  g.addColorStop(0, 'rgba(255,255,255,1)');
+  g.addColorStop(1, 'rgba(255,255,255,0)');
+  ctx.fillStyle = g;
+  ctx.fillRect(0, 0, s, s);
+  const tex = new THREE.CanvasTexture(c);
+  tex.colorSpace = THREE.SRGBColorSpace;
+  return tex;
+}
+
+function createGroundLifeLayer(scene: THREE.Scene, quality: Quality, reduceMotion: boolean): AmbientLayer {
+  const group = new THREE.Group();
+  scene.add(group);
+
+  const count = GROUNDLIFE_COUNT[quality];
+  if (count === 0 || reduceMotion) {
+    // Empty, inert layer — keeps the array uniform and dispose-safe.
+    return { setMode() {}, update() {}, dispose() { scene.remove(group); } };
+  }
+
+  const rng = mulberry32(424242);
+  const positions = new Float32Array(count * 3);
+  // Per-mote home + wander params (preallocated, read-only in update).
+  const home = new Float32Array(count * 3);
+  const wob = new Float32Array(count * 3); // speed x/y/z packed as phase seeds
+  for (let i = 0; i < count; i++) {
+    const side = rng() < 0.5 ? -1 : 1;
+    const hx = side * (5 + rng() * 4);   // forest edges, clear of centre
+    const hy = 0.6 + rng() * 2.2;        // low, near the canopy base
+    const hz = -3 - rng() * 6;
+    home[i * 3] = hx; home[i * 3 + 1] = hy; home[i * 3 + 2] = hz;
+    positions[i * 3] = hx; positions[i * 3 + 1] = hy; positions[i * 3 + 2] = hz;
+    wob[i * 3] = rng() * Math.PI * 2;
+    wob[i * 3 + 1] = rng() * Math.PI * 2;
+    wob[i * 3 + 2] = 0.3 + rng() * 0.5;  // individual speed
+  }
+  const geo = new THREE.BufferGeometry();
+  geo.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+  const tex = makeMoteTexture();
+  const material = new THREE.PointsMaterial({
+    map: tex, color: 0xfff4cf, size: 0.12, transparent: true, opacity: 0,
+    depthWrite: false, blending: THREE.AdditiveBlending, sizeAttenuation: true,
+  });
+  const points = new THREE.Points(geo, material);
+  points.frustumCulled = false;
+  group.add(points);
+
+  let active = false;
+
+  return {
+    setMode(mode) {
+      active = GROUNDLIFE_OK.includes(mode);
+      material.opacity = active ? 0.5 : 0;
+      group.visible = active;
+    },
+    update(t) {
+      if (!active) return;
+      const arr = geo.attributes.position.array as Float32Array;
+      for (let i = 0; i < count; i++) {
+        const sp = wob[i * 3 + 2];
+        arr[i * 3]     = home[i * 3]     + Math.sin(t * sp + wob[i * 3]) * 0.5;
+        arr[i * 3 + 1] = home[i * 3 + 1] + Math.sin(t * sp * 0.8 + wob[i * 3 + 1]) * 0.4;
+        arr[i * 3 + 2] = home[i * 3 + 2] + Math.cos(t * sp * 0.6 + wob[i * 3]) * 0.4;
+      }
+      geo.attributes.position.needsUpdate = true;
+    },
+    dispose() {
+      scene.remove(group);
+      geo.dispose();
+      material.dispose();
+      tex.dispose();
+    },
+  };
+}
+
 export function initForest(host: HTMLElement): void {
   const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   const isMobile = window.matchMedia('(max-width: 720px)').matches;
@@ -113,15 +413,23 @@ export function initForest(host: HTMLElement): void {
   }
 
   // A layered landscape — distant mountain ridge behind a small edge-biased
-  // forest — so the no-WebGL fallback still reads as a little diorama.
+  // forest, with a few clouds and (in pleasant weather) birds — so the
+  // no-WebGL fallback still reads as a little diorama.
   function renderFallback(mode: WeatherMode = 'sunny'): void {
     const snowy = mode === 'snowy', foggy = mode === 'foggy';
+    const harsh = mode === 'rainy' || mode === 'stormy' || snowy || foggy;
     const warm = snowy ? '#cfdde3' : foggy ? '#9fb0a6' : '#6f9a54';
     const cool = snowy ? '#a9bcc6' : '#4f7d42';
     const bark = '#7a5a3c';
     const mtnFar = snowy ? '#e3edf6' : foggy ? '#cfd6da' : '#bcd0e2';
     const mtnNear = snowy ? '#cfdcea' : foggy ? '#b9c2c7' : '#93a8bd';
     const sunOn = mode === 'sunny' || mode === 'clear' || mode === 'hot';
+    const birdsOn = !harsh && mode !== 'cold';
+    // Cloud tint/opacity loosely tracks the WebGL cloud config.
+    const cloudCol = mode === 'stormy' ? '#6f7d8d' : mode === 'rainy' ? '#9eacba'
+      : mode === 'cloudy' ? '#d5dde6' : mode === 'foggy' ? '#d4dadb' : '#ffffff';
+    const cloudOp = mode === 'stormy' ? 0.5 : mode === 'rainy' || mode === 'foggy' ? 0.42
+      : mode === 'cloudy' ? 0.34 : 0.16;
     const tree = (x: number, y: number, s: number, c: string) => `
       <g transform="translate(${x} ${y}) scale(${s})">
         <rect x="-2" y="0" width="4" height="20" rx="1.5" fill="${bark}"/>
@@ -129,8 +437,20 @@ export function initForest(host: HTMLElement): void {
         <circle cx="-8" cy="2" r="8" fill="${c}" opacity="0.75"/>
         <circle cx="8" cy="2" r="8" fill="${c}" opacity="0.75"/>
       </g>`;
+    const cloud = (x: number, y: number, s: number) => `
+      <g transform="translate(${x} ${y}) scale(${s})" fill="${cloudCol}" opacity="${cloudOp}">
+        <ellipse cx="0" cy="0" rx="16" ry="6"/>
+        <ellipse cx="-10" cy="2" rx="9" ry="5"/>
+        <ellipse cx="11" cy="2" rx="8" ry="4.5"/>
+      </g>`;
+    // A tiny "V" chevron bird.
+    const bird = (x: number, y: number, s: number) =>
+      `<path d="M${x - 4 * s} ${y} Q${x} ${y - 2.4 * s} ${x} ${y} Q${x} ${y - 2.4 * s} ${x + 4 * s} ${y}" fill="none" stroke="#3a4a58" stroke-width="${0.9 * s}" stroke-linecap="round" opacity="0.5"/>`;
     host.innerHTML = `<svg class="tree-fallback" viewBox="0 0 200 120" preserveAspectRatio="xMidYMax meet" aria-hidden="true">
       ${sunOn ? '<circle cx="138" cy="44" r="16" fill="#ffe3a8" opacity="0.55"/>' : ''}
+      ${cloud(46, 30, 0.8)}
+      ${cloud(150, 24, 1.0)}
+      ${birdsOn ? bird(70, 22, 1.1) + bird(82, 26, 0.9) + bird(120, 18, 1.0) : ''}
       <path d="M0 70 L26 50 L48 64 L74 44 L104 62 L132 46 L160 60 L184 48 L200 62 L200 120 L0 120 Z" fill="${mtnFar}" opacity="0.6"/>
       <path d="M0 82 L34 64 L60 78 L92 60 L120 76 L150 62 L178 76 L200 66 L200 120 L0 120 Z" fill="${mtnNear}" opacity="0.65"/>
       ${tree(24, 90, 0.7, cool)}
@@ -504,6 +824,12 @@ export function initForest(host: HTMLElement): void {
   HERO_ANCHORS.slice(0, tier.hero).forEach(buildFromAnchor);
   FG_ANCHORS.slice(0, tier.fg).forEach(buildFromAnchor);
 
+  // ── Ambient layers (clouds, birds, ground life) ────────────────────
+  const ambientLayers: AmbientLayer[] = [
+    createCloudLayer(scene, quality, reduceMotion),
+    createBirdLayer(scene, quality, reduceMotion),
+    createGroundLifeLayer(scene, quality, reduceMotion),
+  ];
 
   // ── Weather atmosphere (cheap material/uniform update + one render) ─
   function normalizeMode(mode: string): WeatherMode {
@@ -538,7 +864,9 @@ export function initForest(host: HTMLElement): void {
     SUN_UNI.uOpacity.value = a.sunGlow;
   }
   function setMode(mode: string): void {
-    applyImmediate(normalizeMode(mode));
+    const next = normalizeMode(mode);
+    applyImmediate(next);
+    for (const layer of ambientLayers) layer.setMode(next);
     renderOnce();
   }
 
@@ -556,6 +884,7 @@ export function initForest(host: HTMLElement): void {
   // ── Render / animation ─────────────────────────────────────────────
   let raf = 0;
   const clock = new THREE.Clock();
+  let prevT = 0;
 
   function renderOnce(): void {
     renderer.render(scene, camera);
@@ -563,6 +892,8 @@ export function initForest(host: HTMLElement): void {
 
   function tick(): void {
     const t = clock.getElapsedTime();
+    const dt = Math.min(0.05, t - prevT); // clamp to avoid a huge step after pause
+    prevT = t;
     WIND.uTime.value = t;
 
     // Drive each leaf material's own wind shader: advance time and set a
@@ -576,6 +907,9 @@ export function initForest(host: HTMLElement): void {
         shader.uniforms.uWindStrength.value.set(strength, strength * 0.35, strength);
       }
     }
+
+    // Ambient layers (clouds, birds, motes) — each animates itself.
+    for (const layer of ambientLayers) layer.update(t, dt);
 
     // Subtle camera drift for life; disabled under reduced-motion.
     camera.position.x = Math.sin(t * 0.1) * 0.6;
@@ -600,21 +934,28 @@ export function initForest(host: HTMLElement): void {
     else start();
   });
 
+  function dispose(): void {
+    stop();
+    for (const layer of ambientLayers) layer.dispose();
+  }
+
   window.addEventListener('weather:change', (e) =>
     setMode((e as CustomEvent).detail.mode),
   );
-  (window as any).TreeScene = { setMode, updateForestState: setMode };
+  (window as any).TreeScene = { setMode, updateForestState: setMode, dispose };
 
   // Apply the current weather immediately if it resolved before this lazily
   // imported module booted (weather.js stashes it on window.KTWeatherState) —
-  // so the forest reflects Arlington weather on first paint, no 2nd event.
+  // so the forest (and all ambient layers) reflect Arlington weather on first
+  // paint, no 2nd event. Routed through setMode so the layers receive it too.
   const initialWeather = (window as any).KTWeatherState;
-  applyImmediate(normalizeMode(initialWeather?.mode ?? 'sunny'));
+  setMode(initialWeather?.mode ?? 'sunny');
 
   // ── Boot ───────────────────────────────────────────────────────────
   resize();
   if (reduceMotion) {
-    // Full static render: trees, lighting, sky — one frame, no motion.
+    // Full static render: trees, lighting, sky, and the layers' static poses
+    // (birds in place, clouds parked) — one frame, no motion.
     renderOnce();
   } else {
     start();
