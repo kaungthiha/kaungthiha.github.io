@@ -6,6 +6,43 @@
 <link rel="icon" href="/favicon.ico">
 <title>Capital One Attendance Tracker | KT's Portfolio</title>
 <meta name="description" content="Track office attendance across rolling 13-week periods. Calculate prorated requirements, mark attendance, and export as JSON.">
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+<style>
+  /* Align the tracker with the portfolio's frost/white + blue-accent look.
+     Visual only — no layout or functionality changes. */
+  :root {
+    --kt-primary: #0059bb;
+    --kt-accent-grad: linear-gradient(135deg, #2480FD 0%, #26A1FF 50%, #22D1FF 100%);
+  }
+  body {
+    margin: 0;
+    /* Soft sky → white wash, matching the portfolio background. */
+    background: linear-gradient(180deg, #D0E5FC 0%, #f5faff 55%, #f5faff 100%);
+    background-attachment: fixed;
+    min-height: 100vh;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    color: #171D27;
+  }
+  /* Headings use the portfolio display face. */
+  h1, h2, h3 { font-family: 'Plus Jakarta Sans', -apple-system, sans-serif; letter-spacing: -0.01em; }
+
+  /* Calmer, more even card shadows than the heavy default drop-shadows. */
+  [class*="tw-shadow-md"], [class*="tw-shadow-lg"] { box-shadow: 0 8px 32px rgba(36, 128, 253, 0.08) !important; }
+  [class*="tw-shadow-sm"] { box-shadow: 0 4px 24px rgba(36, 128, 253, 0.06) !important; }
+  [class*="tw-shadow-2xl"] { box-shadow: 0 20px 56px rgba(36, 128, 253, 0.18) !important; }
+
+  /* The blue→cyan gradient becomes the portfolio's softer accent gradient. */
+  [class*="tw-from-[#0066FF]"][class*="tw-to-[#00D4FF]"] { background-image: var(--kt-accent-grad) !important; }
+
+  /* Solid-blue accents → the portfolio primary. */
+  [class*="tw-text-[#0066FF]"] { color: var(--kt-primary) !important; }
+  [class*="tw-border-[#0066FF]"] { border-color: var(--kt-primary) !important; }
+
+  /* Calmer disclaimer banner (cream/orange → soft amber that still reads as a note). */
+  [class*="tw-bg-[#FFF8E1]"] { background-color: #fdf6e3 !important; }
+</style>
 </head>
 <body>
 <div id="attendance-tracker-root"></div>
