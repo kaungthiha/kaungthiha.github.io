@@ -34,6 +34,11 @@ export default defineConfig({
         'ez-tree-src': fileURLToPath(
           new URL('./node_modules/@dgreenheck/ez-tree/src/lib/index.js', import.meta.url),
         ),
+        // Same exports-gate bypass for the leaf textures we load ourselves
+        // (EZ-Tree's own eager loader doesn't fetch them under this setup).
+        'ez-tree-leaves': fileURLToPath(
+          new URL('./node_modules/@dgreenheck/ez-tree/src/lib/assets/leaves', import.meta.url),
+        ),
       },
     },
     build: {

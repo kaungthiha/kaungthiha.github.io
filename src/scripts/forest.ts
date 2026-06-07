@@ -20,6 +20,15 @@ import * as THREE from 'three';
 // base64-inlines every bark/leaf texture into a 3.9 MB blob.
 import { Tree, TreePreset } from 'ez-tree-src';
 
+// Import the leaf billboard textures directly. EZ-Tree's own eager texture
+// loader doesn't fire a fetch under this bundling setup (leaves came back
+// with an empty .image → invisible foliage), so we load them ourselves and
+// assign m.map explicitly per tree.
+import ashLeafUrl from 'ez-tree-leaves/ash_color.png';
+import aspenLeafUrl from 'ez-tree-leaves/aspen_color.png';
+import oakLeafUrl from 'ez-tree-leaves/oak_color.png';
+import pineLeafUrl from 'ez-tree-leaves/pine_color.png';
+
 // Internal weather modes the forest understands. The weather driver maps
 // real conditions onto these; unknown modes fall back to 'sunny'.
 type WeatherMode =
@@ -146,6 +155,28 @@ export function initForest(host: HTMLElement): void {
   renderer.outputColorSpace = THREE.SRGBColorSpace;
   host.appendChild(renderer.domElement);
 
+  // ── Leaf textures (loaded ourselves; see import note above) ────────
+  // Astro/Vite resolves image imports to a metadata object ({ src, width, … }),
+  // not a bare string — so read `.src` (falling back to the value itself).
+  const urlOf = (v: any): string => (typeof v === 'string' ? v : v?.src ?? '');
+  const texLoader = new THREE.TextureLoader();
+  const LEAF_URL: Record<string, string> = {
+    ash: urlOf(ashLeafUrl),
+    aspen: urlOf(aspenLeafUrl),
+    oak: urlOf(oakLeafUrl),
+    pine: urlOf(pineLeafUrl),
+  };
+  const leafTexCache: Record<string, THREE.Texture> = {};
+  function leafTexture(type: string): THREE.Texture {
+    const key = LEAF_URL[type] ? type : 'oak';
+    if (!leafTexCache[key]) {
+      const t = texLoader.load(LEAF_URL[key], () => renderOnce());
+      t.colorSpace = THREE.SRGBColorSpace;
+      leafTexCache[key] = t;
+    }
+    return leafTexCache[key];
+  }
+
   // Recover gracefully if the GPU drops the context.
   renderer.domElement.addEventListener('webglcontextlost', (e) => {
     e.preventDefault();
@@ -223,12 +254,13 @@ export function initForest(host: HTMLElement): void {
     low: { foreground: 2, midground: 5, background: 3 },
   };
 
-  // Warm, non-grey bark hues + leaf colour variance. Background trees get
-  // desaturated/cooler so depth reads clearly.
+  // Warm, non-grey bark hues + vivid summer-leaf colour variance. Background
+  // trees get slightly cooler/softer greens so depth still reads clearly, but
+  // they stay leafy (not bare).
   const BARK_HUES = [0x6b4f34, 0x7a5a3c, 0x5e4a39, 0x836547, 0x6f5034];
-  const LEAF_HUES = [0x4e7a3a, 0x5f8f42, 0x6fa04b, 0x789a3f, 0x86a94e, 0x57863c];
+  const LEAF_HUES = [0x6cb33f, 0x7cc24a, 0x86c84f, 0x9bd45c, 0x5fa83a, 0x8ec64d];
   const BARK_BG = [0x5a5246, 0x615747, 0x554f44];
-  const LEAF_BG = [0x55704a, 0x5e7850, 0x647d57];
+  const LEAF_BG = [0x6a9c4e, 0x74a657, 0x7fae5e];
 
   const rng = mulberry32(20260606);
   const pick = <T>(arr: T[]) => arr[Math.floor(rng() * arr.length)];
@@ -256,6 +288,7 @@ export function initForest(host: HTMLElement): void {
     const leafPool = band === 'background' ? LEAF_BG : LEAF_HUES;
     const barkColor = new THREE.Color(pick(barkPool));
     const leafColor = new THREE.Color(pick(leafPool));
+    const leafType = tree.options?.leaves?.type ?? 'oak';
     // Slight per-tree value jitter so neighbours differ.
     const jitter = 0.9 + rng() * 0.2;
     barkColor.multiplyScalar(jitter);
@@ -264,15 +297,21 @@ export function initForest(host: HTMLElement): void {
       if (!mesh.isMesh || !mesh.material) return;
       const mats = Array.isArray(mesh.material) ? mesh.material : [mesh.material];
       mats.forEach((m: any) => {
-        // Leaf materials are typically transparent/alpha-tested billboards;
-        // bark materials are opaque. Tint accordingly, then add wind.
-        if (m.transparent || m.alphaTest > 0) {
+        // EZ-Tree names the leaf material 'leaves'. Its textured billboard
+        // shader lives in its OWN onBeforeCompile (with built-in sway), so we
+        // must NOT overwrite it — only retint + reassign a real loaded map.
+        const isLeaf = m.name === 'leaves' || m.alphaTest > 0;
+        if (isLeaf) {
+          // EZ-Tree's eager loader leaves m.map with no image under our
+          // bundling, so assign our own loaded leaf texture explicitly.
+          m.map = leafTexture(leafType);
           if (m.color) m.color.copy(leafColor);
+          m.needsUpdate = true;
         } else {
           if (m.color) m.color.copy(barkColor);
           if ('roughness' in m) m.roughness = 0.8 + rng() * 0.2;
+          applyWind(m); // trunk/branch sway only
         }
-        applyWind(m);
       });
     });
   }
@@ -285,6 +324,13 @@ export function initForest(host: HTMLElement): void {
       tree.options.seed = Math.floor(rng() * 100000);
       tree.options.bark.textured = false;
       tree.options.bark.flatShading = true;
+      // Push foliage forward: bigger, denser leaf billboards so the canopy
+      // reads as a leafy summer tree rather than a bare branch skeleton.
+      if (tree.options.leaves) {
+        tree.options.leaves.size = (tree.options.leaves.size ?? 2.5) * 1.6;
+        tree.options.leaves.count = Math.round((tree.options.leaves.count ?? 12) * 1.5);
+        tree.options.leaves.alphaTest = 0.3; // keep soft leaf edges, less harsh cutout
+      }
       tree.generate();
 
       // Small scales; smaller still in the background. Vary per-tree.
@@ -307,6 +353,7 @@ export function initForest(host: HTMLElement): void {
   buildBand('background', counts.background);
   buildBand('midground', counts.midground);
   buildBand('foreground', counts.foreground);
+
 
   // ── Weather atmosphere (cheap material/uniform update + one render) ─
   function normalizeMode(mode: string): WeatherMode {
