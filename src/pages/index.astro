@@ -27,26 +27,22 @@ import Base from '../layouts/Base.astro';
 <div class="tree-canvas-host" id="tree-canvas-host" aria-hidden="true"></div>
 
 <!-- ─────────────────────────────────────────────────────────────────────
-     Shell: Persistent identity column + Flippable content card
+     Landing hero — full-screen intro. Scroll down to reach the work.
      ───────────────────────────────────────────────────────────────────── -->
-<div class="editorial-shell">
-
-  <!-- Identity column (left, persistent) -->
-  <aside class="identity-col" aria-label="About me">
-    <img class="identity-portrait"
+<section class="hero-intro" aria-label="Introduction">
+  <div class="hero-intro-inner">
+    <img class="hero-portrait"
          src="/assets/images/about.jpg"
          alt="Kaung Thiha"
          loading="eager"
-         width="160" height="160">
-    <h1 class="identity-name">
+         width="260" height="260">
+    <h1 class="hero-name">
       I'm Kaung
       <span class="burmese">(ကောင်းသီဟ)</span>
       <span class="identity-weather-line local-weather-status" aria-live="polite">Checking the weather in Arlington, Virginia…</span>
-      <span class="blurb"></span>
     </h1>
-    <p class="identity-bio"></p>
 
-    <ul class="identity-socials">
+    <ul class="hero-socials">
       <li>
         <a href="https://www.linkedin.com/in/kaungthiha/" target="_blank" rel="noopener" aria-label="LinkedIn">
           <svg viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">
@@ -63,7 +59,26 @@ import Base from '../layouts/Base.astro';
       </li>
     </ul>
 
-    <!-- Primary flip CTA — desktop, sits above mood selector -->
+    <!-- Scroll cue → jumps to the work below -->
+    <a class="hero-scroll-cue" href="#portfolio-content" aria-label="Scroll to the work">
+      <span class="hero-scroll-label">the work</span>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14M19 12l-7 7-7-7"/></svg>
+    </a>
+  </div>
+</section>
+
+<!-- ─────────────────────────────────────────────────────────────────────
+     Portfolio content — the existing flippable card shell, below the hero.
+     Identity (portrait/name/weather) now lives in the hero; this column
+     keeps only the flip controls.
+     ───────────────────────────────────────────────────────────────────── -->
+<div class="editorial-shell" id="portfolio-content">
+
+  <!-- Slim identity column — flip controls only -->
+  <aside class="identity-col identity-col--slim" aria-label="View controls">
+    <p class="identity-col-eyebrow">Kaung Thiha</p>
+
+    <!-- Primary flip CTA — desktop -->
     <button class="identity-flip" type="button" id="flip-toggle-primary" data-face-label="front" aria-label="See the person behind the work" aria-pressed="false">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M3 12a9 9 0 0 1 15.5-6.3M21 4v5h-5M21 12a9 9 0 0 1-15.5 6.3M3 20v-5h5"/></svg>
       Me!
@@ -524,18 +539,36 @@ import Base from '../layouts/Base.astro';
       }
     }
 
+    const heroEl    = document.querySelector('.hero-intro');
+    const contentEl = document.getElementById('portfolio-content');
+
+    // True while the landing hero still fills (most of) the viewport.
+    function onHero() {
+      return heroEl ? heroEl.getBoundingClientRect().bottom > window.innerHeight * 0.5 : false;
+    }
+
     function navigate(target) {
       const route = ROUTE[target];
       if (!route) return;
       const needsFlip = body.dataset.face !== route.face;
       navLinks.forEach(l => l.classList.toggle('is-active', l.dataset.navTarget === target));
 
-      if (needsFlip) {
-        applyFace(route.face);
-        setTimeout(() => scrollToSubsection(route.section), 620);
-      } else {
-        scrollToSubsection(route.section);
+      // From the landing hero, a nav click should first bring the work into
+      // view, then flip/scroll to the right subsection.
+      const wasOnHero = onHero();
+      if (wasOnHero && contentEl) {
+        contentEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
       }
+      const flipDelay = wasOnHero ? 650 : 0;
+
+      setTimeout(() => {
+        if (needsFlip) {
+          applyFace(route.face);
+          setTimeout(() => scrollToSubsection(route.section), 620);
+        } else {
+          scrollToSubsection(route.section);
+        }
+      }, flipDelay);
     }
 
     navLinks.forEach(l => {
@@ -560,6 +593,29 @@ import Base from '../layouts/Base.astro';
 
     applyFace('front');
     navLinks.forEach(l => l.classList.toggle('is-active', l.dataset.navTarget === 'tools'));
+  }());
+
+  // ── Scroll flow: hero → work ────────────────────────────────────────
+  (function () {
+    const hero = document.querySelector('.hero-intro');
+    if (!hero) return;
+
+    // Toggle a body class once the user scrolls past most of the hero, so the
+    // forest background fades in over the work (see editorial.css).
+    let ticking = false;
+    function update() {
+      ticking = false;
+      const past = hero.getBoundingClientRect().bottom < window.innerHeight * 0.6;
+      document.body.classList.toggle('scrolled-past-hero', past);
+    }
+    window.addEventListener('scroll', () => {
+      if (!ticking) { ticking = true; requestAnimationFrame(update); }
+    }, { passive: true });
+    update();
+
+    // The scroll cue is a normal anchor (#portfolio-content) — smooth scroll is
+    // handled by CSS scroll-behavior. Nothing else needed; keyboard activation
+    // works because it's an <a href>.
   }());
 </script>
 
