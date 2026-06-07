@@ -221,8 +221,13 @@ export function initForest(host: HTMLElement): void {
   scene.add(ground);
 
   // ── Wind (shared uniforms, injected per material) ──────────────────
-  const BASE_WIND = reduceMotion ? 0 : 0.02;
+  // Stronger base sway than before (0.02 → 0.045) so the trees feel alive.
+  const BASE_WIND = reduceMotion ? 0 : 0.045;
   const WIND = { uTime: { value: 0 }, uStr: { value: BASE_WIND } };
+  // Leaf wind base strength (the EZ-Tree leaf shader uses a Vector3); the
+  // weather multiplier and per-tree click rustle scale on top of this.
+  const LEAF_WIND_BASE = reduceMotion ? 0 : 1.1;
+  let leafWindMul = 1; // updated by weather mode
   function applyWind(mat: THREE.Material) {
     mat.onBeforeCompile = (shader) => {
       shader.uniforms.uTime = WIND.uTime;
@@ -283,6 +288,12 @@ export function initForest(host: HTMLElement): void {
     return { x, z };
   }
 
+  // Per-tree leaf material refs so we can drive their wind each frame and
+  // spike a localized rustle on click. EZ-Tree stashes the compiled shader on
+  // material.userData.shader; we also wrap onBeforeCompile to be sure.
+  interface LeafEntry { mat: any; rustle: number }
+  const leafEntries: LeafEntry[] = [];
+
   function tintTree(tree: any, band: Band) {
     const barkPool = band === 'background' ? BARK_BG : BARK_HUES;
     const leafPool = band === 'background' ? LEAF_BG : LEAF_HUES;
@@ -307,6 +318,9 @@ export function initForest(host: HTMLElement): void {
           m.map = leafTexture(leafType);
           if (m.color) m.color.copy(leafColor);
           m.needsUpdate = true;
+          // Tag the owning tree so a click can find which leaves to rustle.
+          mesh.userData.leafEntry = { mat: m, rustle: 0 } as LeafEntry;
+          leafEntries.push(mesh.userData.leafEntry);
         } else {
           if (m.color) m.color.copy(barkColor);
           if ('roughness' in m) m.roughness = 0.8 + rng() * 0.2;
@@ -324,12 +338,27 @@ export function initForest(host: HTMLElement): void {
       tree.options.seed = Math.floor(rng() * 100000);
       tree.options.bark.textured = false;
       tree.options.bark.flatShading = true;
-      // Push foliage forward: bigger, denser leaf billboards so the canopy
-      // reads as a leafy summer tree rather than a bare branch skeleton.
+      // Foliage that reads as leaves WITHOUT smothering the tree. The preset
+      // sizes are kept (the earlier ×1.6/×1.5 boost was a mis-diagnosis from
+      // when leaves weren't loading — it produced the desktop green blob).
+      // Per-tree variance + a higher alphaTest keeps billboards tight, lets
+      // branches show through, and gives a more natural, less uniform canopy.
       if (tree.options.leaves) {
-        tree.options.leaves.size = (tree.options.leaves.size ?? 2.5) * 1.6;
-        tree.options.leaves.count = Math.round((tree.options.leaves.count ?? 12) * 1.5);
-        tree.options.leaves.alphaTest = 0.3; // keep soft leaf edges, less harsh cutout
+        const baseSize = tree.options.leaves.size ?? 2.5;
+        const baseCount = tree.options.leaves.count ?? 12;
+        // Vary fullness per tree: ~1 in 5 trees are sparse/near-bare so the
+        // forest looks real rather than every tree being equally lush.
+        const fullness = rng();
+        const density =
+          fullness < 0.2 ? 0.35 :          // sparse: bare-ish branches show
+          fullness < 0.5 ? 0.7 :           // medium
+          1.0;                             // full canopy
+        tree.options.leaves.size = baseSize * (0.85 + rng() * 0.3);
+        tree.options.leaves.count = Math.max(3, Math.round(baseCount * density));
+        // Tighter alpha cutout = crisper, smaller leaf silhouettes (less blob).
+        tree.options.leaves.alphaTest = 0.55;
+        // Start leaves a bit further out the branch so inner structure shows.
+        tree.options.leaves.start = Math.min(0.9, (tree.options.leaves.start ?? 0.5) + 0.1);
       }
       tree.generate();
 
@@ -371,6 +400,7 @@ export function initForest(host: HTMLElement): void {
     (scene.fog as THREE.FogExp2).color.setHex(a.fogColor);
     (ground.material as THREE.MeshStandardMaterial).color.setHex(a.ground);
     WIND.uStr.value = reduceMotion ? 0 : BASE_WIND * a.wind;
+    leafWindMul = a.wind;
   }
   function setMode(mode: string): void {
     applyImmediate(normalizeMode(mode));
@@ -391,6 +421,7 @@ export function initForest(host: HTMLElement): void {
   // ── Render / animation ─────────────────────────────────────────────
   let raf = 0;
   const clock = new THREE.Clock();
+  let prevT = 0;
 
   function renderOnce(): void {
     renderer.render(scene, camera);
@@ -398,7 +429,24 @@ export function initForest(host: HTMLElement): void {
 
   function tick(): void {
     const t = clock.getElapsedTime();
+    const dt = Math.min(0.05, t - prevT); // clamp to avoid huge steps after pause
+    prevT = t;
     WIND.uTime.value = t;
+
+    // Drive each leaf material's own wind shader: advance time and set a
+    // strength that combines the weather wind with a per-tree click rustle
+    // that decays back to rest.
+    for (const e of leafEntries) {
+      const shader = e.mat.userData?.shader;
+      if (!shader) continue;
+      if (shader.uniforms.uTime) shader.uniforms.uTime.value = t;
+      if (e.rustle > 0) e.rustle = Math.max(0, e.rustle - dt * 1.6);
+      const strength = LEAF_WIND_BASE * (leafWindMul + e.rustle);
+      if (shader.uniforms.uWindStrength) {
+        shader.uniforms.uWindStrength.value.set(strength, strength * 0.35, strength);
+      }
+    }
+
     // Subtle camera drift for life; disabled under reduced-motion.
     camera.position.x = Math.sin(t * 0.1) * 0.6;
     camera.lookAt(0, 1.4, 0);
@@ -426,6 +474,36 @@ export function initForest(host: HTMLElement): void {
     setMode((e as CustomEvent).detail.mode),
   );
   (window as any).TreeScene = { setMode, updateForestState: setMode };
+
+  // ── Click-to-rustle ────────────────────────────────────────────────
+  // The canvas sits behind content (pointer-events: none), so we listen on
+  // the window, raycast from the click into the scene, and if a leaf mesh is
+  // hit, spike that tree's rustle. Disabled under reduced-motion.
+  if (!reduceMotion) {
+    const raycaster = new THREE.Raycaster();
+    const ndc = new THREE.Vector2();
+    const leafMeshes: THREE.Mesh[] = [];
+    scene.traverse((o: any) => {
+      if (o.isMesh && o.userData?.leafEntry) leafMeshes.push(o);
+    });
+
+    window.addEventListener('pointerdown', (ev: PointerEvent) => {
+      // Ignore clicks on real UI (links/buttons/cards) — only "empty" clicks
+      // over the ambient scene should rustle.
+      const target = ev.target as HTMLElement;
+      if (target.closest('a, button, input, textarea, [role="button"], .card-face, .identity-col'))
+        return;
+      ndc.x = (ev.clientX / window.innerWidth) * 2 - 1;
+      ndc.y = -(ev.clientY / window.innerHeight) * 2 + 1;
+      raycaster.setFromCamera(ndc, camera);
+      const hits = raycaster.intersectObjects(leafMeshes, false);
+      if (hits.length) {
+        const entry = (hits[0].object as any).userData.leafEntry as LeafEntry;
+        entry.rustle = 2.6; // strong gust that decays in ~1.5s
+        start(); // ensure the loop is running to animate the decay
+      }
+    });
+  }
 
   // ── Boot ───────────────────────────────────────────────────────────
   resize();
