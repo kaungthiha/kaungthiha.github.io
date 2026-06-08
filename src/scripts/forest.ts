@@ -211,11 +211,12 @@ const BIRD_COUNT: Record<Quality, number> = { high: 7, medium: 4, low: 2 };
 const BIRD_HARSH: WeatherMode[] = ['rainy', 'stormy', 'snowy', 'foggy'];
 
 function makeBirdGeometry(): THREE.BufferGeometry {
-  // A flat two-triangle "V" (chevron), ~1 unit wide, pointing -z.
+  // A flat two-triangle "V" (chevron), ~1.7 units wide, pointing -z. Enlarged
+  // from the original ~1u so the distant silhouettes actually read.
   const g = new THREE.BufferGeometry();
   const v = new Float32Array([
-    0, 0, 0,  -0.5, 0.12, 0.18,  -0.42, 0.0, 0.16,   // left wing
-    0, 0, 0,   0.42, 0.0, 0.16,   0.5, 0.12, 0.18,   // right wing
+    0, 0, 0,  -0.85, 0.2, 0.3,  -0.72, 0.0, 0.27,   // left wing
+    0, 0, 0,   0.72, 0.0, 0.27,   0.85, 0.2, 0.3,   // right wing
   ]);
   g.setAttribute('position', new THREE.BufferAttribute(v, 3));
   return g;
@@ -228,11 +229,13 @@ function makeBirdSlots(count: number): BirdSlot[] {
   for (let i = 0; i < count; i++) {
     const side = rng() < 0.5 ? -1 : 1;
     slots.push({
-      cx: side * (8 + rng() * 8),        // biased to the sides, clear of centre
-      cy: 8.5 + rng() * 4.5,             // high, above the ridge
-      cz: -20 - rng() * 6,               // far back
-      rx: 4 + rng() * 4,
-      rz: 2 + rng() * 2.5,
+      cx: side * (6 + rng() * 7),        // biased to the sides, clear of centre
+      // Sit in the open sky band above the treetops but in front of the
+      // mountains, so they're actually in frame and not occluded by ridges.
+      cy: 5 + rng() * 3,
+      cz: -13 - rng() * 5,               // in front of the mountains (z -16..-19)
+      rx: 3.5 + rng() * 3.5,
+      rz: 1.5 + rng() * 2,
       speed: 0.12 + rng() * 0.1,
       phase: rng() * Math.PI * 2,
       tilt: 0.8 + rng() * 0.5,
@@ -248,7 +251,7 @@ function createBirdLayer(scene: THREE.Scene, quality: Quality, reduceMotion: boo
   const count = BIRD_COUNT[quality];
   const geometry = makeBirdGeometry();
   const material = new THREE.MeshBasicMaterial({
-    color: 0x2f3d4a, transparent: true, opacity: 0.42,
+    color: 0x2b3845, transparent: true, opacity: 0.72,
     side: THREE.DoubleSide, depthWrite: false, fog: true,
   });
   const mesh = new THREE.InstancedMesh(geometry, material, count);
@@ -265,7 +268,7 @@ function createBirdLayer(scene: THREE.Scene, quality: Quality, reduceMotion: boo
 
   let active = !reduceMotion;
   let speedMul = 1;
-  let baseOpacity = 0.42;
+  let baseOpacity = 0.72;
 
   function writeMatrices(t: number): void {
     for (let i = 0; i < count; i++) {
@@ -290,7 +293,8 @@ function createBirdLayer(scene: THREE.Scene, quality: Quality, reduceMotion: boo
       const harsh = BIRD_HARSH.includes(mode);
       active = !reduceMotion && !harsh;
       speedMul = mode === 'windy' ? 1.6 : mode === 'hot' ? 0.75 : 1;
-      baseOpacity = mode === 'cloudy' ? 0.3 : mode === 'snowy' ? 0.22 : 0.42;
+      // Still a touch softer on overcast/snow days, but clearly visible now.
+      baseOpacity = mode === 'cloudy' ? 0.6 : mode === 'snowy' ? 0.5 : 0.72;
       material.opacity = harsh ? 0 : baseOpacity;
       group.visible = !harsh;
     },
@@ -311,7 +315,7 @@ function createBirdLayer(scene: THREE.Scene, quality: Quality, reduceMotion: boo
 // forest edges in pleasant weather. High tier only; off in harsh weather
 // and under reduced motion. One draw call, soft additive points.
 const GROUNDLIFE_COUNT: Record<Quality, number> = { high: 32, medium: 0, low: 0 };
-const GROUNDLIFE_OK: WeatherMode[] = ['sunny', 'clear', 'hot'];
+const GROUNDLIFE_OK: WeatherMode[] = ['sunny', 'clear', 'hot', 'cloudy', 'windy'];
 
 function makeMoteTexture(): THREE.CanvasTexture {
   const s = 32;
