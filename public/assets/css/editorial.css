@@ -302,7 +302,7 @@ body::after {
   mask-image: radial-gradient(ellipse 72% 92% at 52% 46%, rgba(0,0,0,0.45) 0%, rgba(0,0,0,0.72) 52%, black 86%);
   -webkit-mask-image: radial-gradient(ellipse 72% 92% at 52% 46%, rgba(0,0,0,0.45) 0%, rgba(0,0,0,0.72) 52%, black 86%);
 }
-body.scrolled-past-hero .tree-canvas-host { --forest-opacity: 0.6; }
+body.scrolled-past-hero .tree-canvas-host { --forest-opacity: 0.72; }
 .tree-canvas-host canvas {
   display: block;
   width: 100% !important;
