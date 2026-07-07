@@ -43,6 +43,11 @@ type WeatherMode =
   | 'hot'
   | 'cold';
 
+// Daylight phase, derived by weather.js from Arlington's real sun times and
+// delivered alongside the weather mode on the same `weather:change` event.
+type Phase = 'day' | 'dawn' | 'dusk' | 'night';
+const ALL_PHASES: readonly Phase[] = ['day', 'dawn', 'dusk', 'night'];
+
 // Per-mode atmosphere: lighting tints, sky top colour, fog density/colour,
 // ground colour, wind multiplier, plus distant-mountain and sun-glow control.
 // Kept as plain data so a mode change is a cheap uniform/material update +
@@ -81,6 +86,38 @@ const ATMOS: Record<WeatherMode, Atmosphere> = {
   cold:   { hemiSky: 0xd2e6f6, hemiGround: 0x8c9aa0, hemiInt: 0.95, sunInt: 1.0,  skyTop: 0xaecadd, skyBot: 0xe2eef6, fog: 0.044, fogColor: 0xccdbe7, ground: 0x6a7f63, wind: 1.2, mtnTint: 0xdfe8f0, mtnOpacity: 0.9, sunColor: 0xe6eef8, sunGlow: 0.35 },
 };
 
+// Per-phase transform applied ON TOP of the weather baseline (ATMOS stays
+// authored for daytime). Composition instead of a 4×10 matrix: any weather
+// at any phase works without hand-tuning 40 entries.
+//   lightMul          — multiplies hemi + sun intensities
+//   skyTint/skyMix    — lerp sky gradient + fog colour toward the tint
+//   sceneTint/sceneMix— "moonlight wash" lerp on bark/leaf/ridge/ground bases
+//   sunGlowMul        — scales the weather's sun-glow (0 at night)
+//   moon / stars      — max opacities, further gated by SKY_CLARITY[mode]
+interface PhaseFx {
+  lightMul: number;
+  skyTint: number;
+  skyMix: number;
+  sceneTint: number;
+  sceneMix: number;
+  sunGlowMul: number;
+  moon: number;
+  stars: number;
+}
+
+const PHASE_FX: Record<Phase, PhaseFx> = {
+  day:   { lightMul: 1,    skyTint: 0xffffff, skyMix: 0,    sceneTint: 0xffffff, sceneMix: 0,    sunGlowMul: 1,   moon: 0,    stars: 0 },
+  dawn:  { lightMul: 0.85, skyTint: 0xffc9a0, skyMix: 0.45, sceneTint: 0xffd9b0, sceneMix: 0.16, sunGlowMul: 1.2, moon: 0,    stars: 0.25 },
+  dusk:  { lightMul: 0.78, skyTint: 0xff9e7a, skyMix: 0.5,  sceneTint: 0xe8a37c, sceneMix: 0.2,  sunGlowMul: 1.1, moon: 0.35, stars: 0.4 },
+  night: { lightMul: 0.32, skyTint: 0x0b1630, skyMix: 0.85, sceneTint: 0x35507a, sceneMix: 0.55, sunGlowMul: 0,   moon: 0.9,  stars: 1 },
+};
+
+// How much of the night sky (stars/moon) each weather lets through.
+const SKY_CLARITY: Record<WeatherMode, number> = {
+  sunny: 1, clear: 1, cloudy: 0.15, rainy: 0, stormy: 0,
+  snowy: 0, foggy: 0, windy: 0.4, hot: 0.6, cold: 1,
+};
+
 // Small deterministic PRNG so a given seed always lays out the same forest.
 function mulberry32(seed: number): () => number {
   let a = seed >>> 0;
@@ -115,7 +152,7 @@ function halfWidthAt(z: number, aspect: number): number {
 // speed). All motion is gated by reduced-motion and device tier.
 // ──────────────────────────────────────────────────────────────────────
 interface AmbientLayer {
-  setMode(mode: WeatherMode): void;
+  setContext(mode: WeatherMode, phase: Phase): void;
   /** Re-spread positions to cover the visible width at the layer's depth. */
   setSpread?(aspect: number): void;
   update(t: number, dt: number): void;
@@ -190,14 +227,17 @@ function createCloudLayer(scene: THREE.Scene, quality: Quality, reduceMotion: bo
   let speedMul = 0.7;
   let targetOpacity = 0.18;
 
+  const _nightCloud = new THREE.Color(0x223046);
   return {
-    setMode(mode) {
+    setContext(mode, phase) {
       const c = CLOUD_MODE_CONFIG[mode];
       speedMul = c.speed;
-      targetOpacity = c.opacity;
+      const night = phase === 'night';
+      targetOpacity = c.opacity * (night ? 0.55 : 1);
       for (const cl of clouds) {
         cl.mat.color.setHex(c.color);
-        cl.mat.opacity = c.opacity;
+        if (night) cl.mat.color.lerp(_nightCloud, 0.6);
+        cl.mat.opacity = targetOpacity;
       }
     },
     setSpread(aspect) {
@@ -313,14 +353,15 @@ function createBirdLayer(scene: THREE.Scene, quality: Quality, reduceMotion: boo
   writeMatrices(0);
 
   return {
-    setMode(mode) {
-      const harsh = BIRD_HARSH.includes(mode);
-      active = !reduceMotion && !harsh;
+    setContext(mode, phase) {
+      // Birds roost at night; hidden in harsh weather as before.
+      const hidden = BIRD_HARSH.includes(mode) || phase === 'night';
+      active = !reduceMotion && !hidden;
       speedMul = mode === 'windy' ? 1.6 : mode === 'hot' ? 0.75 : 1;
       // Still a touch softer on overcast/snow days, but clearly visible now.
       baseOpacity = mode === 'cloudy' ? 0.6 : mode === 'snowy' ? 0.5 : 0.72;
-      material.opacity = harsh ? 0 : baseOpacity;
-      group.visible = !harsh;
+      material.opacity = hidden ? 0 : baseOpacity;
+      group.visible = !hidden;
     },
     setSpread(aspect) {
       // Path centres sit around z ≈ -15.5; widen so flocks reach the edges.
@@ -368,7 +409,7 @@ function createGroundLifeLayer(scene: THREE.Scene, quality: Quality, reduceMotio
   const count = GROUNDLIFE_COUNT[quality];
   if (count === 0 || reduceMotion) {
     // Empty, inert layer — keeps the array uniform and dispose-safe.
-    return { setMode() {}, update() {}, dispose() { scene.remove(group); } };
+    return { setContext() {}, update() {}, dispose() { scene.remove(group); } };
   }
 
   const rng = mulberry32(424242);
@@ -401,9 +442,12 @@ function createGroundLifeLayer(scene: THREE.Scene, quality: Quality, reduceMotio
   let active = false;
 
   return {
-    setMode(mode) {
-      active = GROUNDLIFE_OK.includes(mode);
-      material.opacity = active ? 0.5 : 0;
+    setContext(mode, phase) {
+      // Day persona: pale pollen motes. Night/dusk persona handled in P5
+      // (fireflies); until then motes simply glow warmer after dark.
+      active = GROUNDLIFE_OK.includes(mode) || (phase !== 'day' && SKY_CLARITY[mode] > 0);
+      material.color.setHex(phase === 'night' || phase === 'dusk' ? 0xffd97a : 0xfff4cf);
+      material.opacity = active ? (phase === 'night' ? 0.7 : 0.5) : 0;
       group.visible = active;
     },
     update(t) {
@@ -448,16 +492,19 @@ export function initForest(host: HTMLElement): void {
   // A layered landscape — distant mountain ridge behind a small edge-biased
   // forest, with a few clouds and (in pleasant weather) birds — so the
   // no-WebGL fallback still reads as a little diorama.
-  function renderFallback(mode: WeatherMode = 'sunny'): void {
+  function renderFallback(mode: WeatherMode = 'sunny', phase: Phase = 'day'): void {
     const snowy = mode === 'snowy', foggy = mode === 'foggy';
+    const night = phase === 'night';
     const harsh = mode === 'rainy' || mode === 'stormy' || snowy || foggy;
-    const warm = snowy ? '#cfdde3' : foggy ? '#9fb0a6' : '#6f9a54';
-    const cool = snowy ? '#a9bcc6' : '#4f7d42';
-    const bark = '#7a5a3c';
-    const mtnFar = snowy ? '#e3edf6' : foggy ? '#cfd6da' : '#bcd0e2';
-    const mtnNear = snowy ? '#cfdcea' : foggy ? '#b9c2c7' : '#93a8bd';
-    const sunOn = mode === 'sunny' || mode === 'clear' || mode === 'hot';
-    const birdsOn = !harsh && mode !== 'cold';
+    const warm = night ? '#2e4636' : snowy ? '#cfdde3' : foggy ? '#9fb0a6' : '#6f9a54';
+    const cool = night ? '#243a2e' : snowy ? '#a9bcc6' : '#4f7d42';
+    const bark = night ? '#3a3226' : '#7a5a3c';
+    const mtnFar = night ? '#1d2b42' : snowy ? '#e3edf6' : foggy ? '#cfd6da' : '#bcd0e2';
+    const mtnNear = night ? '#16233a' : snowy ? '#cfdcea' : foggy ? '#b9c2c7' : '#93a8bd';
+    const clearSky = mode === 'sunny' || mode === 'clear' || mode === 'hot' || mode === 'cold';
+    const sunOn = !night && (mode === 'sunny' || mode === 'clear' || mode === 'hot');
+    const moonOn = night && clearSky;
+    const birdsOn = !night && !harsh && mode !== 'cold';
     // Cloud tint/opacity loosely tracks the WebGL cloud config.
     const cloudCol = mode === 'stormy' ? '#6f7d8d' : mode === 'rainy' ? '#9eacba'
       : mode === 'cloudy' ? '#d5dde6' : mode === 'foggy' ? '#d4dadb' : '#ffffff';
@@ -479,8 +526,15 @@ export function initForest(host: HTMLElement): void {
     // A tiny "V" chevron bird.
     const bird = (x: number, y: number, s: number) =>
       `<path d="M${x - 4 * s} ${y} Q${x} ${y - 2.4 * s} ${x} ${y} Q${x} ${y - 2.4 * s} ${x + 4 * s} ${y}" fill="none" stroke="#3a4a58" stroke-width="${0.9 * s}" stroke-linecap="round" opacity="0.5"/>`;
+    const starsSvg = moonOn
+      ? [[30, 18], [62, 10], [96, 22], [128, 8], [162, 16], [184, 28]]
+          .map(([x, y]) => `<circle cx="${x}" cy="${y}" r="0.9" fill="#eaf2ff" opacity="0.8"/>`)
+          .join('')
+      : '';
     host.innerHTML = `<svg class="tree-fallback" viewBox="0 0 200 120" preserveAspectRatio="xMidYMax meet" aria-hidden="true">
       ${sunOn ? '<circle cx="138" cy="44" r="16" fill="#ffe3a8" opacity="0.55"/>' : ''}
+      ${moonOn ? '<circle cx="60" cy="34" r="11" fill="#dfe9ff" opacity="0.75"/><circle cx="64" cy="31" r="10" fill="#1d2b42" opacity="0.9"/>' : ''}
+      ${starsSvg}
       ${cloud(46, 30, 0.8)}
       ${cloud(150, 24, 1.0)}
       ${birdsOn ? bird(70, 22, 1.1) + bird(82, 26, 0.9) + bird(120, 18, 1.0) : ''}
@@ -496,10 +550,12 @@ export function initForest(host: HTMLElement): void {
   }
 
   if (!hasWebGL()) {
-    renderFallback('sunny');
-    window.addEventListener('weather:change', (e) =>
-      renderFallback((e as CustomEvent).detail.mode),
-    );
+    const initial = (window as any).KTWeatherState;
+    renderFallback(initial?.mode ?? 'sunny', initial?.phase ?? 'day');
+    window.addEventListener('weather:change', (e) => {
+      const d = (e as CustomEvent).detail;
+      renderFallback(d.mode, d.phase ?? 'day');
+    });
     (window as any).TreeScene = { setMode: renderFallback, updateForestState: renderFallback };
     return;
   }
@@ -611,6 +667,62 @@ export function initForest(host: HTMLElement): void {
   // Sit behind the ridge, offset to the right so it reads as a sun, not a spotlight.
   sunGlow.position.set(7, 6.5, -18.5);
   scene.add(sunGlow);
+
+  // ── Moon (night counterpart of the sun glow) ───────────────────────
+  // Same additive-disc pattern, opposite side, pale blue-white, with a
+  // crescent bite cut in the fragment shader. Opacity is driven by
+  // PHASE_FX.moon × SKY_CLARITY[mode] (hidden by day / under overcast).
+  const MOON_UNI = {
+    uColor: { value: new THREE.Color(0xdfe9ff) },
+    uOpacity: { value: 0.0 },
+  };
+  const moon = new THREE.Mesh(
+    new THREE.PlaneGeometry(16, 16),
+    new THREE.ShaderMaterial({
+      uniforms: MOON_UNI,
+      vertexShader: `varying vec2 vUv;
+        void main(){ vUv=uv; gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.0); }`,
+      fragmentShader: `uniform vec3 uColor; uniform float uOpacity; varying vec2 vUv;
+        void main(){
+          float d = distance(vUv, vec2(0.5));
+          float disc = smoothstep(0.15, 0.135, d);                          // crisp moon disc
+          float bite = smoothstep(0.125, 0.145, distance(vUv, vec2(0.565, 0.535))); // crescent shadow
+          float halo = smoothstep(0.45, 0.1, d) * 0.3;                      // soft glow
+          float a = (disc * bite * 0.95 + halo) * uOpacity;
+          gl_FragColor = vec4(uColor, a);
+        }`,
+      transparent: true,
+      depthWrite: false,
+      blending: THREE.AdditiveBlending,
+    }),
+  );
+  moon.position.set(-7, 8.5, -18.8);
+  scene.add(moon);
+
+  // ── Stars (night sky) ──────────────────────────────────────────────
+  // One Points cloud spread across the sky band, behind the ridges. Twinkle
+  // is a slow global opacity sine in tick() — no per-point shader needed.
+  const STAR_COUNT: Record<Quality, number> = { high: 350, medium: 180, low: 90 };
+  const starCount = STAR_COUNT[quality];
+  const starRng = mulberry32(5151);
+  const starPos = new Float32Array(starCount * 3);
+  const STAR_BUILT_HALF = 40; // scaled up in layoutForAspect for wide frusta
+  for (let i = 0; i < starCount; i++) {
+    starPos[i * 3] = (starRng() - 0.5) * 2 * STAR_BUILT_HALF;
+    starPos[i * 3 + 1] = 5 + Math.pow(starRng(), 0.7) * 24; // denser near zenith
+    starPos[i * 3 + 2] = -19.7;
+  }
+  const starGeo = new THREE.BufferGeometry();
+  starGeo.setAttribute('position', new THREE.BufferAttribute(starPos, 3));
+  const starTex = makeMoteTexture();
+  const starMat = new THREE.PointsMaterial({
+    map: starTex, color: 0xeaf2ff, size: 0.22, transparent: true, opacity: 0,
+    depthWrite: false, blending: THREE.AdditiveBlending, sizeAttenuation: true, fog: false,
+  });
+  const stars = new THREE.Points(starGeo, starMat);
+  stars.frustumCulled = false;
+  scene.add(stars);
+  let starBaseOpacity = 0; // set per (mode, phase) in applyImmediate
 
   // ── Distant procedural mountains (lightweight ridge silhouettes) ────
   // Three flat ridge layers between the sky and the background trees. Each is
@@ -780,6 +892,10 @@ export function initForest(host: HTMLElement): void {
   interface LeafEntry { mat: any }
   const leafEntries: LeafEntry[] = [];
 
+  // Every tinted tree material (bark + leaves), each with userData.baseColor
+  // stashed, so the phase "moonlight wash" can re-derive colours losslessly.
+  const phaseTintedMats: any[] = [];
+
   function tintTree(tree: any, band: Band) {
     const barkPool = band === 'background' ? BARK_BG : BARK_HUES;
     const leafPool = band === 'background' ? LEAF_BG : LEAF_HUES;
@@ -802,11 +918,19 @@ export function initForest(host: HTMLElement): void {
           // EZ-Tree's eager loader leaves m.map with no image under our
           // bundling, so assign our own loaded leaf texture explicitly.
           m.map = leafTexture(leafType);
-          if (m.color) m.color.copy(leafColor);
+          if (m.color) {
+            m.color.copy(leafColor);
+            m.userData.baseColor = m.color.clone();
+            phaseTintedMats.push(m);
+          }
           m.needsUpdate = true;
           leafEntries.push({ mat: m });
         } else {
-          if (m.color) m.color.copy(barkColor);
+          if (m.color) {
+            m.color.copy(barkColor);
+            m.userData.baseColor = m.color.clone();
+            phaseTintedMats.push(m);
+          }
           if ('roughness' in m) m.roughness = 0.8 + rng() * 0.2;
           applyWind(m); // trunk/branch sway only
         }
@@ -944,49 +1068,90 @@ export function initForest(host: HTMLElement): void {
       r.mesh.scale.x = Math.max(1, (halfWidthAt(r.z, aspect) * 1.15) / r.builtHalfWidth);
     }
     sky.scale.x = Math.max(1, (halfWidthAt(-20, aspect) * 1.15) / 60);
-    // Nudge the sun glow outward so it doesn't crowd centre on ultrawide.
+    stars.scale.x = Math.max(1, (halfWidthAt(-19.7, aspect) * 1.1) / 40);
+    // Nudge the sun/moon glows outward so they don't crowd centre on ultrawide.
     sunGlow.position.x = 7 * Math.min(1.6, Math.max(1, aspect / 1.6));
+    moon.position.x = -sunGlow.position.x;
     fillFlanks(aspect);
     for (const layer of ambientLayers) layer.setSpread?.(aspect);
   }
 
-  // ── Weather atmosphere (cheap material/uniform update + one render) ─
+  // ── Weather × phase atmosphere (cheap uniform update + one render) ──
   function normalizeMode(mode: string): WeatherMode {
     return (mode in ATMOS ? mode : 'sunny') as WeatherMode;
   }
-  function applyImmediate(mode: WeatherMode): void {
+  function normalizePhase(phase: string): Phase {
+    return (ALL_PHASES as readonly string[]).includes(phase) ? (phase as Phase) : 'day';
+  }
+
+  // Preallocated temporaries for the colour composition — no per-call allocs.
+  const _skyTint = new THREE.Color();
+  const _sceneTint = new THREE.Color();
+  const _mtnTint = new THREE.Color();
+
+  function applyImmediate(mode: WeatherMode, phase: Phase): void {
     const a = ATMOS[mode];
-    hemi.color.setHex(a.hemiSky);
-    hemi.groundColor.setHex(a.hemiGround);
-    hemi.intensity = a.hemiInt;
-    sun.intensity = a.sunInt;
-    SKY_UNI.uTop.value.setHex(a.skyTop);
-    SKY_UNI.uBot.value.setHex(a.skyBot);
+    const fx = PHASE_FX[phase];
+    const clarity = SKY_CLARITY[mode];
+    _skyTint.setHex(fx.skyTint);
+    _sceneTint.setHex(fx.sceneTint);
+
+    // Lighting: weather baseline dimmed/cooled by the phase.
+    hemi.color.setHex(a.hemiSky).lerp(_sceneTint, fx.sceneMix * 0.5);
+    hemi.groundColor.setHex(a.hemiGround).lerp(_sceneTint, fx.sceneMix * 0.5);
+    hemi.intensity = a.hemiInt * fx.lightMul;
+    sun.intensity = a.sunInt * fx.lightMul;
+
+    // Sky gradient + fog drift toward the phase tint (peach dusk, navy night).
+    SKY_UNI.uTop.value.setHex(a.skyTop).lerp(_skyTint, fx.skyMix);
+    SKY_UNI.uBot.value.setHex(a.skyBot).lerp(_skyTint, fx.skyMix * 0.85);
     (scene.fog as THREE.FogExp2).density = a.fog;
-    (scene.fog as THREE.FogExp2).color.setHex(a.fogColor);
-    (ground.material as THREE.MeshStandardMaterial).color.setHex(a.ground);
+    (scene.fog as THREE.FogExp2).color.setHex(a.fogColor).lerp(_skyTint, fx.skyMix * 0.8);
+
+    (ground.material as THREE.MeshStandardMaterial).color
+      .setHex(a.ground)
+      .lerp(_sceneTint, fx.sceneMix * 0.6);
     WIND.uStr.value = reduceMotion ? 0 : BASE_WIND * a.wind;
     leafWindMul = a.wind;
 
-    // Distant mountains: tint each ridge from its base colour and scale opacity.
-    const tint = new THREE.Color(a.mtnTint);
+    // Moonlight wash over every tree material (bark + leaves), re-derived
+    // from the stashed base colour so repeated phase flips never drift.
+    for (const m of phaseTintedMats) {
+      m.color.copy(m.userData.baseColor).lerp(_sceneTint, fx.sceneMix);
+    }
+
+    // Distant mountains: weather tint, then the same phase wash.
+    _mtnTint.setHex(a.mtnTint);
     for (let i = 0; i < ridges.length; i++) {
       const r = ridges[i];
-      r.mat.color.copy(r.base).multiply(tint);
+      r.mat.color.copy(r.base).multiply(_mtnTint).lerp(_sceneTint, fx.sceneMix * 0.8);
       // Far ridges fade more under haze; near ridge stays a touch stronger.
       const layerBoost = 0.85 + i * 0.08;
       r.mat.opacity = Math.min(1, (0.6 * layerBoost) * a.mtnOpacity + 0.05);
     }
 
-    // Sun glow behind the ridge.
+    // Sun glow behind the ridge (boosted at dawn/dusk, gone at night)…
     SUN_UNI.uColor.value.setHex(a.sunColor);
-    SUN_UNI.uOpacity.value = a.sunGlow;
+    SUN_UNI.uOpacity.value = a.sunGlow * fx.sunGlowMul;
+    // …and the moon + stars take over after dark, if the sky is clear enough.
+    MOON_UNI.uOpacity.value = fx.moon * clarity;
+    starBaseOpacity = fx.stars * clarity * 0.9;
+    starMat.opacity = starBaseOpacity;
+    stars.visible = starBaseOpacity > 0.01;
   }
-  function setMode(mode: string): void {
-    const next = normalizeMode(mode);
-    applyImmediate(next);
-    for (const layer of ambientLayers) layer.setMode(next);
+
+  let currentMode: WeatherMode = 'sunny';
+  let currentPhase: Phase = 'day';
+  function setContext(mode: string, phase: string): void {
+    currentMode = normalizeMode(mode);
+    currentPhase = normalizePhase(phase);
+    applyImmediate(currentMode, currentPhase);
+    for (const layer of ambientLayers) layer.setContext(currentMode, currentPhase);
     renderOnce();
+  }
+  // Back-compat shim (window.TreeScene.setMode callers pass only a mode).
+  function setMode(mode: string): void {
+    setContext(mode, currentPhase);
   }
 
   // ── Resize ─────────────────────────────────────────────────────────
@@ -1031,6 +1196,11 @@ export function initForest(host: HTMLElement): void {
     // Ambient layers (clouds, birds, motes) — each animates itself.
     for (const layer of ambientLayers) layer.update(t, dt);
 
+    // Star twinkle: one slow global opacity sine — no per-point work.
+    if (starBaseOpacity > 0.01) {
+      starMat.opacity = starBaseOpacity * (0.88 + 0.12 * Math.sin(t * 1.7));
+    }
+
     // Subtle camera drift for life; disabled under reduced-motion.
     camera.position.x = Math.sin(t * 0.1) * 0.6;
     camera.lookAt(0, 2.2, -6);
@@ -1059,17 +1229,18 @@ export function initForest(host: HTMLElement): void {
     for (const layer of ambientLayers) layer.dispose();
   }
 
-  window.addEventListener('weather:change', (e) =>
-    setMode((e as CustomEvent).detail.mode),
-  );
-  (window as any).TreeScene = { setMode, updateForestState: setMode, dispose };
+  window.addEventListener('weather:change', (e) => {
+    const d = (e as CustomEvent).detail;
+    setContext(d.mode, d.phase ?? currentPhase);
+  });
+  (window as any).TreeScene = { setMode, setContext, updateForestState: setMode, dispose };
 
-  // Apply the current weather immediately if it resolved before this lazily
-  // imported module booted (weather.js stashes it on window.KTWeatherState) —
-  // so the forest (and all ambient layers) reflect Arlington weather on first
-  // paint, no 2nd event. Routed through setMode so the layers receive it too.
+  // Apply the current weather + phase immediately if they resolved before
+  // this lazily imported module booted (weather.js stashes them on
+  // window.KTWeatherState) — so the forest (and all ambient layers) reflect
+  // Arlington's sky on first paint, no 2nd event.
   const initialWeather = (window as any).KTWeatherState;
-  setMode(initialWeather?.mode ?? 'sunny');
+  setContext(initialWeather?.mode ?? 'sunny', initialWeather?.phase ?? 'day');
 
   // ── Boot ───────────────────────────────────────────────────────────
   resize();
