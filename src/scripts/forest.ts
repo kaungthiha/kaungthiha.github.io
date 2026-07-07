@@ -95,6 +95,17 @@ function mulberry32(seed: number): () => number {
 
 type Quality = 'high' | 'medium' | 'low';
 
+// ── Aspect-aware coverage ──────────────────────────────────────────────
+// The camera has a FIXED vertical FOV (50°) at z=15.5 looking ~horizontal,
+// so the visible horizontal half-extent at a given depth grows linearly
+// with the viewport aspect ratio. Everything that must reach the screen
+// edges (ridges, sky, tree flanks, clouds, birds) sizes itself from this.
+const CAM_Z = 15.5;
+const HALF_FOV_TAN = Math.tan(THREE.MathUtils.degToRad(25));
+function halfWidthAt(z: number, aspect: number): number {
+  return HALF_FOV_TAN * (CAM_Z - z) * aspect;
+}
+
 // ──────────────────────────────────────────────────────────────────────
 // Ambient layers — small, self-contained scene-local managers that add
 // quiet life (clouds, birds, motes) on top of the forest/mountains. Each
@@ -105,6 +116,8 @@ type Quality = 'high' | 'medium' | 'low';
 // ──────────────────────────────────────────────────────────────────────
 interface AmbientLayer {
   setMode(mode: WeatherMode): void;
+  /** Re-spread positions to cover the visible width at the layer's depth. */
+  setSpread?(aspect: number): void;
   update(t: number, dt: number): void;
   dispose(): void;
 }
@@ -153,8 +166,11 @@ function createCloudLayer(scene: THREE.Scene, quality: Quality, reduceMotion: bo
   const tex = makeCloudTexture();
   const rng = mulberry32(31337);
 
-  interface CloudItem { mat: THREE.MeshBasicMaterial; baseX: number; drift: number; phase: number; }
+  // baseN is the cloud's home x normalized to [-1, 1]; the actual x is
+  // baseN × spreadHalf so wide viewports spread the same clouds outward.
+  interface CloudItem { mat: THREE.MeshBasicMaterial; baseN: number; drift: number; phase: number; }
   const clouds: CloudItem[] = [];
+  let spreadHalf = 18;
 
   for (let i = 0; i < count; i++) {
     const mat = new THREE.MeshBasicMaterial({
@@ -164,11 +180,11 @@ function createCloudLayer(scene: THREE.Scene, quality: Quality, reduceMotion: bo
     const w = 14 + rng() * 10;
     const h = 4 + rng() * 2.5;
     const mesh = new THREE.Mesh(new THREE.PlaneGeometry(w, h), mat);
-    const baseX = (rng() - 0.5) * 36;
+    const baseN = (rng() - 0.5) * 2;
     // Sit above the ridge line, behind the mountains/sky.
-    mesh.position.set(baseX, 7 + rng() * 5, -22 - rng() * 4);
+    mesh.position.set(baseN * spreadHalf, 7 + rng() * 5, -22 - rng() * 4);
     group.add(mesh);
-    clouds.push({ mat, baseX, drift: 0.04 + rng() * 0.05, phase: rng() * Math.PI * 2 });
+    clouds.push({ mat, baseN, drift: 0.04 + rng() * 0.05, phase: rng() * Math.PI * 2 });
   }
 
   let speedMul = 0.7;
@@ -184,6 +200,13 @@ function createCloudLayer(scene: THREE.Scene, quality: Quality, reduceMotion: bo
         cl.mat.opacity = c.opacity;
       }
     },
+    setSpread(aspect) {
+      // Clouds sit around z ≈ -24; cover that depth with a small margin.
+      spreadHalf = Math.max(18, halfWidthAt(-24, aspect) * 0.9);
+      for (let i = 0; i < clouds.length; i++) {
+        (group.children[i] as THREE.Mesh).position.x = clouds[i].baseN * spreadHalf;
+      }
+    },
     update(t) {
       if (reduceMotion) return;
       void targetOpacity; // set in setMode; opacity is not animated per-frame
@@ -191,7 +214,7 @@ function createCloudLayer(scene: THREE.Scene, quality: Quality, reduceMotion: bo
       for (let i = 0; i < clouds.length; i++) {
         const mesh = group.children[i] as THREE.Mesh;
         const cl = clouds[i];
-        mesh.position.x = cl.baseX + Math.sin(t * cl.drift * speedMul + cl.phase) * 4;
+        mesh.position.x = cl.baseN * spreadHalf + Math.sin(t * cl.drift * speedMul + cl.phase) * 4;
       }
     },
     dispose() {
@@ -269,12 +292,13 @@ function createBirdLayer(scene: THREE.Scene, quality: Quality, reduceMotion: boo
   let active = !reduceMotion;
   let speedMul = 1;
   let baseOpacity = 0.72;
+  let spreadMul = 1; // scales path centres outward on wide viewports
 
   function writeMatrices(t: number): void {
     for (let i = 0; i < count; i++) {
       const s = slots[i];
       const a = t * s.speed * speedMul + s.phase;
-      _pos.set(s.cx + Math.cos(a) * s.rx, s.cy + Math.sin(a * 1.3) * 0.6, s.cz + Math.sin(a) * s.rz);
+      _pos.set(s.cx * spreadMul + Math.cos(a) * s.rx, s.cy + Math.sin(a * 1.3) * 0.6, s.cz + Math.sin(a) * s.rz);
       // Bank along the path: yaw toward travel, slight roll.
       _e.set(0, -a, Math.sin(a * 2) * 0.15 * s.tilt);
       _quat.setFromEuler(_e);
@@ -297,6 +321,11 @@ function createBirdLayer(scene: THREE.Scene, quality: Quality, reduceMotion: boo
       baseOpacity = mode === 'cloudy' ? 0.6 : mode === 'snowy' ? 0.5 : 0.72;
       material.opacity = harsh ? 0 : baseOpacity;
       group.visible = !harsh;
+    },
+    setSpread(aspect) {
+      // Path centres sit around z ≈ -15.5; widen so flocks reach the edges.
+      spreadMul = Math.max(1, (halfWidthAt(-15.5, aspect) * 0.8) / 13);
+      writeMatrices(0); // refresh the static pose for reduced-motion renders
     },
     update(t) {
       if (!active) return;
@@ -587,7 +616,13 @@ export function initForest(host: HTMLElement): void {
   // Three flat ridge layers between the sky and the background trees. Each is
   // a single triangle-fan BufferGeometry built from a seeded ridgeline, so no
   // image assets and a tiny vertex count. Colours/opacity update per weather.
-  interface Ridge { mat: THREE.MeshBasicMaterial; base: THREE.Color }
+  interface Ridge {
+    mesh: THREE.Mesh;
+    mat: THREE.MeshBasicMaterial;
+    base: THREE.Color;
+    z: number;
+    builtHalfWidth: number;
+  }
   const ridges: Ridge[] = [];
 
   function buildRidge(opts: {
@@ -627,7 +662,7 @@ export function initForest(host: HTMLElement): void {
     const mesh = new THREE.Mesh(geo, mat);
     mesh.position.set(0, 0, z);
     scene.add(mesh);
-    ridges.push({ mat, base: new THREE.Color(color) });
+    ridges.push({ mesh, mat, base: new THREE.Color(color), z, builtHalfWidth: width / 2 });
   }
 
   // Far pale → near darker. All sit behind the background tree band (z ≥ -14).
@@ -780,6 +815,8 @@ export function initForest(host: HTMLElement): void {
   }
 
   const trees: any[] = [];
+  // Source pools for the aspect-aware flank fill (clones pull from these).
+  const builtByBand: Record<Band, any[]> = { foreground: [], midground: [], background: [] };
   function buildFromAnchor(a: Anchor) {
     const band = a.band;
     const tree = new Tree();
@@ -820,6 +857,7 @@ export function initForest(host: HTMLElement): void {
     tintTree(tree, band);
     scene.add(tree);
     trees.push(tree);
+    builtByBand[band].push(tree);
   }
 
   // Build back-to-front so nearer trees overlap farther ones correctly.
@@ -834,6 +872,83 @@ export function initForest(host: HTMLElement): void {
     createBirdLayer(scene, quality, reduceMotion),
     createGroundLifeLayer(scene, quality, reduceMotion),
   ];
+
+  // ── Aspect-aware layout (widescreen edge-to-edge fill) ─────────────
+  // The composed scene was authored for ~4:3–16:10. On wider viewports the
+  // horizontal frustum outgrows it, so: stretch the flat backdrops (ridges,
+  // sky) to the frustum width, and extend the tree bands outward with cheap
+  // clones of already-generated trees.
+  const flankRng = mulberry32(77777);
+  // Representative depth + fill start per band; `filled` tracks how far out
+  // clones already reach so a resize only ever ADDS coverage (extras left
+  // outside the frustum on shrink are culled).
+  const FLANK: Record<Band, { z: number; startX: number }> = {
+    background: { z: -12, startX: 14.5 },
+    midground: { z: -5, startX: 8.5 },
+    foreground: { z: -1.5, startX: 10.5 },
+  };
+  const filled: Record<Band, number> = {
+    background: FLANK.background.startX,
+    midground: FLANK.midground.startX,
+    foreground: FLANK.foreground.startX,
+  };
+  // Wider step = sparser flanks on weaker tiers (clones share geometry and
+  // materials, so the cost is a few extra draw calls each).
+  const FLANK_STEP: Record<Quality, number> = { high: 3.5, medium: 5.8, low: 10 };
+
+  function cloneTree(source: any): THREE.Group {
+    // Clone the generated meshes into a plain Group — Object3D.clone() on the
+    // EZ-Tree subclass would re-run its constructor. Mesh.clone() shares
+    // geometry AND materials, so clones inherit wind sway and weather tints
+    // for free. NEVER call tintTree()/applyWind() on a clone: it would
+    // double-wrap onBeforeCompile and double-register leafEntries.
+    const g = new THREE.Group();
+    for (const child of source.children) g.add(child.clone());
+    return g;
+  }
+
+  function fillFlanks(aspect: number): void {
+    if (aspect <= 1.5) return;
+    const step = FLANK_STEP[quality];
+    (Object.keys(FLANK) as Band[]).forEach((band) => {
+      const pool = builtByBand[band];
+      if (!pool.length) return;
+      const { z } = FLANK[band];
+      const needed = halfWidthAt(z, aspect) * 1.08;
+      for (let x = filled[band]; x < needed; x += step) {
+        for (const side of [-1, 1]) {
+          const src = pool[Math.floor(flankRng() * pool.length)];
+          const clone = cloneTree(src);
+          clone.scale.copy(src.scale).multiplyScalar(0.85 + flankRng() * 0.3);
+          clone.position.set(
+            side * (x + (flankRng() - 0.5) * step * 0.6),
+            0,
+            z + (flankRng() - 0.5) * 2.5,
+          );
+          clone.rotation.y = flankRng() * Math.PI * 2;
+          scene.add(clone);
+        }
+      }
+      filled[band] = Math.max(filled[band], needed);
+    });
+  }
+
+  let lastAspect = 0;
+  function layoutForAspect(aspect: number): void {
+    // Re-layout only on meaningful aspect changes (not every drag pixel).
+    if (Math.abs(aspect - lastAspect) < 0.15) return;
+    lastAspect = aspect;
+    // Stretch each backdrop to the frustum width at its depth. X-scaling a
+    // jagged silhouette just widens peak spacing — visually free.
+    for (const r of ridges) {
+      r.mesh.scale.x = Math.max(1, (halfWidthAt(r.z, aspect) * 1.15) / r.builtHalfWidth);
+    }
+    sky.scale.x = Math.max(1, (halfWidthAt(-20, aspect) * 1.15) / 60);
+    // Nudge the sun glow outward so it doesn't crowd centre on ultrawide.
+    sunGlow.position.x = 7 * Math.min(1.6, Math.max(1, aspect / 1.6));
+    fillFlanks(aspect);
+    for (const layer of ambientLayers) layer.setSpread?.(aspect);
+  }
 
   // ── Weather atmosphere (cheap material/uniform update + one render) ─
   function normalizeMode(mode: string): WeatherMode {
@@ -881,6 +996,7 @@ export function initForest(host: HTMLElement): void {
     renderer.setSize(w, h, false);
     camera.aspect = w / h;
     camera.updateProjectionMatrix();
+    layoutForAspect(camera.aspect);
     renderOnce();
   }
   window.addEventListener('resize', resize);

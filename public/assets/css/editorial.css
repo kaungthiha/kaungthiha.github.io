@@ -299,10 +299,10 @@ body::after {
   /* Gentle vignette that keeps the scene covering most of the viewport — the
      horizon band (mountains) and edge trees stay visible, with only a soft
      dip behind the central reading zone so card text stays legible. */
-  mask-image: radial-gradient(ellipse 72% 92% at 52% 46%, rgba(0,0,0,0.45) 0%, rgba(0,0,0,0.72) 52%, black 86%);
-  -webkit-mask-image: radial-gradient(ellipse 72% 92% at 52% 46%, rgba(0,0,0,0.45) 0%, rgba(0,0,0,0.72) 52%, black 86%);
+  mask-image: radial-gradient(ellipse 72% 92% at 52% 46%, rgba(0,0,0,0.55) 0%, rgba(0,0,0,0.8) 50%, black 78%);
+  -webkit-mask-image: radial-gradient(ellipse 72% 92% at 52% 46%, rgba(0,0,0,0.55) 0%, rgba(0,0,0,0.8) 50%, black 78%);
 }
-body.scrolled-past-hero .tree-canvas-host { --forest-opacity: 0.72; }
+body.scrolled-past-hero .tree-canvas-host { --forest-opacity: 0.85; }
 .tree-canvas-host canvas {
   display: block;
   width: 100% !important;
@@ -319,14 +319,14 @@ body.scrolled-past-hero .tree-canvas-host { --forest-opacity: 0.72; }
 }
 
 @media (max-width: 720px) {
-  body.scrolled-past-hero .tree-canvas-host { --forest-opacity: 0.46; }
+  body.scrolled-past-hero .tree-canvas-host { --forest-opacity: 0.55; }
   .tree-canvas-host {
     mask-image: none;
     -webkit-mask-image: none;
   }
 }
 @media (prefers-reduced-motion: reduce) {
-  body.scrolled-past-hero .tree-canvas-host { --forest-opacity: 0.42; }
+  body.scrolled-past-hero .tree-canvas-host { --forest-opacity: 0.5; }
 }
 
 /* ==========================================================================
