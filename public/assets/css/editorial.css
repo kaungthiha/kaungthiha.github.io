@@ -1046,10 +1046,19 @@ body[data-face="back"] .card-flipper {
    Detailed About + Skills (back face)
    ========================================================================== */
 
+/* Long-form prose gets its own glass so body text never sits directly on
+   the (now much bolder) forest. */
 .about-prose {
   display: flex;
   flex-direction: column;
   gap: 1rem;
+  background: var(--glass-bg);
+  backdrop-filter: blur(var(--glass-blur)) saturate(1.5);
+  -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(1.5);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--r-xl);
+  box-shadow: var(--shadow-soft), inset 0 1px 0 var(--glass-highlight);
+  padding: var(--card-padding);
 }
 .about-prose p {
   font-size: var(--fs-body);
