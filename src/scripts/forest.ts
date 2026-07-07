@@ -380,12 +380,15 @@ function createBirdLayer(scene: THREE.Scene, quality: Quality, reduceMotion: boo
   };
 }
 
-// ── Ground life (motes / pollen / fireflies) ───────────────────────────
-// A single THREE.Points cloud of tiny specks that wander slowly near the
-// forest edges in pleasant weather. High tier only; off in harsh weather
-// and under reduced motion. One draw call, soft additive points.
-const GROUNDLIFE_COUNT: Record<Quality, number> = { high: 32, medium: 0, low: 0 };
+// ── Ground life (motes by day, fireflies after dark) ───────────────────
+// A single THREE.Points cloud with two personas: pale pollen motes that
+// wander near the forest edges in pleasant daytime weather, and warm
+// blinking fireflies low to the ground at dusk/night. One draw call,
+// soft additive points; blink is a per-point colour scale (vertexColors).
+const GROUNDLIFE_COUNT: Record<Quality, number> = { high: 40, medium: 18, low: 0 };
 const GROUNDLIFE_OK: WeatherMode[] = ['sunny', 'clear', 'hot', 'cloudy', 'windy'];
+// Fireflies stay out in any weather that isn't actively wet/frozen.
+const FIREFLY_OK: WeatherMode[] = ['sunny', 'clear', 'hot', 'cloudy', 'windy', 'cold'];
 
 function makeMoteTexture(): THREE.CanvasTexture {
   const s = 32;
@@ -414,57 +417,262 @@ function createGroundLifeLayer(scene: THREE.Scene, quality: Quality, reduceMotio
 
   const rng = mulberry32(424242);
   const positions = new Float32Array(count * 3);
-  // Per-mote home + wander params (preallocated, read-only in update).
+  const colors = new Float32Array(count * 3);
+  // Per-mote homes (mote band near the canopy, firefly band near the grass)
+  // + wander params (preallocated, read-only in update).
   const home = new Float32Array(count * 3);
-  const wob = new Float32Array(count * 3); // speed x/y/z packed as phase seeds
+  const homeFlyY = new Float32Array(count);
+  const wob = new Float32Array(count * 3); // phase x/y + individual speed
+  const blinkPhase = new Float32Array(count);
   for (let i = 0; i < count; i++) {
     const side = rng() < 0.5 ? -1 : 1;
     const hx = side * (5 + rng() * 4);   // forest edges, clear of centre
     const hy = 0.6 + rng() * 2.2;        // low, near the canopy base
     const hz = -3 - rng() * 6;
     home[i * 3] = hx; home[i * 3 + 1] = hy; home[i * 3 + 2] = hz;
+    homeFlyY[i] = 0.3 + rng() * 1.5;     // fireflies hover lower
     positions[i * 3] = hx; positions[i * 3 + 1] = hy; positions[i * 3 + 2] = hz;
+    colors[i * 3] = 1; colors[i * 3 + 1] = 1; colors[i * 3 + 2] = 1;
     wob[i * 3] = rng() * Math.PI * 2;
     wob[i * 3 + 1] = rng() * Math.PI * 2;
     wob[i * 3 + 2] = 0.3 + rng() * 0.5;  // individual speed
+    blinkPhase[i] = rng() * Math.PI * 2;
   }
   const geo = new THREE.BufferGeometry();
   geo.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+  geo.setAttribute('color', new THREE.BufferAttribute(colors, 3));
   const tex = makeMoteTexture();
   const material = new THREE.PointsMaterial({
     map: tex, color: 0xfff4cf, size: 0.12, transparent: true, opacity: 0,
     depthWrite: false, blending: THREE.AdditiveBlending, sizeAttenuation: true,
+    vertexColors: true,
   });
   const points = new THREE.Points(geo, material);
   points.frustumCulled = false;
   group.add(points);
 
-  let active = false;
+  type Persona = 'off' | 'motes' | 'fireflies';
+  let persona: Persona = 'off';
+
+  function resetColors(v: number): void {
+    const c = geo.attributes.color.array as Float32Array;
+    for (let i = 0; i < c.length; i++) c[i] = v;
+    geo.attributes.color.needsUpdate = true;
+  }
 
   return {
     setContext(mode, phase) {
-      // Day persona: pale pollen motes. Night/dusk persona handled in P5
-      // (fireflies); until then motes simply glow warmer after dark.
-      active = GROUNDLIFE_OK.includes(mode) || (phase !== 'day' && SKY_CLARITY[mode] > 0);
-      material.color.setHex(phase === 'night' || phase === 'dusk' ? 0xffd97a : 0xfff4cf);
-      material.opacity = active ? (phase === 'night' ? 0.7 : 0.5) : 0;
-      group.visible = active;
+      const dark = phase === 'night' || phase === 'dusk';
+      persona =
+        dark && FIREFLY_OK.includes(mode) ? 'fireflies' :
+        !dark && GROUNDLIFE_OK.includes(mode) ? 'motes' : 'off';
+      if (persona === 'fireflies') {
+        material.color.setHex(0xffd97a);
+        material.size = 0.14;
+        material.opacity = phase === 'night' ? 0.9 : 0.6;
+      } else {
+        material.color.setHex(0xfff4cf);
+        material.size = 0.12;
+        material.opacity = 0.5;
+        resetColors(1); // steady glow — no blink residue
+      }
+      group.visible = persona !== 'off';
     },
     update(t) {
-      if (!active) return;
+      if (persona === 'off') return;
+      const fly = persona === 'fireflies';
       const arr = geo.attributes.position.array as Float32Array;
       for (let i = 0; i < count; i++) {
-        const sp = wob[i * 3 + 2];
+        const sp = wob[i * 3 + 2] * (fly ? 0.6 : 1); // fireflies drift slower
+        const hy = fly ? homeFlyY[i] : home[i * 3 + 1];
         arr[i * 3]     = home[i * 3]     + Math.sin(t * sp + wob[i * 3]) * 0.5;
-        arr[i * 3 + 1] = home[i * 3 + 1] + Math.sin(t * sp * 0.8 + wob[i * 3 + 1]) * 0.4;
+        arr[i * 3 + 1] = hy              + Math.sin(t * sp * 0.8 + wob[i * 3 + 1]) * (fly ? 0.25 : 0.4);
         arr[i * 3 + 2] = home[i * 3 + 2] + Math.cos(t * sp * 0.6 + wob[i * 3]) * 0.4;
       }
       geo.attributes.position.needsUpdate = true;
+      if (fly) {
+        // Firefly blink: per-point brightness pulse (additive black = off).
+        const c = geo.attributes.color.array as Float32Array;
+        for (let i = 0; i < count; i++) {
+          const s = Math.sin(t * (0.8 + wob[i * 3 + 2]) + blinkPhase[i]);
+          const b = 0.12 + 0.88 * Math.max(0, s) ** 3;
+          c[i * 3] = b; c[i * 3 + 1] = b; c[i * 3 + 2] = b;
+        }
+        geo.attributes.color.needsUpdate = true;
+      }
     },
     dispose() {
       scene.remove(group);
       geo.dispose();
       material.dispose();
+      tex.dispose();
+    },
+  };
+}
+
+// ── Falling leaves ─────────────────────────────────────────────────────
+// A single InstancedMesh of tiny quads that tumble down through the tree
+// bands in fair daytime weather, swaying with the weather's wind. Respawn
+// at canopy height when they reach the ground. CPU cost: composing ~24
+// matrices per frame — same class as the birds.
+const LEAF_FALL_COUNT: Record<Quality, number> = { high: 24, medium: 10, low: 0 };
+const LEAF_FALL_OK: WeatherMode[] = ['sunny', 'clear', 'cloudy', 'windy', 'cold'];
+const LEAF_FALL_HUES = [0x8fbf55, 0xa8c458, 0xc9a94e, 0xc4853e, 0x9d7a3a];
+
+function createLeafFallLayer(scene: THREE.Scene, quality: Quality, reduceMotion: boolean): AmbientLayer {
+  const group = new THREE.Group();
+  scene.add(group);
+
+  const count = LEAF_FALL_COUNT[quality];
+  if (count === 0 || reduceMotion) {
+    return { setContext() {}, update() {}, dispose() { scene.remove(group); } };
+  }
+
+  const geometry = new THREE.PlaneGeometry(0.09, 0.09);
+  const material = new THREE.MeshBasicMaterial({
+    color: 0xffffff, transparent: true, opacity: 0.85,
+    side: THREE.DoubleSide, depthWrite: false, fog: true,
+  });
+  const mesh = new THREE.InstancedMesh(geometry, material, count);
+  mesh.frustumCulled = false;
+  group.add(mesh);
+
+  const rng = mulberry32(13579);
+  // Per-leaf state: position, fall speed, sway phase, tumble rates.
+  const px = new Float32Array(count);
+  const py = new Float32Array(count);
+  const pz = new Float32Array(count);
+  const fall = new Float32Array(count);
+  const sway = new Float32Array(count);
+  const tumA = new Float32Array(count);
+  const tumB = new Float32Array(count);
+  let spreadHalf = 14;
+
+  const _c = new THREE.Color();
+  for (let i = 0; i < count; i++) {
+    _c.setHex(LEAF_FALL_HUES[Math.floor(rng() * LEAF_FALL_HUES.length)]);
+    mesh.setColorAt(i, _c);
+    px[i] = (rng() - 0.5) * 2 * spreadHalf;
+    py[i] = rng() * 6.5; // stagger the first cycle across the full column
+    pz[i] = -2 - rng() * 7;
+    fall[i] = 0.25 + rng() * 0.3;
+    sway[i] = rng() * Math.PI * 2;
+    tumA[i] = 1 + rng() * 2;
+    tumB[i] = 1 + rng() * 2;
+  }
+  if (mesh.instanceColor) mesh.instanceColor.needsUpdate = true;
+
+  const _m = new THREE.Matrix4();
+  const _pos = new THREE.Vector3();
+  const _quat = new THREE.Quaternion();
+  const _scl = new THREE.Vector3(1, 1, 1);
+  const _e = new THREE.Euler();
+
+  let active = false;
+  let windMul = 1;
+
+  return {
+    setContext(mode, phase) {
+      active = phase !== 'night' && LEAF_FALL_OK.includes(mode);
+      windMul = ATMOS[mode].wind;
+      group.visible = active;
+    },
+    setSpread(aspect) {
+      spreadHalf = Math.max(14, halfWidthAt(-5, aspect));
+    },
+    update(t, dt) {
+      if (!active) return;
+      for (let i = 0; i < count; i++) {
+        py[i] -= fall[i] * dt * (0.8 + windMul * 0.4);
+        px[i] += Math.sin(t * 0.9 + sway[i]) * dt * 0.6 + (windMul - 1) * dt * 0.35;
+        if (py[i] < 0.04) {
+          py[i] = 4.5 + Math.random() * 2;
+          px[i] = (Math.random() - 0.5) * 2 * spreadHalf;
+        }
+        _pos.set(px[i], py[i], pz[i]);
+        _e.set(t * tumA[i] + sway[i], t * tumB[i], sway[i]);
+        _quat.setFromEuler(_e);
+        _m.compose(_pos, _quat, _scl);
+        mesh.setMatrixAt(i, _m);
+      }
+      mesh.instanceMatrix.needsUpdate = true;
+    },
+    dispose() {
+      scene.remove(group);
+      geometry.dispose();
+      material.dispose();
+    },
+  };
+}
+
+// ── Fog wisps / ground mist ────────────────────────────────────────────
+// A few wide, very soft planes drifting low through the tree band. Reads
+// as fog in wet weather, valley mist at dawn, and a faint night haze.
+const FOG_WISP_COUNT: Record<Quality, number> = { high: 3, medium: 2, low: 0 };
+
+function fogWispOpacity(mode: WeatherMode, phase: Phase): number {
+  if (mode === 'foggy') return 0.5;
+  if (mode === 'rainy') return 0.3;
+  if (mode === 'stormy' || mode === 'snowy') return 0.25;
+  if (phase === 'dawn') return 0.25;
+  if (phase === 'dusk') return 0.18;
+  if (phase === 'night') return 0.16;
+  return 0;
+}
+
+function createFogWispLayer(scene: THREE.Scene, quality: Quality, reduceMotion: boolean): AmbientLayer {
+  const group = new THREE.Group();
+  group.renderOrder = 5; // over the trees at their depth
+  scene.add(group);
+
+  const count = FOG_WISP_COUNT[quality];
+  if (count === 0) {
+    return { setContext() {}, update() {}, dispose() { scene.remove(group); } };
+  }
+
+  const tex = makeCloudTexture();
+  const rng = mulberry32(24680);
+  interface Wisp { mat: THREE.MeshBasicMaterial; baseX: number; drift: number; phase: number; fade: number }
+  const wisps: Wisp[] = [];
+  for (let i = 0; i < count; i++) {
+    const mat = new THREE.MeshBasicMaterial({
+      map: tex, color: 0xf4f8fc, transparent: true, opacity: 0,
+      depthWrite: false, fog: false,
+    });
+    const mesh = new THREE.Mesh(new THREE.PlaneGeometry(22 + rng() * 10, 2.6 + rng() * 1.4), mat);
+    const baseX = (rng() - 0.5) * 18;
+    mesh.position.set(baseX, 0.5 + rng() * 0.9, -3.5 - rng() * 5.5);
+    group.add(mesh);
+    wisps.push({ mat, baseX, drift: 0.02 + rng() * 0.03, phase: rng() * Math.PI * 2, fade: 0.75 + rng() * 0.25 });
+  }
+
+  let targetOpacity = 0;
+
+  return {
+    setContext(mode, phase) {
+      targetOpacity = fogWispOpacity(mode, phase);
+      const night = phase === 'night';
+      for (const w of wisps) {
+        w.mat.color.setHex(night ? 0x9fb2d0 : 0xf4f8fc);
+        w.mat.opacity = targetOpacity * w.fade;
+      }
+      group.visible = targetOpacity > 0.01;
+    },
+    setSpread(aspect) {
+      group.scale.x = Math.max(1, halfWidthAt(-6, aspect) / 16);
+    },
+    update(t) {
+      if (reduceMotion || targetOpacity <= 0.01) return;
+      for (let i = 0; i < wisps.length; i++) {
+        const w = wisps[i];
+        (group.children[i] as THREE.Mesh).position.x =
+          w.baseX + Math.sin(t * w.drift + w.phase) * 5;
+      }
+    },
+    dispose() {
+      scene.remove(group);
+      for (const w of wisps) w.mat.dispose();
+      group.children.forEach((m) => (m as THREE.Mesh).geometry?.dispose());
       tex.dispose();
     },
   };
@@ -995,6 +1203,8 @@ export function initForest(host: HTMLElement): void {
     createCloudLayer(scene, quality, reduceMotion),
     createBirdLayer(scene, quality, reduceMotion),
     createGroundLifeLayer(scene, quality, reduceMotion),
+    createLeafFallLayer(scene, quality, reduceMotion),
+    createFogWispLayer(scene, quality, reduceMotion),
   ];
 
   // ── Aspect-aware layout (widescreen edge-to-edge fill) ─────────────
