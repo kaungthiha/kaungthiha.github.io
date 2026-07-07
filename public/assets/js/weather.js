@@ -1,15 +1,19 @@
 /* ──────────────────────────────────────────────────────────────────────
-   Automatic local weather — Arlington, Virginia.
+   Automatic local weather + daylight phase — Arlington, Virginia.
 
-   Fetches current conditions from Open-Meteo (free, keyless, CORS-enabled),
-   maps the WMO weather code (+ temperature / wind) onto an internal mode, and
-   drives the page mood: body class, lazy rain/snow particles, weather
-   backdrops, and a `weather:change` event the ambient forest listens for.
+   Fetches current conditions AND today's sunrise/sunset from Open-Meteo
+   (free, keyless, CORS-enabled), maps the WMO weather code (+ temperature /
+   wind) onto an internal mode, derives a daylight phase (day / dawn / dusk /
+   night) from Arlington's actual sun times, and drives the page mood:
+   body classes, `data-theme` on <html>, lazy rain/snow particles, weather
+   backdrops, and a single `weather:change` event carrying {mode, phase}
+   that the ambient forest listens for.
 
-   No user selector, no geolocation prompt — always Arlington. The location
-   snippet (.local-weather-status) updates from a loading state to the
-   resolved phrase. On pages without that element, the script still applies
-   body classes site-wide and no-ops gracefully.
+   This file is the single source of truth for BOTH weather and phase. A
+   minute ticker re-derives the phase between fetches so dusk→night flips
+   live. No user selector, no geolocation prompt — always Arlington.
+
+   Dev override: `?weather=<mode>&phase=<phase>` skips the fetch entirely.
    ────────────────────────────────────────────────────────────────────── */
 
 (function () {
@@ -20,11 +24,17 @@
   // Arlington, Virginia (approx). No geolocation — hardcoded on purpose.
   const LAT = 38.88;
   const LON = -77.09;
+  // timeformat=unixtime makes daily.sunrise/sunset unambiguous epoch seconds
+  // (ISO strings would parse in the VISITOR's zone, not Arlington's).
   const API =
     `https://api.open-meteo.com/v1/forecast?latitude=${LAT}&longitude=${LON}` +
-    `&current=weather_code,temperature_2m,wind_speed_10m&temperature_unit=fahrenheit&wind_speed_unit=mph`;
+    `&current=weather_code,temperature_2m,wind_speed_10m,is_day` +
+    `&daily=sunrise,sunset&forecast_days=1&timezone=America%2FNew_York` +
+    `&timeformat=unixtime&temperature_unit=fahrenheit&wind_speed_unit=mph`;
 
-  const CACHE_KEY = 'kt_arlington_weather_v1';
+  // v2: payload gained sunrise/sunset (a stale v1 entry lacks them — the
+  // phase then falls back to the wall clock, handled below).
+  const CACHE_KEY = 'kt_arlington_weather_v2';
   const TTL_MS = 45 * 60 * 1000; // 45 minutes
 
   const statusEl = document.querySelector('.local-weather-status');
@@ -38,6 +48,7 @@
   const ALL_MODES = [
     'sunny', 'clear', 'cloudy', 'rainy', 'stormy', 'snowy', 'foggy', 'windy', 'hot', 'cold',
   ];
+  const ALL_PHASES = ['day', 'dawn', 'dusk', 'night'];
 
   // User-facing natural-language phrase per mode.
   const PHRASE = {
@@ -88,6 +99,49 @@
     // 'clear' with no refinement reads warmer as "sunny".
     if (base === 'clear') return 'sunny';
     return base;
+  }
+
+  // ── Daylight phase ─────────────────────────────────────────────────
+  // dawn/dusk = sunrise/sunset ± 40 min; night outside; day between.
+  // sunrise/sunset are epoch SECONDS (Open-Meteo timeformat=unixtime).
+  const PHASE_BAND_SEC = 40 * 60;
+  // Today's sun times, kept module-level so the minute ticker can re-derive
+  // the phase without refetching.
+  let sunTimes = null; // { sunrise, sunset } in epoch seconds
+
+  function phaseFromSun(nowSec, sunrise, sunset) {
+    if (nowSec < sunrise - PHASE_BAND_SEC || nowSec > sunset + PHASE_BAND_SEC) return 'night';
+    if (nowSec <= sunrise + PHASE_BAND_SEC) return 'dawn';
+    if (nowSec >= sunset - PHASE_BAND_SEC) return 'dusk';
+    return 'day';
+  }
+
+  // Clock fallback (no sun times yet / fetch failed): fixed bands on the
+  // America/New_York wall clock. KEEP IN SYNC with the inline anti-FOUC
+  // script in src/layouts/Base.astro <head>.
+  function phaseFromClock() {
+    let h;
+    try {
+      h = parseInt(
+        new Intl.DateTimeFormat('en-US', {
+          timeZone: 'America/New_York', hour: 'numeric', hour12: false,
+        }).format(new Date()),
+        10,
+      ) % 24;
+    } catch (_) {
+      h = new Date().getHours();
+    }
+    if (h >= 6 && h < 7) return 'dawn';
+    if (h >= 7 && h < 18) return 'day';
+    if (h >= 18 && h < 20) return 'dusk';
+    return 'night';
+  }
+
+  function resolvePhase() {
+    if (sunTimes && typeof sunTimes.sunrise === 'number' && typeof sunTimes.sunset === 'number') {
+      return phaseFromSun(Date.now() / 1000, sunTimes.sunrise, sunTimes.sunset);
+    }
+    return phaseFromClock();
   }
 
   // ── Particle generation (lazy; only rain/snow) ─────────────────────
@@ -141,15 +195,24 @@
     return null;
   }
 
-  // ── Apply a resolved mode to the page ──────────────────────────────
-  let current = null;
+  // ── Apply a resolved (mode, phase) to the page ─────────────────────
+  let currentMode = null;
+  let currentPhase = null;
 
-  function applyMode(mode, phrase, opts) {
+  const THEME_OF_PHASE = { day: 'light', dawn: 'dawn', dusk: 'dusk', night: 'dark' };
+
+  function applyState(mode, phase, phrase, opts) {
     if (!ALL_MODES.includes(mode)) mode = 'sunny';
+    if (!ALL_PHASES.includes(phase)) phase = 'day';
     const silentSnippet = opts && opts.silentSnippet;
 
-    if (mode !== current) {
-      // Body class
+    const modeChanged = mode !== currentMode;
+    const phaseChanged = phase !== currentPhase;
+
+    // Mode-only work: weather body classes, backdrops, DOM particles.
+    // Keyed on mode change ONLY so the minute phase ticker never rebuilds
+    // the rain/snow DOM.
+    if (modeChanged) {
       ALL_MODES.forEach((m) => document.body.classList.remove('weather-' + m));
       document.body.classList.add('weather-' + mode);
 
@@ -172,10 +235,25 @@
         if (pc.kind === 'snow') buildSnow(pc.node);
         else buildRain(pc.node, pc.kind === 'rain-heavy');
       }
+    }
 
-      current = mode;
+    // Phase-only work: phase body class + the CSS theme on <html>.
+    if (phaseChanged) {
+      ALL_PHASES.forEach((p) => document.body.classList.remove('phase-' + p));
+      document.body.classList.add('phase-' + phase);
+      document.documentElement.dataset.theme = THEME_OF_PHASE[phase];
+    }
 
-      const detail = { mode, phrase: phrase || PHRASE[mode] || mode, source: 'arlington-weather' };
+    if (modeChanged || phaseChanged) {
+      currentMode = mode;
+      currentPhase = phase;
+
+      const detail = {
+        mode,
+        phase,
+        phrase: phrase || PHRASE[mode] || mode,
+        source: 'arlington-weather',
+      };
       // Persist the latest state so a listener that registers AFTER this fired
       // (e.g. the lazily-imported forest) can pick it up on boot — no second
       // event needed.
@@ -186,14 +264,15 @@
 
     // Snippet text (only on pages that have it). Fallback keeps its own copy.
     if (statusEl && !silentSnippet) {
+      const when = phase === 'night' ? ' tonight' : '';
       statusEl.textContent =
-        `It's really ${phrase || PHRASE[mode] || mode} in Arlington, Virginia!`;
+        `It's really ${phrase || PHRASE[mode] || mode} in Arlington, Virginia${when}!`;
     }
   }
 
   // ── Pause / rebuild particles on tab visibility ────────────────────
   document.addEventListener('visibilitychange', () => {
-    const pc = particleContainer(current);
+    const pc = particleContainer(currentMode);
     if (!pc || !pc.node) return;
     if (document.hidden) {
       clearParticles(pc.node);
@@ -218,29 +297,40 @@
   }
   function writeCache(mode, phrase) {
     try {
-      localStorage.setItem(CACHE_KEY, JSON.stringify({ t: Date.now(), mode, phrase }));
+      localStorage.setItem(CACHE_KEY, JSON.stringify({
+        t: Date.now(),
+        mode,
+        phrase,
+        sunrise: sunTimes ? sunTimes.sunrise : undefined,
+        sunset: sunTimes ? sunTimes.sunset : undefined,
+      }));
     } catch (_) {
       /* ignore */
     }
   }
 
-  // ── Fetch current Arlington weather ────────────────────────────────
+  // ── Fetch current Arlington weather + sun times ────────────────────
   function fetchWeather() {
     fetch(API, { mode: 'cors' })
       .then((r) => (r.ok ? r.json() : Promise.reject(new Error('HTTP ' + r.status))))
       .then((data) => {
         const c = data && data.current;
         if (!c || typeof c.weather_code !== 'number') throw new Error('no current weather');
+        const d = data.daily;
+        if (d && Array.isArray(d.sunrise) && typeof d.sunrise[0] === 'number' &&
+            Array.isArray(d.sunset) && typeof d.sunset[0] === 'number') {
+          sunTimes = { sunrise: d.sunrise[0], sunset: d.sunset[0] };
+        }
         const mode = resolveMode(c.weather_code, c.temperature_2m, c.wind_speed_10m);
         const phrase = PHRASE[mode] || mode;
         writeCache(mode, phrase);
-        applyMode(mode, phrase);
+        applyState(mode, resolvePhase(), phrase);
       })
       .catch(() => {
         // Graceful fallback — calm default, friendly copy, no raw codes.
         // Apply the mood/forest but keep the softer bespoke fallback wording.
-        if (!current) {
-          applyMode('sunny', 'calm', { silentSnippet: true });
+        if (!currentMode) {
+          applyState('sunny', resolvePhase(), 'calm', { silentSnippet: true });
           if (statusEl) {
             statusEl.textContent = 'It feels calm in Arlington, Virginia.';
           }
@@ -249,14 +339,34 @@
   }
 
   // ── Boot ───────────────────────────────────────────────────────────
+  // Dev/test override: ?weather=rainy&phase=night skips the live fetch.
+  const params = new URLSearchParams(window.location.search);
+  const weatherOverride = params.get('weather');
+  const phaseOverride = params.get('phase');
+  if (weatherOverride || phaseOverride) {
+    const mode = ALL_MODES.includes(weatherOverride) ? weatherOverride : 'sunny';
+    const phase = ALL_PHASES.includes(phaseOverride) ? phaseOverride : resolvePhase();
+    applyState(mode, phase, PHRASE[mode]);
+    return;
+  }
+
   if (statusEl) {
     statusEl.textContent = 'Checking the weather in Arlington, Virginia…';
   }
 
   const cached = readCache();
   if (cached) {
+    if (typeof cached.sunrise === 'number' && typeof cached.sunset === 'number') {
+      sunTimes = { sunrise: cached.sunrise, sunset: cached.sunset };
+    }
     // Apply instantly from cache, then refresh quietly in the background.
-    applyMode(cached.mode, cached.phrase);
+    applyState(cached.mode, resolvePhase(), cached.phrase);
   }
   fetchWeather();
+
+  // Re-derive the phase every minute so dawn/dusk/night transitions land
+  // without a refetch (and without touching the weather-mode DOM).
+  setInterval(() => {
+    if (currentMode) applyState(currentMode, resolvePhase(), PHRASE[currentMode]);
+  }, 60 * 1000);
 }());
