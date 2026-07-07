@@ -311,17 +311,21 @@ function createBirdLayer(scene: THREE.Scene, quality: Quality, reduceMotion: boo
   const group = new THREE.Group();
   scene.add(group);
 
-  const count = BIRD_COUNT[quality];
+  // Capacity for a second flock that joins at dawn/dusk; extras are hidden
+  // via zero-scale matrices the rest of the day.
+  const baseCount = BIRD_COUNT[quality];
+  const maxCount = baseCount * 2;
   const geometry = makeBirdGeometry();
   const material = new THREE.MeshBasicMaterial({
     color: 0x2b3845, transparent: true, opacity: 0.72,
     side: THREE.DoubleSide, depthWrite: false, fog: true,
   });
-  const mesh = new THREE.InstancedMesh(geometry, material, count);
+  const mesh = new THREE.InstancedMesh(geometry, material, maxCount);
   mesh.frustumCulled = false;
   group.add(mesh);
 
-  const slots = makeBirdSlots(count);
+  const slots = makeBirdSlots(maxCount);
+  const _hidden = new THREE.Matrix4().makeScale(0, 0, 0);
   // Reused temporaries — never allocate inside update().
   const _m = new THREE.Matrix4();
   const _pos = new THREE.Vector3();
@@ -332,12 +336,19 @@ function createBirdLayer(scene: THREE.Scene, quality: Quality, reduceMotion: boo
   let active = !reduceMotion;
   let speedMul = 1;
   let baseOpacity = 0.72;
-  let spreadMul = 1; // scales path centres outward on wide viewports
+  let spreadMul = 1;         // scales path centres outward on wide viewports
+  let activeCount = baseCount; // doubles at dawn/dusk
 
   function writeMatrices(t: number): void {
-    for (let i = 0; i < count; i++) {
+    for (let i = 0; i < maxCount; i++) {
+      if (i >= activeCount) {
+        mesh.setMatrixAt(i, _hidden);
+        continue;
+      }
       const s = slots[i];
-      const a = t * s.speed * speedMul + s.phase;
+      // The slow sine folded into the path angle varies its derivative —
+      // birds visibly speed up and glide without any integration.
+      const a = t * s.speed * speedMul + Math.sin(t * 0.15 + s.phase) * 0.8 + s.phase;
       _pos.set(s.cx * spreadMul + Math.cos(a) * s.rx, s.cy + Math.sin(a * 1.3) * 0.6, s.cz + Math.sin(a) * s.rz);
       // Bank along the path: yaw toward travel, slight roll.
       _e.set(0, -a, Math.sin(a * 2) * 0.15 * s.tilt);
@@ -354,14 +365,17 @@ function createBirdLayer(scene: THREE.Scene, quality: Quality, reduceMotion: boo
 
   return {
     setContext(mode, phase) {
-      // Birds roost at night; hidden in harsh weather as before.
+      // Birds roost at night; hidden in harsh weather as before. Flocks
+      // double at dawn/dusk (commute hours).
       const hidden = BIRD_HARSH.includes(mode) || phase === 'night';
       active = !reduceMotion && !hidden;
+      activeCount = phase === 'dawn' || phase === 'dusk' ? maxCount : baseCount;
       speedMul = mode === 'windy' ? 1.6 : mode === 'hot' ? 0.75 : 1;
       // Still a touch softer on overcast/snow days, but clearly visible now.
       baseOpacity = mode === 'cloudy' ? 0.6 : mode === 'snowy' ? 0.5 : 0.72;
       material.opacity = hidden ? 0 : baseOpacity;
       group.visible = !hidden;
+      writeMatrices(0); // refresh hidden-slot matrices for static renders
     },
     setSpread(aspect) {
       // Path centres sit around z ≈ -15.5; widen so flocks reach the edges.
@@ -506,6 +520,97 @@ function createGroundLifeLayer(scene: THREE.Scene, quality: Quality, reduceMotio
       geo.dispose();
       material.dispose();
       tex.dispose();
+    },
+  };
+}
+
+// ── Butterflies ────────────────────────────────────────────────────────
+// A handful of brightly tinted mini-chevrons wandering figure-8s low over
+// the foreground bushes on pleasant days. Same InstancedMesh pattern (and
+// CPU cost class) as the birds; the wing flap is a vertical squash of the
+// chevron folded into each instance matrix.
+const BUTTERFLY_COUNT: Record<Quality, number> = { high: 5, medium: 2, low: 0 };
+const BUTTERFLY_OK: WeatherMode[] = ['sunny', 'clear', 'hot', 'cloudy'];
+const BUTTERFLY_HUES = [0xffb3d9, 0xffd166, 0x9ad1ff, 0xc77dff, 0xff8fa3];
+
+function createButterflyLayer(scene: THREE.Scene, quality: Quality, reduceMotion: boolean): AmbientLayer {
+  const group = new THREE.Group();
+  scene.add(group);
+
+  const count = BUTTERFLY_COUNT[quality];
+  if (count === 0) {
+    return { setContext() {}, update() {}, dispose() { scene.remove(group); } };
+  }
+
+  const geometry = makeBirdGeometry();
+  const material = new THREE.MeshBasicMaterial({
+    color: 0xffffff, transparent: true, opacity: 0.9,
+    side: THREE.DoubleSide, depthWrite: false, fog: true,
+  });
+  const mesh = new THREE.InstancedMesh(geometry, material, count);
+  mesh.frustumCulled = false;
+  group.add(mesh);
+
+  const rng = mulberry32(97531);
+  interface Fly { hx: number; hy: number; hz: number; r: number; speed: number; phase: number; flap: number }
+  const flies: Fly[] = [];
+  const _c = new THREE.Color();
+  for (let i = 0; i < count; i++) {
+    const side = rng() < 0.5 ? -1 : 1;
+    flies.push({
+      hx: side * (4.5 + rng() * 4.5), // over the fg/mid bushes, clear of centre
+      hy: 0.7 + rng() * 1.2,
+      hz: -1.5 - rng() * 3,
+      r: 0.8 + rng() * 1.2,
+      speed: 0.35 + rng() * 0.3,
+      phase: rng() * Math.PI * 2,
+      flap: 9 + rng() * 5,
+    });
+    _c.setHex(BUTTERFLY_HUES[i % BUTTERFLY_HUES.length]);
+    mesh.setColorAt(i, _c);
+  }
+  if (mesh.instanceColor) mesh.instanceColor.needsUpdate = true;
+
+  const _m = new THREE.Matrix4();
+  const _pos = new THREE.Vector3();
+  const _quat = new THREE.Quaternion();
+  const _scl = new THREE.Vector3();
+  const _e = new THREE.Euler();
+  let active = false;
+
+  function writePose(t: number): void {
+    for (let i = 0; i < count; i++) {
+      const f = flies[i];
+      const a = t * f.speed + f.phase;
+      _pos.set(
+        f.hx + Math.sin(a) * f.r,
+        f.hy + Math.sin(a * 1.7) * 0.3,
+        f.hz + Math.sin(a * 2) * f.r * 0.35, // figure-8
+      );
+      const flap = 0.35 + 0.65 * Math.abs(Math.sin(t * f.flap + f.phase));
+      _scl.set(0.12, 0.12 * flap, 0.12);
+      _e.set(0, -a, 0);
+      _quat.setFromEuler(_e);
+      _m.compose(_pos, _quat, _scl);
+      mesh.setMatrixAt(i, _m);
+    }
+    mesh.instanceMatrix.needsUpdate = true;
+  }
+  writePose(0); // static pose for reduced-motion renders
+
+  return {
+    setContext(mode, phase) {
+      active = !reduceMotion && phase === 'day' && BUTTERFLY_OK.includes(mode);
+      group.visible = phase === 'day' && BUTTERFLY_OK.includes(mode);
+    },
+    update(t) {
+      if (!active) return;
+      writePose(t);
+    },
+    dispose() {
+      scene.remove(group);
+      geometry.dispose();
+      material.dispose();
     },
   };
 }
@@ -932,6 +1037,55 @@ export function initForest(host: HTMLElement): void {
   scene.add(stars);
   let starBaseOpacity = 0; // set per (mode, phase) in applyImmediate
 
+  // ── God rays (light shafts slanting from the sun glow) ──────────────
+  const GODRAY_COUNT = quality === 'high' ? 2 : 0;
+  const godRays: THREE.Mesh[] = [];
+  let godRayBase = 0; // opacity target, set in applyImmediate
+  if (GODRAY_COUNT > 0) {
+    const rc = document.createElement('canvas');
+    rc.width = 64;
+    rc.height = 256;
+    const rctx = rc.getContext('2d')!;
+    const rg = rctx.createLinearGradient(0, 0, 0, 256);
+    rg.addColorStop(0, 'rgba(255,255,255,0.9)');
+    rg.addColorStop(1, 'rgba(255,255,255,0)');
+    rctx.fillStyle = rg;
+    rctx.fillRect(0, 0, 64, 256);
+    const rgx = rctx.createLinearGradient(0, 0, 64, 0); // feather the sides
+    rgx.addColorStop(0, 'rgba(0,0,0,1)');
+    rgx.addColorStop(0.25, 'rgba(0,0,0,0)');
+    rgx.addColorStop(0.75, 'rgba(0,0,0,0)');
+    rgx.addColorStop(1, 'rgba(0,0,0,1)');
+    rctx.globalCompositeOperation = 'destination-out';
+    rctx.fillStyle = rgx;
+    rctx.fillRect(0, 0, 64, 256);
+    const rayTex = new THREE.CanvasTexture(rc);
+    rayTex.colorSpace = THREE.SRGBColorSpace;
+    for (let i = 0; i < GODRAY_COUNT; i++) {
+      const mat = new THREE.MeshBasicMaterial({
+        map: rayTex, color: 0xffeebb, transparent: true, opacity: 0,
+        depthWrite: false, blending: THREE.AdditiveBlending, fog: false,
+      });
+      const m = new THREE.Mesh(new THREE.PlaneGeometry(1.6 + i * 0.8, 12), mat);
+      m.position.set(5.5 + i * 2.6, 4.5, -10 - i);
+      m.rotation.z = 0.32 + i * 0.1;
+      scene.add(m);
+      godRays.push(m);
+    }
+  }
+
+  // ── Shooting star (rare streak on clear nights) ─────────────────────
+  const shootMat = new THREE.MeshBasicMaterial({
+    map: makeMoteTexture(), color: 0xeaf2ff, transparent: true, opacity: 0,
+    depthWrite: false, blending: THREE.AdditiveBlending, fog: false,
+  });
+  const shoot = new THREE.Mesh(new THREE.PlaneGeometry(3.2, 0.07), shootMat);
+  shoot.rotation.z = -0.45;
+  shoot.visible = false;
+  scene.add(shoot);
+  let shootNext = 25 + Math.random() * 20; // seconds of scene time
+  let shootStart = -1;
+
   // ── Distant procedural mountains (lightweight ridge silhouettes) ────
   // Three flat ridge layers between the sky and the background trees. Each is
   // a single triangle-fan BufferGeometry built from a seeded ridgeline, so no
@@ -1000,6 +1154,94 @@ export function initForest(host: HTMLElement): void {
   ground.rotation.x = -Math.PI / 2;
   ground.position.y = -0.02;
   scene.add(ground);
+
+  // ── Grass tufts ──────────────────────────────────────────────────────
+  // One InstancedMesh of crossed alpha-tested blade quads scattered over the
+  // near ground (centre kept clear). Sway rides the SHARED wind uniforms in
+  // the vertex shader — zero per-frame CPU — and the colour follows the
+  // composed ground colour each context change.
+  const GRASS_COUNT: Record<Quality, number> = { high: 140, medium: 60, low: 0 };
+  const grassCount = GRASS_COUNT[quality];
+  let grassMat: THREE.MeshLambertMaterial | null = null;
+  let grassMesh: THREE.InstancedMesh | null = null;
+  if (grassCount > 0) {
+    // Tapered blades drawn on a canvas — no asset import.
+    const gc = document.createElement('canvas');
+    gc.width = 64;
+    gc.height = 64;
+    const gctx = gc.getContext('2d')!;
+    gctx.fillStyle = '#ffffff';
+    for (let b = 0; b < 7; b++) {
+      const bx = 6 + b * 8 + (b % 2) * 2;
+      const lean = (b - 3) * 3;
+      gctx.beginPath();
+      gctx.moveTo(bx - 2.4, 64);
+      gctx.quadraticCurveTo(bx - 1 + lean, 26, bx + lean, 8 + (b % 3) * 6);
+      gctx.quadraticCurveTo(bx + 1 + lean, 26, bx + 2.4, 64);
+      gctx.closePath();
+      gctx.fill();
+    }
+    const grassTex = new THREE.CanvasTexture(gc);
+    grassTex.colorSpace = THREE.SRGBColorSpace;
+
+    // Two crossed quads in one geometry so tufts read from any angle.
+    const W = 0.6, H = 0.55;
+    const gGeo = new THREE.BufferGeometry();
+    gGeo.setAttribute('position', new THREE.BufferAttribute(new Float32Array([
+      -W / 2, 0, 0,   W / 2, 0, 0,   W / 2, H, 0,   -W / 2, H, 0,
+      0, 0, -W / 2,   0, 0, W / 2,   0, H, W / 2,   0, H, -W / 2,
+    ]), 3));
+    gGeo.setAttribute('uv', new THREE.BufferAttribute(new Float32Array([
+      0, 0, 1, 0, 1, 1, 0, 1,   0, 0, 1, 0, 1, 1, 0, 1,
+    ]), 2));
+    gGeo.setIndex([0, 1, 2, 0, 2, 3, 4, 5, 6, 4, 6, 7]);
+    gGeo.computeVertexNormals();
+
+    grassMat = new THREE.MeshLambertMaterial({
+      map: grassTex, alphaTest: 0.45, side: THREE.DoubleSide, color: 0x7da35f,
+    });
+    // Same shared wind uniforms as the trees, but weighted over blade height.
+    grassMat.onBeforeCompile = (shader) => {
+      shader.uniforms.uTime = WIND.uTime;
+      shader.uniforms.uStr = WIND.uStr;
+      shader.vertexShader =
+        'uniform float uTime;\nuniform float uStr;\n' +
+        shader.vertexShader.replace(
+          '#include <begin_vertex>',
+          `#include <begin_vertex>
+           float gw = clamp(position.y / 0.55, 0.0, 1.0);
+           transformed.x += sin(uTime*1.6 + position.x*2.0) * uStr * 3.0 * gw;`,
+        );
+    };
+    grassMesh = new THREE.InstancedMesh(gGeo, grassMat, grassCount);
+    grassMesh.frustumCulled = false;
+    scene.add(grassMesh);
+  }
+
+  function scatterGrass(aspect: number): void {
+    if (!grassMesh) return;
+    const grng = mulberry32(31415);
+    const spread = Math.max(11, halfWidthAt(-2, aspect) * 1.05);
+    const _gm = new THREE.Matrix4();
+    const _gp = new THREE.Vector3();
+    const _gq = new THREE.Quaternion();
+    const _ge = new THREE.Euler();
+    const _gs = new THREE.Vector3();
+    for (let i = 0; i < grassCount; i++) {
+      const side = grng() < 0.5 ? -1 : 1;
+      const x = side * (3.5 + grng() * (spread - 3.5));
+      const z = -0.5 - grng() * 8;
+      const s = 0.7 + grng() * 0.6;
+      _gp.set(x, 0, z);
+      _ge.set(0, grng() * Math.PI, 0);
+      _gq.setFromEuler(_ge);
+      _gs.set(s, s * (0.8 + grng() * 0.4), s);
+      _gm.compose(_gp, _gq, _gs);
+      grassMesh.setMatrixAt(i, _gm);
+    }
+    grassMesh.instanceMatrix.needsUpdate = true;
+  }
+  scatterGrass(1.6); // initial pass; layoutForAspect re-scatters when wider
 
   // ── Wind (shared uniforms, injected per material) ──────────────────
   // Stronger base sway than before (0.02 → 0.045) so the trees feel alive.
@@ -1205,6 +1447,7 @@ export function initForest(host: HTMLElement): void {
     createGroundLifeLayer(scene, quality, reduceMotion),
     createLeafFallLayer(scene, quality, reduceMotion),
     createFogWispLayer(scene, quality, reduceMotion),
+    createButterflyLayer(scene, quality, reduceMotion),
   ];
 
   // ── Aspect-aware layout (widescreen edge-to-edge fill) ─────────────
@@ -1282,6 +1525,11 @@ export function initForest(host: HTMLElement): void {
     // Nudge the sun/moon glows outward so they don't crowd centre on ultrawide.
     sunGlow.position.x = 7 * Math.min(1.6, Math.max(1, aspect / 1.6));
     moon.position.x = -sunGlow.position.x;
+    // God rays slant from wherever the sun glow ends up.
+    for (let i = 0; i < godRays.length; i++) {
+      godRays[i].position.x = (5.5 + i * 2.6) * (sunGlow.position.x / 7);
+    }
+    scatterGrass(aspect);
     fillFlanks(aspect);
     for (const layer of ambientLayers) layer.setSpread?.(aspect);
   }
@@ -1348,6 +1596,22 @@ export function initForest(host: HTMLElement): void {
     starBaseOpacity = fx.stars * clarity * 0.9;
     starMat.opacity = starBaseOpacity;
     stars.visible = starBaseOpacity > 0.01;
+
+    // God rays track the sun glow's strength (strong sun only).
+    const glow = a.sunGlow * fx.sunGlowMul;
+    godRayBase = glow > 0.3 ? glow * 0.22 : 0;
+    for (const ray of godRays) {
+      (ray.material as THREE.MeshBasicMaterial).opacity = godRayBase;
+      ray.visible = godRayBase > 0.01;
+    }
+
+    // Grass follows the composed (weather × phase) ground colour, a bit
+    // brighter so the tufts separate from the plane beneath them.
+    if (grassMat) {
+      grassMat.color
+        .copy((ground.material as THREE.MeshStandardMaterial).color)
+        .multiplyScalar(1.35);
+    }
   }
 
   let currentMode: WeatherMode = 'sunny';
@@ -1409,6 +1673,38 @@ export function initForest(host: HTMLElement): void {
     // Star twinkle: one slow global opacity sine — no per-point work.
     if (starBaseOpacity > 0.01) {
       starMat.opacity = starBaseOpacity * (0.88 + 0.12 * Math.sin(t * 1.7));
+    }
+
+    // God rays breathe very slowly.
+    if (godRayBase > 0.01) {
+      for (let i = 0; i < godRays.length; i++) {
+        (godRays[i].material as THREE.MeshBasicMaterial).opacity =
+          godRayBase * (0.85 + 0.15 * Math.sin(t * 0.3 + i * 1.7));
+      }
+    }
+
+    // Occasional shooting star, only when the night sky is clear.
+    if (starBaseOpacity > 0.6) {
+      if (shootStart < 0 && t > shootNext) {
+        shootStart = t;
+        shoot.visible = true;
+        shoot.position.set((Math.random() - 0.5) * 24, 16 + Math.random() * 8, -19.6);
+      }
+      if (shootStart >= 0) {
+        const p = (t - shootStart) / 0.8;
+        if (p >= 1) {
+          shootStart = -1;
+          shoot.visible = false;
+          shootNext = t + 20 + Math.random() * 20;
+        } else {
+          shoot.position.x += 8 * dt;
+          shoot.position.y -= 3.5 * dt;
+          shootMat.opacity = Math.sin(p * Math.PI) * 0.9;
+        }
+      }
+    } else if (shootStart >= 0) {
+      shootStart = -1;
+      shoot.visible = false;
     }
 
     // Subtle camera drift for life; disabled under reduced-motion.
