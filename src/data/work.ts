@@ -33,8 +33,7 @@ export interface WorkRole {
 
 /** Short personal statement that opens the Work section (~45–80 words). */
 export const workIntro =
-  "I work where product, data, and AI overlap — usually turning a messy " +
-  "question into a useful analysis, workflow, or small product. I'm currently " +
+  "I'm currently " +
   "an Associate Data Product Analyst at Capital One, on the Data Products & " +
   "Experiences team, and I've previously worked across startups, AI operations, " +
   "fintech, and university systems.";
@@ -45,10 +44,10 @@ export const workIntro =
  * detail. Kept lowercase-ish and conversational on purpose.
  */
 export const workSummary: string[] = [
-  "data & product analytics at capital one — card adoption, usage growth, and the data plumbing behind it.",
-  "before that: revenue ops at a construction-tech startup, LLM operations at AWS, product ops at a fintech.",
+  "data & product analytics at capital one — card adoption, usage growth, and the data infra behind it.",
+  "before that: rev ops at a construction-tech startup, RLHF Research + Ops at AWS, product ops at a fintech.",
   "co-founded an AI research tool in college — shipped the MVP, owned the roadmap.",
-  "mostly data and product, some building. i like shipping small, useful things.",
+  "mostly data and product, some building. i like shipping small things for fun.",
 ];
 
 export const roles: WorkRole[] = [
