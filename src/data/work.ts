@@ -39,6 +39,18 @@ export const workIntro =
   "Experiences team, and I've previously worked across startups, AI operations, " +
   "fintech, and university systems.";
 
+/**
+ * Reference-site-style summary — a few short lines that say what I do, not a
+ * blow-by-blow résumé. Each string is one line/clause; the résumé PDF has the
+ * detail. Kept lowercase-ish and conversational on purpose.
+ */
+export const workSummary: string[] = [
+  "data & product analytics at capital one — card adoption, usage growth, and the data plumbing behind it.",
+  "before that: revenue ops at a construction-tech startup, LLM operations at AWS, product ops at a fintech.",
+  "co-founded an AI research tool in college — shipped the MVP, owned the roadmap.",
+  "mostly data and product, some building. i like shipping small, useful things.",
+];
+
 export const roles: WorkRole[] = [
   {
     company: 'Capital One',

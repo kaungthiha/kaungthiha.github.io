@@ -26,24 +26,19 @@ function isSection(v: string | null): v is SectionId {
 const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
 // ── Section switching ────────────────────────────────────────────────────
+// Visibility is CSS-driven: we set data-active on the .pf-panels container and
+// the stylesheet shows only the matching panel. No per-panel attribute races.
 const switcher = document.querySelector<HTMLElement>('[data-section-switcher]');
 const tabs = Array.from(document.querySelectorAll<HTMLAnchorElement>('[data-section-tab]'));
-const panels = new Map<SectionId, HTMLElement>();
-SECTIONS.forEach((id) => {
-  const panel = document.querySelector<HTMLElement>(`[data-section="${id}"]`);
-  if (panel) panels.set(id, panel);
-});
+const panelsContainer = document.querySelector<HTMLElement>('.pf-panels');
 
 let activeSection: SectionId = 'work';
 
 function showSection(id: SectionId, opts: { focusPanel?: boolean; updateHash?: boolean } = {}): void {
-  if (!panels.has(id)) return;
+  if (!SECTIONS.includes(id)) return;
   activeSection = id;
 
-  panels.forEach((panel, key) => {
-    const on = key === id;
-    panel.hidden = !on;
-  });
+  if (panelsContainer) panelsContainer.setAttribute('data-active', id);
 
   tabs.forEach((tab) => {
     const on = tab.dataset.sectionTab === id;
@@ -56,8 +51,12 @@ function showSection(id: SectionId, opts: { focusPanel?: boolean; updateHash?: b
     history.pushState(null, '', `#${id}`);
   }
   if (opts.focusPanel) {
-    const panel = panels.get(id);
-    panel?.focus({ preventScroll: true });
+    const panel = document.getElementById(`panel-${id}`);
+    // Panels are no longer focus targets by default; make focusable ad hoc.
+    if (panel) {
+      panel.setAttribute('tabindex', '-1');
+      panel.focus({ preventScroll: true });
+    }
   }
 }
 

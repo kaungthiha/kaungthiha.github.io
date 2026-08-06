@@ -840,9 +840,17 @@ body:not(.layout-home) #ft-tool { padding: 1rem var(--gutter) 3rem; }
 .pf-tab:focus-visible { outline: 2px solid var(--primary); outline-offset: 4px; border-radius: var(--r-sm); }
 
 /* ── Section scaffolding ─────────────────────────────────────────────── */
+/* Visibility is driven entirely by data-active on the container: only the
+   matching panel shows. This is robust — no per-element attribute toggling,
+   and the no-JS default (data-active="work") shows Work. A plain [hidden]
+   fallback covers any panel not matched (belt and suspenders). */
 .pf-panels { position: relative; }
-.pf-section { animation: pf-fade 0.24s ease-out; }
-.pf-section[hidden] { display: none; }
+.pf-section { display: none; animation: pf-fade 0.24s ease-out; }
+.pf-panels[data-active="work"]   .pf-work,
+.pf-panels[data-active="create"] .pf-create,
+.pf-panels[data-active="loves"]  .pf-loves { display: block; }
+/* If JS is off and the container somehow has no data-active, still show Work. */
+.pf-panels:not([data-active]) .pf-work { display: block; }
 @keyframes pf-fade {
   from { opacity: 0; transform: translateY(8px); }
   to   { opacity: 1; transform: translateY(0); }
@@ -881,7 +889,36 @@ body:not(.layout-home) #ft-tool { padding: 1rem var(--gutter) 3rem; }
   line-height: 1.6;
   color: var(--text-body);
   max-width: 60ch;
-  margin: 0 0 clamp(1.75rem, 1.25rem + 2vw, 2.75rem);
+  margin: 0 0 clamp(1.5rem, 1rem + 1.5vw, 2rem);
+}
+
+/* Reference-site-style narrative summary — a few quiet lines, not a résumé. */
+.pf-summary {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  max-width: 60ch;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+.pf-summary li {
+  font-size: var(--fs-body-large);
+  line-height: 1.55;
+  color: var(--text-body);
+  padding-left: 1.1rem;
+  position: relative;
+}
+.pf-summary li::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0.62em;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--primary);
+  opacity: 0.55;
 }
 
 /* Quiet link (résumé download etc.) */
@@ -920,118 +957,6 @@ body:not(.layout-home) #ft-tool { padding: 1rem var(--gutter) 3rem; }
   white-space: nowrap;
 }
 .pf-metric { color: var(--text-strong); font-weight: 700; }
-
-/* ==========================================================================
-   Work — editorial timeline
-   ========================================================================== */
-.pf-timeline { list-style: none; margin: 0; padding: 0; }
-.pf-role {
-  display: grid;
-  grid-template-columns: 128px 1fr;
-  gap: clamp(1rem, 0.5rem + 1.5vw, 2rem);
-  padding: clamp(1.5rem, 1rem + 1.5vw, 2.25rem) 0;
-  border-top: 1px solid var(--pf-divider);
-}
-.pf-role:first-child { border-top: none; padding-top: 0; }
-.pf-role-when {
-  font-family: var(--font-ui);
-  font-size: 0.8125rem;
-  font-weight: 600;
-  letter-spacing: 0.02em;
-  color: var(--text-muted);
-  padding-top: 0.2rem;
-}
-.pf-role-company {
-  font-family: var(--font-sans);
-  font-size: clamp(1.2rem, 1.05rem + 0.6vw, 1.5rem);
-  font-weight: 700;
-  letter-spacing: -0.01em;
-  color: var(--text-strong);
-  margin: 0;
-  line-height: 1.2;
-}
-.pf-role-title {
-  font-size: var(--fs-body);
-  font-weight: 500;
-  color: var(--text-body);
-  margin: 0.25rem 0 0.75rem;
-}
-.pf-role-mode { color: var(--text-muted); font-weight: 400; }
-.pf-role-scope {
-  font-size: var(--fs-body);
-  line-height: 1.6;
-  color: var(--text-body);
-  margin: 0 0 0.75rem;
-  max-width: 62ch;
-}
-.pf-role-outcomes {
-  margin: 0;
-  padding: 0;
-  list-style: none;
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-  max-width: 64ch;
-}
-.pf-role-outcomes li {
-  position: relative;
-  padding-left: 1.1rem;
-  font-size: var(--fs-body);
-  line-height: 1.55;
-  color: var(--text-body);
-}
-.pf-role-outcomes li::before {
-  content: '';
-  position: absolute;
-  left: 0;
-  top: 0.6em;
-  width: 5px;
-  height: 5px;
-  border-radius: 50%;
-  background: var(--primary);
-  opacity: 0.6;
-}
-.pf-role-note {
-  font-size: 0.8125rem;
-  color: var(--text-muted);
-  font-style: italic;
-  margin: 0.85rem 0 0;
-}
-.pf-inline-link {
-  display: inline-block;
-  margin-top: 0.75rem;
-  font-family: var(--font-ui);
-  font-size: var(--fs-nav);
-  font-weight: 600;
-}
-
-.pf-earlier {
-  margin-top: clamp(1rem, 0.5rem + 1vw, 1.75rem);
-  border-top: 1px solid var(--pf-divider);
-  padding-top: 1.25rem;
-}
-.pf-earlier > summary {
-  font-family: var(--font-ui);
-  font-size: var(--fs-nav);
-  font-weight: 600;
-  color: var(--primary);
-  cursor: pointer;
-  list-style: none;
-  display: inline-flex;
-  align-items: center;
-  gap: 0.4rem;
-}
-.pf-earlier > summary::-webkit-details-marker { display: none; }
-.pf-earlier > summary::before {
-  content: '+';
-  font-size: 1.1em;
-  line-height: 1;
-  color: var(--primary);
-}
-.pf-earlier[open] > summary::before { content: '\2013'; }
-.pf-earlier > summary:focus-visible { outline: 2px solid var(--primary); outline-offset: 3px; border-radius: var(--r-sm); }
-.pf-timeline--compact { margin-top: 1.25rem; }
-.pf-timeline--compact .pf-role-company { font-size: 1.15rem; }
 
 .pf-skills {
   margin-top: clamp(1.75rem, 1.25rem + 2vw, 2.75rem);
@@ -1555,8 +1480,6 @@ html:not([data-theme="dark"]) body.weather-snowy  .pf-stage {
     padding-right: clamp(1rem, 4vw, 1.5rem);
   }
   .pf-switcher-wrap { top: calc(var(--nav-height) - 18px); }
-  .pf-role { grid-template-columns: 1fr; gap: 0.35rem; }
-  .pf-role-when { padding-top: 0; }
   .pf-slide { flex-basis: 90%; }
 }
 

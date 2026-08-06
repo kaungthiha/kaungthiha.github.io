@@ -18,7 +18,9 @@ import ContactFooter from './ContactFooter.astro';
 <div class="pf-stage" id="pf-stage">
   <div class="pf-surface">
     <SectionSwitcher />
-    <div class="pf-panels">
+    <!-- data-active drives which panel shows (CSS-only); defaults to work so
+         the correct section is visible even before/without JS. -->
+    <div class="pf-panels" data-active="work">
       <WorkSection />
       <CreateSection />
       <LovesSection />
