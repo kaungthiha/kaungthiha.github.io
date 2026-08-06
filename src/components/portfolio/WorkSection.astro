@@ -1,0 +1,100 @@
+---
+/**
+ * Work — a web-native, selective résumé.
+ * Short intro → editorial timeline (dates as quiet anchors, no zig-zag) →
+ * "Earlier" disclosure → compact skills line → résumé download + contact.
+ * All content comes from src/data/work.ts (one source of truth).
+ */
+import { roles, workIntro, skills, resumeHref, type WorkRole } from '../../data/work';
+
+const current = roles.filter((r) => !r.earlier);
+const earlier = roles.filter((r) => r.earlier);
+
+/** Split an outcome string on the **metric** sentinel into text + emphasis parts. */
+function parts(text: string): Array<{ t: string; metric: boolean }> {
+  return text.split(/\*\*(.+?)\*\*/g).map((seg, i) => ({ t: seg, metric: i % 2 === 1 }));
+}
+---
+
+<section
+  class="pf-section pf-work"
+  id="panel-work"
+  role="tabpanel"
+  aria-labelledby="tab-work"
+  data-section="work"
+  tabindex="-1"
+>
+  <header class="pf-section-head">
+    <div>
+      <p class="pf-eyebrow">work</p>
+      <h2 class="pf-section-title">I work where product, data, and AI overlap.</h2>
+    </div>
+    <a class="pf-quiet-link" href={resumeHref} target="_blank" rel="noopener">
+      Download résumé
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M12 3v12m0 0 4-4m-4 4-4-4M5 21h14"/></svg>
+    </a>
+  </header>
+
+  <p class="pf-intro">{workIntro}</p>
+
+  <ol class="pf-timeline" role="list">
+    {current.map((r: WorkRole) => (
+      <li class="pf-role">
+        <div class="pf-role-when">{r.dates}</div>
+        <div class="pf-role-main">
+          <h3 class="pf-role-company">{r.company}</h3>
+          <p class="pf-role-title">{r.role}{r.mode && <span class="pf-role-mode"> · {r.mode}</span>}</p>
+          <p class="pf-role-scope">{r.scope}</p>
+          <ul class="pf-role-outcomes">
+            {r.outcomes.map((o) => (
+              <li>
+                {parts(o).map((p) => (p.metric ? <strong class="pf-metric">{p.t}</strong> : <>{p.t}</>))}
+              </li>
+            ))}
+          </ul>
+          {r.tags && (
+            <ul class="pf-tags" aria-label="Tools and practices">
+              {r.tags.map((t) => <li class="pf-tag">{t}</li>)}
+            </ul>
+          )}
+          {r.link && (
+            <a class="pf-inline-link" href={r.link.href} target="_blank" rel="noopener">{r.link.label} →</a>
+          )}
+          {r.note && <p class="pf-role-note">{r.note}</p>}
+        </div>
+      </li>
+    ))}
+  </ol>
+
+  {earlier.length > 0 && (
+    <details class="pf-earlier">
+      <summary>Earlier — leadership & campus roles</summary>
+      <ol class="pf-timeline pf-timeline--compact" role="list">
+        {earlier.map((r: WorkRole) => (
+          <li class="pf-role">
+            <div class="pf-role-when">{r.dates}</div>
+            <div class="pf-role-main">
+              <h3 class="pf-role-company">{r.company}</h3>
+              <p class="pf-role-title">{r.role}</p>
+              <p class="pf-role-scope">{r.scope}</p>
+              <ul class="pf-role-outcomes">
+                {r.outcomes.map((o) => (
+                  <li>{parts(o).map((p) => (p.metric ? <strong class="pf-metric">{p.t}</strong> : <>{p.t}</>))}</li>
+                ))}
+              </ul>
+            </div>
+          </li>
+        ))}
+      </ol>
+    </details>
+  )}
+
+  <div class="pf-skills" aria-label="Skills">
+    {skills.map((g) => (
+      <p class="pf-skill-line">
+        <span class="pf-skill-group">{g.group}</span>
+        <span class="pf-skill-items">{g.items.join(' · ')}</span>
+      </p>
+    ))}
+  </div>
+</section>

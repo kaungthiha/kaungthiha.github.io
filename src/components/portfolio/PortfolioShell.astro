@@ -1,0 +1,44 @@
+---
+/**
+ * PortfolioShell — the single glass editorial surface below the hero.
+ * Holds the sticky section switcher, the three sections (work / create /
+ * loves), and the contact footer, all inside one dominant surface (not a wall
+ * of cards). The forest stays visible around and behind it.
+ *
+ * The two client scripts (section navigation + loves carousel) are imported
+ * here as bundled ES modules so they are code-split and deferred by Astro.
+ */
+import SectionSwitcher from './SectionSwitcher.astro';
+import WorkSection from './WorkSection.astro';
+import CreateSection from './CreateSection.astro';
+import LovesSection from './LovesSection.astro';
+import ContactFooter from './ContactFooter.astro';
+---
+
+<div class="pf-stage" id="pf-stage">
+  <div class="pf-surface">
+    <SectionSwitcher />
+    <div class="pf-panels">
+      <WorkSection />
+      <CreateSection />
+      <LovesSection />
+    </div>
+    <ContactFooter />
+  </div>
+</div>
+
+<!-- Diagram lightbox (reused by Create galleries). Robust dialog semantics +
+     focus trap + restore live in portfolio-navigation.ts. -->
+<div id="pf-lightbox" class="pf-lightbox" role="dialog" aria-modal="true" aria-label="Diagram viewer" hidden>
+  <div class="pf-lightbox-backdrop" data-lightbox-close></div>
+  <div class="pf-lightbox-panel">
+    <button class="pf-lightbox-close" type="button" data-lightbox-close aria-label="Close">&times;</button>
+    <img class="pf-lightbox-img" src="" alt="">
+    <p class="pf-lightbox-caption"></p>
+  </div>
+</div>
+
+<script>
+  import '../../scripts/portfolio-navigation';
+  import '../../scripts/loves-carousel';
+</script>

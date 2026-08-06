@@ -1,0 +1,91 @@
+---
+/**
+ * Loves — a manually controlled visual shelf of taste and curiosity.
+ * A "currently loving" summary line (driven by the same data) sits above a
+ * CSS scroll-snap carousel: native swipe + prev/next + keyboard, a live
+ * position readout, and per-slide SR labels. No autoplay; reduced-motion aware.
+ * Items without an owned image get a tasteful neutral placeholder (no fakes).
+ */
+import { loves, type LoveItem } from '../../data/loves';
+
+const currentlyLoving = loves.filter((l) => l.currently).map((l) => l.title);
+const total = loves.length;
+---
+
+<section
+  class="pf-section pf-loves"
+  id="panel-loves"
+  role="tabpanel"
+  aria-labelledby="tab-loves"
+  data-section="loves"
+  tabindex="-1"
+  hidden
+>
+  <header class="pf-section-head">
+    <div>
+      <p class="pf-eyebrow">loves</p>
+      <h2 class="pf-section-title">A rotating shelf of things I love.</h2>
+    </div>
+  </header>
+
+  {currentlyLoving.length > 0 && (
+    <p class="pf-currently">
+      <span class="pf-currently-label">currently loving</span>
+      <span class="pf-currently-items">{currentlyLoving.join(' · ')}</span>
+    </p>
+  )}
+
+  <div class="pf-carousel" data-loves-carousel>
+    <div
+      class="pf-track"
+      data-loves-track
+      role="group"
+      aria-roledescription="carousel"
+      aria-label="Things Kaung loves"
+      tabindex="0"
+    >
+      {loves.map((item: LoveItem, i) => (
+        <article
+          class="pf-slide"
+          data-loves-slide
+          role="group"
+          aria-roledescription="slide"
+          aria-label={`${i + 1} of ${total}: ${item.title}`}
+        >
+          <div class="pf-slide-media" data-placeholder={item.image ? undefined : ''}>
+            {item.image ? (
+              <img src={item.image} alt={item.imageAlt ?? item.title} loading="lazy" decoding="async" />
+            ) : (
+              <span class="pf-slide-placeholder" aria-hidden="true">{item.category}</span>
+            )}
+            {item.currently && <span class="pf-slide-badge">currently loving</span>}
+          </div>
+          <div class="pf-slide-body">
+            <p class="pf-slide-cat">{item.category}</p>
+            <h3 class="pf-slide-title">
+              {item.href ? (
+                <a href={item.href} target="_blank" rel="noopener">{item.title}</a>
+              ) : (
+                item.title
+              )}
+            </h3>
+            <p class="pf-slide-caption">{item.caption}</p>
+            {item.credit && <p class="pf-slide-credit">{item.credit}</p>}
+          </div>
+        </article>
+      ))}
+    </div>
+
+    <div class="pf-carousel-controls">
+      <button type="button" class="pf-carousel-btn" data-loves-prev aria-label="Previous item">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg>
+      </button>
+      <p class="pf-carousel-count" data-loves-count aria-live="polite">
+        <span data-loves-current>01</span> / {String(total).padStart(2, '0')}
+      </p>
+      <button type="button" class="pf-carousel-btn" data-loves-next aria-label="Next item">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg>
+      </button>
+    </div>
+  </div>
+</section>
