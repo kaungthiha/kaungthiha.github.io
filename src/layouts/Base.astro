@@ -55,6 +55,41 @@ const ogImageAbs = new URL(ogImage, Astro.site).toString();
   <meta name="twitter:description" content={description} />
   <meta name="twitter:image" content={ogImageAbs} />
 
+  <!-- Anti-FOUC: set the daylight theme BEFORE first paint so a night-time
+       visitor never flashes the light UI. Mirrors weather.js — same
+       localStorage key, same phase bands (keep the two in sync). -->
+  <script is:inline>
+    (function () {
+      try {
+        var params = new URLSearchParams(location.search);
+        var phase = params.get('phase');
+        if (!phase) {
+          var BAND = 40 * 60; // seconds, = weather.js PHASE_BAND_SEC
+          var now = Date.now() / 1000;
+          var cached = null;
+          try { cached = JSON.parse(localStorage.getItem('kt_arlington_weather_v2')); } catch (e) {}
+          if (cached && typeof cached.sunrise === 'number' && typeof cached.sunset === 'number') {
+            phase =
+              now < cached.sunrise - BAND || now > cached.sunset + BAND ? 'night' :
+              now <= cached.sunrise + BAND ? 'dawn' :
+              now >= cached.sunset - BAND ? 'dusk' : 'day';
+          } else {
+            // Clock fallback — same bands as weather.js phaseFromClock().
+            var h = parseInt(new Intl.DateTimeFormat('en-US', {
+              timeZone: 'America/New_York', hour: 'numeric', hour12: false,
+            }).format(new Date()), 10) % 24;
+            phase = h >= 6 && h < 7 ? 'dawn' : h >= 7 && h < 18 ? 'day'
+              : h >= 18 && h < 20 ? 'dusk' : 'night';
+          }
+        }
+        document.documentElement.dataset.theme =
+          { day: 'light', dawn: 'dawn', dusk: 'dusk', night: 'dark' }[phase] || 'light';
+      } catch (e) {
+        document.documentElement.dataset.theme = 'light';
+      }
+    })();
+  </script>
+
   <!-- Editorial Portfolio CSS -->
   <link href="/assets/css/editorial.css" rel="stylesheet" />
   <link href="/assets/css/weather.css" rel="stylesheet" />

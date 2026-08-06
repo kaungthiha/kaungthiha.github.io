@@ -54,6 +54,9 @@ body.weather-cold {
   --mood-wash: linear-gradient(180deg, rgba(190, 212, 232, 0.28) 0%, transparent 58%);
 }
 
+/* The mood washes are authored as light-page tints; dim them after dark. */
+html[data-theme="dark"] body::before { opacity: 0.35; }
+
 @media (prefers-reduced-motion: reduce) {
   body::before { transition: none; }
 }

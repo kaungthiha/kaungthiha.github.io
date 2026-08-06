@@ -30,6 +30,10 @@
   ::-webkit-scrollbar-track {
     background: #f1f1f1;
   }
+
+  html[data-theme="dark"] ::-webkit-scrollbar-track {
+    background: #15202e;
+  }
   
   ::-webkit-scrollbar-thumb {
     background: var(--gradient-primary);
