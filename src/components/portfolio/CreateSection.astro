@@ -1,0 +1,148 @@
+---
+/**
+ * Create — tools, prototypes, analyses, and experiments in one data-driven
+ * system. Desktop: master-detail (a project index rail + the active project
+ * story). Mobile: the same content collapses into stacked accessible cards.
+ *
+ * Every detail panel is rendered in the DOM at build time (SEO + no-JS access);
+ * the index buttons just toggle which one is visible on desktop. On narrow
+ * screens CSS stacks index-item + its panel together, so no JS is required to
+ * read anything.
+ */
+import { projects, type Project } from '../../data/projects';
+
+const first = projects[0]?.slug;
+---
+
+<section
+  class="pf-section pf-create"
+  id="panel-create"
+  role="tabpanel"
+  aria-labelledby="tab-create"
+  data-section="create"
+  tabindex="-1"
+  hidden
+>
+  <header class="pf-section-head">
+    <div>
+      <p class="pf-eyebrow">create</p>
+      <h2 class="pf-section-title">Things I've built, tested, and learned from.</h2>
+    </div>
+  </header>
+
+  <div class="pf-create-grid">
+    <!-- Master: project index -->
+    <nav class="pf-index" aria-label="Projects">
+      <ol role="list">
+        {projects.map((p: Project, i) => (
+          <li>
+            <button
+              type="button"
+              class="pf-index-item"
+              class:list={{ 'is-active': p.slug === first }}
+              data-project-target={p.slug}
+              aria-controls={`project-${p.slug}`}
+              aria-expanded={p.slug === first ? 'true' : 'false'}
+            >
+              <span class="pf-index-num">{String(i + 1).padStart(2, '0')}</span>
+              <span class="pf-index-text">
+                <span class="pf-index-title">{p.shortTitle ?? p.title}</span>
+                <span class="pf-index-meta">{p.type}{p.year && ` · ${p.year}`}</span>
+              </span>
+            </button>
+          </li>
+        ))}
+      </ol>
+    </nav>
+
+    <!-- Detail: every project story, one visible at a time on desktop -->
+    <div class="pf-detail-stack">
+      {projects.map((p: Project) => (
+        <article
+          class="pf-detail"
+          class:list={{ 'is-active': p.slug === first }}
+          id={`project-${p.slug}`}
+          data-project={p.slug}
+          aria-hidden={p.slug === first ? 'false' : 'true'}
+        >
+          <div class="pf-detail-head">
+            <span class="pf-type-badge" data-type={p.type}>{p.type}</span>
+            {p.status && <span class="pf-status">{p.status}</span>}
+          </div>
+          <h3 class="pf-detail-title">{p.title}</h3>
+          <p class="pf-detail-summary">{p.summary}</p>
+
+          {p.image && (
+            <img
+              class="pf-detail-image"
+              src={p.image}
+              alt={p.imageAlt ?? ''}
+              loading="lazy"
+              decoding="async"
+            />
+          )}
+
+          {p.problem && (
+            <div class="pf-detail-block">
+              <h4>Problem</h4>
+              <p>{p.problem}</p>
+            </div>
+          )}
+          {p.contribution && p.contribution.length > 0 && (
+            <div class="pf-detail-block">
+              <h4>What I did</h4>
+              <ul>{p.contribution.map((c) => <li>{c}</li>)}</ul>
+            </div>
+          )}
+          {p.outcomes && p.outcomes.length > 0 && (
+            <div class="pf-detail-block">
+              <h4>Result</h4>
+              <ul>{p.outcomes.map((o) => <li>{o}</li>)}</ul>
+            </div>
+          )}
+
+          {p.gallery && p.gallery.length > 0 && (
+            <div class="pf-gallery">
+              {p.gallery.map((g) => (
+                <button
+                  type="button"
+                  class="pf-gallery-thumb"
+                  data-lightbox-src={g.src}
+                  data-lightbox-caption={g.caption ?? g.alt}
+                >
+                  <img src={g.src} alt={g.alt} loading="lazy" decoding="async" />
+                  {g.caption && <span class="pf-gallery-cap">{g.caption}</span>}
+                </button>
+              ))}
+            </div>
+          )}
+
+          {p.stack && p.stack.length > 0 && (
+            <ul class="pf-tags" aria-label="Stack">
+              {p.stack.map((s) => <li class="pf-tag">{s}</li>)}
+            </ul>
+          )}
+
+          {p.links && p.links.length > 0 && (
+            <div class="pf-detail-links">
+              {p.links.map((l) => (
+                <a
+                  class="pf-detail-link"
+                  href={l.href}
+                  target={l.href.startsWith('http') || l.kind === 'pdf' ? '_blank' : undefined}
+                  rel={l.href.startsWith('http') || l.kind === 'pdf' ? 'noopener' : undefined}
+                  data-kind={l.kind}
+                >
+                  {l.label}
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M5 12h14m-6-6 6 6-6 6"/></svg>
+                </a>
+              ))}
+            </div>
+          )}
+
+          {p.confidentialityNote && <p class="pf-detail-note">{p.confidentialityNote}</p>}
+        </article>
+      ))}
+    </div>
+  </div>
+</section>
