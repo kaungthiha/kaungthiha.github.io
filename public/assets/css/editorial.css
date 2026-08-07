@@ -749,8 +749,8 @@ body:not(.layout-home) #ft-tool { padding: 1rem var(--gutter) 3rem; }
    ========================================================================== */
 
 .pf-stage {
-  --pf-max:     1080px;   /* editorial column; forest shows on the sides */
-  --pf-gap:     clamp(2rem, 1rem + 5vw, 5rem);   /* two-column gutter */
+  --pf-max:     920px;    /* contained editorial column; forest on the sides */
+  --pf-gap:     clamp(1.75rem, 1rem + 3vw, 3.5rem);   /* two-column gutter */
   --pf-divider: var(--glass-border);
   --pf-wash:    rgba(245, 251, 255, 0.72);        /* soft backing for legibility */
   --pf-hl-bg:       color-mix(in srgb, var(--primary) 9%, transparent);
@@ -1061,6 +1061,10 @@ body:not(.layout-home) #ft-tool { padding: 1rem var(--gutter) 3rem; }
   display: flex; align-items: center; justify-content: center;
   padding: var(--gutter); opacity: 0; transition: opacity 0.2s ease;
 }
+/* CRITICAL: when closed (hidden attribute present) the overlay must be fully
+   removed from the page — otherwise its full-screen fixed backdrop sits on top
+   of the content and swallows every hover/click. */
+.pf-lightbox[hidden] { display: none; }
 .pf-lightbox.is-open { opacity: 1; }
 .pf-lightbox-backdrop { position: absolute; inset: 0; background: rgba(5, 10, 25, 0.82); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); }
 .pf-lightbox-panel { position: relative; max-width: min(92vw, 820px); display: flex; flex-direction: column; gap: 0.65rem; align-items: center; }
@@ -1072,6 +1076,39 @@ body:not(.layout-home) #ft-tool { padding: 1rem var(--gutter) 3rem; }
   cursor: pointer; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 12px rgba(0,0,0,0.3);
 }
 .pf-lightbox-close:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
+
+/* ── Contact footer — quiet close, small inline icons ──────────────────── */
+.pf-footer {
+  margin-top: clamp(3rem, 2rem + 3vw, 4.5rem);
+  padding-top: clamp(1.5rem, 1rem + 1.5vw, 2rem);
+  border-top: 1px solid var(--pf-divider);
+}
+.pf-footer-note {
+  font-family: var(--font-ui);
+  font-size: 1rem;
+  color: var(--text-body);
+  margin: 0 0 1rem;
+}
+.pf-footer-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 1.5rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.pf-footer-links a {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-family: var(--font-ui);
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--text-muted);
+  transition: color 0.2s ease;
+}
+.pf-footer-links a:hover { color: var(--primary); }
+.pf-footer-links svg { width: 16px; height: 16px; flex-shrink: 0; }
 
 /* ==========================================================================
    Theme + weather wash tweaks — keep the reading column legible everywhere.
