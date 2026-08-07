@@ -87,17 +87,15 @@ export const workHighlights: Record<string, WorkHighlight> = {
   'capital-one': {
     title: 'Capital One',
     body: [
-      'Building the mechanisms for driving data product adoption across Card' +
-        'while drinking alot of sugary Starbies',
-    
+      'Building the mechanisms for driving data product adoption across Card, ' +
+        'while drinking a lot of sugary Starbies.',
     ],
   },
   outbuild: {
     title: 'Outbuild — Revenue Operations',
     body: [
-      'Rev Ops and sales enablement at a Series A construction tech' +
-        'and learning a lot about scrappy GTM motions' +
-    
+      'Rev Ops and sales enablement at a Series A construction tech, ' +
+        'and learning a lot about scrappy GTM motions.',
     ],
   },
   aws: {
@@ -111,8 +109,8 @@ export const workHighlights: Record<string, WorkHighlight> = {
     title: 'Wefunder — Product Ops',
     body: [
       'Product operations and compliance at an equity crowdfunding platform. ' +
-        'a VIP product from 0 → 547 users, creating $161,365 in new revenue, and ran ' +
-  
+        'Grew a VIP product from 0 → 547 users, creating $161,365 in new revenue, ' +
+        'and ran A/B tests that lifted investor engagement and NPS.',
     ],
   },
   askcyborg: {
