@@ -1,0 +1,904 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Kaung Thiha | Portfolio</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,400;0,500;0,600;1,400&family=Inter:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      /* Original frost/sky palette — dark default */
+      --bg: #0c131d;
+      --surface: #15202e;
+      --fg: #e8eef6;
+      --muted: #8593a4;
+      --border: #2c3a4d;
+      --accent: #66aaff;
+      --highlight-bg: rgba(102, 170, 255, 0.12);
+      --highlight-hover: rgba(102, 170, 255, 0.22);
+
+      /* Typography — approachable and friendly */
+      --font-display: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+      --font-body: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+
+      /* Spacing */
+      --space-xs: 0.5rem;
+      --space-sm: 1rem;
+      --space-md: 1.5rem;
+      --space-lg: 2.5rem;
+      --space-xl: 4rem;
+      --space-2xl: 6rem;
+
+      /* Layout */
+      --max-width: 1100px;
+      --content-gap: 80px;
+    }
+
+    [data-theme="light"] {
+      --bg: #f5faff;
+      --surface: #ffffff;
+      --fg: #171d27;
+      --muted: #4a5260;
+      --border: #c1c6d7;
+      --highlight-bg: rgba(0, 89, 187, 0.08);
+      --highlight-hover: rgba(0, 89, 187, 0.15);
+      --accent: #0059bb;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    html {
+      font-size: 16px;
+      scroll-behavior: smooth;
+    }
+
+    body {
+      font-family: var(--font-body);
+      font-size: 1rem;
+      line-height: 1.5;
+      color: var(--fg);
+      background: var(--bg);
+      -webkit-font-smoothing: antialiased;
+      min-height: 100vh;
+    }
+
+    /* Hero Section — preserved from original */
+    .hero {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      padding: var(--space-xl) var(--space-md);
+      position: relative;
+    }
+
+    .hero-inner {
+      text-align: center;
+      max-width: 600px;
+    }
+
+    .hero-portrait {
+      width: 180px;
+      height: 180px;
+      border-radius: 50%;
+      object-fit: cover;
+      margin-bottom: var(--space-lg);
+      border: 3px solid var(--border);
+    }
+
+    .hero-name {
+      font-family: var(--font-display);
+      font-size: clamp(2.5rem, 6vw, 4rem);
+      font-weight: 600;
+      line-height: 1.15;
+      letter-spacing: -0.02em;
+      margin-bottom: var(--space-sm);
+    }
+
+    .hero-name .burmese {
+      display: block;
+      font-size: 0.5em;
+      color: var(--muted);
+      margin-top: var(--space-xs);
+      letter-spacing: 0;
+    }
+
+    .hero-weather {
+      font-family: var(--font-body);
+      font-size: 1rem;
+      font-style: normal;
+      color: var(--muted);
+      margin-bottom: var(--space-lg);
+    }
+
+    .hero-socials {
+      display: flex;
+      justify-content: center;
+      gap: var(--space-sm);
+      margin-bottom: var(--space-xl);
+      list-style: none;
+    }
+
+    .hero-socials a {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      border: 1px solid var(--border);
+      color: var(--fg);
+      transition: border-color 0.2s ease, transform 0.2s ease;
+    }
+
+    .hero-socials a:hover {
+      border-color: var(--accent);
+      transform: translateY(-2px);
+    }
+
+    .hero-socials svg {
+      width: 20px;
+      height: 20px;
+    }
+
+    .hero-scroll-cue {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: var(--space-xs);
+      color: var(--muted);
+      text-decoration: none;
+      font-size: 0.8125rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      transition: color 0.2s ease;
+    }
+
+    .hero-scroll-cue:hover {
+      color: var(--fg);
+    }
+
+    .hero-scroll-cue svg {
+      width: 24px;
+      height: 24px;
+      animation: gentle-bob 2s ease-in-out infinite;
+    }
+
+    @keyframes gentle-bob {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(6px); }
+    }
+
+    /* Content Stage */
+    .content-stage {
+      max-width: var(--max-width);
+      margin: 0 auto;
+      padding: var(--space-2xl) var(--space-md);
+    }
+
+    /* Navigation Pills */
+    .nav-pills {
+      display: flex;
+      gap: var(--space-xs);
+      margin-bottom: var(--space-xl);
+      padding-bottom: var(--space-md);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .nav-pill {
+      font-family: var(--font-body);
+      font-size: 0.9375rem;
+      font-weight: 500;
+      letter-spacing: 0.02em;
+      color: var(--muted);
+      background: none;
+      border: none;
+      padding: var(--space-xs) var(--space-sm);
+      cursor: pointer;
+      transition: color 0.2s ease;
+      position: relative;
+    }
+
+    .nav-pill::after {
+      content: '';
+      position: absolute;
+      bottom: -1px;
+      left: 0;
+      right: 0;
+      height: 2px;
+      background: var(--accent);
+      transform: scaleX(0);
+      transition: transform 0.2s ease;
+    }
+
+    .nav-pill:hover {
+      color: var(--fg);
+    }
+
+    .nav-pill.active {
+      color: var(--fg);
+    }
+
+    .nav-pill.active::after {
+      transform: scaleX(1);
+    }
+
+    .nav-separator {
+      color: var(--border);
+      align-self: center;
+    }
+
+    /* Section Panels */
+    .section-panel {
+      display: none;
+    }
+
+    .section-panel.active {
+      display: block;
+    }
+
+    /* Two-column layout like Charlie Kubal */
+    .section-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: var(--content-gap);
+    }
+
+    @media (max-width: 768px) {
+      .section-grid {
+        grid-template-columns: 1fr;
+        gap: var(--space-lg);
+      }
+    }
+
+    .section-left {
+      position: sticky;
+      top: var(--space-lg);
+      align-self: start;
+    }
+
+    /* Typography for content */
+    .section-heading {
+      font-family: var(--font-display);
+      font-size: clamp(2rem, 4vw, 2.75rem);
+      font-weight: 600;
+      line-height: 1.2;
+      letter-spacing: -0.02em;
+      margin-bottom: var(--space-md);
+    }
+
+    .section-tagline {
+      font-family: var(--font-body);
+      font-size: 0.875rem;
+      font-weight: 500;
+      color: var(--accent);
+      margin-bottom: var(--space-xs);
+      letter-spacing: 0.02em;
+    }
+
+    .bio-text {
+      font-family: var(--font-body);
+      font-size: 1.125rem;
+      line-height: 1.7;
+      color: var(--fg);
+    }
+
+    .bio-text + .bio-text {
+      margin-top: var(--space-md);
+    }
+
+    /* Highlighted inline links */
+    .highlight {
+      background: var(--highlight-bg);
+      color: var(--fg);
+      text-decoration: none;
+      padding: 0.1em 0.3em;
+      margin: -0.1em -0.15em;
+      border-radius: 3px;
+      cursor: pointer;
+      transition: background 0.2s ease;
+    }
+
+    .highlight:hover {
+      background: var(--highlight-hover);
+    }
+
+    /* Dynamic detail panel */
+    .detail-panel {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: var(--space-lg);
+      min-height: 200px;
+    }
+
+    .detail-panel.empty {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--muted);
+      font-family: var(--font-body);
+      font-style: italic;
+    }
+
+    .detail-title {
+      font-family: var(--font-body);
+      font-size: 0.75rem;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: var(--space-sm);
+    }
+
+    .detail-content {
+      font-family: var(--font-body);
+      font-size: 1rem;
+      line-height: 1.65;
+    }
+
+    .detail-content p + p {
+      margin-top: var(--space-sm);
+    }
+
+    .detail-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5em;
+      margin-top: var(--space-md);
+      font-family: var(--font-body);
+      font-size: 0.875rem;
+      color: var(--accent);
+      text-decoration: none;
+      transition: opacity 0.2s ease;
+    }
+
+    .detail-link:hover {
+      opacity: 0.8;
+    }
+
+    .detail-link svg {
+      width: 16px;
+      height: 16px;
+    }
+
+    /* Skills inline */
+    .skills-line {
+      font-family: var(--font-body);
+      font-size: 0.8125rem;
+      color: var(--muted);
+      margin-top: var(--space-md);
+      line-height: 1.8;
+    }
+
+    .skills-line strong {
+      color: var(--fg);
+      font-weight: 500;
+    }
+
+    /* Create section — project index */
+    .project-index {
+      list-style: none;
+    }
+
+    .project-item {
+      padding: var(--space-md) 0;
+      border-bottom: 1px solid var(--border);
+      cursor: pointer;
+      transition: background 0.2s ease;
+    }
+
+    .project-item:first-child {
+      padding-top: 0;
+    }
+
+    .project-item:hover {
+      background: var(--highlight-bg);
+      margin: 0 calc(var(--space-sm) * -1);
+      padding-left: var(--space-sm);
+      padding-right: var(--space-sm);
+    }
+
+    .project-item.active {
+      background: var(--highlight-bg);
+      margin: 0 calc(var(--space-sm) * -1);
+      padding-left: var(--space-sm);
+      padding-right: var(--space-sm);
+    }
+
+    .project-num {
+      font-family: var(--font-body);
+      font-size: 0.75rem;
+      color: var(--muted);
+      margin-bottom: 0.25rem;
+    }
+
+    .project-title {
+      font-family: var(--font-display);
+      font-size: 1.125rem;
+      font-weight: 600;
+      margin-bottom: 0.25rem;
+    }
+
+    .project-meta {
+      font-family: var(--font-body);
+      font-size: 0.8125rem;
+      color: var(--muted);
+    }
+
+    /* Loves section — curated list */
+    .loves-grid {
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-md);
+    }
+
+    .love-item {
+      display: grid;
+      grid-template-columns: auto 1fr;
+      gap: var(--space-md);
+      align-items: start;
+    }
+
+    .love-category {
+      font-family: var(--font-body);
+      font-size: 0.75rem;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--muted);
+      min-width: 100px;
+      padding-top: 0.25em;
+    }
+
+    .love-content {
+      font-family: var(--font-body);
+      font-size: 1rem;
+      line-height: 1.65;
+    }
+
+    .love-content a {
+      color: var(--fg);
+      text-decoration: underline;
+      text-underline-offset: 3px;
+      text-decoration-thickness: 1px;
+      transition: color 0.2s ease;
+    }
+
+    .love-content a:hover {
+      color: var(--accent);
+    }
+
+    /* Currently section */
+    .currently {
+      margin-top: var(--space-2xl);
+      padding-top: var(--space-xl);
+      border-top: 1px solid var(--border);
+    }
+
+    .currently-label {
+      font-family: var(--font-body);
+      font-size: 0.75rem;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: var(--space-sm);
+    }
+
+    .currently-text {
+      font-family: var(--font-body);
+      font-size: 1rem;
+      font-style: normal;
+      color: var(--fg);
+      line-height: 1.65;
+    }
+
+    /* Theme toggle */
+    .theme-toggle {
+      position: fixed;
+      bottom: var(--space-md);
+      right: var(--space-md);
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      border: 1px solid var(--border);
+      background: var(--surface);
+      color: var(--muted);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: border-color 0.2s ease, color 0.2s ease;
+      z-index: 100;
+    }
+
+    .theme-toggle:hover {
+      border-color: var(--fg);
+      color: var(--fg);
+    }
+
+    .theme-toggle svg {
+      width: 18px;
+      height: 18px;
+    }
+
+    /* Focus states */
+    :focus-visible {
+      outline: 2px solid var(--accent);
+      outline-offset: 2px;
+    }
+
+    button:focus-visible {
+      outline: 2px solid var(--accent);
+      outline-offset: 2px;
+    }
+  </style>
+</head>
+<body>
+  <!-- Hero Section — preserved elements -->
+  <section class="hero" data-od-id="hero">
+    <div class="hero-inner">
+      <img
+        class="hero-portrait"
+        src="https://kaungthiha.github.io/assets/images/about.jpg"
+        alt="Kaung Thiha"
+        width="180"
+        height="180"
+      >
+      <h1 class="hero-name">
+        I'm Kaung
+        <span class="burmese">ကောင်းသီဟ</span>
+      </h1>
+      <p class="hero-weather">Checking the weather in Arlington, Virginia…</p>
+
+      <ul class="hero-socials">
+        <li>
+          <a href="https://www.linkedin.com/in/kaungthiha/" target="_blank" rel="noopener" aria-label="LinkedIn">
+            <svg viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">
+              <path d="M0 1.146C0 .513.526 0 1.175 0h13.65C15.474 0 16 .513 16 1.146v13.708c0 .633-.526 1.146-1.175 1.146H1.175C.526 16 0 15.487 0 14.854zm4.943 12.248V6.169H2.542v7.225zm-1.2-8.212c.837 0 1.358-.554 1.358-1.248-.015-.709-.52-1.248-1.342-1.248S2.4 3.226 2.4 3.934c0 .694.521 1.248 1.327 1.248zm4.908 8.212V9.359c0-.216.016-.432.08-.586.173-.431.568-.878 1.232-.878.869 0 1.216.662 1.216 1.634v3.865h2.401V9.25c0-2.22-1.184-3.252-2.764-3.252-1.274 0-1.845.7-2.165 1.193v.025h-.016l.016-.025V6.169h-2.4c.03.678 0 7.225 0 7.225z"/>
+            </svg>
+          </a>
+        </li>
+        <li>
+          <a href="https://open.spotify.com/user/22k3hzyma66fj4nbmanjastiy" target="_blank" rel="noopener" aria-label="Spotify">
+            <svg viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">
+              <path d="M8 0a8 8 0 1 0 0 16A8 8 0 0 0 8 0zm3.669 11.538a.498.498 0 0 1-.686.165c-1.879-1.147-4.243-1.407-7.028-.77a.499.499 0 0 1-.222-.973c3.048-.696 5.662-.397 7.77.892a.5.5 0 0 1 .166.686zm.979-2.178a.624.624 0 0 1-.858.205c-2.15-1.321-5.428-1.704-7.972-.932a.625.625 0 0 1-.362-1.194c2.905-.881 6.517-.454 8.986 1.063a.624.624 0 0 1 .206.858zm.084-2.268C10.154 5.56 5.9 5.419 3.438 6.166a.748.748 0 1 1-.434-1.432c2.825-.857 7.523-.692 10.492 1.07a.747.747 0 1 1-.764 1.288z"/>
+            </svg>
+          </a>
+        </li>
+        <li>
+          <a href="https://github.com/kaungthiha" target="_blank" rel="noopener" aria-label="GitHub">
+            <svg viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">
+              <path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0 0 16 8c0-4.42-3.58-8-8-8z"/>
+            </svg>
+          </a>
+        </li>
+      </ul>
+
+      <a class="hero-scroll-cue" href="#content" aria-label="Scroll to explore">
+        <span>explore</span>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M12 5v14M19 12l-7 7-7-7"/>
+        </svg>
+      </a>
+    </div>
+  </section>
+
+  <!-- Content Stage -->
+  <main class="content-stage" id="content" data-od-id="content-stage">
+    <!-- Navigation Pills -->
+    <nav class="nav-pills" role="tablist" aria-label="Portfolio sections" data-od-id="nav-pills">
+      <button
+        class="nav-pill active"
+        role="tab"
+        aria-selected="true"
+        aria-controls="panel-work"
+        data-section="work"
+      >work</button>
+      <span class="nav-separator" aria-hidden="true">|</span>
+      <button
+        class="nav-pill"
+        role="tab"
+        aria-selected="false"
+        aria-controls="panel-create"
+        data-section="create"
+      >create</button>
+      <span class="nav-separator" aria-hidden="true">|</span>
+      <button
+        class="nav-pill"
+        role="tab"
+        aria-selected="false"
+        aria-controls="panel-loves"
+        data-section="loves"
+      >loves</button>
+    </nav>
+
+    <!-- Work Section -->
+    <section class="section-panel active" id="panel-work" role="tabpanel" data-od-id="section-work">
+      <div class="section-grid">
+        <div class="section-left">
+          <p class="section-tagline">product + data + ai</p>
+          <h2 class="section-heading">I work where<br>overlap happens.</h2>
+
+          <p class="bio-text">
+            Currently an Associate Data Product Analyst at <span class="highlight" data-detail="capital-one">Capital One</span>, on the Data Products & Experiences team. Before that: rev ops at a <span class="highlight" data-detail="outbuild">construction-tech startup</span>, RLHF research at <span class="highlight" data-detail="aws">AWS</span>, product ops at a <span class="highlight" data-detail="fintech">fintech</span>.
+          </p>
+
+          <p class="bio-text">
+            Co-founded <span class="highlight" data-detail="askcyborg">an AI research tool</span> in college — shipped the MVP, owned the roadmap. Mostly data and product, some building. I like shipping small things for fun.
+          </p>
+
+          <p class="skills-line">
+            <strong>Product</strong> PRDs · analytics · A/B testing · stakeholder management<br>
+            <strong>Data</strong> SQL · Python · Snowflake · Databricks · Tableau · R<br>
+            <strong>Building</strong> Astro · TypeScript · AI coding agents · n8n
+          </p>
+        </div>
+
+        <div class="section-right">
+          <div class="detail-panel empty" id="work-detail" data-od-id="work-detail">
+            <span>click a highlight to learn more</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Create Section -->
+    <section class="section-panel" id="panel-create" role="tabpanel" data-od-id="section-create">
+      <div class="section-grid">
+        <div class="section-left">
+          <p class="section-tagline">tinkerer, builder</p>
+          <h2 class="section-heading">Things I've built,<br>tested, learned from.</h2>
+
+          <ol class="project-index">
+            <li class="project-item active" data-project="festival">
+              <span class="project-num">01</span>
+              <p class="project-title">Festival Thingamabob</p>
+              <span class="project-meta">Live tool · 2025</span>
+            </li>
+            <li class="project-item" data-project="outbuild-learning">
+              <span class="project-num">02</span>
+              <p class="project-title">Outbuild Learning</p>
+              <span class="project-meta">AI automation · 2025</span>
+            </li>
+            <li class="project-item" data-project="askcyborg-project">
+              <span class="project-num">03</span>
+              <p class="project-title">AskCyborg</p>
+              <span class="project-meta">Prototype · 2023</span>
+            </li>
+            <li class="project-item" data-project="ease">
+              <span class="project-num">04</span>
+              <p class="project-title">EASE (DSC case study)</p>
+              <span class="project-meta">Case study · 2025</span>
+            </li>
+            <li class="project-item" data-project="reddit-pulse">
+              <span class="project-num">05</span>
+              <p class="project-title">Reddit Pulse</p>
+              <span class="project-meta">Analytics · 2026</span>
+            </li>
+          </ol>
+        </div>
+
+        <div class="section-right">
+          <div class="detail-panel" id="create-detail" data-od-id="create-detail">
+            <p class="detail-title">Festival Thingamabob</p>
+            <div class="detail-content">
+              <p>Plan festival meetups with the squad and build a schedule around the sets nobody wants to miss.</p>
+              <p>Ingests a festival schedule, lets you flag must-see artists, then optimises an itinerary using weighted interval scheduling under time and distance constraints. Supports shared group planning so the whole squad converges on one plan.</p>
+            </div>
+            <a class="detail-link" href="https://kaungthiha.github.io/tools/festival-thingamabob/" target="_blank" rel="noopener">
+              Open the tool
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                <path d="M5 12h14m-6-6 6 6-6 6"/>
+              </svg>
+            </a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Loves Section -->
+    <section class="section-panel" id="panel-loves" role="tabpanel" data-od-id="section-loves">
+      <div class="section-grid">
+        <div class="section-left">
+          <p class="section-tagline">a rotating shelf</p>
+          <h2 class="section-heading">Things I love.</h2>
+
+          <div class="currently">
+            <p class="currently-label">currently loving</p>
+            <p class="currently-text">Relearning Japanese · Warhammer 40K lore · Cooking (and reading about it) · Culinary Class Wars</p>
+          </div>
+        </div>
+
+        <div class="section-right">
+          <div class="loves-grid">
+            <div class="love-item">
+              <span class="love-category">Languages</span>
+              <p class="love-content">Relearning Japanese. I used to be semi-fluent and let it slip. Getting it back — one stubborn kanji at a time — has been oddly grounding.</p>
+            </div>
+            <div class="love-item">
+              <span class="love-category">Lore</span>
+              <p class="love-content">An absurdly deep, grimdark universe. I fall down <a href="https://www.youtube.com/@PancreasNoWork" target="_blank" rel="noopener">PancreasNoWork</a> lore dives and come back up an hour later, no regrets.</p>
+            </div>
+            <div class="love-item">
+              <span class="love-category">Cooking</span>
+              <p class="love-content">Working through Michael Ruhlman's "The Soul of a Chef." Good cooking is just product thinking you can eat.</p>
+            </div>
+            <div class="love-item">
+              <span class="love-category">Watching</span>
+              <p class="love-content">Culinary Class Wars — a cooking competition with real stakes and real craft. Season 2 has been living in my head rent-free.</p>
+            </div>
+            <div class="love-item">
+              <span class="love-category">Books</span>
+              <p class="love-content">"Palo Alto" by Malcolm Harris. A sprawling, unsentimental history of the place that shaped the industry I work in.</p>
+            </div>
+            <div class="love-item">
+              <span class="love-category">Music</span>
+              <p class="love-content"><a href="https://open.spotify.com/user/22k3hzyma66fj4nbmanjastiy" target="_blank" rel="noopener">Whatever's on my Spotify</a>. My listening is public — say hi if our taste overlaps.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- Theme Toggle -->
+  <button class="theme-toggle" id="theme-toggle" aria-label="Toggle light/dark mode">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+      <circle cx="12" cy="12" r="5"/>
+      <path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/>
+    </svg>
+  </button>
+
+  <script>
+    // Section navigation
+    const pills = document.querySelectorAll('.nav-pill');
+    const panels = document.querySelectorAll('.section-panel');
+
+    pills.forEach(pill => {
+      pill.addEventListener('click', () => {
+        const target = pill.dataset.section;
+
+        pills.forEach(p => {
+          p.classList.remove('active');
+          p.setAttribute('aria-selected', 'false');
+        });
+        pill.classList.add('active');
+        pill.setAttribute('aria-selected', 'true');
+
+        panels.forEach(panel => {
+          panel.classList.remove('active');
+          if (panel.id === `panel-${target}`) {
+            panel.classList.add('active');
+          }
+        });
+      });
+    });
+
+    // Work section highlights
+    const workDetails = {
+      'capital-one': {
+        title: 'Capital One',
+        content: '<p>Associate Data Product Analyst on the Data Products & Experiences team. Working on card adoption, usage growth, and the data infrastructure behind it.</p>',
+        link: null
+      },
+      'outbuild': {
+        title: 'Outbuild',
+        content: '<p>Revenue operations at a construction-tech startup. Built systems to track pipeline, automate reporting, and support the sales team.</p>',
+        link: null
+      },
+      'aws': {
+        title: 'AWS — RLHF Research',
+        content: '<p>Reinforcement Learning from Human Feedback research and operations. Part of the team training AI models with human preference data.</p>',
+        link: null
+      },
+      'fintech': {
+        title: 'Fintech Product Ops',
+        content: '<p>Product operations at an early-stage fintech. Coordinated launches, managed stakeholders, and kept the roadmap on track.</p>',
+        link: null
+      },
+      'askcyborg': {
+        title: 'AskCyborg',
+        content: '<p>Co-founded an AI research assistant for SEC EDGAR filings. Ask a question, get a sourced report. Shipped the MVP and owned the roadmap through pivot and product discovery.</p>',
+        link: null
+      }
+    };
+
+    const highlights = document.querySelectorAll('[data-detail]');
+    const workDetailPanel = document.getElementById('work-detail');
+
+    highlights.forEach(hl => {
+      hl.addEventListener('click', () => {
+        const key = hl.dataset.detail;
+        const data = workDetails[key];
+        if (data) {
+          workDetailPanel.classList.remove('empty');
+          workDetailPanel.innerHTML = `
+            <p class="detail-title">${data.title}</p>
+            <div class="detail-content">${data.content}</div>
+            ${data.link ? `<a class="detail-link" href="${data.link}" target="_blank" rel="noopener">Learn more <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M5 12h14m-6-6 6 6-6 6"/></svg></a>` : ''}
+          `;
+        }
+      });
+    });
+
+    // Create section projects
+    const projectDetails = {
+      'festival': {
+        title: 'Festival Thingamabob',
+        content: '<p>Plan festival meetups with the squad and build a schedule around the sets nobody wants to miss.</p><p>Ingests a festival schedule, lets you flag must-see artists, then optimises an itinerary using weighted interval scheduling under time and distance constraints. Supports shared group planning so the whole squad converges on one plan.</p>',
+        link: 'https://kaungthiha.github.io/tools/festival-thingamabob/',
+        linkText: 'Open the tool'
+      },
+      'outbuild-learning': {
+        title: 'Outbuild Learning System',
+        content: '<p>An automated learning-assessment system that cut new-hire sales onboarding from about four weeks to one.</p><p>Combined Claude for quiz generation and grading, Notion as the knowledge base and results hub, Google Forms for delivery, and n8n as the automation layer.</p>',
+        link: null
+      },
+      'askcyborg-project': {
+        title: 'AskCyborg',
+        content: '<p>An AI research assistant for SEC EDGAR filings — ask a question, get a sourced report.</p><p>Built a filing ingestion + parsing flow over SEC EDGAR. Used embeddings and vector retrieval to answer queries and assemble reports. Ran product discovery and user-feedback loops to shape the roadmap.</p>',
+        link: null
+      },
+      'ease': {
+        title: 'EASE — Debt-Support Flow',
+        content: '<p>An interactive mobile prototype for a debt-support flow — meeting customers in financial distress with a clearer path forward.</p><p>Designed a dashboard home with a financial snapshot and a prompt to get a personalised plan. Built a smart survey capturing four key signals with segmentation logic that routes to the right path.</p>',
+        link: 'https://kaungthiha.github.io/pages/dsc-case-study/',
+        linkText: 'Launch the prototype'
+      },
+      'reddit-pulse': {
+        title: 'Instacart Reddit Pulse',
+        content: '<p>A lightweight tool that reads the Reddit API to surface sentiment and narrative signals, then auto-generates two visuals and a short memo.</p><p>Sample run: 24 posts across 3 subreddits, 66.7% negative, with substitutions/out-of-stock the top pain point.</p>',
+        link: 'https://github.com/kaungthiha',
+        linkText: 'View on GitHub'
+      }
+    };
+
+    const projectItems = document.querySelectorAll('.project-item');
+    const createDetailPanel = document.getElementById('create-detail');
+
+    projectItems.forEach(item => {
+      item.addEventListener('click', () => {
+        const key = item.dataset.project;
+        const data = projectDetails[key];
+
+        projectItems.forEach(p => p.classList.remove('active'));
+        item.classList.add('active');
+
+        if (data) {
+          createDetailPanel.innerHTML = `
+            <p class="detail-title">${data.title}</p>
+            <div class="detail-content">${data.content}</div>
+            ${data.link ? `<a class="detail-link" href="${data.link}" target="_blank" rel="noopener">${data.linkText} <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M5 12h14m-6-6 6 6-6 6"/></svg></a>` : ''}
+          `;
+        }
+      });
+    });
+
+    // Theme toggle
+    const themeToggle = document.getElementById('theme-toggle');
+    const html = document.documentElement;
+
+    // Check for saved preference
+    const savedTheme = localStorage.getItem('theme');
+    if (savedTheme) {
+      html.dataset.theme = savedTheme;
+    }
+
+    themeToggle.addEventListener('click', () => {
+      const current = html.dataset.theme;
+      const next = current === 'light' ? 'dark' : 'light';
+      html.dataset.theme = next;
+      localStorage.setItem('theme', next);
+    });
+  </script>
+</body>
+</html>
