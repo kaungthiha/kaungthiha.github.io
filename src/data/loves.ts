@@ -32,8 +32,7 @@ export const loves: LoveItem[] = [
     category: 'Languages & learning',
     title: 'Relearning Japanese',
     caption:
-      'I used to be semi-fluent and let it slip. Getting it back — one stubborn ' +
-      'kanji at a time — has been oddly grounding.',
+      'I used to be semi-fluent and let it slip. Getting it back through Duolingo and anime',
     currently: true,
   },
   {
@@ -41,8 +40,7 @@ export const loves: LoveItem[] = [
     category: 'Games, worlds & lore',
     title: 'Warhammer 40K lore',
     caption:
-      'An absurdly deep, grimdark universe. I fall down PancreasNoWork lore ' +
-      'dives and come back up an hour later, no regrets.',
+      'Love this absurdly deep, grimdark universe. PancreasNoWork is peak',
     href: 'https://www.youtube.com/@PancreasNoWork',
     currently: true,
   },
@@ -51,17 +49,15 @@ export const loves: LoveItem[] = [
     category: 'Cooking & food',
     title: 'Cooking (and reading about it)',
     caption:
-      'Working through Michael Ruhlman\'s "The Soul of a Chef." Good cooking is ' +
-      'just product thinking you can eat.',
+      'Rereading Michael Ruhlman\'s "The Soul of a Chef." Amazing narrative and sparked my love for cooking back in thed day. ',
     currently: true,
   },
   {
     id: 'culinary-class-wars',
     category: 'Watching',
-    title: 'Culinary Class Wars',
+    title: 'Anime: Witch Hat Atelier',
     caption:
-      'A cooking competition with real stakes and real craft. Season 2 has been ' +
-      'living in my head rent-free.',
+      'The magic system is so intricate I love it',
     currently: true,
   },
   {
@@ -70,14 +66,14 @@ export const loves: LoveItem[] = [
     title: '“Palo Alto” — Malcolm Harris',
     caption:
       'A sprawling, unsentimental history of the place that shaped the industry ' +
-      'I work in. Changes how you read a lot of tech mythology.',
+      'I work(ed) in. Changes how you read a lot of tech mythology.',
   },
   {
     id: 'wh40k-book',
     category: 'Books',
     title: '“Ashes of the Imperium” — Chris Wraight',
     caption:
-      'The 40K rabbit hole, in prose form. Sometimes you just want to read about ' +
+      'Another 40K rabbit hole. Sometimes you just want to read about ' +
       'a doomed galaxy before bed.',
   },
   {
@@ -85,7 +81,7 @@ export const loves: LoveItem[] = [
     category: 'Music',
     title: 'Whatever\'s on my Spotify',
     caption:
-      'Music is always running in the background while I build. My listening ' +
+      'I have basic raver tastes. My listening ' +
       'is public — say hi if our taste overlaps.',
     href: 'https://open.spotify.com/user/22k3hzyma66fj4nbmanjastiy?si=ea605d91ddae4bb2',
   },
