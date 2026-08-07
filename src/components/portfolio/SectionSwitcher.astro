@@ -1,12 +1,9 @@
 ---
 /**
- * Section switcher — a restrained ARIA tablist (work / create / loves).
- * Lowercase labels, active state shown by a subtle gradient underline (not a
- * dashboard pill). Sticky near the top of the content stage. Keyboard support
- * (arrows / Home / End) + hash sync live in portfolio-navigation.ts.
- *
- * Semantic <a href="#work"> so the control still works (and deep-links) with
- * no JavaScript; the script upgrades it to a proper tablist.
+ * Section switcher — lowercase nav pills (work | create | loves) with an
+ * underline on the active tab, left-aligned under a divider (charliekubal
+ * style). Semantic <a href="#work"> so it deep-links and works with no JS;
+ * the script (portfolio-navigation.ts) upgrades it to a keyboard tablist.
  */
 const tabs = [
   { id: 'work', label: 'work' },
@@ -16,19 +13,22 @@ const tabs = [
 ---
 
 <div class="pf-switcher-wrap">
-  <div class="pf-switcher" role="tablist" aria-label="Portfolio sections" data-section-switcher>
+  <nav class="pf-switcher" role="tablist" aria-label="Portfolio sections" data-section-switcher>
     {tabs.map((t, i) => (
-      <a
-        class="pf-tab"
-        class:list={{ 'is-active': i === 0 }}
-        id={`tab-${t.id}`}
-        href={`#${t.id}`}
-        role="tab"
-        aria-controls={`panel-${t.id}`}
-        aria-selected={i === 0 ? 'true' : 'false'}
-        tabindex={i === 0 ? '0' : '-1'}
-        data-section-tab={t.id}
-      >{t.label}</a>
+      <>
+        {i > 0 && <span class="pf-tab-sep" aria-hidden="true">|</span>}
+        <a
+          class="pf-tab"
+          class:list={{ 'is-active': i === 0 }}
+          id={`tab-${t.id}`}
+          href={`#${t.id}`}
+          role="tab"
+          aria-controls={`panel-${t.id}`}
+          aria-selected={i === 0 ? 'true' : 'false'}
+          tabindex={i === 0 ? '0' : '-1'}
+          data-section-tab={t.id}
+        >{t.label}</a>
+      </>
     ))}
-  </div>
+  </nav>
 </div>

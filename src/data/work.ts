@@ -50,6 +50,83 @@ export const workSummary: string[] = [
   "mostly data and product, some building. i like shipping small things for fun.",
 ];
 
+/**
+ * Work as flowing prose. Each paragraph is a list of parts; a part is either
+ * plain text or a { text, detail } highlight. Highlights bold on hover and open
+ * the matching workHighlights[detail] entry in the side detail panel.
+ */
+export type ProsetPart = string | { text: string; detail: string };
+export const workProse: ProsetPart[][] = [
+  [
+    'Currently an Associate Data Product Analyst at ',
+    { text: 'Capital One', detail: 'capital-one' },
+    ', on the Data Products & Experiences team. Before that: rev ops at a ',
+    { text: 'construction-tech startup', detail: 'outbuild' },
+    ', RLHF research at ',
+    { text: 'AWS', detail: 'aws' },
+    ', product ops at a ',
+    { text: 'fintech', detail: 'fintech' },
+    '.',
+  ],
+  [
+    'Co-founded ',
+    { text: 'an AI research tool', detail: 'askcyborg' },
+    ' in college — shipped the MVP, owned the roadmap. Mostly data and product, ' +
+      'some building. I like shipping small things for fun.',
+  ],
+];
+
+export interface WorkHighlight {
+  title: string;
+  body: string[];
+  link?: { label: string; href: string };
+}
+
+/** Detail content shown when a work highlight is clicked (public-safe). */
+export const workHighlights: Record<string, WorkHighlight> = {
+  'capital-one': {
+    title: 'Capital One',
+    body: [
+      'Associate Data Product Analyst on the Data Products & Experiences team — ' +
+        'card adoption, usage growth, and the data infrastructure behind it.',
+      'Built Databricks/Python automation that removed 5+ hours/week of manual ' +
+        'validation, and modeled ~1.2 TB of event data across Snowflake, OneLake, and internal APIs.',
+    ],
+  },
+  outbuild: {
+    title: 'Outbuild — Revenue Operations',
+    body: [
+      'Revenue operations and sales enablement at a Series A construction-tech ' +
+        'startup. Built an AI-assisted learning system that cut new-hire onboarding ' +
+        'from ~4 weeks to ~1 week, and tightened the funnel with HubSpot automations.',
+    ],
+  },
+  aws: {
+    title: 'AWS — RLHF Research & Ops',
+    body: [
+      'LLM / agentic-model operations via Keywords Studios. Directed a team of ' +
+        '50+ research associates training and evaluating an AI classification model, ' +
+        'and used Hex dashboards to lift QA pass rate ~5% month-over-month.',
+    ],
+  },
+  fintech: {
+    title: 'Wefunder — Product Ops',
+    body: [
+      'Product operations and compliance at an equity-crowdfunding platform. Grew ' +
+        'a VIP product from 0 → 547 users, creating $161,365 in new revenue, and ran ' +
+        'A/B tests that lifted investor engagement and NPS.',
+    ],
+  },
+  askcyborg: {
+    title: 'AskCyborg',
+    body: [
+      'Co-founded an AI research assistant for SEC EDGAR filings — ask a question, ' +
+        'get a sourced report. Shipped the MVP and owned the roadmap through product ' +
+        'discovery, using embeddings and vector retrieval to assemble reports.',
+    ],
+  },
+};
+
 export const roles: WorkRole[] = [
   {
     company: 'Capital One',

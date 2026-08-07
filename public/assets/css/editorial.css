@@ -739,20 +739,22 @@ body:not(.layout-home) > #main {
 }
 body:not(.layout-home) #ft-tool { padding: 1rem var(--gutter) 3rem; }
 
+
 /* ==========================================================================
    Portfolio content stage — work / create / loves
-   A slim, centered editorial column that floats in the middle of the scene,
-   so the forest breathes on both sides. No heavy glass box — just enough of a
-   soft, theme-aware wash directly behind the text to keep it readable over the
-   forest. Theme-aware via the shared --text-* / --glass-* tokens.
+   Charliekubal-style editorial: a centered column that floats in the scene
+   (forest breathes on the sides), lowercase nav pills, and a two-column
+   heading/detail grid per section. Theme-aware via the shared --text-*/
+   --glass-*/--primary tokens (light / dawn / dusk / dark all covered).
    ========================================================================== */
 
 .pf-stage {
-  --pf-max:    720px;    /* slim centered column; forest shows on the sides */
-  --pf-pad:    clamp(1.1rem, 0.5rem + 2vw, 2rem);
+  --pf-max:     1080px;   /* editorial column; forest shows on the sides */
+  --pf-gap:     clamp(2rem, 1rem + 5vw, 5rem);   /* two-column gutter */
   --pf-divider: var(--glass-border);
-  /* Soft wash behind the reading column (light/dawn/dusk default). */
-  --pf-wash:   rgba(245, 251, 255, 0.78);
+  --pf-wash:    rgba(245, 251, 255, 0.72);        /* soft backing for legibility */
+  --pf-hl-bg:       color-mix(in srgb, var(--primary) 9%, transparent);
+  --pf-hl-bg-hover: color-mix(in srgb, var(--primary) 16%, transparent);
 
   position: relative;
   z-index: 1;
@@ -762,77 +764,76 @@ body:not(.layout-home) #ft-tool { padding: 1rem var(--gutter) 3rem; }
   scroll-margin-top: calc(var(--nav-height) + 1rem);
 }
 
-/* Minimalist surface: no border, no card. A whisper-soft radial wash sits
-   directly behind the reading column so text stays legible over the forest
-   without reading as a box. Falls back to a faint flat tint without blur. */
+/* Minimalist surface: a whisper-soft wash behind the reading column so text
+   stays legible over the forest, no card/box. */
 .pf-surface {
   position: relative;
-  padding: clamp(1rem, 0.5rem + 1.5vw, 1.75rem) var(--pf-pad) clamp(2rem, 1.5rem + 2vw, 3rem);
+  padding: clamp(1rem, 0.5rem + 1.5vw, 1.75rem) clamp(1.25rem, 0.6rem + 2vw, 2.5rem)
+           clamp(2rem, 1.5rem + 2vw, 3rem);
   background: radial-gradient(
-    ellipse 120% 100% at 50% 30%,
+    ellipse 130% 100% at 50% 20%,
     var(--pf-wash) 0%,
-    color-mix(in srgb, var(--pf-wash) 55%, transparent) 55%,
+    color-mix(in srgb, var(--pf-wash) 45%, transparent) 60%,
     transparent 100%
   );
 }
 @supports (backdrop-filter: blur(6px)) or (-webkit-backdrop-filter: blur(6px)) {
-  .pf-surface {
-    backdrop-filter: blur(3px);
-    -webkit-backdrop-filter: blur(3px);
-  }
+  .pf-surface { backdrop-filter: blur(3px); -webkit-backdrop-filter: blur(3px); }
 }
 
-/* ── Sticky section switcher — centered pill, clearly interactive ──────── */
+/* ── Nav pills (work | create | loves) ─────────────────────────────────── */
 .pf-switcher-wrap {
   position: sticky;
   top: calc(var(--nav-height) - 12px);
   z-index: 5;
-  display: flex;
-  justify-content: center;
-  margin: 0 0 clamp(1.75rem, 1.25rem + 2vw, 2.75rem);
-  padding-top: 0.25rem;
+  margin: 0 0 clamp(2rem, 1.5rem + 2vw, 3.5rem);
+  padding-bottom: clamp(1rem, 0.75rem + 1vw, 1.5rem);
+  border-bottom: 1px solid var(--pf-divider);
+  background: linear-gradient(var(--pf-wash), var(--pf-wash));
 }
-/* No outer container — the tabs sit directly on the content wash and mesh with
-   it. Each tab keeps a blue hover + a filled active pill so it's clearly a
-   control. */
 .pf-switcher {
-  display: inline-flex;
-  gap: 0.35rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
 }
 .pf-tab {
   position: relative;
   font-family: var(--font-ui);
-  font-size: var(--fs-nav);
-  font-weight: 600;
-  letter-spacing: -0.005em;
+  font-size: 0.9375rem;
+  font-weight: 500;
+  letter-spacing: 0.02em;
   color: var(--text-muted);
   text-decoration: none;
-  padding: 0.4rem 1rem;
-  border-radius: var(--r-pill);
   background: none;
   border: none;
+  padding: 0.4rem 0.75rem;
   cursor: pointer;
-  transition: color 0.2s ease, background 0.2s ease;
+  transition: color 0.2s ease;
 }
-.pf-tab:hover { color: var(--primary); background: color-mix(in srgb, var(--primary) 12%, transparent); }
-.pf-tab.is-active {
-  color: white;
-  background: var(--accent-gradient);
-  box-shadow: 0 2px 8px rgba(36, 128, 253, 0.28);
+.pf-tab::after {
+  content: '';
+  position: absolute;
+  left: 0.75rem;
+  right: 0.75rem;
+  bottom: calc(-1 * clamp(1rem, 0.75rem + 1vw, 1.5rem) - 1px);
+  height: 2px;
+  background: var(--primary);
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.2s ease;
 }
-.pf-tab:focus-visible { outline: 2px solid var(--primary); outline-offset: 3px; }
+.pf-tab:hover { color: var(--text-strong); }
+.pf-tab.is-active { color: var(--text-strong); }
+.pf-tab.is-active::after { transform: scaleX(1); }
+.pf-tab:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; border-radius: var(--r-sm); }
+.pf-tab-sep { color: var(--pf-divider); user-select: none; }
 
-/* ── Section scaffolding ─────────────────────────────────────────────── */
-/* Visibility is driven entirely by data-active on the container: only the
-   matching panel shows. This is robust — no per-element attribute toggling,
-   and the no-JS default (data-active="work") shows Work. A plain [hidden]
-   fallback covers any panel not matched (belt and suspenders). */
+/* ── Section visibility (data-active on the container) ─────────────────── */
 .pf-panels { position: relative; }
 .pf-section { display: none; animation: pf-fade 0.24s ease-out; }
 .pf-panels[data-active="work"]   .pf-work,
 .pf-panels[data-active="create"] .pf-create,
 .pf-panels[data-active="loves"]  .pf-loves { display: block; }
-/* If JS is off and the container somehow has no data-active, still show Work. */
 .pf-panels:not([data-active]) .pf-work { display: block; }
 @keyframes pf-fade {
   from { opacity: 0; transform: translateY(8px); }
@@ -840,593 +841,246 @@ body:not(.layout-home) #ft-tool { padding: 1rem var(--gutter) 3rem; }
 }
 .pf-section:focus { outline: none; }
 
-.pf-section-head {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 1rem;
-  flex-wrap: wrap;
-  margin-bottom: clamp(1.25rem, 1rem + 1.5vw, 2rem);
+/* ── Two-column grid: heading/left, detail/right ───────────────────────── */
+.pf-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--pf-gap);
 }
-.pf-eyebrow {
+.pf-grid-left { position: sticky; top: calc(var(--nav-height) + 2rem); align-self: start; }
+
+.pf-tagline {
   font-family: var(--font-ui);
-  font-size: var(--fs-label-caps);
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.14em;
-  color: var(--secondary);
-  margin: 0 0 0.4rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  color: var(--primary);
+  margin: 0 0 0.5rem;
 }
-.pf-section-title {
+.pf-heading {
   font-family: var(--font-sans);
-  font-size: clamp(1.5rem, 1.15rem + 1.4vw, 2.1rem);
-  font-weight: 800;
-  line-height: 1.14;
+  font-size: clamp(1.9rem, 1.4rem + 2vw, 2.75rem);
+  font-weight: 600;
+  line-height: 1.15;
   letter-spacing: -0.02em;
   color: var(--text-strong);
-  margin: 0;
-  max-width: 18ch;
-}
-.pf-intro {
-  font-size: clamp(1.0625rem, 1rem + 0.4vw, 1.25rem);
-  line-height: 1.6;
-  color: var(--text-body);
-  max-width: 60ch;
-  margin: 0 0 clamp(1.5rem, 1rem + 1.5vw, 2rem);
+  margin: 0 0 clamp(1.25rem, 1rem + 1vw, 1.75rem);
 }
 
-/* Reference-site-style narrative summary — a few quiet lines, not a résumé. */
-.pf-summary {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-  max-width: 60ch;
-  display: flex;
-  flex-direction: column;
-  gap: 0.75rem;
-}
-.pf-summary li {
-  font-size: var(--fs-body-large);
-  line-height: 1.55;
+/* ── Work: bio prose + highlights ──────────────────────────────────────── */
+.pf-bio {
+  font-family: var(--font-ui);
+  font-size: 1.125rem;
+  line-height: 1.7;
   color: var(--text-body);
-  padding-left: 1.1rem;
-  position: relative;
+  margin: 0;
 }
-.pf-summary li::before {
-  content: '';
-  position: absolute;
-  left: 0;
-  top: 0.62em;
-  width: 5px;
-  height: 5px;
-  border-radius: 50%;
-  background: var(--primary);
-  opacity: 0.55;
-}
+.pf-bio + .pf-bio { margin-top: 1.25rem; }
 
-/* Quiet link (résumé download etc.) */
+/* A highlighted role: bolds on hover, opens the side detail on click. */
+.pf-highlight {
+  font: inherit;
+  color: var(--text-strong);
+  background: var(--pf-hl-bg);
+  border: none;
+  padding: 0.1em 0.3em;
+  margin: -0.1em -0.05em;
+  border-radius: 3px;
+  cursor: pointer;
+  transition: background 0.2s ease, font-weight 0.05s ease;
+}
+.pf-highlight:hover,
+.pf-highlight.is-active { background: var(--pf-hl-bg-hover); font-weight: 700; }
+.pf-highlight:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
+
+.pf-skills-line {
+  font-family: var(--font-ui);
+  font-size: 0.8125rem;
+  color: var(--text-muted);
+  line-height: 1.9;
+  margin: clamp(1.5rem, 1rem + 1.5vw, 2rem) 0 0;
+}
+.pf-skills-line strong { color: var(--text-strong); font-weight: 600; }
+
 .pf-quiet-link {
   display: inline-flex;
   align-items: center;
   gap: 0.4rem;
   font-family: var(--font-ui);
-  font-size: var(--fs-nav);
+  font-size: 0.875rem;
   font-weight: 600;
   color: var(--primary);
-  white-space: nowrap;
-  align-self: center;
 }
 .pf-quiet-link svg { width: 15px; height: 15px; }
 .pf-quiet-link:hover { color: var(--primary-container); }
+.pf-quiet-link--standalone { margin-top: clamp(1.25rem, 1rem + 1vw, 1.75rem); }
 
-/* Shared tag chips */
-.pf-tags {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.4rem;
-  margin: 0.85rem 0 0;
-  padding: 0;
-  list-style: none;
-}
-.pf-tag {
-  font-family: var(--font-ui);
-  font-size: 0.75rem;
-  font-weight: 500;
-  color: var(--on-surface-variant);
+/* ── Detail panel (right column) — shared by Work + Create ─────────────── */
+.pf-grid-right { min-width: 0; }
+.pf-detail-panel {
   background: var(--glass-bg);
   border: 1px solid var(--glass-border);
-  border-radius: var(--r-pill);
-  padding: 0.14rem 0.6rem;
-  white-space: nowrap;
-}
-.pf-metric { color: var(--text-strong); font-weight: 700; }
-
-.pf-skills {
-  margin-top: clamp(1.75rem, 1.25rem + 2vw, 2.75rem);
-  padding-top: clamp(1.25rem, 1rem + 1vw, 1.75rem);
-  border-top: 1px solid var(--pf-divider);
-  display: flex;
-  flex-direction: column;
-  gap: 0.6rem;
-}
-.pf-skill-line {
-  margin: 0;
-  font-size: var(--fs-body-sm);
-  line-height: 1.55;
-  color: var(--text-body);
-  display: flex;
-  gap: 0.6rem;
-  flex-wrap: wrap;
-}
-.pf-skill-group {
-  flex: 0 0 auto;
-  min-width: 5.5rem;
-  font-family: var(--font-ui);
-  font-weight: 700;
-  color: var(--text-strong);
-}
-
-/* ==========================================================================
-   Create — master-detail
-   ========================================================================== */
-/* Single stacked column to suit the slim center column: a compact tappable
-   project index, then the active project's story below it. */
-.pf-create-grid {
-  display: flex;
-  flex-direction: column;
-  gap: clamp(1.25rem, 1rem + 1vw, 1.75rem);
-}
-.pf-index ol { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 0.15rem; }
-.pf-index-item {
-  width: 100%;
-  display: flex;
-  gap: 0.75rem;
-  align-items: baseline;
-  text-align: left;
-  background: none;
-  border: none;
-  border-left: 2px solid transparent;
-  padding: 0.7rem 0.75rem;
-  border-radius: 0 var(--r-md) var(--r-md) 0;
-  cursor: pointer;
-  transition: background 0.18s ease, border-color 0.18s ease;
-}
-.pf-index-item:hover { background: var(--glass-bg); }
-.pf-index-item.is-active {
-  background: var(--glass-bg-hover);
-  border-left-color: var(--primary);
-}
-.pf-index-item:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
-.pf-index-num {
-  font-family: var(--font-ui);
-  font-size: 0.75rem;
-  font-weight: 700;
-  color: var(--text-muted);
-  flex: 0 0 auto;
-}
-.pf-index-item.is-active .pf-index-num { color: var(--primary); }
-.pf-index-text { display: flex; flex-direction: column; gap: 0.1rem; }
-.pf-index-title {
-  font-family: var(--font-sans);
-  font-size: var(--fs-body-sm);
-  font-weight: 600;
-  color: var(--text-strong);
-  line-height: 1.25;
-}
-.pf-index-meta {
-  font-family: var(--font-ui);
-  font-size: 0.75rem;
-  color: var(--text-muted);
-}
-
-.pf-detail-stack { min-width: 0; }
-.pf-detail { display: none; }
-.pf-detail.is-active { display: block; animation: pf-fade 0.24s ease-out; }
-.pf-detail-head { display: flex; align-items: center; gap: 0.6rem; margin-bottom: 0.6rem; }
-.pf-type-badge {
-  font-family: var(--font-ui);
-  font-size: 0.7rem;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
-  color: var(--on-secondary-container);
-  background: var(--secondary-container);
-  border-radius: var(--r-pill);
-  padding: 0.2rem 0.65rem;
-}
-.pf-status {
-  font-family: var(--font-ui);
-  font-size: 0.7rem;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
-  color: var(--text-muted);
-}
-.pf-status::before { content: '\25CF '; color: var(--primary); opacity: 0.6; }
-.pf-detail-title {
-  font-family: var(--font-sans);
-  font-size: clamp(1.35rem, 1.1rem + 1vw, 1.9rem);
-  font-weight: 700;
-  letter-spacing: -0.015em;
-  color: var(--text-strong);
-  line-height: 1.15;
-  margin: 0 0 0.6rem;
-}
-.pf-detail-summary {
-  font-size: var(--fs-body-large);
-  line-height: 1.6;
-  color: var(--text-body);
-  margin: 0 0 1.25rem;
-  max-width: 62ch;
-}
-.pf-detail-image {
-  width: 100%;
-  height: auto;
-  aspect-ratio: 16 / 9;
-  object-fit: cover;
   border-radius: var(--r-lg);
-  border: 1px solid var(--glass-border);
-  margin: 0 0 1.5rem;
-  background: var(--surface-container-low);
+  padding: clamp(1.25rem, 1rem + 1vw, 1.75rem);
 }
-.pf-detail-block { margin: 0 0 1.25rem; }
-.pf-detail-block h4 {
+@supports (backdrop-filter: blur(6px)) {
+  .pf-detail-panel { backdrop-filter: blur(8px) saturate(1.2); -webkit-backdrop-filter: blur(8px) saturate(1.2); }
+}
+.pf-detail-panel.is-empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 180px;
+  color: var(--text-muted);
+  font-style: italic;
+  text-align: center;
+}
+.pf-detail-title {
   font-family: var(--font-ui);
-  font-size: var(--fs-label-caps);
-  font-weight: 700;
-  text-transform: uppercase;
+  font-size: 0.75rem;
+  font-weight: 600;
   letter-spacing: 0.08em;
-  color: var(--secondary);
-  margin: 0 0 0.5rem;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  margin: 0 0 0.75rem;
 }
-.pf-detail-block p {
-  font-size: var(--fs-body);
+.pf-detail-content {
+  font-family: var(--font-ui);
+  font-size: 1rem;
   line-height: 1.65;
   color: var(--text-body);
-  margin: 0;
-  max-width: 64ch;
 }
-.pf-detail-block ul {
-  margin: 0;
-  padding: 0;
-  list-style: none;
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-  max-width: 64ch;
+.pf-detail-content p { margin: 0; }
+.pf-detail-content p + p { margin-top: 0.75rem; }
+.pf-detail-content ul { margin: 0.75rem 0 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 0.4rem; }
+.pf-detail-content li { position: relative; padding-left: 1.1rem; }
+.pf-detail-content li::before {
+  content: ''; position: absolute; left: 0; top: 0.6em;
+  width: 5px; height: 5px; border-radius: 50%; background: var(--primary); opacity: 0.6;
 }
-.pf-detail-block li {
-  position: relative;
-  padding-left: 1.1rem;
-  font-size: var(--fs-body);
-  line-height: 1.55;
-  color: var(--text-body);
-}
-.pf-detail-block li::before {
-  content: '';
-  position: absolute;
-  left: 0;
-  top: 0.6em;
-  width: 5px;
-  height: 5px;
-  border-radius: 50%;
-  background: var(--primary);
-  opacity: 0.6;
-}
-.pf-gallery {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-  gap: 0.75rem;
-  margin: 0 0 1.5rem;
-}
-.pf-gallery-thumb {
-  display: block;
-  padding: 0;
-  border: 1px solid var(--glass-border);
-  border-radius: var(--r-md);
-  overflow: hidden;
-  background: var(--glass-bg);
-  cursor: zoom-in;
-  text-align: center;
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
-}
-.pf-gallery-thumb:hover { transform: translateY(-2px); box-shadow: var(--shadow-soft); }
-.pf-gallery-thumb:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
-.pf-gallery-thumb img { width: 100%; height: auto; display: block; }
-.pf-gallery-cap {
-  display: block;
-  font-size: 0.72rem;
+.pf-detail-stack-line {
+  font-family: var(--font-ui);
+  font-size: 0.8125rem;
   color: var(--text-muted);
-  padding: 0.35rem 0.5rem;
+  margin: 1rem 0 0;
 }
-.pf-detail-links { display: flex; flex-wrap: wrap; gap: 0.6rem; margin-top: 1.25rem; }
 .pf-detail-link {
   display: inline-flex;
   align-items: center;
-  gap: 0.4rem;
+  gap: 0.5em;
+  margin-top: 1.25rem;
   font-family: var(--font-ui);
-  font-size: var(--fs-nav);
+  font-size: 0.875rem;
   font-weight: 600;
-  color: white;
-  background: var(--primary);
-  padding: 0.55rem 1.05rem;
-  border-radius: var(--r-pill);
-  transition: background 0.2s ease, transform 0.2s ease;
-}
-.pf-detail-link:hover { background: var(--primary-container); color: white; transform: translateY(-1px); }
-.pf-detail-link svg { width: 14px; height: 14px; }
-.pf-detail-link[data-kind="github"],
-.pf-detail-link[data-kind="pdf"] {
   color: var(--primary);
-  background: var(--glass-bg-hover);
 }
-.pf-detail-link[data-kind="github"]:hover,
-.pf-detail-link[data-kind="pdf"]:hover { background: var(--glass-bg-strong); color: var(--primary); }
-.pf-detail-note {
-  font-size: 0.8125rem;
-  color: var(--text-muted);
-  font-style: italic;
-  margin: 1rem 0 0;
-}
+.pf-detail-link + .pf-detail-link { margin-left: 1rem; }
+.pf-detail-link svg { width: 16px; height: 16px; }
+.pf-detail-link:hover { color: var(--primary-container); }
+.pf-detail-note { font-size: 0.8125rem; color: var(--text-muted); font-style: italic; margin: 1rem 0 0; }
 
-/* ==========================================================================
-   Loves — carousel
-   ========================================================================== */
-.pf-currently {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: baseline;
-  gap: 0.5rem 0.85rem;
-  margin: 0 0 clamp(1.25rem, 1rem + 1.5vw, 2rem);
-  padding: 0.85rem 1.1rem;
-  background: var(--glass-bg);
-  border: 1px solid var(--glass-border);
-  border-radius: var(--r-lg);
+/* Create: only the active project detail shows in the right column. */
+.pf-project-detail { display: none; }
+.pf-project-detail.is-active { display: block; animation: pf-fade 0.24s ease-out; }
+
+.pf-gallery { display: grid; grid-template-columns: 1fr 1fr; gap: 0.6rem; margin: 1rem 0 0; }
+.pf-gallery-thumb {
+  display: block; padding: 0; border: 1px solid var(--glass-border);
+  border-radius: var(--r-md); overflow: hidden; background: var(--glass-bg);
+  cursor: zoom-in; text-align: center;
+  transition: transform 0.2s ease;
 }
+.pf-gallery-thumb:hover { transform: translateY(-2px); }
+.pf-gallery-thumb:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
+.pf-gallery-thumb img { width: 100%; height: auto; display: block; }
+.pf-gallery-cap { display: block; font-size: 0.7rem; color: var(--text-muted); padding: 0.3rem 0.4rem; }
+
+/* ── Create: project index (left column) ───────────────────────────────── */
+.pf-project-index { list-style: none; margin: 0; padding: 0; }
+.pf-project-item {
+  width: 100%;
+  text-align: left;
+  background: none;
+  border: none;
+  border-bottom: 1px solid var(--pf-divider);
+  padding: clamp(1rem, 0.75rem + 1vw, 1.5rem) 0;
+  cursor: pointer;
+  transition: background 0.2s ease, padding 0.2s ease, margin 0.2s ease;
+}
+.pf-project-index li:first-child .pf-project-item { padding-top: 0; }
+.pf-project-item:hover,
+.pf-project-item.is-active {
+  background: var(--pf-hl-bg);
+  margin: 0 -1rem;
+  padding-left: 1rem;
+  padding-right: 1rem;
+}
+.pf-project-item:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
+.pf-project-num { display: block; font-family: var(--font-ui); font-size: 0.75rem; color: var(--text-muted); margin-bottom: 0.25rem; }
+.pf-project-title { display: block; font-family: var(--font-sans); font-size: 1.125rem; font-weight: 600; color: var(--text-strong); margin-bottom: 0.2rem; }
+.pf-project-meta { display: block; font-family: var(--font-ui); font-size: 0.8125rem; color: var(--text-muted); }
+
+/* ── Loves: currently note + category/text list ────────────────────────── */
+.pf-currently { margin-top: clamp(1.5rem, 1rem + 1.5vw, 2rem); }
 .pf-currently-label {
   font-family: var(--font-ui);
-  font-size: var(--fs-label-caps);
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.1em;
-  color: var(--secondary);
-}
-.pf-currently-items { font-size: var(--fs-body-sm); color: var(--text-body); }
-
-.pf-carousel { position: relative; }
-.pf-track {
-  display: flex;
-  gap: clamp(1rem, 0.5rem + 1.5vw, 1.75rem);
-  overflow-x: auto;
-  scroll-snap-type: x mandatory;
-  scroll-behavior: smooth;
-  scrollbar-width: none;
-  -ms-overflow-style: none;
-  padding-bottom: 0.5rem;
-  margin: 0 calc(-1 * var(--pf-pad));
-  padding-left: var(--pf-pad);
-  padding-right: var(--pf-pad);
-}
-.pf-track::-webkit-scrollbar { display: none; }
-.pf-track:focus-visible { outline: 2px solid var(--primary); outline-offset: 4px; border-radius: var(--r-lg); }
-.pf-slide {
-  scroll-snap-align: center;
-  flex: 0 0 min(88%, 640px);
-  display: flex;
-  flex-direction: column;
-  background: var(--glass-bg);
-  border: 1px solid var(--glass-border);
-  border-radius: var(--r-xl);
-  overflow: hidden;
-}
-.pf-slide-media {
-  position: relative;
-  aspect-ratio: 16 / 10;
-  background: var(--surface-container-low);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  overflow: hidden;
-}
-.pf-slide-media img { width: 100%; height: 100%; object-fit: cover; }
-.pf-slide-media[data-placeholder] {
-  background:
-    radial-gradient(ellipse 80% 60% at 30% 20%, color-mix(in srgb, var(--frost-glow) 60%, transparent), transparent 60%),
-    linear-gradient(135deg, var(--sky-start), var(--surface-container));
-}
-.pf-slide-placeholder {
-  font-family: var(--font-ui);
-  font-size: 0.8125rem;
+  font-size: 0.75rem;
   font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.1em;
-  color: var(--tertiary);
-  opacity: 0.85;
-}
-.pf-slide-badge {
-  position: absolute;
-  top: 0.75rem;
-  left: 0.75rem;
-  font-family: var(--font-ui);
-  font-size: 0.68rem;
-  font-weight: 700;
-  text-transform: uppercase;
   letter-spacing: 0.08em;
-  color: white;
-  background: var(--accent-gradient);
-  border-radius: var(--r-pill);
-  padding: 0.22rem 0.65rem;
-  box-shadow: 0 2px 8px rgba(36, 128, 253, 0.3);
-}
-.pf-slide-body { padding: clamp(1.1rem, 0.8rem + 1vw, 1.75rem); }
-.pf-slide-cat {
-  font-family: var(--font-ui);
-  font-size: var(--fs-label-caps);
-  font-weight: 600;
   text-transform: uppercase;
-  letter-spacing: 0.1em;
-  color: var(--secondary);
-  margin: 0 0 0.4rem;
-}
-.pf-slide-title {
-  font-family: var(--font-sans);
-  font-size: clamp(1.2rem, 1rem + 0.8vw, 1.6rem);
-  font-weight: 700;
-  letter-spacing: -0.01em;
-  color: var(--text-strong);
-  line-height: 1.2;
-  margin: 0 0 0.6rem;
-}
-.pf-slide-title a { color: inherit; }
-.pf-slide-title a:hover { color: var(--primary); }
-.pf-slide-caption {
-  font-size: var(--fs-body);
-  line-height: 1.6;
-  color: var(--text-body);
-  margin: 0;
-  max-width: 52ch;
-}
-.pf-slide-credit { font-size: 0.72rem; color: var(--text-muted); margin: 0.75rem 0 0; }
-
-.pf-carousel-controls {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-  margin-top: 1.25rem;
-}
-.pf-carousel-btn {
-  width: 44px;
-  height: 44px;
-  border-radius: 50%;
-  border: 1px solid var(--glass-border);
-  background: var(--glass-bg-hover);
-  color: var(--text-strong);
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  transition: background 0.2s ease, transform 0.2s ease, opacity 0.2s ease;
-}
-.pf-carousel-btn:hover:not(:disabled) { background: var(--glass-bg-strong); transform: translateY(-1px); }
-.pf-carousel-btn:disabled { opacity: 0.35; cursor: default; }
-.pf-carousel-btn:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
-.pf-carousel-btn svg { width: 20px; height: 20px; }
-.pf-carousel-count {
-  font-family: var(--font-ui);
-  font-size: 0.9rem;
-  font-weight: 600;
-  letter-spacing: 0.05em;
   color: var(--text-muted);
-  margin: 0;
+  margin: 0 0 0.5rem;
 }
+.pf-currently-text { font-family: var(--font-ui); font-size: 1rem; line-height: 1.65; color: var(--text-body); margin: 0; }
 
-/* ==========================================================================
-   Contact footer
-   ========================================================================== */
-.pf-footer {
-  margin-top: clamp(2.5rem, 2rem + 3vw, 4rem);
-  padding-top: clamp(1.5rem, 1rem + 1.5vw, 2rem);
-  border-top: 1px solid var(--pf-divider);
-  text-align: center;
-}
-.pf-footer-note {
-  font-family: var(--font-sans);
-  font-size: clamp(1.1rem, 1rem + 0.5vw, 1.35rem);
-  font-weight: 600;
-  color: var(--text-strong);
-  margin: 0 0 1.25rem;
-}
-.pf-footer-links {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  gap: 0.75rem 1.5rem;
-  margin: 0;
-  padding: 0;
-  list-style: none;
-}
-.pf-footer-links a {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.5rem;
+.pf-loves-list { display: flex; flex-direction: column; gap: clamp(1.25rem, 1rem + 1vw, 1.75rem); }
+.pf-love-row { display: grid; grid-template-columns: 100px 1fr; gap: clamp(1rem, 0.75rem + 1vw, 1.5rem); align-items: start; }
+.pf-love-cat {
   font-family: var(--font-ui);
-  font-size: var(--fs-nav);
+  font-size: 0.75rem;
   font-weight: 600;
-  color: var(--on-surface-variant);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  padding-top: 0.25em;
 }
-.pf-footer-links a:hover { color: var(--primary); }
-.pf-footer-links svg { width: 16px; height: 16px; }
+.pf-love-text { font-family: var(--font-ui); font-size: 1rem; line-height: 1.65; color: var(--text-body); margin: 0; }
+.pf-love-title { color: var(--text-strong); font-weight: 600; }
+.pf-love-text a {
+  color: var(--text-strong);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  text-decoration-thickness: 1px;
+  transition: color 0.2s ease;
+}
+.pf-love-text a:hover { color: var(--primary); }
 
-/* ==========================================================================
-   Diagram lightbox (reused by Create)
-   ========================================================================== */
+/* ── Diagram lightbox (reused by Create) ───────────────────────────────── */
 .pf-lightbox {
-  position: fixed;
-  inset: 0;
-  z-index: 9500;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: var(--gutter);
-  opacity: 0;
-  transition: opacity 0.2s ease;
+  position: fixed; inset: 0; z-index: 9500;
+  display: flex; align-items: center; justify-content: center;
+  padding: var(--gutter); opacity: 0; transition: opacity 0.2s ease;
 }
 .pf-lightbox.is-open { opacity: 1; }
-.pf-lightbox-backdrop {
-  position: absolute;
-  inset: 0;
-  background: rgba(5, 10, 25, 0.82);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-}
-.pf-lightbox-panel {
-  position: relative;
-  max-width: min(92vw, 820px);
-  display: flex;
-  flex-direction: column;
-  gap: 0.65rem;
-  align-items: center;
-}
+.pf-lightbox-backdrop { position: absolute; inset: 0; background: rgba(5, 10, 25, 0.82); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); }
+.pf-lightbox-panel { position: relative; max-width: min(92vw, 820px); display: flex; flex-direction: column; gap: 0.65rem; align-items: center; }
 .pf-lightbox-img { width: 100%; border-radius: var(--r-md); box-shadow: 0 24px 64px rgba(0,0,0,0.5); }
 .pf-lightbox-caption { color: rgba(255,255,255,0.78); font-size: 0.8125rem; text-align: center; margin: 0; }
 .pf-lightbox-close {
-  position: absolute;
-  top: -16px;
-  right: -16px;
-  width: 38px;
-  height: 38px;
-  border-radius: 50%;
-  background: white;
-  color: #171d27;
-  border: none;
-  font-size: 1.2rem;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+  position: absolute; top: -16px; right: -16px; width: 38px; height: 38px;
+  border-radius: 50%; background: white; color: #171d27; border: none; font-size: 1.2rem;
+  cursor: pointer; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 12px rgba(0,0,0,0.3);
 }
 .pf-lightbox-close:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
 
 /* ==========================================================================
-   Dark theme — the wash goes dark so light text stays legible over the night
-   forest; dividers pick up a faint light edge.
+   Theme + weather wash tweaks — keep the reading column legible everywhere.
    ========================================================================== */
 html[data-theme="dark"] .pf-stage {
   --pf-wash: rgba(12, 19, 31, 0.82);
-  --pf-divider: rgba(140, 180, 255, 0.14);
+  --pf-divider: rgba(140, 180, 255, 0.16);
 }
-html[data-theme="dark"] .pf-slide,
-html[data-theme="dark"] .pf-currently { background: var(--glass-bg-strong); }
-
-/* Preserve the night dimming of weather backdrops (this rule lived in the old
-   portfolio tail that was rebuilt; re-stated so it isn't lost). */
 html[data-theme="dark"] .weather-bg { filter: brightness(0.55) saturate(0.85); }
-
-/* ==========================================================================
-   Weather-theme adaptations — deepen the wash under busy daytime weather so
-   the reading column stays calm. (Dark theme handles its own above.)
-   ========================================================================== */
 html:not([data-theme="dark"]) body.weather-cloudy .pf-stage,
 html:not([data-theme="dark"]) body.weather-windy  .pf-stage,
 html:not([data-theme="dark"]) body.weather-rainy  .pf-stage,
@@ -1437,24 +1091,21 @@ html:not([data-theme="dark"]) body.weather-snowy  .pf-stage {
 }
 
 /* ==========================================================================
-   Responsive
+   Responsive — stack the two columns; drop stickiness.
    ========================================================================== */
-@media (max-width: 720px) {
-  .pf-stage { padding-left: 0; padding-right: 0; }
-  .pf-switcher-wrap { top: calc(var(--nav-height) - 18px); }
-  .pf-slide { flex-basis: 90%; }
-}
-
-@media (max-width: 480px) {
-  .pf-slide { flex-basis: 92%; }
+@media (max-width: 768px) {
+  .pf-grid { grid-template-columns: 1fr; gap: clamp(1.5rem, 1rem + 3vw, 2.5rem); }
+  .pf-grid-left { position: static; }
+  .pf-love-row { grid-template-columns: 1fr; gap: 0.35rem; }
+  .pf-love-cat { padding-top: 0; }
+  .pf-gallery { grid-template-columns: 1fr; }
 }
 
 /* ==========================================================================
-   Reduced motion — remove translation/animation, keep everything usable
+   Reduced motion
    ========================================================================== */
 @media (prefers-reduced-motion: reduce) {
   .pf-section,
-  .pf-detail.is-active { animation: none; }
-  .pf-track { scroll-behavior: auto; }
-  .pf-tab::after { transition: none; }
+  .pf-project-detail.is-active { animation: none; }
+  .pf-tab::after, .pf-highlight, .pf-project-item { transition: none; }
 }

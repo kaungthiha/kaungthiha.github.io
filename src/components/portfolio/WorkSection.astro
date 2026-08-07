@@ -1,10 +1,15 @@
 ---
 /**
- * Work — a short, reference-site-style summary of what I do (not a full,
- * expanded résumé). A few narrative lines + a compact skills line + a résumé
- * download for anyone who wants the detail. Content from src/data/work.ts.
+ * Work — flowing prose with highlighted jobs (charliekubal-style). Left column:
+ * heading + bio prose where each highlighted role bolds on hover and, on click,
+ * fills the right-column detail panel. A compact skills line + résumé link close
+ * it out. Content from src/data/work.ts.
  */
-import { workIntro, workSummary, skills, resumeHref } from '../../data/work';
+import { workProse, skills, resumeHref, type ProsetPart } from '../../data/work';
+
+function isHighlight(p: ProsetPart): p is { text: string; detail: string } {
+  return typeof p !== 'string';
+}
 ---
 
 <section
@@ -14,29 +19,39 @@ import { workIntro, workSummary, skills, resumeHref } from '../../data/work';
   aria-labelledby="tab-work"
   data-section="work"
 >
-  <header class="pf-section-head">
-    <div>
-      <p class="pf-eyebrow">work</p>
-      <h2 class="pf-section-title">I work where product, data, and AI overlap.</h2>
-    </div>
-    <a class="pf-quiet-link" href={resumeHref} target="_blank" rel="noopener">
-      Download résumé
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M12 3v12m0 0 4-4m-4 4-4-4M5 21h14"/></svg>
-    </a>
-  </header>
+  <div class="pf-grid">
+    <div class="pf-grid-left">
+      <p class="pf-tagline">product + data + ai</p>
+      <h2 class="pf-heading">I work where<br>overlap happens.</h2>
 
-  <p class="pf-intro">{workIntro}</p>
+      {workProse.map((para) => (
+        <p class="pf-bio">
+          {para.map((part) =>
+            isHighlight(part) ? (
+              <button type="button" class="pf-highlight" data-detail={part.detail}>{part.text}</button>
+            ) : (
+              <>{part}</>
+            ),
+          )}
+        </p>
+      ))}
 
-  <ul class="pf-summary" role="list">
-    {workSummary.map((line) => <li>{line}</li>)}
-  </ul>
-
-  <div class="pf-skills" aria-label="Skills">
-    {skills.map((g) => (
-      <p class="pf-skill-line">
-        <span class="pf-skill-group">{g.group}</span>
-        <span class="pf-skill-items">{g.items.join(' · ')}</span>
+      <p class="pf-skills-line">
+        {skills.map((g) => (
+          <><strong>{g.group}</strong> {g.items.join(' · ')}<br /></>
+        ))}
       </p>
-    ))}
+
+      <a class="pf-quiet-link pf-quiet-link--standalone" href={resumeHref} target="_blank" rel="noopener">
+        Download résumé
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M12 3v12m0 0 4-4m-4 4-4-4M5 21h14"/></svg>
+      </a>
+    </div>
+
+    <div class="pf-grid-right">
+      <div class="pf-detail-panel is-empty" id="work-detail" data-work-detail aria-live="polite">
+        <span class="pf-detail-empty">click a highlighted role to learn more</span>
+      </div>
+    </div>
   </div>
 </section>

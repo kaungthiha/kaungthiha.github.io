@@ -151,6 +151,42 @@ indexItems.forEach((btn) => {
   });
 });
 
+// ── Work highlights → side detail panel ──────────────────────────────────
+// Highlighted roles bold on hover (CSS). Clicking one fills the detail panel
+// on the right with that role's blurb + optional link. Content is imported so
+// it stays in one source of truth (src/data/work.ts).
+import { workHighlights } from '../data/work';
+
+const highlights = Array.from(document.querySelectorAll<HTMLButtonElement>('[data-detail]'));
+const workDetail = document.querySelector<HTMLElement>('[data-work-detail]');
+
+function escapeHtml(s: string): string {
+  return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+}
+
+function showHighlight(key: string): void {
+  const data = workHighlights[key];
+  if (!data || !workDetail) return;
+  highlights.forEach((h) => h.classList.toggle('is-active', h.dataset.detail === key));
+  const bodyHtml = data.body.map((p) => `<p>${escapeHtml(p)}</p>`).join('');
+  const linkHtml = data.link
+    ? `<a class="pf-detail-link" href="${data.link.href}" target="_blank" rel="noopener">${escapeHtml(
+        data.link.label,
+      )} <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M5 12h14m-6-6 6 6-6 6"/></svg></a>`
+    : '';
+  workDetail.classList.remove('is-empty');
+  workDetail.innerHTML = `<p class="pf-detail-title">${escapeHtml(
+    data.title,
+  )}</p><div class="pf-detail-content">${bodyHtml}</div>${linkHtml}`;
+}
+
+highlights.forEach((hl) => {
+  hl.addEventListener('click', () => {
+    const key = hl.dataset.detail;
+    if (key) showHighlight(key);
+  });
+});
+
 // ── Diagram lightbox (focus trap + restore) ──────────────────────────────
 const lightbox = document.getElementById('pf-lightbox');
 const lightboxImg = lightbox?.querySelector<HTMLImageElement>('.pf-lightbox-img') ?? null;
