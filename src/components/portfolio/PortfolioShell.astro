@@ -1,18 +1,16 @@
 ---
 /**
- * PortfolioShell — the single glass editorial surface below the hero.
- * Holds the sticky section switcher, the three sections (work / create /
- * loves), and the contact footer, all inside one dominant surface (not a wall
- * of cards). The forest stays visible around and behind it.
+ * PortfolioShell — the centered editorial column below the hero. Holds the
+ * sticky section switcher and the three sections (work / create / loves). The
+ * forest stays visible around and behind it.
  *
- * The two client scripts (section navigation + loves carousel) are imported
- * here as bundled ES modules so they are code-split and deferred by Astro.
+ * The section-navigation client script is imported here as a bundled ES module
+ * so it is code-split and deferred by Astro.
  */
 import SectionSwitcher from './SectionSwitcher.astro';
 import WorkSection from './WorkSection.astro';
 import CreateSection from './CreateSection.astro';
 import LovesSection from './LovesSection.astro';
-import ContactFooter from './ContactFooter.astro';
 ---
 
 <div class="pf-stage" id="pf-stage">
@@ -25,7 +23,6 @@ import ContactFooter from './ContactFooter.astro';
       <CreateSection />
       <LovesSection />
     </div>
-    <ContactFooter />
   </div>
 </div>
 
