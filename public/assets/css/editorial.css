@@ -756,7 +756,13 @@ body:not(.layout-home) #ft-tool { padding: 1rem var(--gutter) 3rem; }
   --pf-max:     920px;    /* contained editorial column; forest on the sides */
   --pf-gap:     clamp(1.75rem, 1rem + 3vw, 3.5rem);   /* two-column gutter */
   --pf-divider: var(--glass-border);
-  --pf-wash:    rgba(245, 251, 255, 0.72);        /* soft backing for legibility */
+  /* Frosted panel fill (~85% opacity) + its inner highlight & drop shadow.
+     Theme-aware — overridden for dark below. --pf-wash mirrors the panel so
+     the sticky nav bar reads solid over it. */
+  --pf-panel:      rgba(246, 251, 255, 0.85);
+  --pf-wash:       var(--pf-panel);
+  --pf-highlight:  rgba(255, 255, 255, 0.6);
+  --pf-panel-shadow: 0 -2px 40px rgba(31, 65, 85, 0.10);
   --pf-hl-bg:       color-mix(in srgb, var(--primary) 9%, transparent);
   --pf-hl-bg-hover: color-mix(in srgb, var(--primary) 16%, transparent);
 
@@ -768,21 +774,22 @@ body:not(.layout-home) #ft-tool { padding: 1rem var(--gutter) 3rem; }
   scroll-margin-top: calc(var(--nav-height) + 1rem);
 }
 
-/* Minimalist surface: a whisper-soft wash behind the reading column so text
-   stays legible over the forest, no card/box. */
+/* Frosted-glass content backdrop — a "rising panel" that lifts out of the
+   forest as you scroll past the hero: 85% fill, 20px blur + saturation boost,
+   rounded top corners, an inner highlight line and a soft shadow for depth. */
 .pf-surface {
   position: relative;
-  padding: clamp(1rem, 0.5rem + 1.5vw, 1.75rem) clamp(1.25rem, 0.6rem + 2vw, 2.5rem)
+  padding: clamp(1.5rem, 1rem + 2vw, 2.75rem) clamp(1.25rem, 0.6rem + 2vw, 2.5rem)
            clamp(2rem, 1.5rem + 2vw, 3rem);
-  background: radial-gradient(
-    ellipse 130% 100% at 50% 20%,
-    var(--pf-wash) 0%,
-    color-mix(in srgb, var(--pf-wash) 45%, transparent) 60%,
-    transparent 100%
-  );
+  background: var(--pf-panel);
+  border-radius: 24px 24px 0 0;
+  box-shadow: var(--pf-panel-shadow), inset 0 1px 0 var(--pf-highlight);
 }
 @supports (backdrop-filter: blur(6px)) or (-webkit-backdrop-filter: blur(6px)) {
-  .pf-surface { backdrop-filter: blur(3px); -webkit-backdrop-filter: blur(3px); }
+  .pf-surface {
+    backdrop-filter: blur(20px) saturate(1.4);
+    -webkit-backdrop-filter: blur(20px) saturate(1.4);
+  }
 }
 
 /* ── Nav pills (work | create | loves) ─────────────────────────────────── */
@@ -863,7 +870,9 @@ body:not(.layout-home) #ft-tool { padding: 1rem var(--gutter) 3rem; }
   color: var(--primary);
   margin: 0 0 1rem;
 }
-/* Elegant serif italic statement heading (prototype). */
+/* Elegant serif italic statement heading (prototype). A gentle text-shadow
+   (light glow in light themes, soft dark lift in dark) helps it pop off the
+   frosted panel. --pf-heading-shadow is themed below. */
 .pf-heading {
   font-family: var(--font-statement);
   font-size: clamp(2.25rem, 1.6rem + 2.6vw, 3.5rem);
@@ -872,6 +881,7 @@ body:not(.layout-home) #ft-tool { padding: 1rem var(--gutter) 3rem; }
   line-height: 1.1;
   letter-spacing: -0.02em;
   color: var(--text-strong);
+  text-shadow: var(--pf-heading-shadow, 0 1px 1px rgba(255, 255, 255, 0.6));
   margin: 0 0 clamp(1.5rem, 1rem + 1.5vw, 2.5rem);
 }
 
@@ -1128,18 +1138,27 @@ body:not(.layout-home) #ft-tool { padding: 1rem var(--gutter) 3rem; }
 /* ==========================================================================
    Theme + weather wash tweaks — keep the reading column legible everywhere.
    ========================================================================== */
+/* Light themes: a soft white glow lifts the headings off the panel. */
+:root { --pf-heading-shadow: 0 1px 2px rgba(255, 255, 255, 0.55); }
+
 html[data-theme="dark"] .pf-stage {
-  --pf-wash: rgba(12, 19, 31, 0.82);
-  --pf-divider: rgba(140, 180, 255, 0.16);
+  --pf-panel:        rgba(14, 22, 34, 0.85);
+  --pf-wash:         var(--pf-panel);
+  --pf-highlight:    rgba(150, 190, 255, 0.10);
+  --pf-panel-shadow: 0 -2px 44px rgba(0, 0, 0, 0.45);
+  --pf-heading-shadow: 0 1px 10px rgba(0, 0, 0, 0.5);
+  --pf-divider:      rgba(140, 180, 255, 0.16);
 }
 html[data-theme="dark"] .weather-bg { filter: brightness(0.55) saturate(0.85); }
+/* Busy daytime weather: nudge the panel a touch more opaque so the reading
+   area stays calm. */
 html:not([data-theme="dark"]) body.weather-cloudy .pf-stage,
 html:not([data-theme="dark"]) body.weather-windy  .pf-stage,
 html:not([data-theme="dark"]) body.weather-rainy  .pf-stage,
 html:not([data-theme="dark"]) body.weather-stormy .pf-stage,
 html:not([data-theme="dark"]) body.weather-foggy  .pf-stage,
 html:not([data-theme="dark"]) body.weather-snowy  .pf-stage {
-  --pf-wash: rgba(245, 250, 253, 0.9);
+  --pf-panel: rgba(246, 251, 255, 0.92);
 }
 
 /* ==========================================================================
