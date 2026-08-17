@@ -59,7 +59,7 @@ export const projects: Project[] = [
       'Plan festival meetups and build a schedule around the ' +
       'sets nobody wants to miss.',
     problem:
-      'My rave planning experience(especially for EDC) is often chaos: overlapping sets, must-see artists, ' +
+      'My rave planning experience(especially for EDC) can be a headache sometimes: overlapping sets, must-see artists, ' +
       'and everyone squinting at a grid on their phone.',
     contribution: [
       'Ingests a festival schedule and lets you flag must-see artists.',
@@ -253,7 +253,7 @@ export const projects: Project[] = [
   },
   {
     slug: 'ewa-proposal',
-    title: 'Early Wage Access — Feature Proposal',
+    title: 'Early Wage Access Feature Proposal',
     shortTitle: 'Early Wage Access',
     type: 'Product case',
     year: '2025',
