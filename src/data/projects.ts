@@ -56,10 +56,10 @@ export const projects: Project[] = [
     status: 'Live',
     featured: true,
     summary:
-      'Plan festival meetups with the squad and build a schedule around the ' +
+      'Plan festival meetups and build a schedule around the ' +
       'sets nobody wants to miss.',
     problem:
-      'Group festival planning is chaos: overlapping sets, must-see artists, ' +
+      'My rave planning experience(especially for EDC) is often chaos: overlapping sets, must-see artists, ' +
       'and everyone squinting at a grid on their phone.',
     contribution: [
       'Ingests a festival schedule and lets you flag must-see artists.',
@@ -79,19 +79,19 @@ export const projects: Project[] = [
     year: '2025',
     status: 'Complete',
     summary:
-      'An automated learning-assessment system that cut new-hire sales ' +
-      'onboarding from about four weeks to one.',
+      'An automated learning-assessment system that cut new sales ' +
+      'onboarding from ~four weeks to one.',
     problem:
-      'Selling construction software means knowing industry terminology, ' +
+      'Selling construction software means knowing industry terms, ' +
       'delivery methods, lean principles, and how pull planning works. New AEs ' +
-      'and SDRs historically spent 3–4 weeks self-studying and shadowing before ' +
-      'they could sell.',
+      'and SDRs to contech historically spent 3–4 weeks studying and shadowing before ' +
+      'they felt completely ready.',
     contribution: [
       'Combined Claude for quiz generation and grading, Notion as the knowledge base and results hub, Google Forms for delivery, and n8n as the automation layer.',
       'Returned assessment results to an executive dashboard so leadership could see ramp progress.',
     ],
     outcomes: [
-      'Shortened onboarding from ~4 weeks to ~1 week, so new hires could start revenue-generating activity sooner.',
+      'Shortened onboarding from ~4 weeks to ~1 week, so new hires could start hitting sales calls confidently sooner.',
     ],
     stack: ['Claude', 'Notion', 'n8n', 'Google Forms', 'JavaScript'],
     image: '/assets/images/Outbuild.jpg',
@@ -118,22 +118,27 @@ export const projects: Project[] = [
     year: '2023',
     status: 'Archived',
     summary:
-      'An AI research assistant for SEC EDGAR filings — ask a question, get a ' +
-      'sourced report. Co-founded; I shipped the MVP and owned the roadmap.',
+      'An AI research assistant for SEC EDGAR filings in the days of GPT- 3.5 Turbo. The flow was -> ask a question, get a ' +
+      'sourced report. Co-founded; I owned the roadmap, helped write the code to generate embeddings, and shipped the MVP.',
     problem:
       'Financial research buries useful signal inside dense regulatory filings. ' +
-      'Analysts spend hours reading EDGAR to answer questions a good assistant ' +
+      'Analysts spend hours reading EDGAR filings to answer questions a good assistant ' +
       'could surface in seconds.',
     contribution: [
       'Built a filing ingestion + parsing flow over SEC EDGAR.',
       'Used embeddings and vector retrieval to answer queries and assemble reports.',
       'Ran product discovery and user-feedback loops to shape the roadmap.',
+      'Got to lead workstreams with developers and contractors which was a very educational experience as a college student.',
     ],
     outcomes: [
       'Integrating a cloud vector database sped retrieval by roughly 2×.',
     ],
-    stack: ['Python', 'Vector DB', 'Embeddings', 'ReportLab', 'Figma'],
-    links: [],
+    stack: ['Python', 'Vector DB', 'Embeddings', 'Figma'],
+    links: [
+      { label: 'Visit askcyborg.com', href: 'https://askcyborg.com/', kind: 'live' },
+    ],
+    confidentialityNote:
+      "Heads up: I no longer maintain this one, so it may be a little rough around the edges.",
   },
   {
     slug: 'ease-dsc',
@@ -156,11 +161,10 @@ export const projects: Project[] = [
     stack: ['React', 'Tailwind CSS', 'JavaScript'],
     image: '/assets/images/ease.png',
     imageAlt: 'EASE debt-support flow mobile prototype',
-    links: [
-      { label: 'Launch the prototype', href: '/pages/dsc-case-study/', kind: 'case-study' },
-    ],
+    links: [],
     confidentialityNote:
-      'An independent UX concept built with public-safe wording and no customer data.',
+      "Sorry, I can't actually show the demo on this one — it's internal Capital " +
+      "One work, so it stays a corporate secret. You get the gist above.",
   },
   {
     slug: 'attendance-tracker',
@@ -169,11 +173,11 @@ export const projects: Project[] = [
     year: '2025',
     status: 'Live',
     summary:
-      'A personal utility for tracking office attendance across rolling ' +
-      '13-week periods, with prorated requirements and JSON import/export.',
+      'My personal utility for tracking office attendance across rolling ' +
+      '13 week periods, with prorated requirements and JSON import/export.',
     problem:
       'Rolling attendance windows with prorated requirements are annoying to ' +
-      'track by hand and easy to get wrong.',
+      'track by hand and easy to get wrong. Plus, I like to min/max',
     contribution: [
       'Calculates prorated requirements across rolling 13-week periods.',
       'Marks attendance on a calendar and exports/imports state as JSON.',
@@ -183,7 +187,7 @@ export const projects: Project[] = [
       { label: 'Open the tracker', href: '/tools/attendance-tracker/', kind: 'live' },
     ],
     confidentialityNote:
-      'A personal attendance tracker — not an official product of any employer.',
+      'A personal attendance tracker — not an official product of my employer.',
   },
   {
     slug: 'instacart-reddit-pulse',
@@ -193,14 +197,14 @@ export const projects: Project[] = [
     year: '2026',
     status: 'In progress',
     summary:
-      'A lightweight tool that reads the Reddit API to surface sentiment and ' +
+      'A lightweight tool I made for some APM app oomph that reads the Reddit API to surface sentiment and ' +
       'narrative signals, then auto-generates two visuals and a short memo.',
     problem:
       'Emerging narratives about a product live scattered across forums. Reading ' +
-      'them all by hand does not scale.',
+      'them all by hand is too tedious',
     contribution: [
       'Pulls posts via the Reddit API and scores sentiment and volume signals.',
-      'Auto-generates two visuals and a memo artifact for quick review.',
+      'Auto generates two visuals and a memo artifact for quick review.',
     ],
     outcomes: [
       'Sample run (Mar 4–11, 2026): 24 posts across 3 subreddits, 66.7% negative, with substitutions / out-of-stock the top pain point.',
@@ -234,10 +238,10 @@ export const projects: Project[] = [
     status: 'In progress',
     summary:
       'A proof-of-concept for tracking a team\'s AI usage and adoption signals ' +
-      'in one simple dashboard.',
+      'in one simple dashboard. Good lesson in pivoting + making too many random things since it is really hard to get useful insights from simple tracking.',
     problem:
-      'Teams adopting AI tools rarely have a simple read on who is using what, ' +
-      'or whether adoption is actually landing.',
+      'Teams adopting AI tools rarely have a simple read on who is using what ' +
+      'or whether adoption is landing.',
     contribution: [
       'Prototyped a tracker that captures adoption signals and rolls them into a simple view.',
     ],
@@ -256,14 +260,14 @@ export const projects: Project[] = [
     status: 'Complete',
     summary:
       'A product proposal evaluating whether to launch an Early Wage Access ' +
-      'feature for construction-tech. Recommendation: a limited pilot.',
+      'feature for construction-tech. My recommendation: a limited pilot.',
     problem:
       'Should a construction-tech product launch Early Wage Access? It needs a ' +
       'clear read on customer value, risk, and how to decide.',
     contribution: [
       'Made the case that EWA aligns with supporting construction workforces and rides the labor-shortage tailwind for differentiated benefits.',
       'Framed a small pilot to limit downside while generating the real-world learning needed for a confident go/no-go.',
-      'Laid out risks, success metrics, and the go/no-go framing.',
+      'Laid out risks, success metrics, and next steps.',
     ],
     stack: ['Product strategy', 'Market analysis'],
     links: [
