@@ -5,9 +5,9 @@ import PortfolioShell from '../components/portfolio/PortfolioShell.astro';
 
 <Base title="Kaung Thiha" slimNav={false}>
 <!-- ─────────────────────────────────────────────────────────────────────
-     Top navigation rail — brand + section links (work / create / loves).
-     These links live over the hero; clicking one scrolls the content stage
-     into view and activates that section (see portfolio-navigation.ts).
+     Top navigation rail — brand only. The section tabs live in the content
+     stage (work / stuff / loves), so a duplicate set over the hero isn't
+     needed; the user scrolls down and finds them there.
      ───────────────────────────────────────────────────────────────────── -->
 <nav class="editorial-topnav" aria-label="Primary">
   <div class="topnav-brand">
@@ -15,12 +15,6 @@ import PortfolioShell from '../components/portfolio/PortfolioShell.astro';
       <span class="topnav-brand-mark" aria-hidden="true"></span>
       <span class="topnav-brand-text">Kaung Thiha</span>
     </a>
-  </div>
-
-  <div class="topnav-links">
-    <a class="topnav-link" href="#work" data-nav-target="work">work</a>
-    <a class="topnav-link" href="#create" data-nav-target="create">create</a>
-    <a class="topnav-link" href="#loves" data-nav-target="loves">loves</a>
   </div>
 </nav>
 
