@@ -1093,14 +1093,15 @@ body:not(.layout-home) #ft-tool { padding: 1rem var(--gutter) 3rem; }
 }
 
 .pf-loves-list { display: flex; flex-direction: column; gap: clamp(1.25rem, 1rem + 1vw, 1.75rem); }
-.pf-love-row { display: grid; grid-template-columns: 90px 1fr; gap: clamp(1rem, 0.75rem + 1vw, 1.5rem); align-items: baseline; }
+.pf-love-row { display: grid; grid-template-columns: 150px 1fr; gap: clamp(1rem, 0.75rem + 1vw, 1.5rem); align-items: baseline; }
 .pf-love-cat {
   font-family: var(--font-ui);
-  font-size: 1.21875rem;
+  font-size: 0.9375rem;
   font-weight: 600;
   letter-spacing: 0.1em;
   text-transform: uppercase;
   color: var(--text-muted);
+  line-height: 1.4;
 }
 .pf-love-text { font-family: var(--font-ui); font-size: 1.40625rem; line-height: 1.75; letter-spacing: 0.01em; color: var(--text-body); margin: 0; }
 .pf-love-title { color: var(--text-strong); font-weight: 600; }
