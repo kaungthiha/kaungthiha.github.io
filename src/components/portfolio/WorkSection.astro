@@ -1,67 +1,58 @@
 ---
 /**
- * Work — a short vertical chronology, readable without clicking anything.
- * Earlier roles sit behind a native <details>. The résumé link only renders
- * when the PDF actually exists in public/ at build time.
+ * Work — a concise career summary: one line per role, newest first, then a
+ * link to the full timeline on /career/. Every fact comes from the canonical
+ * dataset via src/lib/career.ts; this file only decides the layout.
  */
 import { existsSync } from 'node:fs';
 import { join } from 'node:path';
-import {
-  workHeading,
-  workIntro,
-  roles,
-  earlierRoles,
-  skills,
-  resumeHref,
-} from '../../data/work';
+import { portfolioConfig } from '../../data/portfolio/portfolio-config';
+import { getCareerSummary, getCurrentRole, getPublicSkills } from '../../lib/career';
 
-const hasResume = existsSync(join(process.cwd(), 'public', resumeHref));
+const { work, skillGroups } = portfolioConfig;
+const milestones = getCareerSummary(work.summaryExperienceIds);
+const current = getCurrentRole();
+const skills = getPublicSkills(skillGroups);
+const hasResume = existsSync(join(process.cwd(), 'public', work.resumeHref));
 ---
 
 <section class="home-section" id="work" aria-labelledby="work-title">
   <p class="section-label">work</p>
-  <h2 class="section-heading" id="work-title">{workHeading}</h2>
-  <p class="section-intro">{workIntro}</p>
+  <h2 class="section-heading" id="work-title">{work.heading}</h2>
+  <p class="section-intro">
+    {work.intro}
+    {current && (
+      <> Right now: {current.role.canonical_title}{current.role.team_or_scope && `, ${current.role.team_or_scope}`}, at {current.experience.organization}.</>
+    )}
+  </p>
 
-  <ol class="chronology">
-    {roles.map((r) => (
+  <ol class="chronology chronology--milestones">
+    {milestones.map((m) => (
       <li class="chapter">
-        <p class="chapter-dates">{r.dates}</p>
+        <p class="chapter-dates">{m.years}</p>
         <div class="chapter-body">
-          <h3 class="chapter-company">{r.company}</h3>
-          <p class="chapter-role">{r.role}</p>
-          <p class="chapter-summary">{r.summary}</p>
-          {r.result && <p class="chapter-result">{r.result}</p>}
+          <h3 class="chapter-company">{m.organization}</h3>
+          <p class="chapter-role">{m.title}{m.scope && ` · ${m.scope}`}</p>
         </div>
       </li>
     ))}
   </ol>
 
-  <details class="earlier">
-    <summary>Earlier work</summary>
-    <ol class="chronology chronology--compact">
-      {earlierRoles.map((r) => (
-        <li class="chapter">
-          <p class="chapter-dates">{r.dates}</p>
-          <div class="chapter-body">
-            <h3 class="chapter-company">{r.company}</h3>
-            <p class="chapter-role">{r.role}</p>
-            <p class="chapter-summary">{r.summary}</p>
-          </div>
-        </li>
-      ))}
-    </ol>
-  </details>
-
-  <p class="skills-line">
-    {skills.map((g) => (
-      <span class="skills-group"><span class="skills-name">{g.group}</span> {g.items.join(' · ')}</span>
-    ))}
+  <p class="section-cta">
+    <a class="text-link" href={work.careerPageHref}>{work.careerCtaLabel} →</a>
   </p>
+
+  {skills.length > 0 && (
+    <p class="skills-line">
+      {skills.map((g) => (
+        <span class="skills-group"><span class="skills-name">{g.label}</span> {g.items.join(' · ')}</span>
+      ))}
+    </p>
+  )}
 
   {hasResume && (
     <p class="section-cta">
-      <a class="text-link" href={resumeHref} target="_blank" rel="noopener">Résumé (PDF) →</a>
+      <a class="text-link" href={work.resumeHref} target="_blank" rel="noopener">Résumé (PDF) →</a>
     </p>
   )}
 </section>

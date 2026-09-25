@@ -1,48 +1,46 @@
 ---
 /**
- * One featured project as a simple story: meta, title, a sentence or two, an
- * optional standout result, the stack, one primary link, and one image when
- * there's a real one. Detail lives in the linked tool / PDF, not here.
+ * One featured project as a simple story. Facts come from the canonical
+ * project record; the image, CTA label, and note are presentation config.
  */
-import type { Project } from '../../data/projects';
+import { portfolioConfig } from '../../data/portfolio/portfolio-config';
+import { projectResult, projectYear, sentenceCase, type CareerProject } from '../../lib/career';
 
 interface Props {
-  project: Project;
+  project: CareerProject;
 }
 
 const { project: p } = Astro.props;
-const cta = p.links?.[0];
-const external = cta ? cta.href.startsWith('http') || cta.kind === 'pdf' : false;
+const { ctaLabels, images, notes } = portfolioConfig.create;
+const link = p.links?.[0];
+const external = link ? link.url.startsWith('http') || link.kind === 'pdf' : false;
+const year = projectYear(p);
+const result = projectResult(p);
+const image = images[p.id];
+const note = notes[p.id];
 ---
 
-<article class="story" aria-labelledby={`story-${p.slug}`}>
-  <p class="story-meta">{p.type}{p.year && ` · ${p.year}`}</p>
-  <h3 class="story-title" id={`story-${p.slug}`}>{p.title}</h3>
-  <p class="story-summary">{p.summary}</p>
-  {p.result && <p class="story-result">{p.result}</p>}
-  {p.stack && p.stack.length > 0 && <p class="story-stack">{p.stack.join(' · ')}</p>}
-  {cta && (
+<article class="story" id={`story-${p.id}`} aria-labelledby={`story-title-${p.id}`}>
+  <p class="story-meta">{sentenceCase(p.category)}{year && ` · ${year}`}</p>
+  <h3 class="story-title" id={`story-title-${p.id}`}>{p.title}</h3>
+  <p class="story-summary">{p.website_summary ?? p.summary}</p>
+  {result && <p class="story-result">{result}</p>}
+  {p.technologies && p.technologies.length > 0 && <p class="story-stack">{p.technologies.join(' · ')}</p>}
+  {link && (
     <p class="story-cta">
       <a
         class="text-link"
-        href={cta.href}
+        href={link.url}
         target={external ? '_blank' : undefined}
         rel={external ? 'noopener' : undefined}
-      >{cta.label} →</a>
+      >{ctaLabels[link.kind]} →</a>
     </p>
   )}
-  {p.confidentialityNote && <p class="story-note">{p.confidentialityNote}</p>}
+  {note && <p class="story-note">{note}</p>}
 
-  {p.image && (
+  {image && (
     <figure class="story-figure">
-      <img
-        src={p.image}
-        alt={p.imageAlt ?? ''}
-        width={p.imageSize?.[0]}
-        height={p.imageSize?.[1]}
-        loading="lazy"
-        decoding="async"
-      />
+      <img src={image.src} alt={image.alt} width={image.width} height={image.height} loading="lazy" decoding="async" />
     </figure>
   )}
 </article>

@@ -1,18 +1,21 @@
 ---
 /**
- * Create — four featured project stories, then everything else as a quiet
- * "small experiments" list. All in normal document flow.
+ * Create — featured project stories, then a quiet "small experiments" list.
+ * Which projects appear (and in what order) is portfolio config; what they
+ * are is the canonical dataset.
  */
-import { projects } from '../../data/projects';
+import { portfolioConfig } from '../../data/portfolio/portfolio-config';
+import { getProjects } from '../../lib/career';
 import ProjectStory from './ProjectStory.astro';
 
-const featured = projects.filter((p) => p.featured);
-const experiments = projects.filter((p) => !p.featured);
+const { create } = portfolioConfig;
+const featured = getProjects(create.featuredProjectIds);
+const experiments = getProjects(create.experimentProjectIds);
 ---
 
 <section class="home-section" id="create" aria-labelledby="create-title">
   <p class="section-label">create</p>
-  <h2 class="section-heading" id="create-title">Things I've built, tested, and learned from.</h2>
+  <h2 class="section-heading" id="create-title">{create.heading}</h2>
 
   <div class="stories">
     {featured.map((p) => <ProjectStory project={p} />)}
@@ -20,24 +23,24 @@ const experiments = projects.filter((p) => !p.featured);
 
   {experiments.length > 0 && (
     <div class="experiments">
-      <h3 class="experiments-title">Small experiments</h3>
+      <h3 class="experiments-title">{create.experimentsHeading}</h3>
       <ul class="experiments-list">
         {experiments.map((p) => {
           const link = p.links?.[0];
-          const external = link ? link.href.startsWith('http') || link.kind === 'pdf' : false;
+          const external = link ? link.url.startsWith('http') || link.kind === 'pdf' : false;
           return (
             <li>
               {link ? (
                 <a
                   class="experiment-name"
-                  href={link.href}
+                  href={link.url}
                   target={external ? '_blank' : undefined}
                   rel={external ? 'noopener' : undefined}
-                >{p.shortTitle ?? p.title}</a>
+                >{p.title}</a>
               ) : (
-                <span class="experiment-name">{p.shortTitle ?? p.title}</span>
+                <span class="experiment-name">{p.title}</span>
               )}
-              {p.blurb && <span class="experiment-blurb">{p.blurb}</span>}
+              {(p.website_summary ?? p.summary) && <span class="experiment-blurb">{p.website_summary ?? p.summary}</span>}
             </li>
           );
         })}

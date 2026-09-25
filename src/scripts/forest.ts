@@ -1527,7 +1527,9 @@ export function initForest(host: HTMLElement): void {
     else start();
   });
 
+  // Pages without a hero (e.g. /career/) keep the forest as a still frame.
   const heroEl = document.querySelector('.hero-intro');
+  if (!heroEl) heroVisible = false;
   if (heroEl && 'IntersectionObserver' in window) {
     new IntersectionObserver(
       ([entry]) => {

@@ -46,6 +46,9 @@ export default defineConfig({
   // external references don't 404.
   redirects: {
     '/pages/dsc-case-study.html': '/pages/dsc-case-study/',
+    // The old hard-coded résumé page (stale titles + a phone number) now lives
+    // on as the canonical, data-driven career timeline.
+    '/resume': '/career/',
   },
 
   integrations: [

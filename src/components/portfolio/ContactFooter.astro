@@ -1,16 +1,19 @@
 ---
 /**
- * A quiet ending: plain text links, no icons, no card.
+ * A quiet ending: plain text links, no icons, no card. Contact details come
+ * from the canonical profile (never a phone number).
  */
-const email = 'kaungthiha.3@gmail.com';
+import { getProfile } from '../../lib/career';
+
+const { public_email, public_links } = getProfile();
 ---
 
 <footer class="home-footer" id="contact" aria-labelledby="contact-title">
   <h2 class="footer-title" id="contact-title">Say hi.</h2>
   <ul class="footer-links">
-    <li><a class="text-link" href="https://www.linkedin.com/in/kaungthiha/" target="_blank" rel="noopener">LinkedIn</a></li>
-    <li><a class="text-link" href="https://github.com/kaungthiha" target="_blank" rel="noopener">GitHub</a></li>
-    <li><a class="text-link" href={`mailto:${email}`}>Email</a></li>
+    {public_links?.linkedin && <li><a class="text-link" href={public_links.linkedin} target="_blank" rel="noopener">LinkedIn</a></li>}
+    {public_links?.github && <li><a class="text-link" href={public_links.github} target="_blank" rel="noopener">GitHub</a></li>}
+    {public_email && <li><a class="text-link" href={`mailto:${public_email}`}>Email</a></li>}
   </ul>
   <p class="footer-line">Made in Arlington, under whatever weather is happening outside.</p>
 </footer>

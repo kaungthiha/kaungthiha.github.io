@@ -1,0 +1,46 @@
+---
+/**
+ * One employer on the /career/ timeline: every canonical role under it
+ * (newest first), a canonical summary, and a few selected outcomes. Overlaps
+ * with other employers and related projects are derived, never written by hand.
+ */
+import { organizationLabel, sentenceCase, type TimelineEntry } from '../../lib/career';
+
+interface Props {
+  entry: TimelineEntry;
+}
+
+const { entry } = Astro.props;
+const exp = entry.experience;
+const meta = [exp.location, exp.engagement_type && sentenceCase(exp.engagement_type)].filter(Boolean).join(' · ');
+---
+
+<li class="timeline-entry" id={exp.id}>
+  <h3 class="timeline-org">{organizationLabel(exp)}</h3>
+  {meta && <p class="timeline-meta">{meta}</p>}
+
+  {entry.roles.map(({ role, range, achievements }) => (
+    <div class="timeline-role">
+      <p class="timeline-dates">{range}</p>
+      <p class="timeline-title">{role.canonical_title}{role.team_or_scope && ` · ${role.team_or_scope}`}</p>
+      {role.summary && <p class="timeline-summary">{role.summary}</p>}
+      {achievements.length > 0 && (
+        <ul class="timeline-outcomes">
+          {achievements.map((a) => <li>{a.text}</li>)}
+        </ul>
+      )}
+    </div>
+  ))}
+
+  {entry.alongside.length > 0 && (
+    <p class="timeline-aside">Overlapped with {entry.alongside.join(' and ')}.</p>
+  )}
+  {entry.relatedProjects.length > 0 && (
+    <p class="timeline-related">
+      Related work:{' '}
+      {entry.relatedProjects.map((p, i) => (
+        <>{i > 0 && ', '}<a class="text-link" href={`/#story-${p.id}`}>{p.title} →</a></>
+      ))}
+    </p>
+  )}
+</li>

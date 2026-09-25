@@ -1,0 +1,319 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://kaungthiha.github.io/schemas/career-history.schema.json",
+  "title": "Kaung Thiha Canonical Career History",
+  "description": "Validation schema for the canonical career-history dataset used by the portfolio and resume-generation workflows.",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "generated_on",
+    "dataset_name",
+    "usage_contract",
+    "profile",
+    "education",
+    "experience",
+    "projects",
+    "skills",
+    "source_files",
+    "data_quality_notes"
+  ],
+  "properties": {
+    "schema_version": {
+      "type": "string"
+    },
+    "generated_on": {
+      "type": "string",
+      "format": "date"
+    },
+    "dataset_name": {
+      "type": "string"
+    },
+    "purpose": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "usage_contract": {
+      "type": "object"
+    },
+    "profile": {
+      "type": "object",
+      "required": [
+        "name"
+      ],
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "location": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "public_links": {
+          "type": "object"
+        },
+        "public_email": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "source_ids": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "additionalProperties": true
+    },
+    "education": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/record"
+      }
+    },
+    "experience": {
+      "type": "array",
+      "items": {
+        "allOf": [
+          {
+            "$ref": "#/$defs/record"
+          },
+          {
+            "type": "object",
+            "required": [
+              "id",
+              "organization",
+              "roles"
+            ],
+            "properties": {
+              "roles": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "required": [
+                    "canonical_title",
+                    "start_date",
+                    "current"
+                  ],
+                  "properties": {
+                    "canonical_title": {
+                      "type": "string"
+                    },
+                    "team_or_scope": {
+                      "type": [
+                        "string",
+                        "null"
+                      ]
+                    },
+                    "start_date": {
+                      "type": [
+                        "string",
+                        "null"
+                      ]
+                    },
+                    "end_date": {
+                      "type": [
+                        "string",
+                        "null"
+                      ]
+                    },
+                    "current": {
+                      "type": "boolean"
+                    },
+                    "summary": {
+                      "type": [
+                        "string",
+                        "null"
+                      ]
+                    },
+                    "achievements": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/$defs/achievement"
+                      }
+                    },
+                    "title_aliases": {
+                      "type": "array"
+                    },
+                    "title_source_ids": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      }
+                    }
+                  },
+                  "additionalProperties": true
+                }
+              }
+            }
+          }
+        ]
+      }
+    },
+    "leadership": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/record"
+      }
+    },
+    "projects": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/record"
+      }
+    },
+    "skills": {
+      "type": "object"
+    },
+    "certifications": {
+      "type": "array"
+    },
+    "source_files": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "id",
+          "filenames",
+          "sha256",
+          "authority"
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "filenames": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "sha256": {
+            "type": "string",
+            "pattern": "^[a-f0-9]{64}$"
+          },
+          "authority": {
+            "type": "string"
+          },
+          "notes": {
+            "type": "string"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    "data_quality_notes": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    }
+  },
+  "$defs": {
+    "metric": {
+      "type": "object",
+      "required": [
+        "name",
+        "value",
+        "unit"
+      ],
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "value": {
+          "type": [
+            "number",
+            "integer",
+            "string"
+          ]
+        },
+        "unit": {
+          "type": "string"
+        },
+        "qualifier": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": true
+    },
+    "achievement": {
+      "type": "object",
+      "required": [
+        "text"
+      ],
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "text": {
+          "type": "string"
+        },
+        "metrics": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/metric"
+          }
+        },
+        "website_default": {
+          "type": "boolean"
+        },
+        "public_safe": {
+          "type": "boolean"
+        },
+        "source_ids": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "confidence": {
+          "type": "string"
+        },
+        "notes": {
+          "type": "string"
+        },
+        "conflicts": {
+          "type": "array"
+        }
+      },
+      "additionalProperties": true
+    },
+    "record": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "source_ids": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "website_default": {
+          "type": "boolean"
+        },
+        "website_priority": {
+          "type": "integer"
+        },
+        "confidence": {
+          "type": "string"
+        },
+        "conflicts": {
+          "type": "array"
+        },
+        "historical_variants": {
+          "type": "array"
+        }
+      },
+      "additionalProperties": true
+    }
+  },
+  "additionalProperties": true
+}

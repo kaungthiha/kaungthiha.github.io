@@ -1,0 +1,122 @@
+---
+/**
+ * /career/ — the longer, chronological professional history. Same canonical
+ * records as the homepage summary (src/lib/career.ts), with more context:
+ * canonical role summaries, a couple of selected outcomes per role, honest
+ * overlaps, and links to related project stories. Statically rendered.
+ */
+import Base from '../layouts/Base.astro';
+import CareerEntry from '../components/career/CareerEntry.astro';
+import ContactFooter from '../components/portfolio/ContactFooter.astro';
+import { portfolioConfig } from '../data/portfolio/portfolio-config';
+import {
+  getCareerEducation,
+  getCareerTimeline,
+  getExperience,
+  getLeadership,
+  getPublicSkills,
+  yearRange,
+} from '../lib/career';
+
+const { career, create, skillGroups } = portfolioConfig;
+
+// One pass over main + earlier employers so overlaps are detected across both.
+const all = getCareerTimeline({
+  experienceIds: [...career.experienceIds, ...career.earlierExperienceIds],
+  achievementsPerRole: career.achievementsPerRole,
+  relatedProjectIds: create.featuredProjectIds,
+});
+const isMain = (id: string) => career.experienceIds.includes(id);
+const groups = all
+  .map((g) => ({ ...g, entries: g.entries.filter((e) => isMain(e.experience.id)) }))
+  .filter((g) => g.entries.length > 0);
+const earlier = all.flatMap((g) => g.entries).filter((e) => !isMain(e.experience.id));
+const leadership = getLeadership(career.leadershipIds);
+const education = career.showEducation ? getCareerEducation() : [];
+const skills = career.showSkills ? getPublicSkills(skillGroups) : [];
+
+const orgs = career.experienceIds.map((id) => getExperience(id).organization);
+const description =
+  `Kaung Thiha's career across product, data, and AI, including ` +
+  `${orgs.slice(0, -1).join(', ')}, and ${orgs[orgs.length - 1]}.`;
+---
+
+<Base title="Career" description={description}>
+  <!-- Same forest, held still and quiet behind the reading column. -->
+  <div class="tree-canvas-host" id="tree-canvas-host" aria-hidden="true" style="--hero-progress: 0"></div>
+
+  <div class="home-content">
+    <div class="home-inner career-page">
+      <header class="career-intro">
+        <p class="section-label">career</p>
+        <h1 class="section-heading">{career.heading}</h1>
+        <p class="section-intro">{career.intro}</p>
+      </header>
+
+      {groups.map((g) => (
+        <section class="career-group" aria-labelledby={`era-${g.label}`}>
+          <h2 class="career-group-label" id={`era-${g.label}`}>{g.label}</h2>
+          <ol class="timeline">
+            {g.entries.map((entry) => <CareerEntry entry={entry} />)}
+          </ol>
+        </section>
+      ))}
+
+      {(earlier.length > 0 || leadership.length > 0) && (
+        <section class="career-group" aria-labelledby="era-earlier">
+          <h2 class="career-group-label" id="era-earlier">Earlier</h2>
+          <ol class="timeline">
+            {earlier.map((entry) => <CareerEntry entry={entry} />)}
+            {leadership.map((l) => (
+              <li class="timeline-entry timeline-entry--minor" id={l.id}>
+                <h3 class="timeline-org">{l.organization}</h3>
+                <div class="timeline-role">
+                  <p class="timeline-dates">{yearRange({ start_date: l.start_date, end_date: l.end_date, current: false })}</p>
+                  <p class="timeline-title">{l.canonical_title}</p>
+                  {l.summary && <p class="timeline-summary">{l.summary}</p>}
+                </div>
+              </li>
+            ))}
+          </ol>
+        </section>
+      )}
+
+      {education.length > 0 && (
+        <section class="career-group" aria-labelledby="era-education">
+          <h2 class="career-group-label" id="era-education">Education</h2>
+          <ul class="career-plain-list">
+            {education.map((e) => (
+              <li>
+                <h3 class="timeline-org">{e.institution}</h3>
+                <p class="timeline-title">{e.credential}</p>
+                <p class="timeline-dates">{e.when}</p>
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
+
+      {skills.length > 0 && (
+        <section class="career-group" aria-labelledby="era-skills">
+          <h2 class="career-group-label" id="era-skills">Skills</h2>
+          <p class="skills-line">
+            {skills.map((g) => (
+              <span class="skills-group"><span class="skills-name">{g.label}</span> {g.items.join(' · ')}</span>
+            ))}
+          </p>
+        </section>
+      )}
+
+      <ContactFooter />
+    </div>
+  </div>
+
+  <script>
+    const host = document.getElementById('tree-canvas-host');
+    if (host) {
+      const boot = () => import('../scripts/forest').then((m) => m.initForest(host));
+      if ('requestIdleCallback' in window) window.requestIdleCallback(boot, { timeout: 2000 });
+      else setTimeout(boot, 200);
+    }
+  </script>
+</Base>

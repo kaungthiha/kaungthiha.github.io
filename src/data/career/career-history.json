@@ -1,0 +1,1687 @@
+{
+  "schema_version": "1.0.0",
+  "generated_on": "2026-09-24",
+  "dataset_name": "Kaung Thiha canonical career history",
+  "purpose": [
+    "Single source of truth for portfolio Work/Create sections",
+    "Source data for future resume variants",
+    "Preserve historical experience without letting stale resume wording override newer authoritative records"
+  ],
+  "usage_contract": {
+    "authoritative_title_rule": "Use canonical_title and role dates in experience[].roles. Do not substitute title aliases unless explicitly generating a historical resume reproduction.",
+    "current_source_rule": "src_apm_general wins when job titles, current role ordering, or current-facing education conflict with older files.",
+    "achievement_rule": "Achievements supported only by supplemental sources are retained but marked website_default=false when they are too detailed, stale, or unnecessary for a minimal portfolio.",
+    "conflict_rule": "Do not silently resolve unresolved conflicts. Use conflicts[] and data_quality_notes[] to decide whether to omit a disputed fact from public copy.",
+    "privacy_rule": "Do not expose phone numbers or private/internal employer material. This dataset intentionally excludes the phone number present in source resumes.",
+    "rendering_rule": "Website components should read from this dataset (or a typed derivative of it) instead of hard-coding job titles, dates, or metrics."
+  },
+  "profile": {
+    "name": "Kaung Thiha",
+    "location": "Arlington, VA",
+    "public_links": {
+      "linkedin": "https://www.linkedin.com/in/kaungthiha",
+      "portfolio": "https://kaungthiha.github.io",
+      "github": "https://github.com/kaungthiha"
+    },
+    "public_email": "kaungthiha.3@gmail.com",
+    "source_ids": [
+      "src_apm_general",
+      "src_portfolio_site"
+    ]
+  },
+  "education": [
+    {
+      "id": "edu_harvard_alm",
+      "institution": "Harvard University",
+      "credential": "Master of Liberal Arts (ALM) in Extension Studies",
+      "field": "Data Science",
+      "status": "in_progress",
+      "start_date": null,
+      "expected_completion": "2027",
+      "website_default": true,
+      "source_ids": [
+        "src_apm_general"
+      ],
+      "confidence": "high"
+    },
+    {
+      "id": "edu_usf_bs",
+      "institution": "University of San Francisco",
+      "credential": "Bachelor of Science (B.S.)",
+      "field": "Business Analytics",
+      "start_date": "2021-08",
+      "end_date": "2024-05",
+      "gpa": 3.81,
+      "website_default": true,
+      "source_ids": [
+        "src_apm_general",
+        "src_product_healthcare"
+      ],
+      "confidence": "high",
+      "historical_variants": [
+        {
+          "description": "Older resumes described the degree as 'BSBA Business Analytics, Computer Science' or 'B.S. Business Analytics, Computer Science'.",
+          "source_ids": [
+            "src_v17",
+            "src_master",
+            "src_coop_da",
+            "src_passport"
+          ],
+          "canonical_resolution": "Use the latest APM resume wording: B.S. in Business Analytics."
+        },
+        {
+          "description": "Older resumes showed GPA 3.8; Product Healthcare showed 3.81.",
+          "source_ids": [
+            "src_v17",
+            "src_master",
+            "src_passport",
+            "src_product_healthcare"
+          ],
+          "canonical_resolution": "Use 3.81 when GPA is needed; latest APM resume omits GPA entirely."
+        }
+      ]
+    },
+    {
+      "id": "edu_coop_da",
+      "institution": "COOP Careers",
+      "credential": "Data Analytics Fellow",
+      "field": "SQL, Python, Tableau, analytics and professional development",
+      "start_date": "2024-08",
+      "end_date": "2024-12",
+      "duration_notes": "16-week fellowship; one source also describes approximately 200 hours of hands-on learning.",
+      "website_default": false,
+      "source_ids": [
+        "src_product_healthcare",
+        "src_coop_da"
+      ],
+      "confidence": "high"
+    }
+  ],
+  "experience": [
+    {
+      "id": "exp_capital_one",
+      "organization": "Capital One",
+      "location": "McLean, VA",
+      "website_priority": 1,
+      "website_default": true,
+      "roles": [
+        {
+          "id": "role_c1_emerging_payments",
+          "canonical_title": "Associate Data Analyst",
+          "team_or_scope": "Emerging Payments & Strategy",
+          "start_date": "2026-09",
+          "end_date": null,
+          "current": true,
+          "title_source_ids": [
+            "src_apm_general"
+          ],
+          "title_aliases": [],
+          "summary": "Owns consumer analytics for emerging-payment products and investment decisions across Capital One's Card portfolio.",
+          "achievements": [
+            {
+              "id": "c1_ep_google_pay_paypal",
+              "text": "Own consumer analytics for Google Pay and PayPal across Capital One's $53.9B Card portfolio, presenting insights to EVP+ audiences to shape enterprise product investment strategy.",
+              "metrics": [
+                {
+                  "name": "card_portfolio_value",
+                  "value": 53.9,
+                  "unit": "USD billions"
+                }
+              ],
+              "website_default": true,
+              "public_safe": true,
+              "source_ids": [
+                "src_apm_general"
+              ],
+              "confidence": "high"
+            },
+            {
+              "id": "c1_ep_alerts_pipeline",
+              "text": "Launched an alerts monitoring pipeline covering approximately 16M events and a unified data cube spanning approximately $106M in recouped customer spend across 6 alert types.",
+              "metrics": [
+                {
+                  "name": "events_covered",
+                  "value": 16,
+                  "unit": "millions",
+                  "qualifier": "approximately"
+                },
+                {
+                  "name": "recouped_customer_spend",
+                  "value": 106,
+                  "unit": "USD millions",
+                  "qualifier": "approximately"
+                },
+                {
+                  "name": "alert_types",
+                  "value": 6,
+                  "unit": "types"
+                }
+              ],
+              "website_default": true,
+              "public_safe": true,
+              "source_ids": [
+                "src_apm_general"
+              ],
+              "confidence": "high"
+            }
+          ]
+        },
+        {
+          "id": "role_c1_data_products",
+          "canonical_title": "Associate Data Product Manager",
+          "team_or_scope": "Data Products & Experiences",
+          "start_date": "2025-07",
+          "end_date": "2026-09",
+          "current": false,
+          "title_source_ids": [
+            "src_apm_general"
+          ],
+          "title_aliases": [
+            {
+              "title": "Associate Data Product Analyst",
+              "source_ids": [
+                "src_master"
+              ],
+              "status": "superseded_by_authoritative_source"
+            }
+          ],
+          "summary": "Built analytics, automation, and discovery systems supporting data-product adoption and delivery.",
+          "achievements": [
+            {
+              "id": "c1_dp_jira_automation",
+              "text": "Automated Jira ticket processing with Python in Databricks, eliminating 5+ hours of weekly manual validation.",
+              "metrics": [
+                {
+                  "name": "manual_time_saved",
+                  "value": 5,
+                  "unit": "hours/week",
+                  "qualifier": "at least"
+                }
+              ],
+              "website_default": true,
+              "public_safe": true,
+              "source_ids": [
+                "src_apm_general",
+                "src_master"
+              ],
+              "confidence": "high"
+            },
+            {
+              "id": "c1_dp_discovery_framework",
+              "text": "Wrote the PRD and built a discovery framework across Snowflake, OneLake, and APIs using SQL regex to classify reference data for an AI-agent data product, lifting data-product consumption 7%.",
+              "metrics": [
+                {
+                  "name": "data_product_consumption_lift",
+                  "value": 7,
+                  "unit": "percent"
+                }
+              ],
+              "website_default": true,
+              "public_safe": true,
+              "source_ids": [
+                "src_apm_general",
+                "src_master"
+              ],
+              "confidence": "high"
+            },
+            {
+              "id": "c1_dp_data_model",
+              "text": "Redesigned a Spark SQL data model handling 1.2TB of monthly event data, reducing script complexity 87% (1,500 to 200 lines) and Databricks cluster runtime 33% (6 to 4 hours).",
+              "metrics": [
+                {
+                  "name": "monthly_event_data",
+                  "value": 1.2,
+                  "unit": "TB"
+                },
+                {
+                  "name": "script_complexity_reduction",
+                  "value": 87,
+                  "unit": "percent"
+                },
+                {
+                  "name": "script_lines_before",
+                  "value": 1500,
+                  "unit": "lines"
+                },
+                {
+                  "name": "script_lines_after",
+                  "value": 200,
+                  "unit": "lines"
+                },
+                {
+                  "name": "cluster_runtime_reduction",
+                  "value": 33,
+                  "unit": "percent"
+                },
+                {
+                  "name": "cluster_runtime_before",
+                  "value": 6,
+                  "unit": "hours"
+                },
+                {
+                  "name": "cluster_runtime_after",
+                  "value": 4,
+                  "unit": "hours"
+                }
+              ],
+              "website_default": true,
+              "public_safe": true,
+              "source_ids": [
+                "src_apm_general",
+                "src_master"
+              ],
+              "confidence": "high"
+            },
+            {
+              "id": "c1_dp_api_delivery",
+              "text": "Presented an API delivery framework to Senior Director and Product partners, then scaled it with an LLM tool that classified 100+ tickets by engineering effort and reduced average time-to-market estimates from 500 to 140 days.",
+              "metrics": [
+                {
+                  "name": "tickets_classified",
+                  "value": 100,
+                  "unit": "tickets",
+                  "qualifier": "more than"
+                },
+                {
+                  "name": "estimated_days_before",
+                  "value": 500,
+                  "unit": "days"
+                },
+                {
+                  "name": "estimated_days_after",
+                  "value": 140,
+                  "unit": "days"
+                }
+              ],
+              "website_default": true,
+              "public_safe": true,
+              "source_ids": [
+                "src_apm_general"
+              ],
+              "confidence": "high"
+            },
+            {
+              "id": "c1_dp_usage_reporting",
+              "text": "Owned adoption and usage analytics for the Card line of business and built QuickSuite reporting supporting a 30% growth OKR.",
+              "metrics": [
+                {
+                  "name": "growth_okr",
+                  "value": 30,
+                  "unit": "percent"
+                }
+              ],
+              "website_default": false,
+              "public_safe": true,
+              "source_ids": [
+                "src_master"
+              ],
+              "confidence": "medium",
+              "notes": "Supported by the master resume but omitted from the authoritative APM resume."
+            },
+            {
+              "id": "c1_dp_graphql",
+              "text": "Evaluated which high-traffic APIs were routed through an enterprise GraphQL layer to surface usage patterns and migration opportunities.",
+              "website_default": false,
+              "public_safe": true,
+              "source_ids": [
+                "src_master"
+              ],
+              "confidence": "medium",
+              "notes": "Supported by the master resume but omitted from the authoritative APM resume."
+            }
+          ]
+        }
+      ],
+      "source_ids": [
+        "src_apm_general",
+        "src_master"
+      ]
+    },
+    {
+      "id": "exp_outbuild",
+      "organization": "Outbuild",
+      "organization_description": "Construction tech startup",
+      "location": "Remote",
+      "engagement_type": "contract",
+      "website_priority": 2,
+      "website_default": true,
+      "roles": [
+        {
+          "canonical_title": "Revenue Operations Analyst",
+          "start_date": "2025-06",
+          "end_date": "2025-11",
+          "current": false,
+          "title_source_ids": [
+            "src_apm_general"
+          ],
+          "summary": "Built revenue-operations automation and an AI-assisted learning system for a construction-tech sales team.",
+          "achievements": [
+            {
+              "id": "outbuild_learning",
+              "text": "Built an LLM-assisted learning system for 20 AEs/SDRs using internal documentation, Apps Script-driven forms, and n8n to display results to executives, cutting onboarding from 4 weeks to 1 week.",
+              "metrics": [
+                {
+                  "name": "learners",
+                  "value": 20,
+                  "unit": "people"
+                },
+                {
+                  "name": "onboarding_before",
+                  "value": 4,
+                  "unit": "weeks"
+                },
+                {
+                  "name": "onboarding_after",
+                  "value": 1,
+                  "unit": "week"
+                }
+              ],
+              "website_default": true,
+              "public_safe": true,
+              "source_ids": [
+                "src_apm_general",
+                "src_master"
+              ],
+              "confidence": "high"
+            },
+            {
+              "id": "outbuild_hubspot",
+              "text": "Created HubSpot automations and custom-coded workflows to improve sales efficiency and reporting accuracy.",
+              "website_default": false,
+              "public_safe": true,
+              "source_ids": [
+                "src_master"
+              ],
+              "confidence": "medium"
+            }
+          ]
+        }
+      ],
+      "source_ids": [
+        "src_apm_general",
+        "src_master"
+      ]
+    },
+    {
+      "id": "exp_aws_keywords",
+      "organization": "Amazon Web Services",
+      "engagement_employer": "Keywords Studios",
+      "location": "San Francisco, CA",
+      "engagement_type": "contract",
+      "website_priority": 3,
+      "website_default": true,
+      "roles": [
+        {
+          "canonical_title": "Research Associate 3",
+          "team_or_scope": "LLM Operations",
+          "start_date": "2025-01",
+          "end_date": "2025-06",
+          "current": false,
+          "title_source_ids": [
+            "src_apm_general"
+          ],
+          "summary": "Worked on RLHF operations for Amazon Nova Act, supporting agentic browsing and classification model training/evaluation.",
+          "achievements": [
+            {
+              "id": "aws_rlhf_team",
+              "text": "Directed 50+ annotators on the RLHF team for Amazon Nova Act in training and evaluating an AI model for agentic browsing and classification.",
+              "metrics": [
+                {
+                  "name": "annotators",
+                  "value": 50,
+                  "unit": "people",
+                  "qualifier": "more than"
+                }
+              ],
+              "website_default": true,
+              "public_safe": true,
+              "source_ids": [
+                "src_apm_general"
+              ],
+              "confidence": "high"
+            },
+            {
+              "id": "aws_hex",
+              "text": "Built Hex dashboards to replace spreadsheets, surfacing inefficiencies that improved model pass rates 5% week over week.",
+              "metrics": [
+                {
+                  "name": "pass_rate_improvement",
+                  "value": 5,
+                  "unit": "percent WoW"
+                }
+              ],
+              "website_default": true,
+              "public_safe": true,
+              "source_ids": [
+                "src_apm_general",
+                "src_master"
+              ],
+              "confidence": "high"
+            }
+          ]
+        }
+      ],
+      "source_ids": [
+        "src_apm_general",
+        "src_master"
+      ]
+    },
+    {
+      "id": "exp_wefunder",
+      "organization": "Wefunder",
+      "location": "San Francisco, CA",
+      "website_priority": 4,
+      "website_default": true,
+      "roles": [
+        {
+          "canonical_title": "Closing & Compliance Product Operations",
+          "start_date": "2024-01",
+          "end_date": "2024-07",
+          "current": false,
+          "title_source_ids": [
+            "src_apm_general"
+          ],
+          "title_aliases": [
+            {
+              "title": "Closing and Compliance Product Analyst",
+              "source_ids": [
+                "src_product_healthcare",
+                "src_coop_da"
+              ],
+              "status": "historical_variant"
+            },
+            {
+              "title": "Closing Strategy and Compliance Intern",
+              "source_ids": [
+                "src_master"
+              ],
+              "status": "superseded_or_conflicting_draft"
+            }
+          ],
+          "summary": "Owned product-operations and compliance workflows for an equity-crowdfunding platform, including transaction operations, experimentation, and a VIP product.",
+          "achievements": [
+            {
+              "id": "wefunder_vip",
+              "text": "Launched a VIP product with founders, Engineering, Design, and the VP of Operations, growing adoption from 0 to 547 users and creating $161,365 in revenue.",
+              "metrics": [
+                {
+                  "name": "users_before",
+                  "value": 0,
+                  "unit": "users"
+                },
+                {
+                  "name": "users_after",
+                  "value": 547,
+                  "unit": "users"
+                },
+                {
+                  "name": "new_revenue",
+                  "value": 161365,
+                  "unit": "USD"
+                }
+              ],
+              "website_default": true,
+              "public_safe": true,
+              "source_ids": [
+                "src_apm_general",
+                "src_master",
+                "src_product_healthcare"
+              ],
+              "confidence": "high"
+            },
+            {
+              "id": "wefunder_experiments",
+              "text": "Used market analysis and A/B testing to optimize conversion and retention, resulting in a 10% lift in investor engagement and a 20% improvement in NPS.",
+              "metrics": [
+                {
+                  "name": "investor_engagement_lift",
+                  "value": 10,
+                  "unit": "percent"
+                },
+                {
+                  "name": "nps_improvement",
+                  "value": 20,
+                  "unit": "percent"
+                }
+              ],
+              "website_default": true,
+              "public_safe": true,
+              "source_ids": [
+                "src_apm_general",
+                "src_master"
+              ],
+              "confidence": "high",
+              "conflicts": [
+                "Product Healthcare groups the 20% figure as improvement in conversion rates and NPS; authoritative APM specifies 10% investor engagement and 20% NPS."
+              ]
+            },
+            {
+              "id": "wefunder_transactions",
+              "text": "Managed approximately $350K in weekly transaction/disbursement flow across 500+ active campaigns and built PostgreSQL ETL/process improvements that reduced turnaround time 20%.",
+              "metrics": [
+                {
+                  "name": "weekly_transactions",
+                  "value": 350000,
+                  "unit": "USD/week",
+                  "qualifier": "approximately"
+                },
+                {
+                  "name": "active_campaigns",
+                  "value": 500,
+                  "unit": "campaigns",
+                  "qualifier": "more than"
+                },
+                {
+                  "name": "turnaround_improvement",
+                  "value": 20,
+                  "unit": "percent"
+                }
+              ],
+              "website_default": false,
+              "public_safe": true,
+              "source_ids": [
+                "src_master",
+                "src_product_healthcare",
+                "src_coop_da"
+              ],
+              "confidence": "high"
+            },
+            {
+              "id": "wefunder_funding_blockers",
+              "text": "Automated triage/analysis of investor funding blockers, reducing manual workload 50%.",
+              "metrics": [
+                {
+                  "name": "manual_work_reduction",
+                  "value": 50,
+                  "unit": "percent"
+                }
+              ],
+              "website_default": false,
+              "public_safe": true,
+              "source_ids": [
+                "src_master"
+              ],
+              "confidence": "medium"
+            },
+            {
+              "id": "wefunder_regulatory",
+              "text": "Guided founders through Regulation CF and Regulation D filing requirements and SEC disclosures.",
+              "website_default": false,
+              "public_safe": true,
+              "source_ids": [
+                "src_master"
+              ],
+              "confidence": "medium"
+            }
+          ]
+        }
+      ],
+      "source_ids": [
+        "src_apm_general",
+        "src_master",
+        "src_product_healthcare",
+        "src_coop_da"
+      ],
+      "conflicts": [
+        {
+          "field": "dates",
+          "details": "One draft in the master resume says Jan 2023-May 2024, while newer/authoritative resumes consistently place Wefunder in Jan-Jul 2024.",
+          "resolution": "Canonical dates are Jan 2024-Jul 2024."
+        }
+      ]
+    },
+    {
+      "id": "exp_askcyborg",
+      "organization": "AskCyborg",
+      "affiliation": "CrossWork",
+      "location": "Los Angeles, CA",
+      "website_priority": 5,
+      "website_default": true,
+      "roles": [
+        {
+          "canonical_title": "Co-Founder, Product Manager",
+          "start_date": "2023-06",
+          "end_date": "2023-10",
+          "current": false,
+          "title_source_ids": [
+            "src_apm_general"
+          ],
+          "title_aliases": [
+            {
+              "title": "Venture Capital Analyst Intern / Venture Capital Summer Analyst (CrossWork Midas)",
+              "source_ids": [
+                "src_master",
+                "src_v17",
+                "src_coop_da"
+              ],
+              "status": "historical_resume_variant"
+            }
+          ],
+          "summary": "Shipped an AI-powered SEC EDGAR research MVP and owned product discovery, roadmap, and parts of the retrieval workflow.",
+          "achievements": [
+            {
+              "id": "askcyborg_mvp",
+              "text": "Shipped an AI-powered SEC chatbot MVP, using user feedback to refine the query-to-report generation flow.",
+              "website_default": true,
+              "public_safe": true,
+              "source_ids": [
+                "src_apm_general",
+                "src_master",
+                "src_product_healthcare"
+              ],
+              "confidence": "high"
+            },
+            {
+              "id": "askcyborg_design",
+              "text": "Coordinated 3 UI/UX and design contractors to implement Figma demos and overhaul the product's visual language.",
+              "metrics": [
+                {
+                  "name": "contractors",
+                  "value": 3,
+                  "unit": "people"
+                }
+              ],
+              "website_default": true,
+              "public_safe": true,
+              "source_ids": [
+                "src_apm_general",
+                "src_product_healthcare"
+              ],
+              "confidence": "high"
+            },
+            {
+              "id": "askcyborg_embeddings",
+              "text": "Wrote Python to parse SEC filing JSON, generate embeddings, and prepare chunks for retrieval.",
+              "website_default": false,
+              "public_safe": true,
+              "source_ids": [
+                "src_master"
+              ],
+              "confidence": "medium"
+            },
+            {
+              "id": "askcyborg_vector_db",
+              "text": "Collaborated with engineers to integrate a cloud vector database, improving retrieval speed by roughly 2x.",
+              "metrics": [
+                {
+                  "name": "retrieval_speed_multiplier",
+                  "value": 2,
+                  "unit": "x",
+                  "qualifier": "approximately"
+                }
+              ],
+              "website_default": true,
+              "public_safe": true,
+              "source_ids": [
+                "src_master",
+                "src_product_healthcare"
+              ],
+              "confidence": "high"
+            },
+            {
+              "id": "crosswork_diligence",
+              "text": "Conducted due diligence on 12 pre-IPO firms and presented investment work that influenced approximately $1.5M in fund allocation.",
+              "metrics": [
+                {
+                  "name": "companies_diligenced",
+                  "value": 12,
+                  "unit": "companies"
+                },
+                {
+                  "name": "fund_allocation_influenced",
+                  "value": 1.5,
+                  "unit": "USD millions",
+                  "qualifier": "approximately"
+                }
+              ],
+              "website_default": false,
+              "public_safe": true,
+              "source_ids": [
+                "src_master",
+                "src_v17",
+                "src_coop_da"
+              ],
+              "confidence": "medium",
+              "notes": "Historical CrossWork Midas scope retained, but the authoritative APM resume uses AskCyborg / Co-Founder, Product Manager as the canonical title."
+            }
+          ]
+        }
+      ],
+      "source_ids": [
+        "src_apm_general",
+        "src_master",
+        "src_product_healthcare",
+        "src_coop_da",
+        "src_v17"
+      ]
+    },
+    {
+      "id": "exp_usf_its",
+      "organization": "University of San Francisco Information Technology Services",
+      "location": "San Francisco, CA",
+      "website_priority": 6,
+      "website_default": true,
+      "roles": [
+        {
+          "canonical_title": "Salesforce Database Administrator",
+          "start_date": "2022-05",
+          "end_date": "2023-12",
+          "current": false,
+          "title_source_ids": [
+            "src_apm_general"
+          ],
+          "title_aliases": [
+            {
+              "title": "Salesforce Product Administrator",
+              "source_ids": [
+                "src_product_healthcare"
+              ],
+              "status": "historical_variant"
+            },
+            {
+              "title": "USF ITS Campus Trainee | Salesforce Database Administrator",
+              "source_ids": [
+                "src_passport"
+              ],
+              "status": "historical_variant"
+            }
+          ],
+          "summary": "Administered Salesforce at university scale while supporting dashboards, data access, UAT, and Agile delivery.",
+          "achievements": [
+            {
+              "id": "usf_scale_cost",
+              "text": "Administered Salesforce for 10,000+ users, cutting license costs 33%.",
+              "metrics": [
+                {
+                  "name": "users",
+                  "value": 10000,
+                  "unit": "users",
+                  "qualifier": "more than"
+                },
+                {
+                  "name": "license_cost_reduction",
+                  "value": 33,
+                  "unit": "percent"
+                }
+              ],
+              "website_default": true,
+              "public_safe": true,
+              "source_ids": [
+                "src_apm_general",
+                "src_master",
+                "src_product_healthcare",
+                "src_coop_da"
+              ],
+              "confidence": "high"
+            },
+            {
+              "id": "usf_scrum",
+              "text": "Led Agile ceremonies as Scrum master for 10 developers and analysts, managing Jira backlogs and UAT.",
+              "metrics": [
+                {
+                  "name": "team_size",
+                  "value": 10,
+                  "unit": "people"
+                }
+              ],
+              "website_default": true,
+              "public_safe": true,
+              "source_ids": [
+                "src_apm_general",
+                "src_master",
+                "src_product_healthcare",
+                "src_coop_da"
+              ],
+              "confidence": "high"
+            },
+            {
+              "id": "usf_licenses",
+              "text": "Reconfigured approximately 200 Salesforce accounts, saving about $2,000 biannually.",
+              "metrics": [
+                {
+                  "name": "accounts_reconfigured",
+                  "value": 200,
+                  "unit": "accounts",
+                  "qualifier": "approximately"
+                },
+                {
+                  "name": "biannual_savings",
+                  "value": 2000,
+                  "unit": "USD"
+                }
+              ],
+              "website_default": false,
+              "public_safe": true,
+              "source_ids": [
+                "src_master",
+                "src_coop_da",
+                "src_passport"
+              ],
+              "confidence": "high"
+            }
+          ]
+        }
+      ],
+      "source_ids": [
+        "src_apm_general",
+        "src_master",
+        "src_product_healthcare",
+        "src_coop_da",
+        "src_passport"
+      ]
+    },
+    {
+      "id": "exp_energy_innovation_capital",
+      "organization": "Energy Innovation Capital",
+      "location": "San Francisco, CA",
+      "website_priority": 8,
+      "website_default": false,
+      "roles": [
+        {
+          "canonical_title": "Research and Data Analytics Extern",
+          "start_date": "2023-09",
+          "end_date": "2023-12",
+          "current": false,
+          "title_source_ids": [
+            "src_master"
+          ],
+          "summary": "Researched Carbon Capture, Utilization, and Storage and broader energy-transition market dynamics.",
+          "achievements": [
+            {
+              "text": "Identified sector drivers, macro trends, and risks in CCUS and drafted an investment memo covering 4 key public and private players.",
+              "metrics": [
+                {
+                  "name": "players_profiled",
+                  "value": 4,
+                  "unit": "companies"
+                }
+              ],
+              "website_default": false,
+              "public_safe": true,
+              "source_ids": [
+                "src_master"
+              ],
+              "confidence": "medium"
+            }
+          ]
+        }
+      ],
+      "source_ids": [
+        "src_master"
+      ]
+    },
+    {
+      "id": "exp_ignitexl",
+      "organization": "igniteXL Ventures",
+      "website_priority": 9,
+      "website_default": false,
+      "roles": [
+        {
+          "canonical_title": "AI Deal Sourcing Extern",
+          "start_date": "2023-09",
+          "end_date": null,
+          "current": false,
+          "date_status": "end_date_unresolved_from_supplied_files",
+          "title_source_ids": [
+            "src_master",
+            "src_v17"
+          ],
+          "summary": "Created investment memos for early-stage companies using market sizing, revenue projections, and AI-assisted research.",
+          "achievements": [
+            {
+              "text": "Created memos for 3 high-potential companies containing projections, revenue models, and AI-assisted insights.",
+              "metrics": [
+                {
+                  "name": "companies",
+                  "value": 3,
+                  "unit": "companies"
+                }
+              ],
+              "website_default": false,
+              "public_safe": true,
+              "source_ids": [
+                "src_master"
+              ],
+              "confidence": "medium"
+            }
+          ]
+        }
+      ],
+      "source_ids": [
+        "src_master",
+        "src_v17"
+      ],
+      "conflicts": [
+        {
+          "field": "end_date",
+          "details": "Historical resumes say 'Present', but those were written in 2023-era contexts and no newer supplied source establishes a final end date.",
+          "resolution": "Do not render 'Present' on the website. Omit the end date or label it unresolved in internal tooling."
+        }
+      ]
+    },
+    {
+      "id": "exp_debate_judge",
+      "organization": "HiredJudge",
+      "website_priority": 10,
+      "website_default": false,
+      "roles": [
+        {
+          "canonical_title": "Debate Judge",
+          "start_date": "2018-10",
+          "end_date": null,
+          "current": false,
+          "date_status": "current_status_not_verified_by_recent_supplied_resume",
+          "title_source_ids": [
+            "src_passport"
+          ],
+          "summary": "Judged middle- and high-school speech and debate competitions and provided detailed strategic/rhetorical feedback.",
+          "achievements": [
+            {
+              "text": "Provided extensive feedback to 100+ competitors on case strategy and rhetorical tactics.",
+              "metrics": [
+                {
+                  "name": "competitors",
+                  "value": 100,
+                  "unit": "people",
+                  "qualifier": "more than"
+                }
+              ],
+              "website_default": false,
+              "public_safe": true,
+              "source_ids": [
+                "src_passport"
+              ],
+              "confidence": "medium"
+            }
+          ]
+        }
+      ],
+      "source_ids": [
+        "src_passport"
+      ]
+    }
+  ],
+  "leadership": [
+    {
+      "id": "lead_apo",
+      "organization": "Alpha Phi Omega Service Fraternity",
+      "canonical_title": "Finance Chair, Pledge Trainer",
+      "start_date": "2021-08",
+      "end_date": "2024-05",
+      "summary": "Led fundraising, finance, recruitment, and community engagement.",
+      "achievements": [
+        "Raised $2,000+ for charity with local business/nonprofit partnerships.",
+        "Increased international-student presence by 30% through recruitment and community engagement."
+      ],
+      "source_ids": [
+        "src_product_healthcare",
+        "src_master",
+        "src_v17",
+        "src_passport"
+      ],
+      "website_default": false,
+      "confidence": "high"
+    },
+    {
+      "id": "lead_fiscal_affairs",
+      "organization": "Fiscal Affairs Council",
+      "canonical_title": "Chair of Annual Budget, Chair of Investment Task Force",
+      "start_date": "2019-08",
+      "end_date": "2021-05",
+      "summary": "Oversaw a $1.6M student-organization budget and researched alternative investment vehicles.",
+      "source_ids": [
+        "src_master",
+        "src_v17",
+        "src_passport"
+      ],
+      "website_default": false,
+      "confidence": "high"
+    },
+    {
+      "id": "lead_advocacy",
+      "organization": "Advocacy Council",
+      "canonical_title": "Chair of Legislative, Vice Chair of Advocacy",
+      "start_date": "2020-08",
+      "end_date": "2021-05",
+      "summary": "Hosted town halls and negotiated $5,000 in support for a campus food pantry and temporary student housing.",
+      "source_ids": [
+        "src_master",
+        "src_v17"
+      ],
+      "website_default": false,
+      "confidence": "medium"
+    },
+    {
+      "id": "lead_badminton",
+      "organization": "Badminton at Orange Coast",
+      "canonical_title": "Founder & President",
+      "start_date": "2018-09",
+      "end_date": "2021-05",
+      "summary": "Built a 140+ member club and grew its balance from $0 to $4,000 while maintaining reserves.",
+      "source_ids": [
+        "src_master",
+        "src_passport"
+      ],
+      "website_default": false,
+      "confidence": "high"
+    }
+  ],
+  "projects": [
+    {
+      "id": "proj_sheepherder",
+      "title": "SheepHerder",
+      "category": "festival planning app",
+      "status": "project",
+      "date": null,
+      "summary": "React/TypeScript festival-planning app with weighted interval scheduling, distance/time constraints, shared schedule generation, and session restore / group-planning features.",
+      "technologies": [
+        "React",
+        "TypeScript",
+        "Supabase",
+        "Cline",
+        "gpt-oss-120b"
+      ],
+      "achievements": [
+        "Developed a weighted interval scheduling algorithm factoring in distance and user-defined time constraints.",
+        "Shipped shared-schedule and group-planning features with organic usage within a day of launch."
+      ],
+      "metric_conflicts": [
+        {
+          "metric": "organic_users_within_first_day",
+          "variants": [
+            "70+",
+            "60+"
+          ],
+          "source_ids": [
+            "src_master"
+          ],
+          "resolution": "Do not hard-code a user count on the website until verified; use 'organic users within a day of launch' or choose the conservative 60+ only if a number is required."
+        }
+      ],
+      "website_default": true,
+      "website_priority": 1,
+      "source_ids": [
+        "src_master",
+        "src_portfolio_site"
+      ],
+      "confidence": "medium",
+      "website_summary": "Plan festival meetups and build a schedule around the sets nobody wants to miss.",
+      "links": [
+        {
+          "kind": "live",
+          "url": "/tools/festival-thingamabob/"
+        }
+      ]
+    },
+    {
+      "id": "proj_instacart_reddit_pulse",
+      "title": "Instacart Reddit Pulse",
+      "category": "voice-of-customer analytics",
+      "date": null,
+      "summary": "Python + Reddit data tool that classifies customer sentiment across six pain-point categories and automates a recurring product memo with trend analysis, theme ranking, and recommendations.",
+      "technologies": [
+        "Python",
+        "Reddit API"
+      ],
+      "website_default": true,
+      "website_priority": 5,
+      "source_ids": [
+        "src_master",
+        "src_portfolio_site"
+      ],
+      "confidence": "high",
+      "website_summary": "Reads Reddit to surface sentiment on Instacart, then drafts a short memo. Made for some APM app oomph.",
+      "independent": true,
+      "links": [
+        {
+          "kind": "github",
+          "url": "https://github.com/kaungthiha"
+        }
+      ],
+      "achievements": [
+        "Sample run (Mar 4–11, 2026): 24 posts across 3 subreddits, 66.7% negative, with substitutions / out-of-stock the top pain point."
+      ]
+    },
+    {
+      "id": "proj_retailer_performance",
+      "title": "Retailer Performance Analysis",
+      "category": "analytics",
+      "date": "2024-05",
+      "summary": "Analyzed 500,000+ retail transactions to identify seasonality, workforce/logistics opportunities, and inventory strategy.",
+      "technologies": [
+        "R",
+        "Tableau"
+      ],
+      "achievements": [
+        "Analyzed 500,000+ transactions.",
+        "Built forecasting/analysis to identify seasonal patterns and support inventory/workforce recommendations."
+      ],
+      "source_ids": [
+        "src_coop_da",
+        "src_product_healthcare",
+        "src_master"
+      ],
+      "website_default": false,
+      "confidence": "medium",
+      "conflicts": [
+        "One master-resume draft says SQL while multiple targeted resume variants describe the project in R.",
+        "Methods vary across drafts (regression/correlation vs moving averages/time-series forecasting)."
+      ]
+    },
+    {
+      "id": "proj_airbnb",
+      "title": "Airbnb Location Analysis",
+      "category": "analytics / forecasting",
+      "date": "2024-12",
+      "summary": "Analyzed 13,000+ Texas Airbnb listings and used forecasting/visualization to identify attractive rental areas and investment characteristics.",
+      "technologies": [
+        "Python",
+        "PyTorch Forecasting",
+        "matplotlib",
+        "Tableau"
+      ],
+      "achievements": [
+        "Applied Temporal Fusion Transformer / PyTorch Forecasting analysis to rental prices and occupancy.",
+        "Built interactive Tableau dashboards and story points for investment analysis."
+      ],
+      "source_ids": [
+        "src_coop_da",
+        "src_master",
+        "src_v17",
+        "src_passport"
+      ],
+      "website_default": false,
+      "confidence": "medium",
+      "historical_variants": [
+        "Older versions describe 13,808 Austin listings and regression/host-level analysis.",
+        "Newer data-analytics versions describe 13,000+ Texas listings and PyTorch Forecasting."
+      ]
+    },
+    {
+      "id": "proj_cfa_research_challenge",
+      "title": "CFA Institute Research Challenge",
+      "category": "equity research",
+      "date": "2023-05",
+      "summary": "Produced equity research on AMD using DCF, market multiples, and Monte Carlo analysis; team placed 5th in Northern California.",
+      "technologies": [
+        "DCF",
+        "Market Multiples",
+        "Python",
+        "Monte Carlo"
+      ],
+      "metrics": [
+        {
+          "name": "monte_carlo_trials",
+          "value": 10000,
+          "unit": "trials"
+        },
+        {
+          "name": "regional_placement",
+          "value": 5,
+          "unit": "place"
+        }
+      ],
+      "source_ids": [
+        "src_coop_da",
+        "src_product_healthcare",
+        "src_master",
+        "src_v17",
+        "src_passport"
+      ],
+      "website_default": false,
+      "confidence": "high"
+    },
+    {
+      "id": "proj_stroke_model",
+      "title": "Stroke Predictive Classification Model",
+      "category": "healthcare analytics / machine learning",
+      "date": null,
+      "summary": "Analyzed 6,000+ stroke records and built an interpretable decision-tree classifier with cross-validation.",
+      "technologies": [
+        "R",
+        "Decision Trees",
+        "Cross-validation"
+      ],
+      "metrics": [
+        {
+          "name": "records",
+          "value": 6000,
+          "unit": "records",
+          "qualifier": "more than"
+        },
+        {
+          "name": "accuracy",
+          "value": 70,
+          "unit": "percent"
+        }
+      ],
+      "source_ids": [
+        "src_product_healthcare",
+        "src_master"
+      ],
+      "website_default": false,
+      "confidence": "high"
+    },
+    {
+      "id": "proj_bitcoin_volatility",
+      "title": "Bitcoin Volatility Analysis",
+      "category": "risk analytics",
+      "date": null,
+      "summary": "Built a GARCH(1,1) model to forecast 60-day Bitcoin volatility and calculated 95% Value at Risk.",
+      "technologies": [
+        "GARCH",
+        "Time Series",
+        "Risk Analytics"
+      ],
+      "metrics": [
+        {
+          "name": "forecast_horizon",
+          "value": 60,
+          "unit": "days"
+        },
+        {
+          "name": "var_confidence",
+          "value": 95,
+          "unit": "percent"
+        },
+        {
+          "name": "value_at_risk",
+          "value": -5.92,
+          "unit": "percent"
+        }
+      ],
+      "source_ids": [
+        "src_master"
+      ],
+      "website_default": false,
+      "confidence": "medium"
+    },
+    {
+      "id": "proj_sonoma_wines",
+      "title": "Sonoma Valley Wines",
+      "category": "business modeling",
+      "date": null,
+      "summary": "Built a business plan and Excel model for vineyard production and advertising under a $10,000 initial-capital constraint.",
+      "technologies": [
+        "Excel",
+        "Financial Modeling"
+      ],
+      "source_ids": [
+        "src_master",
+        "src_v17",
+        "src_passport"
+      ],
+      "website_default": false,
+      "confidence": "high"
+    },
+    {
+      "id": "proj_tatcha",
+      "title": "Integrated Marketing Communications Campaign - Tatcha",
+      "category": "marketing strategy",
+      "date": null,
+      "summary": "Developed an integrated marketing concept and channel/budget schedule for a prestige cosmetics brand.",
+      "source_ids": [
+        "src_master",
+        "src_v17",
+        "src_passport"
+      ],
+      "website_default": false,
+      "confidence": "high"
+    },
+    {
+      "id": "proj_crowe_future_of_talent",
+      "title": "Crowe Consulting Case Competition: Imagining the Future of Talent",
+      "category": "strategy case",
+      "date": null,
+      "summary": "Proposed talent strategies and analyzed AI adoption's impact on productivity, satisfaction, and client value.",
+      "source_ids": [
+        "src_master",
+        "src_v17"
+      ],
+      "website_default": false,
+      "confidence": "medium"
+    },
+    {
+      "id": "proj_outbuild_learning",
+      "title": "Outbuild AI Learning System",
+      "category": "AI automation",
+      "date": null,
+      "related_experience_id": "exp_outbuild",
+      "related_achievement_ids": [
+        "outbuild_learning"
+      ],
+      "summary": "An automated learning-assessment system for new AEs and SDRs at a construction-tech startup, combining Claude for quiz generation and grading, Notion as the knowledge base and results hub, Google Forms for delivery, and n8n as the automation layer.",
+      "website_summary": "An automated learning-assessment system that cut new sales onboarding from four weeks to one.",
+      "problem": "Selling construction software means knowing industry terms, delivery methods, lean principles, and how pull planning works. New AEs and SDRs historically spent 3–4 weeks studying and shadowing before they felt ready.",
+      "technologies": [
+        "Claude",
+        "Notion",
+        "n8n",
+        "Google Forms",
+        "JavaScript"
+      ],
+      "achievements": [
+        "Combined Claude for quiz generation and grading, Notion as the knowledge base and results hub, Google Forms for delivery, and n8n as the automation layer.",
+        "Returned assessment results to an executive dashboard so leadership could see ramp progress."
+      ],
+      "links": [
+        {
+          "kind": "pdf",
+          "url": "/assets/projects/Outbuild_AI Learning System_KT.docx.pdf"
+        }
+      ],
+      "website_default": true,
+      "website_priority": 2,
+      "source_ids": [
+        "src_portfolio_site",
+        "src_apm_general"
+      ],
+      "confidence": "high"
+    },
+    {
+      "id": "proj_askcyborg",
+      "title": "AskCyborg",
+      "category": "AI product prototype",
+      "date": null,
+      "related_experience_id": "exp_askcyborg",
+      "related_achievement_ids": [
+        "askcyborg_mvp",
+        "askcyborg_embeddings",
+        "askcyborg_vector_db"
+      ],
+      "result_achievement_id": "askcyborg_vector_db",
+      "summary": "An AI research assistant for SEC EDGAR filings, built in the days of GPT-3.5 Turbo: ask a question, get a sourced report.",
+      "website_summary": "An AI research assistant for SEC EDGAR filings, back in the days of GPT-3.5 Turbo. Ask a question, get a sourced report. Co-founded; I owned the roadmap, helped write the code to generate embeddings, and shipped the MVP.",
+      "problem": "Financial research buries useful signal inside dense regulatory filings. Analysts spend hours reading EDGAR filings to answer questions a good assistant could surface in seconds.",
+      "technologies": [
+        "Python",
+        "Vector DB",
+        "Embeddings",
+        "Figma"
+      ],
+      "achievements": [
+        "Built a filing ingestion and parsing flow over SEC EDGAR.",
+        "Used embeddings and vector retrieval to answer queries and assemble reports.",
+        "Ran product discovery and user-feedback loops to shape the roadmap.",
+        "Led workstreams with developers and contractors as a college student."
+      ],
+      "maintained": false,
+      "links": [
+        {
+          "kind": "website",
+          "url": "https://askcyborg.com/"
+        }
+      ],
+      "website_default": true,
+      "website_priority": 3,
+      "source_ids": [
+        "src_portfolio_site",
+        "src_apm_general",
+        "src_master"
+      ],
+      "confidence": "high"
+    },
+    {
+      "id": "proj_ease",
+      "title": "EASE — Debt-Support Flow",
+      "category": "case study",
+      "date": null,
+      "related_experience_id": "exp_capital_one",
+      "summary": "An interactive mobile prototype for a debt-support flow, meeting customers in financial distress with a clearer path forward.",
+      "website_summary": "An interactive mobile prototype for a debt-support flow — meeting customers in financial distress with a clearer path forward.",
+      "problem": "Customers in financial distress need differentiated help fast, and the flow should also improve how at-risk customers are identified.",
+      "technologies": [
+        "React",
+        "Tailwind CSS",
+        "JavaScript"
+      ],
+      "achievements": [
+        "Designed a dashboard home with a financial snapshot and a prompt to get a personalized plan.",
+        "Built a smart survey capturing four key signals (payment difficulty, external debt, intent, primary concern) with segmentation logic that routes to the right path.",
+        "Laid out three support paths — a payment plan, budgeting tools, and debt-settlement education — with a comparison table and a \"rebuild with us\" confirmation screen."
+      ],
+      "public_demo": false,
+      "links": [],
+      "website_default": true,
+      "website_priority": 4,
+      "source_ids": [
+        "src_portfolio_site"
+      ],
+      "confidence": "high"
+    },
+    {
+      "id": "proj_attendance_tracker",
+      "title": "Attendance Tracker",
+      "category": "personal tool",
+      "date": null,
+      "summary": "A personal utility for tracking office attendance across rolling 13-week periods, with prorated requirements and JSON import/export. Not an official product of any employer.",
+      "website_summary": "Rolling 13-week office-attendance math, because I like to min/max.",
+      "technologies": [
+        "JavaScript",
+        "HTML",
+        "CSS"
+      ],
+      "achievements": [
+        "Calculates prorated requirements across rolling 13-week periods.",
+        "Marks attendance on a calendar and exports/imports state as JSON."
+      ],
+      "links": [
+        {
+          "kind": "live",
+          "url": "/tools/attendance-tracker/"
+        }
+      ],
+      "website_default": true,
+      "website_priority": 6,
+      "source_ids": [
+        "src_portfolio_site"
+      ],
+      "confidence": "high"
+    },
+    {
+      "id": "proj_ai_usage_tracker",
+      "title": "AI Usage Tracker",
+      "category": "experiment",
+      "status": "in_progress",
+      "date": null,
+      "summary": "A proof-of-concept for tracking a team's AI usage and adoption signals in one simple dashboard.",
+      "website_summary": "A proof-of-concept for tracking a team's AI adoption. Mostly a lesson in pivoting.",
+      "technologies": [
+        "JavaScript",
+        "HTML",
+        "CSS"
+      ],
+      "links": [
+        {
+          "kind": "live",
+          "url": "/tools/ai-usage-tracker/"
+        }
+      ],
+      "website_default": true,
+      "website_priority": 7,
+      "source_ids": [
+        "src_portfolio_site"
+      ],
+      "confidence": "high"
+    },
+    {
+      "id": "proj_early_wage_access",
+      "title": "Early Wage Access Feature Proposal",
+      "category": "product case",
+      "date": null,
+      "summary": "A product proposal evaluating whether to launch an Early Wage Access feature for construction tech, recommending a limited pilot with defined risks, success metrics, and a go/no-go framing.",
+      "website_summary": "A product case for piloting early wage access in construction tech.",
+      "technologies": [
+        "Product strategy",
+        "Market analysis"
+      ],
+      "links": [
+        {
+          "kind": "pdf",
+          "url": "/assets/projects/KT_LumberProposal.pdf"
+        }
+      ],
+      "website_default": true,
+      "website_priority": 8,
+      "source_ids": [
+        "src_portfolio_site"
+      ],
+      "confidence": "high"
+    }
+  ],
+  "skills": {
+    "authoritative_current_resume": {
+      "product_and_business": [
+        "User Research",
+        "Strategy & Operations",
+        "Product Analytics",
+        "A/B Testing",
+        "Stakeholder Management"
+      ],
+      "tools_and_data": [
+        "Python (Pandas, NumPy)",
+        "SQL (BigQuery, PostgreSQL)",
+        "Snowflake",
+        "Databricks",
+        "Jira",
+        "Tableau",
+        "Excel"
+      ],
+      "ai_ml": [
+        "RLHF",
+        "LLM Evaluation",
+        "Agentic Workflows",
+        "Claude Code",
+        "n8n",
+        "GitHub Copilot"
+      ],
+      "source_ids": [
+        "src_apm_general"
+      ]
+    },
+    "historically_documented_additional": [
+      "R",
+      "Java",
+      "Salesforce",
+      "Asana",
+      "Replit",
+      "Gemini",
+      "ChatGPT",
+      "Jupyter Notebooks",
+      "Machine Learning Algorithms",
+      "Financial Modeling",
+      "Market Research",
+      "Process Optimization",
+      "Apex",
+      "SOQL",
+      "Lucidchart",
+      "FactSet"
+    ],
+    "notes": "For a current public site, default to authoritative_current_resume. Use historical additions only when relevant and still accurate."
+  },
+  "certifications": [
+    {
+      "name": "Google Data Analytics Professional Certificate",
+      "status": "documented_in_older_resume",
+      "source_ids": [
+        "src_master",
+        "src_product_healthcare"
+      ],
+      "confidence": "medium",
+      "website_default": false
+    },
+    {
+      "name": "Data Visualization in Tableau",
+      "status": "documented",
+      "source_ids": [
+        "src_master",
+        "src_product_healthcare",
+        "src_coop_da"
+      ],
+      "confidence": "medium",
+      "website_default": false
+    }
+  ],
+  "source_files": [
+    {
+      "id": "src_apm_general",
+      "filenames": [
+        "KaungThiha_Resume APM(General).pdf",
+        "KaungThiha_Resume APM(General)(1).pdf"
+      ],
+      "sha256": "c243adf1d15010f3ee8b55c77000108dcfaa78a1c88f7323ca7d68b294896fd9",
+      "authority": "authoritative_current",
+      "notes": "Two uploaded files are byte-identical. Per user instruction, this source is authoritative for current job titles, current role ordering, and current-facing education."
+    },
+    {
+      "id": "src_master",
+      "filenames": [
+        "KaungThiha_Resume_Master(1).docx"
+      ],
+      "sha256": "f4fd673040bf0c149db6d872022dc5fcad4f491fd90822980f36bfef16e1852b",
+      "authority": "supplemental_comprehensive",
+      "notes": "Broadest source for historical achievements, projects, leadership, and older experience variants. Contains duplicate drafts and stale titles/dates, so authoritative-current conflicts are resolved in favor of src_apm_general."
+    },
+    {
+      "id": "src_product_healthcare",
+      "filenames": [
+        "Product Healthcare.pdf"
+      ],
+      "sha256": "2d6b49639709a1a7cd9b3e812cc67ecfebf257999c0c029350345d36466d05a3",
+      "authority": "supplemental_targeted",
+      "notes": "Useful for USF GPA, COOP fellowship dates, Wefunder/AskCyborg/USF achievement variants, leadership, and analytics projects."
+    },
+    {
+      "id": "src_coop_da",
+      "filenames": [
+        "KaungThiha_COOP Resume DA.pdf"
+      ],
+      "sha256": "dae4d598d02d24bb81096150d0dbddcf507eb5e1d5db16ea18e7cc72cc885326",
+      "authority": "historical_targeted",
+      "notes": "Older data-analytics resume; useful for project dates/details and historical title variants."
+    },
+    {
+      "id": "src_v17",
+      "filenames": [
+        "KaungThiha_Resume(V17).docx"
+      ],
+      "sha256": "27ae3d3da8e6decf5fe0e2eb6c90926d7d236ecfecb44a42fbf1c27a1fb652c2",
+      "authority": "historical",
+      "notes": "Older resume; useful for venture/leadership history and project details. 'Present' dates are stale and are not interpreted as current without newer support."
+    },
+    {
+      "id": "src_passport",
+      "filenames": [
+        "KaungThiha_Resume_Passport.pdf"
+      ],
+      "sha256": "7a02e6f5df7be026041243f1c5f17b895a28b59c3c08c3656f66500df14f8544",
+      "authority": "historical",
+      "notes": "Early resume preserving debate, leadership, and older project history. Dates marked 'Present' are historical snapshots, not assumed current."
+    },
+    {
+      "id": "src_portfolio_site",
+      "filenames": [
+        "src/data/projects.ts (kaungthiha.github.io @ 730d1857)"
+      ],
+      "sha256": "456198895c6eda3a5c51f22c0f834c77e7f6bc1e0ba9829eec424481a34aecfa",
+      "authority": "published_portfolio_copy",
+      "notes": "Project copy already published on the portfolio, written by Kaung. Source for project records no resume covers (EASE, the trackers, Early Wage Access) and for website summaries, links, and stacks. Resume sources still win on titles, dates, and metrics."
+    }
+  ],
+  "data_quality_notes": [
+    "The two APM resume uploads are byte-identical and are treated as one authoritative source.",
+    "The master resume is intentionally not treated as authoritative for titles because it contains multiple duplicate drafts and stale variants.",
+    "Capital One's canonical current title is Associate Data Analyst (Emerging Payments & Strategy), Sep 2026-Present.",
+    "Capital One's immediately prior canonical title is Associate Data Product Manager (Data Products & Experiences), Jul 2025-Sep 2026.",
+    "Wefunder's canonical title is Closing & Compliance Product Operations, Jan 2024-Jul 2024; older Product Analyst / Intern labels are retained only as historical variants.",
+    "AskCyborg's canonical title is Co-Founder, Product Manager. CrossWork Midas VC Analyst wording is retained as historical scope/title provenance, not the canonical public title.",
+    "USF's canonical title is Salesforce Database Administrator; older Product Administrator and Campus Trainee labels are retained as variants.",
+    "igniteXL's supplied files do not establish a final end date; do not present it as currently active.",
+    "HiredJudge/Debate Judge appears as 'Present' only in an older resume; current status is not established by the supplied recent files.",
+    "SheepHerder has conflicting first-day organic user counts (70+ and 60+) within the master source. Avoid a hard number on the website until independently verified.",
+    "Older USF degree descriptions include Computer Science, but the authoritative APM resume lists only B.S. in Business Analytics. Use the APM wording by default.",
+    "The dataset excludes the phone number even though it appears in source resumes, because it is unnecessary for website work-history rendering.",
+    "Six project records (Outbuild AI Learning System, AskCyborg, EASE, Attendance Tracker, AI Usage Tracker, Early Wage Access) were added from the published portfolio copy (src_portfolio_site); no resume covered them. Their dates are left null because no source establishes them.",
+    "website_summary fields are portfolio-facing phrasings of the same facts; they must not change titles, dates, or metrics."
+  ]
+}
