@@ -139,11 +139,10 @@ const ogImageAbs = new URL(ogImage, Astro.site).toString();
     <slot />
   </main>
 
-  <!-- Ambient effects (site-wide, deferred so they never block paint).
+  <!-- Weather (site-wide, deferred so it never blocks paint).
        The WebGL forest is NOT loaded here — it's a code-split island loaded
        only on the homepage, where #tree-canvas-host exists. -->
   <script src="/assets/js/weather.js" defer></script>
-  <script src="/assets/js/ripple.js" defer></script>
 
   <!-- GoatCounter — privacy-friendly, cookieless analytics (site-wide) -->
   <script

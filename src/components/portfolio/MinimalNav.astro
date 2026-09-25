@@ -1,0 +1,21 @@
+---
+/**
+ * Minimal anchor nav: plain text, no container. Hidden while the hero fills
+ * the screen and fades in once the reader reaches the content (see
+ * homepage-observer.ts). Without JS it simply stays visible.
+ */
+const links = [
+  { id: 'work', label: 'work' },
+  { id: 'create', label: 'create' },
+  { id: 'loves', label: 'loves' },
+];
+---
+
+<nav class="minimal-nav" aria-label="Sections" data-minimal-nav>
+  <a class="minimal-nav-brand" href="#top">Kaung Thiha</a>
+  <div class="minimal-nav-links">
+    {links.map((l) => (
+      <a href={`#${l.id}`} data-nav-link={l.id}>{l.label}</a>
+    ))}
+  </div>
+</nav>

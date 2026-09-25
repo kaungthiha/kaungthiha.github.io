@@ -1,57 +1,67 @@
 ---
 /**
- * Work — flowing prose with highlighted jobs (charliekubal-style). Left column:
- * heading + bio prose where each highlighted role bolds on hover and, on click,
- * fills the right-column detail panel. A compact skills line + résumé link close
- * it out. Content from src/data/work.ts.
+ * Work — a short vertical chronology, readable without clicking anything.
+ * Earlier roles sit behind a native <details>. The résumé link only renders
+ * when the PDF actually exists in public/ at build time.
  */
-import { workProse, skills, resumeHref, type ProsetPart } from '../../data/work';
+import { existsSync } from 'node:fs';
+import { join } from 'node:path';
+import {
+  workHeading,
+  workIntro,
+  roles,
+  earlierRoles,
+  skills,
+  resumeHref,
+} from '../../data/work';
 
-function isHighlight(p: ProsetPart): p is { text: string; detail: string } {
-  return typeof p !== 'string';
-}
+const hasResume = existsSync(join(process.cwd(), 'public', resumeHref));
 ---
 
-<section
-  class="pf-section pf-work"
-  id="panel-work"
-  role="tabpanel"
-  aria-labelledby="tab-work"
-  data-section="work"
->
-  <div class="pf-grid">
-    <div class="pf-grid-left">
-      <p class="pf-tagline">product through data + ai</p>
-      <h2 class="pf-heading">I like solving problems.</h2>
+<section class="home-section" id="work" aria-labelledby="work-title">
+  <p class="section-label">work</p>
+  <h2 class="section-heading" id="work-title">{workHeading}</h2>
+  <p class="section-intro">{workIntro}</p>
 
-      {workProse.map((para) => (
-        <p class="pf-bio">
-          {para.map((part) =>
-            isHighlight(part) ? (
-              <button type="button" class="pf-highlight" data-detail={part.detail}>{part.text}</button>
-            ) : (
-              <>{part}</>
-            ),
-          )}
-        </p>
+  <ol class="chronology">
+    {roles.map((r) => (
+      <li class="chapter">
+        <p class="chapter-dates">{r.dates}</p>
+        <div class="chapter-body">
+          <h3 class="chapter-company">{r.company}</h3>
+          <p class="chapter-role">{r.role}</p>
+          <p class="chapter-summary">{r.summary}</p>
+          {r.result && <p class="chapter-result">{r.result}</p>}
+        </div>
+      </li>
+    ))}
+  </ol>
+
+  <details class="earlier">
+    <summary>Earlier work</summary>
+    <ol class="chronology chronology--compact">
+      {earlierRoles.map((r) => (
+        <li class="chapter">
+          <p class="chapter-dates">{r.dates}</p>
+          <div class="chapter-body">
+            <h3 class="chapter-company">{r.company}</h3>
+            <p class="chapter-role">{r.role}</p>
+            <p class="chapter-summary">{r.summary}</p>
+          </div>
+        </li>
       ))}
+    </ol>
+  </details>
 
-      <p class="pf-skills-line">
-        {skills.map((g) => (
-          <><strong>{g.group}</strong> {g.items.join(' · ')}<br /></>
-        ))}
-      </p>
+  <p class="skills-line">
+    {skills.map((g) => (
+      <span class="skills-group"><span class="skills-name">{g.group}</span> {g.items.join(' · ')}</span>
+    ))}
+  </p>
 
-      <a class="pf-quiet-link pf-quiet-link--standalone" href={resumeHref} target="_blank" rel="noopener">
-        Download résumé
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M12 3v12m0 0 4-4m-4 4-4-4M5 21h14"/></svg>
-      </a>
-    </div>
-
-    <div class="pf-grid-right">
-      <div class="pf-detail-panel is-empty" id="work-detail" data-work-detail aria-live="polite">
-        <span class="pf-detail-empty">click a highlighted role to learn more</span>
-      </div>
-    </div>
-  </div>
+  {hasResume && (
+    <p class="section-cta">
+      <a class="text-link" href={resumeHref} target="_blank" rel="noopener">Résumé (PDF) →</a>
+    </p>
+  )}
 </section>

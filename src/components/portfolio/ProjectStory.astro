@@ -1,0 +1,48 @@
+---
+/**
+ * One featured project as a simple story: meta, title, a sentence or two, an
+ * optional standout result, the stack, one primary link, and one image when
+ * there's a real one. Detail lives in the linked tool / PDF, not here.
+ */
+import type { Project } from '../../data/projects';
+
+interface Props {
+  project: Project;
+}
+
+const { project: p } = Astro.props;
+const cta = p.links?.[0];
+const external = cta ? cta.href.startsWith('http') || cta.kind === 'pdf' : false;
+---
+
+<article class="story" aria-labelledby={`story-${p.slug}`}>
+  <p class="story-meta">{p.type}{p.year && ` · ${p.year}`}</p>
+  <h3 class="story-title" id={`story-${p.slug}`}>{p.title}</h3>
+  <p class="story-summary">{p.summary}</p>
+  {p.result && <p class="story-result">{p.result}</p>}
+  {p.stack && p.stack.length > 0 && <p class="story-stack">{p.stack.join(' · ')}</p>}
+  {cta && (
+    <p class="story-cta">
+      <a
+        class="text-link"
+        href={cta.href}
+        target={external ? '_blank' : undefined}
+        rel={external ? 'noopener' : undefined}
+      >{cta.label} →</a>
+    </p>
+  )}
+  {p.confidentialityNote && <p class="story-note">{p.confidentialityNote}</p>}
+
+  {p.image && (
+    <figure class="story-figure">
+      <img
+        src={p.image}
+        alt={p.imageAlt ?? ''}
+        width={p.imageSize?.[0]}
+        height={p.imageSize?.[1]}
+        loading="lazy"
+        decoding="async"
+      />
+    </figure>
+  )}
+</article>

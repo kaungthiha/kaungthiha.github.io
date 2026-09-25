@@ -1,54 +1,35 @@
 ---
 /**
- * Loves — a simple, curated category/text list (charliekubal-style). Left
- * column: heading + a "currently loving" note. Right column: a list of items,
- * each a short category label beside a sentence. No carousel, no images.
- * Content from src/data/loves.ts.
+ * Loves — personal field notes: a lowercase category beside a line or two.
+ * Optionally one real nature photo (see src/data/loves.ts).
  */
-import { loves, type LoveItem } from '../../data/loves';
-
-const currentlyLoving = loves.filter((l) => l.currently).map((l) => l.title);
-/** Short category label for the left rail of each row. */
-function shortCategory(c: string): string {
-  return c.split(/[&,]/)[0].trim();
-}
+import { loves, lovesHeading, fieldPhoto } from '../../data/loves';
 ---
 
-<section
-  class="pf-section pf-loves"
-  id="panel-loves"
-  role="tabpanel"
-  aria-labelledby="tab-loves"
-  data-section="loves"
->
-  <div class="pf-grid">
-    <div class="pf-grid-left">
-      <p class="pf-tagline">a rotating shelf</p>
-      <h2 class="pf-heading">Things I love.</h2>
+<section class="home-section" id="loves" aria-labelledby="loves-title">
+  <p class="section-label">loves</p>
+  <h2 class="section-heading" id="loves-title">{lovesHeading}</h2>
 
-      {currentlyLoving.length > 0 && (
-        <div class="pf-currently">
-          <p class="pf-currently-label">currently loving</p>
-          <p class="pf-currently-text">{currentlyLoving.join(' · ')}</p>
-        </div>
-      )}
-    </div>
-
-    <div class="pf-grid-right">
-      <div class="pf-loves-list">
-        {loves.map((item: LoveItem) => (
-          <div class="pf-love-row">
-            <span class="pf-love-cat">{shortCategory(item.category)}</span>
-            <p class="pf-love-text">
-              {item.href ? (
-                <><a href={item.href} target="_blank" rel="noopener">{item.title}</a>. {item.caption}</>
-              ) : (
-                <><strong class="pf-love-title">{item.title}.</strong> {item.caption}</>
-              )}
-            </p>
-          </div>
-        ))}
+  <dl class="field-notes">
+    {loves.map((item) => (
+      <div class="field-note">
+        <dt>{item.category}</dt>
+        <dd>
+          {item.href ? (
+            <a class="field-lead" href={item.href} target="_blank" rel="noopener">{item.lead}</a>
+          ) : (
+            <span class="field-lead">{item.lead}</span>
+          )}{' '}
+          {item.note}
+        </dd>
       </div>
-    </div>
-  </div>
+    ))}
+  </dl>
+
+  {fieldPhoto && (
+    <figure class="field-photo">
+      <img src={fieldPhoto.src} alt={fieldPhoto.alt} loading="lazy" decoding="async" />
+      {fieldPhoto.caption && <figcaption>{fieldPhoto.caption}</figcaption>}
+    </figure>
+  )}
 </section>

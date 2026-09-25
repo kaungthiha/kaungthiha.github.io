@@ -1,30 +1,21 @@
 ---
 import Base from '../layouts/Base.astro';
-import PortfolioShell from '../components/portfolio/PortfolioShell.astro';
+import MinimalNav from '../components/portfolio/MinimalNav.astro';
+import WorkSection from '../components/portfolio/WorkSection.astro';
+import CreateSection from '../components/portfolio/CreateSection.astro';
+import LovesSection from '../components/portfolio/LovesSection.astro';
+import ContactFooter from '../components/portfolio/ContactFooter.astro';
 ---
 
 <Base title="Kaung Thiha" slimNav={false}>
-<!-- ─────────────────────────────────────────────────────────────────────
-     Top navigation rail — brand only. The section tabs live in the content
-     stage (work / stuff / loves), so a duplicate set over the hero isn't
-     needed; the user scrolls down and finds them there.
-     ───────────────────────────────────────────────────────────────────── -->
-<nav class="editorial-topnav" aria-label="Primary">
-  <div class="topnav-brand">
-    <a href="#" data-nav-target="me">
-      <span class="topnav-brand-mark" aria-hidden="true"></span>
-      <span class="topnav-brand-text">Kaung Thiha</span>
-    </a>
-  </div>
-</nav>
-
-<!-- Ambient forest background (Three.js, fixed full-viewport, behind content) -->
+<!-- Ambient forest (Three.js, fixed full-viewport, behind everything). Most
+     present on the hero, quiet while reading. -->
 <div class="tree-canvas-host" id="tree-canvas-host" aria-hidden="true"></div>
 
 <!-- ─────────────────────────────────────────────────────────────────────
-     Landing hero — full-screen intro. Scroll down to explore.
+     Hero — the landscape is the point here; the UI stays small.
      ───────────────────────────────────────────────────────────────────── -->
-<section class="hero-intro" aria-label="Introduction">
+<section class="hero-intro" id="top" aria-label="Introduction">
   <div class="hero-intro-inner">
     <img class="hero-portrait"
          src="/assets/images/about.jpg"
@@ -54,51 +45,34 @@ import PortfolioShell from '../components/portfolio/PortfolioShell.astro';
       </li>
     </ul>
 
-    <!-- Scroll cue → jumps to the content stage below -->
-    <a class="hero-scroll-cue" href="#portfolio-content" aria-label="Scroll to explore the portfolio">
-      <span class="hero-scroll-label">explore</span>
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14M19 12l-7 7-7-7"/></svg>
-    </a>
+    <a class="hero-scroll-cue" href="#work">explore <span aria-hidden="true">↓</span></a>
   </div>
 </section>
 
+<MinimalNav />
+
 <!-- ─────────────────────────────────────────────────────────────────────
-     Portfolio content — one editorial glass surface: work / create / loves.
+     One scrolling document: work → create → loves → say hi. Everything is
+     in normal flow; nothing needs JS to be readable.
      ───────────────────────────────────────────────────────────────────── -->
-<div id="portfolio-content">
-  <PortfolioShell />
+<div class="home-content">
+  <div class="home-inner">
+    <WorkSection />
+    <CreateSection />
+    <LovesSection />
+    <ContactFooter />
+  </div>
 </div>
 
-<script is:inline>
-  // ── Scroll flow: hero → content ────────────────────────────────────────
-  // Toggle a body class once the user scrolls past most of the hero, so the
-  // forest background fades in over the content (see editorial.css). The
-  // scroll cue is a normal anchor (#portfolio-content); smooth scroll is
-  // handled by CSS scroll-behavior. Keyboard activation works (it's an <a>).
-  (function () {
-    const hero = document.querySelector('.hero-intro');
-    if (!hero) return;
-    let ticking = false;
-    function update() {
-      ticking = false;
-      const past = hero.getBoundingClientRect().bottom < window.innerHeight * 0.6;
-      document.body.classList.toggle('scrolled-past-hero', past);
-    }
-    window.addEventListener('scroll', () => {
-      if (!ticking) { ticking = true; requestAnimationFrame(update); }
-    }, { passive: true });
-    update();
-  }());
+<script>
+  import '../scripts/homepage-observer';
 </script>
 
-<!-- WebGL forest hero — bundled, code-split ES module island.
-     Dynamically imported on idle so the Three.js + EZ-Tree bundle never
-     blocks first paint or initial Lighthouse metrics. -->
+<!-- WebGL forest — bundled, code-split ES module island. Dynamically imported
+     on idle so the Three.js + EZ-Tree bundle never blocks first paint. -->
 <script>
   const host = document.getElementById('tree-canvas-host');
   if (host) {
-    // Dynamic import → Vite code-splits the Three.js + EZ-Tree bundle into
-    // its own chunk that only downloads when this boot callback runs.
     const boot = () => import('../scripts/forest').then((m) => m.initForest(host));
     if ('requestIdleCallback' in window) {
       window.requestIdleCallback(boot, { timeout: 2000 });

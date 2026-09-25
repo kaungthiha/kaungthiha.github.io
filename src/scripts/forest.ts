@@ -152,6 +152,8 @@ function halfWidthAt(z: number, aspect: number): number {
 // speed). All motion is gated by reduced-motion and device tier.
 // ──────────────────────────────────────────────────────────────────────
 interface AmbientLayer {
+  /** Root group, so the ambient director can switch the whole layer off. */
+  group?: THREE.Group;
   setContext(mode: WeatherMode, phase: Phase): void;
   /** Re-spread positions to cover the visible width at the layer's depth. */
   setSpread?(aspect: number): void;
@@ -229,6 +231,7 @@ function createCloudLayer(scene: THREE.Scene, quality: Quality, reduceMotion: bo
 
   const _nightCloud = new THREE.Color(0x223046);
   return {
+    group,
     setContext(mode, phase) {
       const c = CLOUD_MODE_CONFIG[mode];
       speedMul = c.speed;
@@ -364,6 +367,7 @@ function createBirdLayer(scene: THREE.Scene, quality: Quality, reduceMotion: boo
   writeMatrices(0);
 
   return {
+    group,
     setContext(mode, phase) {
       // Birds roost at night; hidden in harsh weather as before. Flocks
       // double at dawn/dusk (commute hours).
@@ -475,6 +479,7 @@ function createGroundLifeLayer(scene: THREE.Scene, quality: Quality, reduceMotio
   }
 
   return {
+    group,
     setContext(mode, phase) {
       const dark = phase === 'night' || phase === 'dusk';
       persona =
@@ -524,192 +529,6 @@ function createGroundLifeLayer(scene: THREE.Scene, quality: Quality, reduceMotio
   };
 }
 
-// ── Butterflies ────────────────────────────────────────────────────────
-// A handful of brightly tinted mini-chevrons wandering figure-8s low over
-// the foreground bushes on pleasant days. Same InstancedMesh pattern (and
-// CPU cost class) as the birds; the wing flap is a vertical squash of the
-// chevron folded into each instance matrix.
-const BUTTERFLY_COUNT: Record<Quality, number> = { high: 5, medium: 2, low: 0 };
-const BUTTERFLY_OK: WeatherMode[] = ['sunny', 'clear', 'hot', 'cloudy'];
-const BUTTERFLY_HUES = [0xffb3d9, 0xffd166, 0x9ad1ff, 0xc77dff, 0xff8fa3];
-
-function createButterflyLayer(scene: THREE.Scene, quality: Quality, reduceMotion: boolean): AmbientLayer {
-  const group = new THREE.Group();
-  scene.add(group);
-
-  const count = BUTTERFLY_COUNT[quality];
-  if (count === 0) {
-    return { setContext() {}, update() {}, dispose() { scene.remove(group); } };
-  }
-
-  const geometry = makeBirdGeometry();
-  const material = new THREE.MeshBasicMaterial({
-    color: 0xffffff, transparent: true, opacity: 0.9,
-    side: THREE.DoubleSide, depthWrite: false, fog: true,
-  });
-  const mesh = new THREE.InstancedMesh(geometry, material, count);
-  mesh.frustumCulled = false;
-  group.add(mesh);
-
-  const rng = mulberry32(97531);
-  interface Fly { hx: number; hy: number; hz: number; r: number; speed: number; phase: number; flap: number }
-  const flies: Fly[] = [];
-  const _c = new THREE.Color();
-  for (let i = 0; i < count; i++) {
-    const side = rng() < 0.5 ? -1 : 1;
-    flies.push({
-      hx: side * (4.5 + rng() * 4.5), // over the fg/mid bushes, clear of centre
-      hy: 0.7 + rng() * 1.2,
-      hz: -1.5 - rng() * 3,
-      r: 0.8 + rng() * 1.2,
-      speed: 0.35 + rng() * 0.3,
-      phase: rng() * Math.PI * 2,
-      flap: 9 + rng() * 5,
-    });
-    _c.setHex(BUTTERFLY_HUES[i % BUTTERFLY_HUES.length]);
-    mesh.setColorAt(i, _c);
-  }
-  if (mesh.instanceColor) mesh.instanceColor.needsUpdate = true;
-
-  const _m = new THREE.Matrix4();
-  const _pos = new THREE.Vector3();
-  const _quat = new THREE.Quaternion();
-  const _scl = new THREE.Vector3();
-  const _e = new THREE.Euler();
-  let active = false;
-
-  function writePose(t: number): void {
-    for (let i = 0; i < count; i++) {
-      const f = flies[i];
-      const a = t * f.speed + f.phase;
-      _pos.set(
-        f.hx + Math.sin(a) * f.r,
-        f.hy + Math.sin(a * 1.7) * 0.3,
-        f.hz + Math.sin(a * 2) * f.r * 0.35, // figure-8
-      );
-      const flap = 0.35 + 0.65 * Math.abs(Math.sin(t * f.flap + f.phase));
-      _scl.set(0.12, 0.12 * flap, 0.12);
-      _e.set(0, -a, 0);
-      _quat.setFromEuler(_e);
-      _m.compose(_pos, _quat, _scl);
-      mesh.setMatrixAt(i, _m);
-    }
-    mesh.instanceMatrix.needsUpdate = true;
-  }
-  writePose(0); // static pose for reduced-motion renders
-
-  return {
-    setContext(mode, phase) {
-      active = !reduceMotion && phase === 'day' && BUTTERFLY_OK.includes(mode);
-      group.visible = phase === 'day' && BUTTERFLY_OK.includes(mode);
-    },
-    update(t) {
-      if (!active) return;
-      writePose(t);
-    },
-    dispose() {
-      scene.remove(group);
-      geometry.dispose();
-      material.dispose();
-    },
-  };
-}
-
-// ── Falling leaves ─────────────────────────────────────────────────────
-// A single InstancedMesh of tiny quads that tumble down through the tree
-// bands in fair daytime weather, swaying with the weather's wind. Respawn
-// at canopy height when they reach the ground. CPU cost: composing ~24
-// matrices per frame — same class as the birds.
-const LEAF_FALL_COUNT: Record<Quality, number> = { high: 24, medium: 10, low: 0 };
-const LEAF_FALL_OK: WeatherMode[] = ['sunny', 'clear', 'cloudy', 'windy', 'cold'];
-const LEAF_FALL_HUES = [0x8fbf55, 0xa8c458, 0xc9a94e, 0xc4853e, 0x9d7a3a];
-
-function createLeafFallLayer(scene: THREE.Scene, quality: Quality, reduceMotion: boolean): AmbientLayer {
-  const group = new THREE.Group();
-  scene.add(group);
-
-  const count = LEAF_FALL_COUNT[quality];
-  if (count === 0 || reduceMotion) {
-    return { setContext() {}, update() {}, dispose() { scene.remove(group); } };
-  }
-
-  const geometry = new THREE.PlaneGeometry(0.09, 0.09);
-  const material = new THREE.MeshBasicMaterial({
-    color: 0xffffff, transparent: true, opacity: 0.85,
-    side: THREE.DoubleSide, depthWrite: false, fog: true,
-  });
-  const mesh = new THREE.InstancedMesh(geometry, material, count);
-  mesh.frustumCulled = false;
-  group.add(mesh);
-
-  const rng = mulberry32(13579);
-  // Per-leaf state: position, fall speed, sway phase, tumble rates.
-  const px = new Float32Array(count);
-  const py = new Float32Array(count);
-  const pz = new Float32Array(count);
-  const fall = new Float32Array(count);
-  const sway = new Float32Array(count);
-  const tumA = new Float32Array(count);
-  const tumB = new Float32Array(count);
-  let spreadHalf = 14;
-
-  const _c = new THREE.Color();
-  for (let i = 0; i < count; i++) {
-    _c.setHex(LEAF_FALL_HUES[Math.floor(rng() * LEAF_FALL_HUES.length)]);
-    mesh.setColorAt(i, _c);
-    px[i] = (rng() - 0.5) * 2 * spreadHalf;
-    py[i] = rng() * 6.5; // stagger the first cycle across the full column
-    pz[i] = -2 - rng() * 7;
-    fall[i] = 0.25 + rng() * 0.3;
-    sway[i] = rng() * Math.PI * 2;
-    tumA[i] = 1 + rng() * 2;
-    tumB[i] = 1 + rng() * 2;
-  }
-  if (mesh.instanceColor) mesh.instanceColor.needsUpdate = true;
-
-  const _m = new THREE.Matrix4();
-  const _pos = new THREE.Vector3();
-  const _quat = new THREE.Quaternion();
-  const _scl = new THREE.Vector3(1, 1, 1);
-  const _e = new THREE.Euler();
-
-  let active = false;
-  let windMul = 1;
-
-  return {
-    setContext(mode, phase) {
-      active = phase !== 'night' && LEAF_FALL_OK.includes(mode);
-      windMul = ATMOS[mode].wind;
-      group.visible = active;
-    },
-    setSpread(aspect) {
-      spreadHalf = Math.max(14, halfWidthAt(-5, aspect));
-    },
-    update(t, dt) {
-      if (!active) return;
-      for (let i = 0; i < count; i++) {
-        py[i] -= fall[i] * dt * (0.8 + windMul * 0.4);
-        px[i] += Math.sin(t * 0.9 + sway[i]) * dt * 0.6 + (windMul - 1) * dt * 0.35;
-        if (py[i] < 0.04) {
-          py[i] = 4.5 + Math.random() * 2;
-          px[i] = (Math.random() - 0.5) * 2 * spreadHalf;
-        }
-        _pos.set(px[i], py[i], pz[i]);
-        _e.set(t * tumA[i] + sway[i], t * tumB[i], sway[i]);
-        _quat.setFromEuler(_e);
-        _m.compose(_pos, _quat, _scl);
-        mesh.setMatrixAt(i, _m);
-      }
-      mesh.instanceMatrix.needsUpdate = true;
-    },
-    dispose() {
-      scene.remove(group);
-      geometry.dispose();
-      material.dispose();
-    },
-  };
-}
-
 // ── Fog wisps / ground mist ────────────────────────────────────────────
 // A few wide, very soft planes drifting low through the tree band. Reads
 // as fog in wet weather, valley mist at dawn, and a faint night haze.
@@ -754,6 +573,7 @@ function createFogWispLayer(scene: THREE.Scene, quality: Quality, reduceMotion: 
   let targetOpacity = 0;
 
   return {
+    group,
     setContext(mode, phase) {
       targetOpacity = fogWispOpacity(mode, phase);
       const night = phase === 'night';
@@ -781,6 +601,23 @@ function createFogWispLayer(scene: THREE.Scene, quality: Quality, reduceMotion: 
       tex.dispose();
     },
   };
+}
+
+// ── Ambient director ───────────────────────────────────────────────────
+// Rare effects are more memorable when they are actually rare, so only one
+// contextual effect runs at a time. Rain / storm / snow get their
+// precipitation from weather.js (DOM particles), so the scene adds nothing.
+type Effect = 'birds' | 'clouds' | 'fog' | 'fireflies' | 'stars' | 'none';
+
+function pickEffect(mode: WeatherMode, phase: Phase): Effect {
+  if (mode === 'rainy' || mode === 'stormy' || mode === 'snowy') return 'none';
+  if (mode === 'foggy') return 'fog';
+  if (phase === 'night') return 'stars';
+  if (phase === 'dusk') return 'fireflies';
+  if (mode === 'windy') return 'none'; // wind shows up as stronger tree sway
+  if (mode === 'cloudy') return 'clouds';
+  if (mode === 'hot') return 'none';   // the warm atmosphere reads as haze
+  return 'birds';                      // clear / sunny / cold, day or dawn
 }
 
 export function initForest(host: HTMLElement): void {
@@ -1037,43 +874,6 @@ export function initForest(host: HTMLElement): void {
   scene.add(stars);
   let starBaseOpacity = 0; // set per (mode, phase) in applyImmediate
 
-  // ── God rays (light shafts slanting from the sun glow) ──────────────
-  const GODRAY_COUNT = quality === 'high' ? 2 : 0;
-  const godRays: THREE.Mesh[] = [];
-  let godRayBase = 0; // opacity target, set in applyImmediate
-  if (GODRAY_COUNT > 0) {
-    const rc = document.createElement('canvas');
-    rc.width = 64;
-    rc.height = 256;
-    const rctx = rc.getContext('2d')!;
-    const rg = rctx.createLinearGradient(0, 0, 0, 256);
-    rg.addColorStop(0, 'rgba(255,255,255,0.9)');
-    rg.addColorStop(1, 'rgba(255,255,255,0)');
-    rctx.fillStyle = rg;
-    rctx.fillRect(0, 0, 64, 256);
-    const rgx = rctx.createLinearGradient(0, 0, 64, 0); // feather the sides
-    rgx.addColorStop(0, 'rgba(0,0,0,1)');
-    rgx.addColorStop(0.25, 'rgba(0,0,0,0)');
-    rgx.addColorStop(0.75, 'rgba(0,0,0,0)');
-    rgx.addColorStop(1, 'rgba(0,0,0,1)');
-    rctx.globalCompositeOperation = 'destination-out';
-    rctx.fillStyle = rgx;
-    rctx.fillRect(0, 0, 64, 256);
-    const rayTex = new THREE.CanvasTexture(rc);
-    rayTex.colorSpace = THREE.SRGBColorSpace;
-    for (let i = 0; i < GODRAY_COUNT; i++) {
-      const mat = new THREE.MeshBasicMaterial({
-        map: rayTex, color: 0xffeebb, transparent: true, opacity: 0,
-        depthWrite: false, blending: THREE.AdditiveBlending, fog: false,
-      });
-      const m = new THREE.Mesh(new THREE.PlaneGeometry(1.6 + i * 0.8, 12), mat);
-      m.position.set(5.5 + i * 2.6, 4.5, -10 - i);
-      m.rotation.z = 0.32 + i * 0.1;
-      scene.add(m);
-      godRays.push(m);
-    }
-  }
-
   // ── Shooting star (rare streak on clear nights) ─────────────────────
   const shootMat = new THREE.MeshBasicMaterial({
     map: makeMoteTexture(), color: 0xeaf2ff, transparent: true, opacity: 0,
@@ -1083,7 +883,7 @@ export function initForest(host: HTMLElement): void {
   shoot.rotation.z = -0.45;
   shoot.visible = false;
   scene.add(shoot);
-  let shootNext = 25 + Math.random() * 20; // seconds of scene time
+  let shootNext = 40 + Math.random() * 40; // seconds of scene time — kept rare
   let shootStart = -1;
 
   // ── Distant procedural mountains (lightweight ridge silhouettes) ────
@@ -1441,14 +1241,18 @@ export function initForest(host: HTMLElement): void {
   FG_ANCHORS.slice(0, tier.fg).forEach(buildFromAnchor);
 
   // ── Ambient layers (clouds, birds, ground life) ────────────────────
-  const ambientLayers: AmbientLayer[] = [
-    createCloudLayer(scene, quality, reduceMotion),
-    createBirdLayer(scene, quality, reduceMotion),
-    createGroundLifeLayer(scene, quality, reduceMotion),
-    createLeafFallLayer(scene, quality, reduceMotion),
-    createFogWispLayer(scene, quality, reduceMotion),
-    createButterflyLayer(scene, quality, reduceMotion),
-  ];
+  // One baseline motion (tree sway) + ONE contextual effect at a time. The
+  // director (pickEffect) decides which layer is allowed to show; the rest
+  // stay hidden and skip their per-frame work.
+  const clouds = createCloudLayer(scene, quality, reduceMotion);
+  const birds = createBirdLayer(scene, quality, reduceMotion);
+  const fireflies = createGroundLifeLayer(scene, quality, reduceMotion);
+  const fogWisps = createFogWispLayer(scene, quality, reduceMotion);
+  const ambientLayers: AmbientLayer[] = [clouds, birds, fireflies, fogWisps];
+  const layerFor: Record<Exclude<Effect, 'stars' | 'none'>, AmbientLayer> = {
+    clouds, birds, fireflies, fog: fogWisps,
+  };
+  let activeLayer: AmbientLayer | null = null;
 
   // ── Aspect-aware layout (widescreen edge-to-edge fill) ─────────────
   // The composed scene was authored for ~4:3–16:10. On wider viewports the
@@ -1525,10 +1329,6 @@ export function initForest(host: HTMLElement): void {
     // Nudge the sun/moon glows outward so they don't crowd centre on ultrawide.
     sunGlow.position.x = 7 * Math.min(1.6, Math.max(1, aspect / 1.6));
     moon.position.x = -sunGlow.position.x;
-    // God rays slant from wherever the sun glow ends up.
-    for (let i = 0; i < godRays.length; i++) {
-      godRays[i].position.x = (5.5 + i * 2.6) * (sunGlow.position.x / 7);
-    }
     scatterGrass(aspect);
     fillFlanks(aspect);
     for (const layer of ambientLayers) layer.setSpread?.(aspect);
@@ -1597,14 +1397,6 @@ export function initForest(host: HTMLElement): void {
     starMat.opacity = starBaseOpacity;
     stars.visible = starBaseOpacity > 0.01;
 
-    // God rays track the sun glow's strength (strong sun only).
-    const glow = a.sunGlow * fx.sunGlowMul;
-    godRayBase = glow > 0.3 ? glow * 0.22 : 0;
-    for (const ray of godRays) {
-      (ray.material as THREE.MeshBasicMaterial).opacity = godRayBase;
-      ray.visible = godRayBase > 0.01;
-    }
-
     // Grass follows the composed (weather × phase) ground colour, a bit
     // brighter so the tufts separate from the plane beneath them.
     if (grassMat) {
@@ -1620,7 +1412,18 @@ export function initForest(host: HTMLElement): void {
     currentMode = normalizeMode(mode);
     currentPhase = normalizePhase(phase);
     applyImmediate(currentMode, currentPhase);
-    for (const layer of ambientLayers) layer.setContext(currentMode, currentPhase);
+    const effect = pickEffect(currentMode, currentPhase);
+    activeLayer = effect === 'stars' || effect === 'none' ? null : layerFor[effect];
+    for (const layer of ambientLayers) {
+      layer.setContext(currentMode, currentPhase);
+      if (layer !== activeLayer && layer.group) layer.group.visible = false;
+    }
+    // Stars (and their rare shooting star) belong to the 'stars' effect only.
+    if (effect !== 'stars') {
+      starBaseOpacity = 0;
+      starMat.opacity = 0;
+      stars.visible = false;
+    }
     renderOnce();
   }
   // Back-compat shim (window.TreeScene.setMode callers pass only a mode).
@@ -1667,20 +1470,12 @@ export function initForest(host: HTMLElement): void {
       }
     }
 
-    // Ambient layers (clouds, birds, motes) — each animates itself.
-    for (const layer of ambientLayers) layer.update(t, dt);
+    // Only the director's chosen layer animates.
+    activeLayer?.update(t, dt);
 
     // Star twinkle: one slow global opacity sine — no per-point work.
     if (starBaseOpacity > 0.01) {
       starMat.opacity = starBaseOpacity * (0.88 + 0.12 * Math.sin(t * 1.7));
-    }
-
-    // God rays breathe very slowly.
-    if (godRayBase > 0.01) {
-      for (let i = 0; i < godRays.length; i++) {
-        (godRays[i].material as THREE.MeshBasicMaterial).opacity =
-          godRayBase * (0.85 + 0.15 * Math.sin(t * 0.3 + i * 1.7));
-      }
     }
 
     // Occasional shooting star, only when the night sky is clear.
@@ -1695,7 +1490,7 @@ export function initForest(host: HTMLElement): void {
         if (p >= 1) {
           shootStart = -1;
           shoot.visible = false;
-          shootNext = t + 20 + Math.random() * 20;
+          shootNext = t + 60 + Math.random() * 60;
         } else {
           shoot.position.x += 8 * dt;
           shoot.position.y -= 3.5 * dt;
@@ -1707,15 +1502,17 @@ export function initForest(host: HTMLElement): void {
       shoot.visible = false;
     }
 
-    // Subtle camera drift for life; disabled under reduced-motion.
-    camera.position.x = Math.sin(t * 0.1) * 0.6;
-    camera.lookAt(0, 2.2, -6);
     renderOnce();
     raf = requestAnimationFrame(tick);
   }
 
+  // The landscape quiets while the user reads: once the hero is off-screen
+  // the loop stops on a static frame, and wakes when they scroll back up.
+  let heroVisible = true;
   function start(): void {
-    if (!raf && !reduceMotion) raf = requestAnimationFrame(tick);
+    if (!raf && !reduceMotion && heroVisible && !document.hidden) {
+      raf = requestAnimationFrame(tick);
+    }
   }
   function stop(): void {
     if (raf) {
@@ -1729,6 +1526,21 @@ export function initForest(host: HTMLElement): void {
     if (document.hidden) stop();
     else start();
   });
+
+  const heroEl = document.querySelector('.hero-intro');
+  if (heroEl && 'IntersectionObserver' in window) {
+    new IntersectionObserver(
+      ([entry]) => {
+        heroVisible = entry.isIntersecting && entry.intersectionRatio > 0.1;
+        if (heroVisible) start();
+        else {
+          stop();
+          renderOnce();
+        }
+      },
+      { threshold: [0, 0.1, 0.25] },
+    ).observe(heroEl);
+  }
 
   function dispose(): void {
     stop();

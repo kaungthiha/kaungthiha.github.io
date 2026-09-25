@@ -1,11 +1,11 @@
 /* ==========================================================================
-   Kaung's Editorial Portfolio
-   - Full-screen atmospheric hero (portrait, name, live weather, WebGL forest)
-   - One glass editorial content surface below: work / create / loves
-   - Sky/frost palette, Plus Jakarta Sans + Inter
+   Kaung's Portfolio — nature is the environment, content is quiet.
+   - Hero: the forest at full presence (portrait, name, live weather)
+   - One scrolling document below: work → create → loves → say hi
+   - Two families: Plus Jakarta Sans (UI + body), Source Serif 4 (headings)
    ========================================================================== */
 
-@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;1,400;1,500&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,500;1,8..60,400&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,500;1,8..60,400&display=swap');
 
 /* ── Tokens ─────────────────────────────────────────────────────────── */
 :root {
@@ -35,11 +35,8 @@
   --accent-gradient:        linear-gradient(135deg, #2480FD 0%, #26A1FF 50%, #22D1FF 100%);
 
   --font-sans:              'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-  --font-ui:                'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-  /* Editorial serifs for the content sections (see prototype). Statement =
-     elegant italic display; serif-title = readable serif for titles. */
-  --font-statement:         'Cormorant Garamond', 'Playfair Display', Georgia, serif;
-  --font-serif-title:       'Source Serif 4', Georgia, 'Times New Roman', serif;
+  --font-ui:                var(--font-sans);   /* alias kept for inner pages */
+  --font-serif:             'Source Serif 4', Georgia, 'Times New Roman', serif;
 
   --fs-display-hero:        clamp(2rem, 1.4rem + 2.4vw, 2.625rem);
   --fs-headline-section:    clamp(1.25rem, 1.05rem + 0.8vw, 1.5rem);
@@ -51,8 +48,13 @@
 
   --gutter: clamp(1rem, 0.5rem + 1.5vw, 1.5rem);
   --container-max: 1280px;
-  --shell-max: 1240px;
-  --card-padding: clamp(1.25rem, 0.75rem + 2vw, 2rem);
+
+  /* Homepage reading layout */
+  --content-max:  820px;
+  --project-max:  1080px;
+  --section-space: clamp(9rem, 15vw, 14rem);
+  /* "Fog clearing" wash behind the reading column (light-based themes). */
+  --reading-wash: 247, 250, 252;
 
   --r-sm: 0.5rem;
   --r-md: 0.75rem;
@@ -76,34 +78,25 @@
   --glass-highlight:     rgba(255, 255, 255, 0.75);
   --glass-blur:          22px;
 
-  /* Background bloom blobs (was hardcoded #0066ff/#00d4ff) */
-  --bloom-a: linear-gradient(135deg, #0066ff 0%, #00d4ff 100%);
-  --bloom-b: linear-gradient(135deg, #00d4ff 0%, #0066ff 100%);
-
-  --nav-height:    72px;          /* sticky nav reservation */
-  --flip-duration: 0.6s;
+  --nav-height:    72px;          /* fixed nav reservation (inner pages) */
 }
 
 /* ── Daylight themes ─────────────────────────────────────────────────
    data-theme is set on <html> before first paint (Base.astro inline
    script) and kept live by weather.js from Arlington's real sun times:
    light (day) → dawn → dusk → dark (night). Dawn/dusk stay light-based
-   and only re-tint the sky + bloom; dark swaps the full token set. */
+   and only re-tint the sky; dark swaps the full token set. */
 
 html[data-theme="dawn"] {
   --sky-start: #f8d9b4;
   --sky-end:   #cfdef0;
   --frost-glow: #ffe3c2;
-  --bloom-a: linear-gradient(135deg, #ff9a56 0%, #ffd28a 100%);
-  --bloom-b: linear-gradient(135deg, #ffd28a 0%, #7fb2ff 100%);
 }
 
 html[data-theme="dusk"] {
   --sky-start: #f3b98f;
   --sky-end:   #a9bcdf;
   --frost-glow: #ffd0ae;
-  --bloom-a: linear-gradient(135deg, #ff8a5c 0%, #c98ae0 100%);
-  --bloom-b: linear-gradient(135deg, #c98ae0 0%, #5c8aff 100%);
 }
 
 html[data-theme="dark"] {
@@ -144,8 +137,7 @@ html[data-theme="dark"] {
   --glass-border-strong: rgba(140, 180, 255, 0.32);
   --glass-highlight:     rgba(160, 200, 255, 0.08);
 
-  --bloom-a: linear-gradient(135deg, #1b3a7a 0%, #0e5e78 100%);
-  --bloom-b: linear-gradient(135deg, #0e5e78 0%, #1b3a7a 100%);
+  --reading-wash: 11, 17, 27;
 }
 
 /* ── Reset / base ────────────────────────────────────────────────────── */
@@ -215,42 +207,7 @@ button { font-family: inherit; cursor: pointer; }
 .site-header, .footer { display: none; }
 
 /* ==========================================================================
-   Background bloom — preserved from v1's folder-card glow
-   ========================================================================== */
-
-body::before,
-body::after {
-  content: '';
-  position: fixed;
-  width: clamp(280px, 35vw, 460px);
-  height: clamp(280px, 35vw, 460px);
-  border-radius: 50%;
-  filter: blur(90px);
-  opacity: 0.32;
-  pointer-events: none;
-  z-index: -3;
-  animation: bloom-float 16s ease-in-out infinite;
-}
-body::before {
-  top: -120px;
-  right: -120px;
-  background: var(--bloom-a);
-}
-body::after {
-  bottom: -120px;
-  left: -120px;
-  background: var(--bloom-b);
-  animation-delay: -8s;
-}
-html[data-theme="dark"] body::before,
-html[data-theme="dark"] body::after { opacity: 0.22; }
-@keyframes bloom-float {
-  0%, 100% { transform: translate(0, 0) scale(1); }
-  50%      { transform: translate(20px, -20px) scale(1.06); }
-}
-
-/* ==========================================================================
-   Top navigation rail — glass, persistent (houses weather + flip toggle)
+   Slim chrome on inner pages (resume, projects, contact, …)
    ========================================================================== */
 
 .editorial-topnav {
@@ -261,41 +218,18 @@ html[data-theme="dark"] body::after { opacity: 0.22; }
   width: calc(100% - 2 * var(--gutter));
   max-width: var(--container-max);
   z-index: 100;
-  /* Faint glass base even at idle — a fully transparent nav disappears
-     against the night forest. */
-  background: var(--glass-bg);
-  backdrop-filter: blur(14px) saturate(1.3);
-  -webkit-backdrop-filter: blur(14px) saturate(1.3);
-  border: 1px solid var(--glass-border);
-  border-radius: var(--r-pill);
-  box-shadow: none;
-  padding: 0.4rem 0.75rem 0.4rem 1.25rem;
   display: flex;
   align-items: center;
+  justify-content: space-between;
   gap: 0.75rem;
-  opacity: 0.55;
-  transition: background 0.35s ease, border-color 0.35s ease, box-shadow 0.35s ease,
-              backdrop-filter 0.35s ease, opacity 0.35s ease;
-}
-.editorial-topnav:hover,
-.editorial-topnav:focus-within {
+  padding: 0.4rem 0.75rem 0.4rem 1.25rem;
   background: var(--glass-bg-hover);
   backdrop-filter: blur(var(--glass-blur)) saturate(1.5);
   -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(1.5);
-  border-color: var(--glass-border-strong);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--r-pill);
   box-shadow: var(--shadow-nav);
-  opacity: 1;
 }
-/* Slim chrome on inner pages (project pages) stays its solid glass */
-.editorial-topnav.editorial-topnav--slim {
-  background: var(--glass-bg-hover);
-  backdrop-filter: blur(var(--glass-blur)) saturate(1.5);
-  -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(1.5);
-  border-color: var(--glass-border);
-  box-shadow: var(--shadow-nav);
-  opacity: 1;
-}
-
 .topnav-brand {
   font-family: var(--font-sans);
   font-weight: 800;
@@ -303,7 +237,6 @@ html[data-theme="dark"] body::after { opacity: 0.22; }
   letter-spacing: -0.01em;
   color: var(--text-strong);
   white-space: nowrap;
-  flex-shrink: 0;
 }
 .topnav-brand a {
   color: inherit;
@@ -317,78 +250,53 @@ html[data-theme="dark"] body::after { opacity: 0.22; }
   border-radius: 50%;
   background: var(--accent-gradient);
   display: inline-block;
-  box-shadow: 0 2px 8px rgba(36, 128, 253, 0.3);
 }
-
-.topnav-links {
-  display: flex;
-  align-items: center;
-  gap: 0.15rem;
-  flex: 1 1 auto;
-  min-width: 0;
-  overflow-x: auto;
-  scrollbar-width: none;
-  -ms-overflow-style: none;
-  justify-content: center;
-  scroll-snap-type: x mandatory;
-  padding: 0 0.25rem;
-}
-.topnav-links::-webkit-scrollbar { display: none; }
-
-.topnav-link {
-  font-family: var(--font-ui);
-  font-size: var(--fs-nav);
-  font-weight: 500;
-  color: var(--on-surface-variant);
-  padding: 0.45rem 0.85rem;
-  border-radius: var(--r-pill);
-  white-space: nowrap;
-  scroll-snap-align: center;
-  transition: color 0.2s ease, background 0.2s ease;
-  min-height: 34px;
+.topnav-link--back {
   display: inline-flex;
   align-items: center;
-  background: transparent;
-  border: none;
-  cursor: pointer;
+  min-height: 34px;
+  padding: 0.45rem 0.85rem;
+  border-radius: var(--r-pill);
+  font-family: var(--font-sans);
+  font-size: var(--fs-nav);
+  font-weight: 600;
+  color: var(--primary);
 }
-.topnav-link:hover { color: var(--primary); background: rgba(0, 89, 187, 0.06); }
-.topnav-link.is-active {
-  color: white;
-  background: var(--accent-gradient);
-}
+.topnav-link--back:hover { color: var(--primary-container); background: rgba(0, 89, 187, 0.06); }
 
-/* Cluster of nav-side controls (weather + flip) */
-.topnav-controls {
-  display: flex;
-  align-items: center;
-  gap: 0.4rem;
-  flex-shrink: 0;
+/* Push inner-page content below the fixed slim chrome. The homepage carries
+   body.layout-home (Base slimNav={false}); inner pages don't. */
+body:not(.layout-home) > #main {
+  padding-top: clamp(5.5rem, 4rem + 4vw, 7rem);
 }
+body:not(.layout-home) #ft-tool { padding: 1rem var(--gutter) 3rem; }
 
-/* Ambient forest background — fixed full viewport, behind all content.
-   Tweak `--forest-opacity` below to dial down/up the visual presence.
-   On the landing hero the forest is fully hidden (gives the WebGL scene time
-   to load behind a clean intro); once the user scrolls toward the work it
-   fades in (body.scrolled-past-hero, set by JS). */
+/* ==========================================================================
+   Forest — immersive on the hero, quiet while reading.
+   homepage-observer.ts publishes --hero-progress (1 on the hero → 0 past it);
+   the forest's opacity eases between the two levels below.
+   ========================================================================== */
+
+:root {
+  --hero-progress: 1;
+  --forest-hero: 0.92;
+  --forest-read: 0.24;
+}
 .tree-canvas-host {
-  --forest-opacity: 0;
   position: fixed;
   inset: 0;
   width: 100vw;
   height: 100vh;
   height: 100dvh;
-  z-index: -1;             /* sits below content & nav, above body bloom (-3) and weather-bg (-2) */
+  z-index: -1;             /* above the weather backdrops (-2) and mood wash (-3) */
   pointer-events: none;
-  opacity: var(--forest-opacity);
-  transition: opacity 0.8s ease;
-  /* Gentle vignette that keeps the scene covering most of the viewport — the
-     horizon band (mountains) and edge trees stay visible, with only a soft
-     dip behind the central reading zone so card text stays legible. */
-  mask-image: radial-gradient(ellipse 72% 92% at 52% 46%, rgba(0,0,0,0.55) 0%, rgba(0,0,0,0.8) 50%, black 78%);
-  -webkit-mask-image: radial-gradient(ellipse 72% 92% at 52% 46%, rgba(0,0,0,0.55) 0%, rgba(0,0,0,0.8) 50%, black 78%);
+  opacity: calc(var(--forest-read) + (var(--forest-hero) - var(--forest-read)) * var(--hero-progress));
+  transition: opacity 0.4s ease;
+  /* Soft dip behind the centre so the hero text and reading column breathe;
+     the edges and horizon stay at full strength. */
+  mask-image: radial-gradient(ellipse 70% 90% at 50% 46%, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0.88) 50%, black 78%);
+  -webkit-mask-image: radial-gradient(ellipse 70% 90% at 50% 46%, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0.88) 50%, black 78%);
 }
-body.scrolled-past-hero .tree-canvas-host { --forest-opacity: 0.85; }
 .tree-canvas-host canvas {
   display: block;
   width: 100% !important;
@@ -403,20 +311,13 @@ body.scrolled-past-hero .tree-canvas-host { --forest-opacity: 0.85; }
   width: clamp(180px, 28vw, 280px);
   opacity: 0.5;
 }
-
 @media (max-width: 720px) {
-  body.scrolled-past-hero .tree-canvas-host { --forest-opacity: 0.55; }
-  .tree-canvas-host {
-    mask-image: none;
-    -webkit-mask-image: none;
-  }
-}
-@media (prefers-reduced-motion: reduce) {
-  body.scrolled-past-hero .tree-canvas-host { --forest-opacity: 0.5; }
+  :root { --forest-hero: 0.85; --forest-read: 0.16; }
+  .tree-canvas-host { mask-image: none; -webkit-mask-image: none; }
 }
 
 /* ==========================================================================
-   Landing hero — full-screen intro above the flippable work shell
+   Hero — the landscape leads; the UI stays small and still.
    ========================================================================== */
 
 .hero-intro {
@@ -426,32 +327,48 @@ body.scrolled-past-hero .tree-canvas-host { --forest-opacity: 0.85; }
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: calc(var(--nav-height) + 1rem) var(--gutter) 2rem;
+  padding: 3rem var(--gutter) 2.5rem;
   text-align: center;
 }
-
 .hero-intro-inner {
+  position: relative;
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
-  gap: 1.25rem;
-  /* Slight upward bias so the scroll cue has room below */
-  margin-top: -2rem;
+  gap: 1.1rem;
   max-width: 40rem;
+}
+/* A little fog clearing behind the text, so it reads over the full forest
+   without a box. Lives on the full-bleed section (inset 0) so it can never
+   widen the page, and the ellipse fades to transparent well inside it. */
+.hero-intro::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;             /* above the forest (earlier in the DOM), below the text */
+  pointer-events: none;
+  background: radial-gradient(ellipse min(92vw, 36rem) min(44vh, 24rem) at 50% 52%,
+    rgba(var(--reading-wash), 0.62) 0%,
+    rgba(var(--reading-wash), 0.34) 55%,
+    rgba(var(--reading-wash), 0) 100%);
+}
+@media (prefers-reduced-motion: no-preference) {
+  .hero-intro-inner { animation: hero-fade 0.8s ease-out backwards; }
+}
+@keyframes hero-fade {
+  from { opacity: 0; }
+  to   { opacity: 1; }
 }
 
 .hero-portrait {
-  width: clamp(150px, 22vw, 260px);
-  height: clamp(150px, 22vw, 260px);
+  width: clamp(128px, 17vw, 204px);
+  height: clamp(128px, 17vw, 204px);
   border-radius: 50%;
   object-fit: cover;
-  border: 5px solid var(--glass-border-strong);
-  box-shadow: 0 16px 48px rgba(36, 128, 253, 0.22), 0 0 0 1px var(--glass-border);
+  border: 4px solid var(--glass-border-strong);
+  box-shadow: 0 14px 40px rgba(20, 40, 60, 0.18);
 }
-html[data-theme="dark"] .hero-portrait {
-  box-shadow: 0 16px 48px rgba(0, 0, 0, 0.5), 0 0 40px rgba(76, 154, 255, 0.18);
-}
+html[data-theme="dark"] .hero-portrait { box-shadow: 0 14px 40px rgba(0, 0, 0, 0.5); }
 
 .hero-name {
   font-family: var(--font-sans);
@@ -470,8 +387,36 @@ html[data-theme="dark"] .hero-portrait {
   margin-top: 0.5rem;
   letter-spacing: 0;
 }
-/* The weather line inside the hero name uses the existing
-   .identity-weather-line typography (caption under the Burmese). */
+
+/* Local weather line — reads like a continuation of "I'm Kaung", not a
+   widget. Keeps .local-weather-status so weather.js can update it. */
+.identity-weather-line {
+  display: block;
+  font-family: var(--font-sans);
+  font-size: 0.4em;            /* relative to the h1 */
+  font-weight: 500;
+  line-height: 1.35;
+  letter-spacing: 0;
+  color: var(--text-body);
+  margin-top: 0.5rem;
+  transition: color 0.6s ease;
+}
+body.weather-sunny .identity-weather-line,
+body.weather-clear .identity-weather-line,
+body.weather-hot   .identity-weather-line { color: #8a5d24; }
+body.weather-rainy .identity-weather-line,
+body.weather-stormy .identity-weather-line,
+body.weather-foggy .identity-weather-line { color: #4f606f; }
+body.weather-snowy .identity-weather-line,
+body.weather-cold  .identity-weather-line { color: #4f687b; }
+html[data-theme="dark"] body.weather-sunny .identity-weather-line,
+html[data-theme="dark"] body.weather-clear .identity-weather-line,
+html[data-theme="dark"] body.weather-hot   .identity-weather-line { color: #e8c07a; }
+html[data-theme="dark"] body.weather-rainy .identity-weather-line,
+html[data-theme="dark"] body.weather-stormy .identity-weather-line,
+html[data-theme="dark"] body.weather-foggy .identity-weather-line { color: #9fb4c8; }
+html[data-theme="dark"] body.weather-snowy .identity-weather-line,
+html[data-theme="dark"] body.weather-cold  .identity-weather-line { color: #a9c6dd; }
 
 .hero-socials {
   display: flex;
@@ -485,102 +430,300 @@ html[data-theme="dark"] .hero-portrait {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 42px;
-  height: 42px;
+  width: 44px;
+  height: 44px;
   border-radius: 50%;
   background: var(--glass-bg-strong);
-  backdrop-filter: blur(12px) saturate(1.4);
-  -webkit-backdrop-filter: blur(12px) saturate(1.4);
+  backdrop-filter: blur(12px) saturate(1.3);
+  -webkit-backdrop-filter: blur(12px) saturate(1.3);
   border: 1px solid var(--glass-border);
   color: var(--on-surface-variant);
-  box-shadow: var(--shadow-soft);
-  transition: transform 0.2s ease, color 0.2s ease, box-shadow 0.2s ease;
+  transition: color 0.2s ease;
 }
-.hero-socials a:hover {
-  color: var(--primary);
-  transform: translateY(-2px);
-  box-shadow: var(--shadow-lift);
-}
+.hero-socials a:hover { color: var(--primary); }
 .hero-socials svg { width: 20px; height: 20px; }
 
-/* Scroll cue */
 .hero-scroll-cue {
-  display: inline-flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 0.35rem;
-  margin-top: 1.5rem;
+  margin-top: 1.25rem;
+  font-family: var(--font-sans);
+  font-size: 0.8125rem;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
   color: var(--on-surface-variant);
   text-decoration: none;
-  font-family: var(--font-ui);
-  font-size: 1.15625rem;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.1em;
-  transition: color 0.2s ease, transform 0.2s ease;
 }
 .hero-scroll-cue:hover { color: var(--primary); }
-.hero-scroll-cue svg {
-  width: 26px;
-  height: 26px;
-  animation: scroll-bounce 1.8s ease-in-out infinite;
-}
-@keyframes scroll-bounce {
-  0%, 100% { transform: translateY(0); }
-  50%      { transform: translateY(6px); }
-}
-@media (prefers-reduced-motion: reduce) {
-  .hero-scroll-cue svg { animation: none; }
-}
 
-/* Local weather line — a subtle secondary identity caption that sits under
-   the Burmese name, reading like a continuation of "I'm Kaung" rather than a
-   widget. No pill, border, background, icon, or shadow. The element keeps the
-   .local-weather-status class so weather.js can still find/update it. */
-.identity-weather-line {
-  display: block;
+/* ==========================================================================
+   Minimal nav — plain text, fades in after the hero. No pill, no border.
+   ========================================================================== */
+
+.minimal-nav {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 50;
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 1rem max(var(--gutter), calc((100vw - var(--project-max)) / 2)) 1.4rem;
+  /* A soft fade, not a bar: strongest at the very top, gone by its bottom. */
+  background: linear-gradient(to bottom,
+    rgba(var(--reading-wash), 0.97) 0%,
+    rgba(var(--reading-wash), 0.94) 62%,
+    rgba(var(--reading-wash), 0) 100%);
   font-family: var(--font-sans);
-  font-size: 0.4em;            /* relative to the h1 hero size */
-  font-weight: 500;
-  line-height: 1.35;
-  letter-spacing: 0;
-  color: var(--text-body);
-  margin-top: 0.5rem;
-  transition: color 0.6s ease;
+  font-size: 0.9375rem;
+  transition: opacity 0.3s ease;
 }
-/* Subtle weather-aware tint — restrained, never distracting. */
-body.weather-sunny .identity-weather-line,
-body.weather-clear .identity-weather-line,
-body.weather-hot   .identity-weather-line { color: #9a6a2e; }
-body.weather-rainy .identity-weather-line,
-body.weather-stormy .identity-weather-line,
-body.weather-foggy .identity-weather-line { color: #5a6b7a; }
-body.weather-snowy .identity-weather-line,
-body.weather-cold  .identity-weather-line { color: #5b7488; }
-/* Lighter tints for contrast on the dark theme */
-html[data-theme="dark"] body.weather-sunny .identity-weather-line,
-html[data-theme="dark"] body.weather-clear .identity-weather-line,
-html[data-theme="dark"] body.weather-hot   .identity-weather-line { color: #e8c07a; }
-html[data-theme="dark"] body.weather-rainy .identity-weather-line,
-html[data-theme="dark"] body.weather-stormy .identity-weather-line,
-html[data-theme="dark"] body.weather-foggy .identity-weather-line { color: #9fb4c8; }
-html[data-theme="dark"] body.weather-snowy .identity-weather-line,
-html[data-theme="dark"] body.weather-cold  .identity-weather-line { color: #a9c6dd; }
-
-/* Mobile nav adjustments */
-@media (max-width: 720px) {
-  :root { --glass-blur: 12px; }  /* heavy backdrop blur costs on low-end */
-  .editorial-topnav {
-    padding: 0.35rem 0.6rem;
-    gap: 0.4rem;
-    width: calc(100% - 1.5rem);
-  }
-  .topnav-brand-text { display: none; }
-  .topnav-links { justify-content: flex-start; }
+.minimal-nav.is-hidden { opacity: 0; pointer-events: none; }
+.minimal-nav.is-hidden:focus-within { opacity: 1; pointer-events: auto; }
+.minimal-nav a {
+  color: var(--text-body);
+  text-decoration: none;
+  text-underline-offset: 6px;
+  text-decoration-thickness: 1px;
+}
+.minimal-nav a:hover { color: var(--text-strong); text-decoration-line: underline; }
+.minimal-nav-brand { font-weight: 700; color: var(--text-strong) !important; }
+.minimal-nav-links { display: flex; gap: clamp(1rem, 0.5rem + 2vw, 2rem); }
+.minimal-nav-links a[aria-current="true"] {
+  color: var(--text-strong);
+  text-decoration-line: underline;
+}
+@media (max-width: 560px) {
+  .minimal-nav-brand { display: none; }
+  .minimal-nav { justify-content: center; }
 }
 
 /* ==========================================================================
-   Weather backdrop & ripple canvas
+   Reading zone — fog clearing around the text, no card.
+   A horizontal wash strongest behind the column that fades into the forest
+   on either side, and fades in from the hero at the top.
+   ========================================================================== */
+
+.home-content {
+  position: relative;
+  isolation: isolate;
+  padding: 0 var(--gutter);
+}
+.home-content::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background: linear-gradient(90deg,
+    rgba(var(--reading-wash), 0) calc(50% - 760px),
+    rgba(var(--reading-wash), 0.62) calc(50% - 560px),
+    rgba(var(--reading-wash), 0.86) calc(50% - 420px),
+    rgba(var(--reading-wash), 0.86) calc(50% + 420px),
+    rgba(var(--reading-wash), 0.62) calc(50% + 560px),
+    rgba(var(--reading-wash), 0) calc(50% + 760px));
+  -webkit-mask-image: linear-gradient(to bottom, transparent 0, #000 22vh);
+  mask-image: linear-gradient(to bottom, transparent 0, #000 22vh);
+}
+.home-inner {
+  max-width: var(--content-max);
+  margin: 0 auto;
+  padding-bottom: clamp(4rem, 3rem + 4vw, 7rem);
+  font-size: 1.0625rem;
+  line-height: 1.7;
+  color: var(--text-body);
+}
+
+/* ── Sections ───────────────────────────────────────────────────────────── */
+.home-section {
+  padding-top: var(--section-space);
+  scroll-margin-top: 1rem;
+}
+.home-section:first-child { padding-top: max(20vh, 7rem); }
+
+.section-label {
+  margin: 0 0 0.75rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  color: var(--primary);
+}
+.section-heading {
+  margin: 0 0 1.25rem;
+  font-family: var(--font-serif);
+  font-size: clamp(2.625rem, 2rem + 2.4vw, 3.5rem);
+  font-weight: 400;
+  line-height: 1.1;
+  letter-spacing: -0.015em;
+  color: var(--text-strong);
+  text-wrap: balance;
+}
+.section-intro {
+  margin: 0 0 clamp(2.5rem, 2rem + 2vw, 3.5rem);
+  font-size: 1.125rem;
+  max-width: 34em;
+}
+
+.text-link {
+  color: var(--primary);
+  font-weight: 600;
+  text-decoration: none;
+  text-underline-offset: 4px;
+  text-decoration-thickness: 1px;
+}
+.text-link:hover { text-decoration-line: underline; }
+
+/* ── Work: chronology ───────────────────────────────────────────────────── */
+.chronology { list-style: none; margin: 0; padding: 0; }
+.chapter {
+  display: grid;
+  grid-template-columns: 7.5rem 1fr;
+  gap: 1.5rem;
+  padding: 1.75rem 0;
+  border-top: 1px solid rgba(var(--reading-divider, 23, 32, 39), 0.1);
+}
+.chapter:first-child { border-top: none; padding-top: 0; }
+.chapter-dates {
+  margin: 0.35rem 0 0;
+  font-size: 0.8125rem;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.02em;
+  color: var(--text-muted);
+}
+.chapter-company {
+  margin: 0;
+  font-family: var(--font-serif);
+  font-size: 1.5rem;
+  font-weight: 500;
+  line-height: 1.2;
+  color: var(--text-strong);
+}
+.chapter-role { margin: 0.15rem 0 0.5rem; font-size: 0.9375rem; color: var(--text-muted); }
+.chapter-summary { margin: 0; }
+.chapter-result { margin: 0.4rem 0 0; color: var(--text-strong); }
+
+.earlier { margin-top: 1rem; }
+.earlier > summary {
+  cursor: pointer;
+  width: fit-content;
+  font-size: 0.9375rem;
+  font-weight: 600;
+  color: var(--primary);
+}
+.earlier > summary:hover { text-decoration: underline; text-underline-offset: 4px; }
+.chronology--compact { margin-top: 1rem; }
+.chronology--compact .chapter { padding: 1.1rem 0; }
+.chronology--compact .chapter-company { font-size: 1.1875rem; }
+
+.skills-line {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  margin: 2.75rem 0 0;
+  font-size: 0.875rem;
+  line-height: 1.6;
+  color: var(--text-muted);
+}
+.skills-name { font-weight: 600; color: var(--text-strong); margin-right: 0.35rem; }
+.section-cta { margin: 1.75rem 0 0; }
+
+/* ── Create: project stories ────────────────────────────────────────────── */
+.stories { display: flex; flex-direction: column; gap: clamp(4.5rem, 3.5rem + 4vw, 7rem); margin-top: clamp(2.5rem, 2rem + 2vw, 3.5rem); }
+.story-meta { margin: 0 0 0.5rem; font-size: 0.8125rem; letter-spacing: 0.02em; color: var(--text-muted); }
+.story-title {
+  margin: 0 0 0.75rem;
+  font-family: var(--font-serif);
+  font-size: clamp(1.5rem, 1.3rem + 0.8vw, 1.75rem);
+  font-weight: 500;
+  line-height: 1.2;
+  color: var(--text-strong);
+}
+.story-summary { margin: 0; max-width: 38em; }
+.story-result { margin: 0.6rem 0 0; color: var(--text-strong); max-width: 38em; }
+.story-stack { margin: 0.9rem 0 0; font-size: 0.875rem; color: var(--text-muted); }
+.story-cta { margin: 0.9rem 0 0; }
+.story-note { margin: 0.9rem 0 0; font-size: 0.9375rem; font-style: italic; color: var(--text-muted); max-width: 38em; }
+/* Images may break out wider than the text column. */
+.story-figure {
+  margin: 2rem calc(50% - min(var(--project-max), 100vw - 2 * var(--gutter)) / 2) 0;
+  text-align: center;
+}
+.story-figure img {
+  display: inline-block;
+  width: auto;
+  max-width: 100%;
+  height: auto;
+  border-radius: var(--r-md);
+}
+
+.experiments { margin-top: clamp(5rem, 4rem + 4vw, 7.5rem); }
+.experiments-title {
+  margin: 0 0 1.25rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  color: var(--text-muted);
+}
+.experiments-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 0.9rem; }
+.experiments-list li { display: flex; flex-wrap: wrap; column-gap: 0.75rem; }
+.experiment-name {
+  font-weight: 600;
+  color: var(--text-strong);
+  text-decoration: none;
+  text-underline-offset: 4px;
+  text-decoration-thickness: 1px;
+}
+a.experiment-name:hover { color: var(--primary); text-decoration-line: underline; }
+.experiment-blurb { color: var(--text-body); }
+
+/* ── Loves: field notes ─────────────────────────────────────────────────── */
+.field-notes { margin: clamp(2rem, 1.5rem + 1.5vw, 2.75rem) 0 0; display: flex; flex-direction: column; gap: 1.5rem; }
+.field-note { display: grid; grid-template-columns: 7.5rem 1fr; gap: 1.5rem; }
+.field-note dt {
+  margin: 0;
+  padding-top: 0.1rem;
+  font-size: 0.9375rem;
+  font-style: italic;
+  font-family: var(--font-serif);
+  color: var(--text-muted);
+}
+.field-note dd { margin: 0; }
+.field-lead { font-weight: 600; color: var(--text-strong); }
+a.field-lead {
+  text-decoration: underline;
+  text-underline-offset: 4px;
+  text-decoration-thickness: 1px;
+  text-decoration-color: rgba(var(--reading-divider, 23, 32, 39), 0.3);
+}
+a.field-lead:hover { color: var(--primary); text-decoration-color: currentColor; }
+.field-photo { margin: 3rem 0 0; }
+.field-photo img { width: 100%; height: auto; border-radius: var(--r-md); }
+.field-photo figcaption { margin-top: 0.5rem; font-size: 0.875rem; color: var(--text-muted); }
+
+/* ── Ending ─────────────────────────────────────────────────────────────── */
+.home-footer { padding-top: var(--section-space); }
+.footer-title {
+  margin: 0 0 1rem;
+  font-family: var(--font-serif);
+  font-size: clamp(2rem, 1.6rem + 1.6vw, 2.5rem);
+  font-weight: 400;
+  color: var(--text-strong);
+}
+.footer-links { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 0.5rem 1.75rem; }
+.footer-line { margin: 2.5rem 0 0; font-size: 0.875rem; color: var(--text-muted); }
+
+html[data-theme="dark"] { --reading-divider: 200, 220, 245; }
+
+@media (max-width: 640px) {
+  .chapter,
+  .field-note { grid-template-columns: 1fr; gap: 0.35rem; }
+  .chapter-dates { margin-top: 0; }
+  .field-note dt { padding-top: 0; }
+}
+
+/* ==========================================================================
+   Weather backdrops — the atmosphere changes; the UI doesn't.
    ========================================================================== */
 
 .weather-bg {
@@ -593,8 +736,6 @@ html[data-theme="dark"] body.weather-cold  .identity-weather-line { color: #a9c6
 }
 .weather-bg.is-active { opacity: 1; }
 
-/* Each mode activates its own backdrop. Containers default to opacity 0 and
-   fade in via .is-active (set by weather.js) or the body class. */
 body.weather-sunny .weather-bg--sunny,
 body.weather-clear .weather-bg--clear,
 body.weather-cloudy .weather-bg--cloudy,
@@ -612,7 +753,6 @@ body.weather-cold .weather-bg--cold { opacity: 1; }
     radial-gradient(circle at 80% -10%, rgba(255, 226, 159, 0.45) 0%, transparent 45%),
     radial-gradient(circle at 20% 110%, rgba(199, 232, 254, 0.45) 0%, transparent 50%);
 }
-
 .weather-bg--hot {
   background:
     radial-gradient(circle at 82% -12%, rgba(255, 198, 120, 0.5) 0%, transparent 48%),
@@ -628,41 +768,22 @@ body.weather-cold .weather-bg--cold { opacity: 1; }
 .weather-bg--foggy {
   background: linear-gradient(180deg, rgba(208, 214, 214, 0.4) 0%, rgba(208, 214, 214, 0.22) 100%);
 }
-.weather-bg--stormy .raindrop {
-  position: absolute;
-  width: 1.5px;
-  background: linear-gradient(to bottom, transparent, rgba(255,255,255,0.7));
-  animation: rain-fall linear infinite;
-  will-change: transform;
-}
-
 .weather-bg--rainy {
   background: linear-gradient(180deg, rgba(60, 90, 130, 0.18) 0%, rgba(60, 90, 130, 0.08) 100%);
 }
-.weather-bg--rainy .raindrop {
+.weather-bg--rainy .raindrop,
+.weather-bg--stormy .raindrop {
   position: absolute;
   width: 1px;
   background: linear-gradient(to bottom, transparent, rgba(255,255,255,0.6));
   animation: rain-fall linear infinite;
   will-change: transform;
 }
+.weather-bg--stormy .raindrop { width: 1.5px; background: linear-gradient(to bottom, transparent, rgba(255,255,255,0.7)); }
 @keyframes rain-fall {
   0%   { transform: translateY(-10vh); }
   100% { transform: translateY(110vh); }
 }
-/* One-shot entrance: the hero rises in on load. The `backwards` fill leaves
-   no lingering transform once it finishes. */
-@media (prefers-reduced-motion: no-preference) {
-  .hero-intro-inner {
-    animation: rise-in 0.7s cubic-bezier(0.22, 1, 0.36, 1) backwards;
-  }
-}
-@keyframes rise-in {
-  from { opacity: 0; transform: translateY(18px); }
-  to   { opacity: 1; transform: translateY(0); }
-}
-
-body.weather-snowy .weather-bg--snowy { opacity: 1; }
 .weather-bg--snowy {
   background: linear-gradient(180deg, rgba(255,255,255,0.25) 0%, rgba(199, 232, 254, 0.15) 100%);
 }
@@ -679,15 +800,7 @@ body.weather-snowy .weather-bg--snowy { opacity: 1; }
   0%   { transform: translate3d(0, 0, 0) rotate(0deg); }
   100% { transform: translate3d(40px, 110vh, 0) rotate(360deg); }
 }
-
-.ripple-canvas {
-  position: fixed;
-  inset: 0;
-  pointer-events: none;
-  z-index: -1;
-  opacity: 0.6;
-  mix-blend-mode: multiply;
-}
+html[data-theme="dark"] .weather-bg { filter: brightness(0.55) saturate(0.85); }
 
 /* ==========================================================================
    Reduced motion
@@ -701,484 +814,5 @@ body.weather-snowy .weather-bg--snowy { opacity: 1; }
     scroll-behavior: auto !important;
   }
   .weather-bg .raindrop,
-  .weather-bg .snowflake,
-  .ripple-canvas { display: none !important; }
-}
-
-@media (hover: none), (pointer: coarse) {
-  .ripple-canvas { display: none; }
-}
-
-/* ==========================================================================
-   Slim chrome on non-home pages (project pages get this)
-   ========================================================================== */
-
-.editorial-topnav--slim .topnav-brand-text { display: inline; }
-
-.topnav-link--back {
-  color: var(--primary);
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  color: var(--secondary);
-  display: inline-block;
-  margin-bottom: 0.4rem;
-}
-.section-title {
-  font-family: var(--font-sans);
-  font-size: var(--fs-headline-section);
-  font-weight: 700;
-  line-height: 1.3;
-  letter-spacing: -0.015em;
-  color: var(--text-strong);
-  margin: 0 0 0.4rem;
-}
-.topnav-link--back:hover { color: var(--primary-container); background: rgba(0, 89, 187, 0.06); }
-
-/* On non-home pages (project pages), push content below the fixed slim chrome.
-   The home page carries body.layout-home (Base slimNav={false}); inner pages
-   don't, so this targets them without depending on the removed shell markup. */
-body:not(.layout-home) > #main {
-  padding-top: clamp(5.5rem, 4rem + 4vw, 7rem);
-}
-body:not(.layout-home) #ft-tool { padding: 1rem var(--gutter) 3rem; }
-
-
-/* ==========================================================================
-   Portfolio content stage — work / create / loves
-   Charliekubal-style editorial: a centered column that floats in the scene
-   (forest breathes on the sides), lowercase nav pills, and a two-column
-   heading/detail grid per section. Theme-aware via the shared --text-*/
-   --glass-*/--primary tokens (light / dawn / dusk / dark all covered).
-   ========================================================================== */
-
-.pf-stage {
-  --pf-max:     1020px;   /* editorial column, widened for the larger type */
-  --pf-gap:     clamp(1.75rem, 1rem + 3vw, 3.5rem);   /* two-column gutter */
-  --pf-divider: var(--glass-border);
-  /* Frosted panel fill + its inner highlight & drop shadow. Opacity is high
-     (~0.94) so background bleed doesn't muddy the text. Theme-aware — dark is
-     overridden below. --pf-wash mirrors the panel so the sticky nav reads
-     solid over it. */
-  --pf-panel:      rgba(247, 251, 255, 0.86);
-  --pf-wash:       var(--pf-panel);
-  --pf-highlight:  rgba(255, 255, 255, 0.6);
-  --pf-panel-shadow: 0 -2px 40px rgba(31, 65, 85, 0.10);
-  --pf-hl-bg:       color-mix(in srgb, var(--primary) 9%, transparent);
-  --pf-hl-bg-hover: color-mix(in srgb, var(--primary) 16%, transparent);
-
-  position: relative;
-  z-index: 1;
-  max-width: var(--pf-max);
-  margin: 0 auto;
-  padding: 0 var(--gutter) clamp(3rem, 2rem + 4vw, 5rem);
-  scroll-margin-top: calc(var(--nav-height) + 1rem);
-}
-
-/* Frosted-glass content backdrop — a "rising panel" that lifts out of the
-   forest as you scroll past the hero: 85% fill, 20px blur + saturation boost,
-   rounded top corners, an inner highlight line and a soft shadow for depth. */
-.pf-surface {
-  position: relative;
-  padding: clamp(1.5rem, 1rem + 2vw, 2.75rem) clamp(1.25rem, 0.6rem + 2vw, 2.5rem)
-           clamp(2rem, 1.5rem + 2vw, 3rem);
-  background: var(--pf-panel);
-  border-radius: 24px 24px 0 0;
-  box-shadow: var(--pf-panel-shadow), inset 0 1px 0 var(--pf-highlight);
-}
-@supports (backdrop-filter: blur(6px)) or (-webkit-backdrop-filter: blur(6px)) {
-  .pf-surface {
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
-  }
-}
-
-/* ── Nav pills (work | create | loves) ─────────────────────────────────── */
-.pf-switcher-wrap {
-  position: sticky;
-  top: calc(var(--nav-height) - 12px);
-  z-index: 5;
-  margin: 0 0 clamp(2rem, 1.5rem + 2vw, 3.5rem);
-  padding-bottom: clamp(1rem, 0.75rem + 1vw, 1.5rem);
-  border-bottom: 1px solid var(--pf-divider);
-  background: linear-gradient(var(--pf-wash), var(--pf-wash));
-}
-.pf-switcher {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-}
-.pf-tab {
-  position: relative;
-  font-family: var(--font-ui);
-  font-size: 1.34375rem;
-  font-weight: 600;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: var(--text-muted);
-  text-decoration: none;
-  background: none;
-  border: none;
-  padding: 0.4rem 0.75rem;
-  cursor: pointer;
-  transition: color 0.2s ease;
-}
-.pf-tab::after {
-  content: '';
-  position: absolute;
-  left: 0.75rem;
-  right: 0.75rem;
-  bottom: calc(-1 * clamp(1rem, 0.75rem + 1vw, 1.5rem) - 1px);
-  height: 2px;
-  background: var(--primary);
-  transform: scaleX(0);
-  transform-origin: left;
-  transition: transform 0.2s ease;
-}
-.pf-tab:hover { color: var(--text-strong); }
-.pf-tab.is-active { color: var(--text-strong); }
-.pf-tab.is-active::after { transform: scaleX(1); }
-.pf-tab:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; border-radius: var(--r-sm); }
-.pf-tab-sep { color: var(--pf-divider); user-select: none; }
-
-/* ── Section visibility (data-active on the container) ─────────────────── */
-.pf-panels { position: relative; }
-.pf-section { display: none; animation: pf-fade 0.24s ease-out; }
-.pf-panels[data-active="work"]   .pf-work,
-.pf-panels[data-active="create"] .pf-create,
-.pf-panels[data-active="loves"]  .pf-loves { display: block; }
-.pf-panels:not([data-active]) .pf-work { display: block; }
-@keyframes pf-fade {
-  from { opacity: 0; transform: translateY(8px); }
-  to   { opacity: 1; transform: translateY(0); }
-}
-.pf-section:focus { outline: none; }
-
-/* ── Two-column grid: heading/left, detail/right ───────────────────────── */
-.pf-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: var(--pf-gap);
-}
-.pf-grid-left { position: sticky; top: calc(var(--nav-height) + 2rem); align-self: start; }
-
-.pf-tagline {
-  font-family: var(--font-ui);
-  font-size: 1.28125rem;
-  font-weight: 600;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  color: var(--primary);
-  margin: 0 0 1rem;
-}
-/* Elegant serif italic statement heading (prototype). A gentle text-shadow
-   (light glow in light themes, soft dark lift in dark) helps it pop off the
-   frosted panel. --pf-heading-shadow is themed below. */
-.pf-heading {
-  font-family: var(--font-statement);
-  font-size: clamp(2.78125rem, 2.13125rem + 2.6vw, 4.03125rem);
-  font-weight: 400;
-  font-style: italic;
-  line-height: 1.1;
-  letter-spacing: -0.02em;
-  color: var(--text-strong);
-  text-shadow: var(--pf-heading-shadow, 0 1px 1px rgba(255, 255, 255, 0.6));
-  margin: 0 0 clamp(1.5rem, 1rem + 1.5vw, 2.5rem);
-}
-
-/* ── Work: bio prose + highlights ──────────────────────────────────────── */
-.pf-bio {
-  font-family: var(--font-ui);
-  font-size: 1.59375rem;
-  line-height: 1.75;
-  color: var(--text-body);
-  margin: 0;
-  max-width: 52ch;
-}
-.pf-bio + .pf-bio { margin-top: clamp(1.5rem, 1rem + 1.5vw, 2.5rem); }
-
-/* A highlighted role: bolds on hover, opens the side detail on click. */
-.pf-highlight {
-  display: inline-block;
-  font-family: var(--font-ui);
-  font-size: inherit;
-  font-weight: 500;
-  color: var(--text-strong);
-  background: var(--pf-hl-bg);
-  border: none;
-  padding: 0.1em 0.35em;
-  margin: -0.1em -0.175em;
-  border-radius: 4px;
-  cursor: pointer;
-  transition: background 0.25s cubic-bezier(0.16, 1, 0.3, 1);
-}
-.pf-highlight:hover,
-.pf-highlight.is-active { background: var(--pf-hl-bg-hover); font-weight: 700; }
-.pf-highlight:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
-
-.pf-skills-line {
-  font-family: var(--font-ui);
-  font-size: 1.28125rem;
-  color: var(--text-muted);
-  line-height: 2.25;
-  letter-spacing: 0.015em;
-  margin: clamp(1.75rem, 1.25rem + 2vw, 2.75rem) 0 0;
-}
-.pf-skills-line strong {
-  font-size: 1.21875rem;
-  font-weight: 600;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  color: var(--text-strong);
-}
-
-.pf-quiet-link {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.4rem;
-  font-family: var(--font-ui);
-  font-size: 1.40625rem;
-  font-weight: 600;
-  color: var(--primary);
-}
-.pf-quiet-link svg { width: 15px; height: 15px; }
-.pf-quiet-link:hover { color: var(--primary-container); }
-.pf-quiet-link--standalone { margin-top: clamp(1.25rem, 1rem + 1vw, 1.75rem); }
-
-/* ── Detail panel (right column) — shared by Work + Create ─────────────── */
-.pf-grid-right { min-width: 0; }
-.pf-detail-panel {
-  background: var(--glass-bg);
-  border: 1px solid var(--glass-border);
-  border-radius: var(--r-lg);
-  padding: clamp(1.25rem, 1rem + 1vw, 1.75rem);
-}
-@supports (backdrop-filter: blur(6px)) {
-  .pf-detail-panel { backdrop-filter: blur(8px) saturate(1.2); -webkit-backdrop-filter: blur(8px) saturate(1.2); }
-}
-.pf-detail-panel.is-empty {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  min-height: 180px;
-  color: var(--text-muted);
-  font-family: var(--font-serif-title);
-  font-size: 1.53125rem;
-  font-style: italic;
-  letter-spacing: -0.01em;
-  text-align: center;
-}
-/* Serif title (prototype). */
-.pf-detail-title {
-  font-family: var(--font-serif-title);
-  font-size: 1.90625rem;
-  font-weight: 400;
-  letter-spacing: -0.01em;
-  color: var(--text-strong);
-  margin: 0 0 clamp(1rem, 0.75rem + 1vw, 1.5rem);
-}
-.pf-detail-content {
-  font-family: var(--font-ui);
-  font-size: 1.40625rem;
-  line-height: 1.75;
-  letter-spacing: 0.01em;
-  color: var(--text-muted);
-}
-.pf-detail-content p { margin: 0; }
-.pf-detail-content p + p { margin-top: 0.75rem; }
-.pf-detail-content ul { margin: 0.75rem 0 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 0.4rem; }
-.pf-detail-content li { position: relative; padding-left: 1.1rem; }
-.pf-detail-content li::before {
-  content: ''; position: absolute; left: 0; top: 0.6em;
-  width: 5px; height: 5px; border-radius: 50%; background: var(--primary); opacity: 0.6;
-}
-.pf-detail-stack-line {
-  font-family: var(--font-ui);
-  font-size: 1.34375rem;
-  color: var(--text-muted);
-  margin: 1rem 0 0;
-}
-.pf-detail-link {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.5em;
-  margin-top: clamp(1.25rem, 1rem + 1vw, 2rem);
-  font-family: var(--font-ui);
-  font-size: 1.21875rem;
-  font-weight: 600;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  color: var(--primary);
-}
-.pf-detail-link + .pf-detail-link { margin-left: 1rem; }
-.pf-detail-link svg { width: 14px; height: 14px; }
-.pf-detail-link:hover { color: var(--primary-container); }
-.pf-detail-note { font-size: 1.34375rem; color: var(--text-muted); font-style: italic; margin: 1rem 0 0; }
-
-/* Create: only the active project detail shows in the right column. */
-.pf-project-detail { display: none; }
-.pf-project-detail.is-active { display: block; animation: pf-fade 0.24s ease-out; }
-
-.pf-gallery { display: grid; grid-template-columns: 1fr 1fr; gap: 0.6rem; margin: 1rem 0 0; }
-.pf-gallery-thumb {
-  display: block; padding: 0; border: 1px solid var(--glass-border);
-  border-radius: var(--r-md); overflow: hidden; background: var(--glass-bg);
-  cursor: zoom-in; text-align: center;
-  transition: transform 0.2s ease;
-}
-.pf-gallery-thumb:hover { transform: translateY(-2px); }
-.pf-gallery-thumb:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
-.pf-gallery-thumb img { width: 100%; height: auto; display: block; }
-.pf-gallery-cap { display: block; font-size: 1.23125rem; color: var(--text-muted); padding: 0.3rem 0.4rem; }
-
-/* ── Create: project index (left column) ───────────────────────────────── */
-.pf-project-index { list-style: none; margin: 0; padding: 0; }
-.pf-project-item {
-  width: 100%;
-  text-align: left;
-  background: none;
-  border: none;
-  border-bottom: 1px solid var(--pf-divider);
-  padding: clamp(1rem, 0.75rem + 1vw, 1.5rem) 0;
-  cursor: pointer;
-  transition: background 0.2s ease, padding 0.2s ease, margin 0.2s ease;
-}
-.pf-project-index li:first-child .pf-project-item { padding-top: 0; }
-.pf-project-item:hover,
-.pf-project-item.is-active {
-  background: var(--pf-hl-bg);
-  margin: 0 -1rem;
-  padding-left: 1rem;
-  padding-right: 1rem;
-}
-.pf-project-item:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
-.pf-project-num { display: block; font-family: var(--font-ui); font-size: 1.21875rem; font-weight: 500; letter-spacing: 0.08em; color: var(--text-muted); margin-bottom: 0.375rem; }
-/* Serif title by default; flips to elegant italic on hover / active. */
-.pf-project-title {
-  display: block;
-  font-family: var(--font-serif-title);
-  font-size: 1.78125rem;
-  font-weight: 400;
-  letter-spacing: -0.01em;
-  color: var(--text-strong);
-  margin-bottom: 0.375rem;
-  transition: font-family 0.2s ease, font-style 0.2s ease;
-}
-.pf-project-item:hover .pf-project-title,
-.pf-project-item.is-active .pf-project-title {
-  font-family: var(--font-statement);
-  font-style: italic;
-}
-.pf-project-meta { display: block; font-family: var(--font-ui); font-size: 1.28125rem; letter-spacing: 0.02em; color: var(--text-muted); }
-
-/* ── Loves: currently note + category/text list ────────────────────────── */
-.pf-currently { margin-top: clamp(1.5rem, 1rem + 1.5vw, 2rem); }
-.pf-currently-label {
-  font-family: var(--font-ui);
-  font-size: 1.21875rem;
-  font-weight: 600;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  color: var(--primary);
-  margin: 0 0 0.75rem;
-}
-/* Serif italic (prototype). */
-.pf-currently-text {
-  font-family: var(--font-statement);
-  font-size: 1.78125rem;
-  font-style: italic;
-  line-height: 1.5;
-  color: var(--text-strong);
-  margin: 0;
-}
-
-.pf-loves-list { display: flex; flex-direction: column; gap: clamp(1.25rem, 1rem + 1vw, 1.75rem); }
-.pf-love-row { display: grid; grid-template-columns: 150px 1fr; gap: clamp(1rem, 0.75rem + 1vw, 1.5rem); align-items: baseline; }
-.pf-love-cat {
-  font-family: var(--font-ui);
-  font-size: 0.9375rem;
-  font-weight: 600;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  color: var(--text-muted);
-  line-height: 1.4;
-}
-.pf-love-text { font-family: var(--font-ui); font-size: 1.40625rem; line-height: 1.75; letter-spacing: 0.01em; color: var(--text-body); margin: 0; }
-.pf-love-title { color: var(--text-strong); font-weight: 600; }
-.pf-love-text a {
-  color: var(--text-strong);
-  text-decoration: underline;
-  text-underline-offset: 4px;
-  text-decoration-thickness: 1px;
-  text-decoration-color: var(--glass-border);
-  transition: color 0.2s ease, text-decoration-color 0.2s ease;
-}
-.pf-love-text a:hover { color: var(--primary); text-decoration-color: var(--primary); }
-
-/* ── Diagram lightbox (reused by Create) ───────────────────────────────── */
-.pf-lightbox {
-  position: fixed; inset: 0; z-index: 9500;
-  display: flex; align-items: center; justify-content: center;
-  padding: var(--gutter); opacity: 0; transition: opacity 0.2s ease;
-}
-/* CRITICAL: when closed (hidden attribute present) the overlay must be fully
-   removed from the page — otherwise its full-screen fixed backdrop sits on top
-   of the content and swallows every hover/click. */
-.pf-lightbox[hidden] { display: none; }
-.pf-lightbox.is-open { opacity: 1; }
-.pf-lightbox-backdrop { position: absolute; inset: 0; background: rgba(5, 10, 25, 0.82); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); }
-.pf-lightbox-panel { position: relative; max-width: min(92vw, 820px); display: flex; flex-direction: column; gap: 0.65rem; align-items: center; }
-.pf-lightbox-img { width: 100%; border-radius: var(--r-md); box-shadow: 0 24px 64px rgba(0,0,0,0.5); }
-.pf-lightbox-caption { color: rgba(255,255,255,0.78); font-size: 0.8125rem; text-align: center; margin: 0; }
-.pf-lightbox-close {
-  position: absolute; top: -16px; right: -16px; width: 38px; height: 38px;
-  border-radius: 50%; background: white; color: #171d27; border: none; font-size: 1.2rem;
-  cursor: pointer; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 12px rgba(0,0,0,0.3);
-}
-.pf-lightbox-close:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
-
-/* ==========================================================================
-   Theme + weather wash tweaks — keep the reading column legible everywhere.
-   ========================================================================== */
-/* Light themes: a soft white glow lifts the headings off the panel. */
-:root { --pf-heading-shadow: 0 1px 2px rgba(255, 255, 255, 0.55); }
-
-html[data-theme="dark"] .pf-stage {
-  --pf-panel:        rgba(13, 20, 31, 0.86);
-  --pf-wash:         var(--pf-panel);
-  --pf-highlight:    rgba(150, 190, 255, 0.10);
-  --pf-panel-shadow: 0 -2px 44px rgba(0, 0, 0, 0.45);
-  --pf-heading-shadow: 0 1px 10px rgba(0, 0, 0, 0.5);
-  --pf-divider:      rgba(140, 180, 255, 0.16);
-}
-html[data-theme="dark"] .weather-bg { filter: brightness(0.55) saturate(0.85); }
-/* Busy daytime weather: nudge the panel a touch more opaque so the reading
-   area stays calm. */
-html:not([data-theme="dark"]) body.weather-cloudy .pf-stage,
-html:not([data-theme="dark"]) body.weather-windy  .pf-stage,
-html:not([data-theme="dark"]) body.weather-rainy  .pf-stage,
-html:not([data-theme="dark"]) body.weather-stormy .pf-stage,
-html:not([data-theme="dark"]) body.weather-foggy  .pf-stage,
-html:not([data-theme="dark"]) body.weather-snowy  .pf-stage {
-  --pf-panel: rgba(247, 251, 255, 0.86);
-}
-
-/* ==========================================================================
-   Responsive — stack the two columns; drop stickiness.
-   ========================================================================== */
-@media (max-width: 768px) {
-  .pf-grid { grid-template-columns: 1fr; gap: clamp(1.5rem, 1rem + 3vw, 2.5rem); }
-  .pf-grid-left { position: static; }
-  .pf-love-row { grid-template-columns: 1fr; gap: 0.35rem; }
-  .pf-love-cat { padding-top: 0; }
-  .pf-gallery { grid-template-columns: 1fr; }
-}
-
-/* ==========================================================================
-   Reduced motion
-   ========================================================================== */
-@media (prefers-reduced-motion: reduce) {
-  .pf-section,
-  .pf-project-detail.is-active { animation: none; }
-  .pf-tab::after, .pf-highlight, .pf-project-item { transition: none; }
+  .weather-bg .snowflake { display: none !important; }
 }

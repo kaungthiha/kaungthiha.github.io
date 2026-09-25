@@ -1,12 +1,9 @@
 /* ──────────────────────────────────────────────────────────────────────
    Create — projects, tools, prototypes, analyses, experiments.
 
-   Single source of truth for the Create section. Descriptions are reconciled
-   from the old inline project-modal copy (all verified, public-safe) and the
-   redesign brief. Live-tool routes, PDFs, and case-study routes are the exact
-   existing URLs so nothing 404s. Images are reused only where a real owned
-   asset exists; projects without one render a tasteful neutral placeholder
-   (no invented screenshots). See the summary for the image TODO list.
+   Four projects are `featured` and get a full story on the homepage; the
+   rest render as a quiet "small experiments" list using `blurb`. Live-tool
+   routes, PDFs, and case-study routes are the exact existing URLs.
    ────────────────────────────────────────────────────────────────────── */
 
 export type ProjectType =
@@ -33,14 +30,21 @@ export interface Project {
   type: ProjectType;
   year?: string;
   status?: ProjectStatus;
+  /** Featured projects get a full story on the homepage. */
   featured?: boolean;
+  /** One sentence for the small-experiments list (non-featured only). */
+  blurb?: string;
   summary: string;
+  /** Optional standout result shown on the homepage story. */
+  result?: string;
   problem?: string;
   contribution?: string[];
   outcomes?: string[];
   stack?: string[];
   image?: string;
   imageAlt?: string;
+  /** Intrinsic size of `image`, so the story reserves space (no layout shift). */
+  imageSize?: [number, number];
   gallery?: Array<{ src: string; alt: string; caption?: string }>;
   links?: ProjectLink[];
   confidentialityNote?: string;
@@ -59,11 +63,11 @@ export const projects: Project[] = [
       'Plan festival meetups and build a schedule around the ' +
       'sets nobody wants to miss.',
     problem:
-      'My rave planning experience(especially for EDC) can be a headache sometimes: overlapping sets, must-see artists, ' +
+      'My rave planning experience (especially for EDC) can be a headache sometimes: overlapping sets, must-see artists, ' +
       'and everyone squinting at a grid on their phone.',
     contribution: [
       'Ingests a festival schedule and lets you flag must-see artists.',
-      'Optimises an itinerary using weighted interval scheduling under time and distance constraints.',
+      'Optimizes an itinerary using weighted interval scheduling under time and distance constraints.',
       'Supports shared group planning so the whole squad converges on one plan.',
     ],
     stack: ['React', 'TypeScript', 'Supabase'],
@@ -73,6 +77,7 @@ export const projects: Project[] = [
   },
   {
     slug: 'outbuild-learning',
+    featured: true,
     title: 'Outbuild AI Learning System',
     shortTitle: 'Outbuild Learning',
     type: 'AI automation',
@@ -94,8 +99,9 @@ export const projects: Project[] = [
       'Shortened onboarding from ~4 weeks to ~1 week, so new hires could start hitting sales calls confidently sooner.',
     ],
     stack: ['Claude', 'Notion', 'n8n', 'Google Forms', 'JavaScript'],
-    image: '/assets/images/Outbuild.jpg',
-    imageAlt: 'Outbuild AI learning system',
+    image: '/assets/projects/outbuild_diagram.png',
+    imageAlt: 'Diagram of the Outbuild learning system: V1 used hardcoded per-topic n8n branches; V2 uses unified pipelines for quiz generation, grading, and reporting with Claude.',
+    imageSize: [650, 669],
     gallery: [
       {
         src: '/assets/projects/outbuild_diagram.png',
@@ -113,12 +119,14 @@ export const projects: Project[] = [
   },
   {
     slug: 'askcyborg',
+    featured: true,
+    result: 'Integrating a cloud vector database sped retrieval by roughly 2×.',
     title: 'AskCyborg',
     type: 'Prototype',
     year: '2023',
     status: 'Archived',
     summary:
-      'An AI research assistant for SEC EDGAR filings in the days of GPT- 3.5 Turbo. The flow was -> ask a question, get a ' +
+      'An AI research assistant for SEC EDGAR filings, back in the days of GPT-3.5 Turbo. Ask a question, get a ' +
       'sourced report. Co-founded; I owned the roadmap, helped write the code to generate embeddings, and shipped the MVP.',
     problem:
       'Financial research buries useful signal inside dense regulatory filings. ' +
@@ -142,6 +150,7 @@ export const projects: Project[] = [
   },
   {
     slug: 'ease-dsc',
+    featured: true,
     title: 'EASE — Debt-Support Flow',
     shortTitle: 'EASE (DSC case study)',
     type: 'Case study',
@@ -154,13 +163,11 @@ export const projects: Project[] = [
       'Customers in financial distress need differentiated help fast, and the ' +
       'flow should also improve how at-risk customers are identified.',
     contribution: [
-      'Designed a dashboard home with a financial snapshot and a prompt to get a personalised plan.',
+      'Designed a dashboard home with a financial snapshot and a prompt to get a personalized plan.',
       'Built a smart survey capturing four key signals (payment difficulty, external debt, intent, primary concern) with segmentation logic that routes to the right path.',
       'Laid out three support paths — a payment plan, budgeting tools, and debt-settlement education — with a comparison table and a "rebuild with us" confirmation screen.',
     ],
     stack: ['React', 'Tailwind CSS', 'JavaScript'],
-    image: '/assets/images/ease.png',
-    imageAlt: 'EASE debt-support flow mobile prototype',
     links: [],
     confidentialityNote:
       "Sorry, I can't actually show the demo on this one — it's internal Capital " +
@@ -168,6 +175,7 @@ export const projects: Project[] = [
   },
   {
     slug: 'attendance-tracker',
+    blurb: 'Rolling 13-week office-attendance math, because I like to min/max.',
     title: 'Attendance Tracker',
     type: 'Live tool',
     year: '2025',
@@ -177,7 +185,7 @@ export const projects: Project[] = [
       '13 week periods, with prorated requirements and JSON import/export.',
     problem:
       'Rolling attendance windows with prorated requirements are annoying to ' +
-      'track by hand and easy to get wrong. Plus, I like to min/max',
+      'track by hand and easy to get wrong. Plus, I like to min/max.',
     contribution: [
       'Calculates prorated requirements across rolling 13-week periods.',
       'Marks attendance on a calendar and exports/imports state as JSON.',
@@ -191,6 +199,7 @@ export const projects: Project[] = [
   },
   {
     slug: 'instacart-reddit-pulse',
+    blurb: 'Reads Reddit to surface sentiment on Instacart, then drafts a short memo. Made for some APM app oomph.',
     title: 'Instacart Reddit Pulse',
     shortTitle: 'Reddit Pulse',
     type: 'Analytics',
@@ -201,10 +210,10 @@ export const projects: Project[] = [
       'narrative signals, then auto-generates two visuals and a short memo.',
     problem:
       'Emerging narratives about a product live scattered across forums. Reading ' +
-      'them all by hand is too tedious',
+      'them all by hand is too tedious.',
     contribution: [
       'Pulls posts via the Reddit API and scores sentiment and volume signals.',
-      'Auto generates two visuals and a memo artifact for quick review.',
+      'Auto-generates two visuals and a memo artifact for quick review.',
     ],
     outcomes: [
       'Sample run (Mar 4–11, 2026): 24 posts across 3 subreddits, 66.7% negative, with substitutions / out-of-stock the top pain point.',
@@ -232,13 +241,14 @@ export const projects: Project[] = [
   },
   {
     slug: 'ai-usage-tracker',
+    blurb: "A proof-of-concept for tracking a team's AI adoption. Mostly a lesson in pivoting.",
     title: 'AI Usage Tracker',
     type: 'Experiment',
     year: '2025',
     status: 'In progress',
     summary:
       'A proof-of-concept for tracking a team\'s AI usage and adoption signals ' +
-      'in one simple dashboard. Good lesson in pivoting + making too many random things since it is really hard to get useful insights from simple tracking.',
+      'in one simple dashboard. A good lesson in pivoting: simple tracking rarely produces useful insight.',
     problem:
       'Teams adopting AI tools rarely have a simple read on who is using what ' +
       'or whether adoption is landing.',
@@ -253,6 +263,7 @@ export const projects: Project[] = [
   },
   {
     slug: 'ewa-proposal',
+    blurb: 'A product case for piloting early wage access in construction tech.',
     title: 'Early Wage Access Feature Proposal',
     shortTitle: 'Early Wage Access',
     type: 'Product case',

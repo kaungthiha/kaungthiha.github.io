@@ -1,106 +1,47 @@
 ---
 /**
- * Create — a two-column index/detail (charliekubal-style). Left: heading + a
- * project index list; clicking an item shows its story on the right. Every
- * detail is rendered in the DOM at build time (SEO + no-JS access); JS just
- * toggles which one is active. On mobile the grid stacks.
- * Content from src/data/projects.ts.
+ * Create — four featured project stories, then everything else as a quiet
+ * "small experiments" list. All in normal document flow.
  */
-import { projects, type Project } from '../../data/projects';
+import { projects } from '../../data/projects';
+import ProjectStory from './ProjectStory.astro';
 
-const first = projects[0]?.slug;
+const featured = projects.filter((p) => p.featured);
+const experiments = projects.filter((p) => !p.featured);
 ---
 
-<section
-  class="pf-section pf-create"
-  id="panel-create"
-  role="tabpanel"
-  aria-labelledby="tab-create"
-  data-section="create"
->
-  <div class="pf-grid">
-    <div class="pf-grid-left">
-      <p class="pf-tagline">tinkering</p>
-      <h2 class="pf-heading">Things I've built,<br>tested, learned from.</h2>
+<section class="home-section" id="create" aria-labelledby="create-title">
+  <p class="section-label">create</p>
+  <h2 class="section-heading" id="create-title">Things I've built, tested, and learned from.</h2>
 
-      <ol class="pf-project-index" aria-label="Projects">
-        {projects.map((p: Project, i) => (
-          <li>
-            <button
-              type="button"
-              class="pf-project-item"
-              class:list={{ 'is-active': p.slug === first }}
-              data-project-target={p.slug}
-              aria-controls={`project-${p.slug}`}
-              aria-expanded={p.slug === first ? 'true' : 'false'}
-            >
-              <span class="pf-project-num">{String(i + 1).padStart(2, '0')}</span>
-              <span class="pf-project-title">{p.shortTitle ?? p.title}</span>
-              <span class="pf-project-meta">{p.type}{p.year && ` · ${p.year}`}</span>
-            </button>
-          </li>
-        ))}
-      </ol>
-    </div>
-
-    <div class="pf-grid-right">
-      <div class="pf-detail-stack">
-        {projects.map((p: Project) => (
-          <article
-            class="pf-detail-panel pf-project-detail"
-            class:list={{ 'is-active': p.slug === first }}
-            id={`project-${p.slug}`}
-            data-project={p.slug}
-            aria-hidden={p.slug === first ? 'false' : 'true'}
-          >
-            <p class="pf-detail-title">{p.title}</p>
-            <div class="pf-detail-content">
-              <p>{p.summary}</p>
-              {p.problem && <p>{p.problem}</p>}
-              {p.contribution && p.contribution.length > 0 && (
-                <ul>{p.contribution.map((c) => <li>{c}</li>)}</ul>
-              )}
-              {p.outcomes && p.outcomes.length > 0 && (
-                <ul>{p.outcomes.map((o) => <li>{o}</li>)}</ul>
-              )}
-            </div>
-
-            {p.gallery && p.gallery.length > 0 && (
-              <div class="pf-gallery">
-                {p.gallery.map((g) => (
-                  <button
-                    type="button"
-                    class="pf-gallery-thumb"
-                    data-lightbox-src={g.src}
-                    data-lightbox-caption={g.caption ?? g.alt}
-                  >
-                    <img src={g.src} alt={g.alt} loading="lazy" decoding="async" />
-                    {g.caption && <span class="pf-gallery-cap">{g.caption}</span>}
-                  </button>
-                ))}
-              </div>
-            )}
-
-            {p.stack && p.stack.length > 0 && (
-              <p class="pf-detail-stack-line">{p.stack.join(' · ')}</p>
-            )}
-
-            {p.links && p.links.length > 0 && p.links.map((l) => (
-              <a
-                class="pf-detail-link"
-                href={l.href}
-                target={l.href.startsWith('http') || l.kind === 'pdf' ? '_blank' : undefined}
-                rel={l.href.startsWith('http') || l.kind === 'pdf' ? 'noopener' : undefined}
-              >
-                {l.label}
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M5 12h14m-6-6 6 6-6 6"/></svg>
-              </a>
-            ))}
-
-            {p.confidentialityNote && <p class="pf-detail-note">{p.confidentialityNote}</p>}
-          </article>
-        ))}
-      </div>
-    </div>
+  <div class="stories">
+    {featured.map((p) => <ProjectStory project={p} />)}
   </div>
+
+  {experiments.length > 0 && (
+    <div class="experiments">
+      <h3 class="experiments-title">Small experiments</h3>
+      <ul class="experiments-list">
+        {experiments.map((p) => {
+          const link = p.links?.[0];
+          const external = link ? link.href.startsWith('http') || link.kind === 'pdf' : false;
+          return (
+            <li>
+              {link ? (
+                <a
+                  class="experiment-name"
+                  href={link.href}
+                  target={external ? '_blank' : undefined}
+                  rel={external ? 'noopener' : undefined}
+                >{p.shortTitle ?? p.title}</a>
+              ) : (
+                <span class="experiment-name">{p.shortTitle ?? p.title}</span>
+              )}
+              {p.blurb && <span class="experiment-blurb">{p.blurb}</span>}
+            </li>
+          );
+        })}
+      </ul>
+    </div>
+  )}
 </section>
