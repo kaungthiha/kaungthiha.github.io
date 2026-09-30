@@ -16,8 +16,8 @@ import type { ProjectLink } from '../../lib/career';
 export const portfolioConfig = {
   work: {
     heading: 'I like solving problems.',
-    intro: 'Product through data and AI. Mostly data and product, some building.',
-    /** Employers shown as homepage milestones (every canonical role renders). */
+    intro: '',
+    /** */
     summaryExperienceIds: [
       'exp_capital_one',
       'exp_outbuild',
@@ -34,8 +34,8 @@ export const portfolioConfig = {
   career: {
     heading: 'Career',
     intro:
-      'The longer version: where I have worked, what I did there, and how it connects. ' +
-      'Mostly product, data, and AI, with some fintech and a startup along the way.',
+      'The longer version. ' +
+      'Mostly product, data, and AI, with some fintech + startup stuff along the way.',
     experienceIds: [
       'exp_capital_one',
       'exp_outbuild',
@@ -59,7 +59,7 @@ export const portfolioConfig = {
   ],
 
   create: {
-    heading: "Things I've built, tested, and learned from.",
+    heading: "Things I've worked on and learned from.",
     featuredProjectIds: ['proj_sheepherder', 'proj_outbuild_learning', 'proj_askcyborg', 'proj_ease'],
     experimentProjectIds: [
       'proj_attendance_tracker',

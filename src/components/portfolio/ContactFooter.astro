@@ -9,11 +9,11 @@ const { public_email, public_links } = getProfile();
 ---
 
 <footer class="home-footer" id="contact" aria-labelledby="contact-title">
-  <h2 class="footer-title" id="contact-title">Say hi.</h2>
+  <h2 class="footer-title" id="contact-title">Links!</h2>
   <ul class="footer-links">
     {public_links?.linkedin && <li><a class="text-link" href={public_links.linkedin} target="_blank" rel="noopener">LinkedIn</a></li>}
     {public_links?.github && <li><a class="text-link" href={public_links.github} target="_blank" rel="noopener">GitHub</a></li>}
     {public_email && <li><a class="text-link" href={`mailto:${public_email}`}>Email</a></li>}
   </ul>
-  <p class="footer-line">Made in Arlington, under whatever weather is happening outside.</p>
+  <p class="footer-line"></p>
 </footer>

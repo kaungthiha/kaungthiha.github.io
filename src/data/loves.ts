@@ -23,7 +23,7 @@ export const loves: LoveNote[] = [
   {
     category: 'language',
     lead: 'Relearning Japanese.',
-    note: 'I used to be semi-fluent and let it slip. Getting it back through Duolingo and anime.',
+    note: 'I used to be semi-fluent and let it slip. Getting it back through Duolingo and anime!',
   },
   {
     category: 'worlds',
@@ -35,26 +35,25 @@ export const loves: LoveNote[] = [
     category: 'cooking',
     lead: 'Cooking, and reading about it.',
     note:
-      "Rereading Michael Ruhlman's “The Soul of a Chef,” the book that sparked " +
+      "Rereading Michael Ruhlman's “The Soul of a Chef,” the book that helped spark " +
       'my love for cooking back in the day.',
   },
   {
     category: 'watching',
     lead: 'Witch Hat Atelier.',
-    note: 'The magic system is so intricate. I love it.',
+    note: 'I really love the intricate magic system!',
   },
   {
     category: 'reading',
     lead: '“Palo Alto” by Malcolm Harris.',
     note:
       'An unsentimental history of the place that shaped the industry I work in. ' +
-      'Also “Ashes of the Imperium,” because sometimes you just want to read about ' +
-      'a doomed galaxy before bed.',
+      'Also “Ashes of the Imperium,”. The stuff post Horus Heresy hits',
   },
   {
     category: 'music',
     lead: "Whatever's on my Spotify.",
-    note: 'Basic raver taste. My listening is public, so say hi if ours overlaps.',
+    note: 'Basic raver tastes.',
     href: 'https://open.spotify.com/user/22k3hzyma66fj4nbmanjastiy?si=ea605d91ddae4bb2',
   },
 ];
