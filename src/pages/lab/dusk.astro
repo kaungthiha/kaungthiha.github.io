@@ -1,0 +1,96 @@
+---
+/**
+ * /lab/dusk/ — unlinked, noindex preview of the painted dusk forest.
+ * The live homepage is untouched; this page proves the hybrid scene (one
+ * gouache painting + live shader effects) and the darker, warmer content
+ * palette before anything ships to the real hero.
+ */
+import Base from '../../layouts/Base.astro';
+import WorkSection from '../../components/portfolio/WorkSection.astro';
+import ContactFooter from '../../components/portfolio/ContactFooter.astro';
+
+const phases = ['dawn', 'day', 'dusk', 'night'];
+const weathers = ['clear', 'cloudy', 'windy', 'rainy', 'stormy', 'foggy', 'snowy'];
+---
+
+<Base title="Dusk preview" slimNav={false} noindex ogImage="/assets/forest/dusk/master.jpg">
+  <Fragment slot="head">
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+Myanmar:wght@300;400&display=swap" rel="stylesheet" />
+    <link rel="preload" as="image" href="/assets/forest/dusk/master.webp" />
+    <link href="/assets/css/dusk.css" rel="stylesheet" />
+  </Fragment>
+
+  <!-- The painting: a still CSS background first (and the no-WebGL fallback),
+       then the live shader canvas fades in over it. -->
+  <div class="dusk-host" id="dusk-host" aria-hidden="true"></div>
+
+  <section class="dusk-hero" aria-label="Introduction">
+    <div class="dusk-title">
+      <h1 class="dusk-name">Kaung Thiha</h1>
+      <p class="dusk-burmese" lang="my">ကောင်းသီဟ</p>
+      <p class="dusk-roles">Product <span aria-hidden="true">·</span> Data <span aria-hidden="true">·</span> Building</p>
+    </div>
+    <p class="dusk-weather local-weather-status" aria-live="polite">Checking the weather in Arlington, Virginia…</p>
+    <a class="dusk-enter" href="#work">
+      <span>Enter</span>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="m6 9 6 6 6-6" /></svg>
+    </a>
+  </section>
+
+  <div class="home-content dusk-content">
+    <div class="home-inner">
+      <WorkSection />
+      <ContactFooter />
+    </div>
+  </div>
+
+  <!-- Preview controls: try every phase and weather without waiting for them. -->
+  <details class="dusk-preview" id="dusk-preview">
+    <summary class="dusk-preview-label">Preview states</summary>
+    <div class="dusk-preview-row" data-kind="phase">
+      {phases.map((p) => <button type="button" data-value={p}>{p}</button>)}
+    </div>
+    <div class="dusk-preview-row" data-kind="mode">
+      {weathers.map((w) => <button type="button" data-value={w}>{w}</button>)}
+    </div>
+  </details>
+
+  <script>
+    import { initDusk } from '../../scripts/dusk';
+
+    const host = document.getElementById('dusk-host');
+    if (host) {
+      initDusk(host, {
+        masterUrl: '/assets/forest/dusk/master.webp',
+        maskUrl: '/assets/forest/dusk/mask.webp',
+        fadeColor: [0.055, 0.09, 0.078],
+      });
+    }
+
+    // Open the preview panel by default where there's room for it.
+    if (window.innerWidth > 720) document.getElementById('dusk-preview')?.setAttribute('open', '');
+
+    // Preview buttons broadcast the same event weather.js does.
+    const state = { mode: 'clear', phase: 'dusk' };
+    const sync = () => {
+      const live = (window as any).KTWeatherState;
+      if (live) { state.mode = live.mode; state.phase = live.phase; }
+      document.querySelectorAll<HTMLButtonElement>('.dusk-preview button').forEach((b) => {
+        const kind = b.parentElement?.dataset.kind as 'mode' | 'phase';
+        b.setAttribute('aria-pressed', String(state[kind] === b.dataset.value));
+      });
+    };
+    window.addEventListener('weather:change', sync);
+    sync();
+    document.querySelectorAll<HTMLButtonElement>('.dusk-preview button').forEach((b) => {
+      b.addEventListener('click', () => {
+        const kind = b.parentElement?.dataset.kind as 'mode' | 'phase';
+        state[kind] = b.dataset.value!;
+        (window as any).KTWeatherState = { ...((window as any).KTWeatherState || {}), ...state };
+        window.dispatchEvent(new CustomEvent('weather:change', { detail: { ...state } }));
+      });
+    });
+  </script>
+</Base>

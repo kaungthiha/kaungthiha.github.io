@@ -52,7 +52,8 @@ export default defineConfig({
   },
 
   integrations: [
-    sitemap(),
+    // Unlinked design previews under /lab/ stay out of the sitemap.
+    sitemap({ filter: (page) => !page.includes('/lab/') }),
   ],
 
   vite: {
