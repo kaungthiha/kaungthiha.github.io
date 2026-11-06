@@ -17,25 +17,12 @@ export const portfolioConfig = {
   work: {
     heading: 'I like solving problems.',
     intro: '',
-    /** */
-    summaryExperienceIds: [
-      'exp_capital_one',
-      'exp_outbuild',
-      'exp_aws_keywords',
-      'exp_wefunder',
-      'exp_askcyborg',
-    ],
-    careerPageHref: '/career/',
-    careerCtaLabel: 'View full career timeline',
     /** Rendered only when the file exists in public/ at build time. */
     resumeHref: '/assets/Kaung_Thiha_Resume.pdf',
   },
 
+  /** The Work branch's career timeline. */
   career: {
-    heading: 'Career',
-    intro:
-      'The longer version. ' +
-      'Mostly product, data, and AI, with some fintech + startup stuff along the way.',
     experienceIds: [
       'exp_capital_one',
       'exp_outbuild',
@@ -61,11 +48,11 @@ export const portfolioConfig = {
   create: {
     heading: "Things I've worked on and learned from.",
     featuredProjectIds: ['proj_sheepherder', 'proj_outbuild_learning', 'proj_askcyborg', 'proj_ease'],
+    // Archived (hidden here; their records stay in the dataset):
+    // proj_ai_usage_tracker, proj_early_wage_access.
     experimentProjectIds: [
       'proj_attendance_tracker',
       'proj_instacart_reddit_pulse',
-      'proj_ai_usage_tracker',
-      'proj_early_wage_access',
     ],
     experimentsHeading: 'Small experiments',
     /** Primary CTA label by canonical link kind. */

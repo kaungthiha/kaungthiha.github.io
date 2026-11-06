@@ -182,34 +182,7 @@ export function organizationLabel(exp: ExperienceRecord): string {
   return exp.organization;
 }
 
-// ── Homepage: concise milestones ─────────────────────────────────────────
-export interface CareerMilestone {
-  key: string;
-  years: string;
-  organization: string;
-  title: string;
-  scope?: string;
-}
-
-/** One line per role for the given employers, newest first. */
-export function getCareerSummary(experienceIds: string[]): CareerMilestone[] {
-  const rows: Array<CareerMilestone & { sort: number }> = [];
-  for (const exp of experienceIds.map(getExperience)) {
-    getRoles(exp).forEach((role, i) => {
-      rows.push({
-        key: role.id ?? `${exp.id}-${i}`,
-        years: yearRange(role),
-        organization: exp.organization,
-        title: role.canonical_title,
-        scope: role.team_or_scope ?? undefined,
-        sort: toMonths(role.start_date, 0),
-      });
-    });
-  }
-  return rows.sort((a, b) => b.sort - a.sort).map(({ sort: _sort, ...row }) => row);
-}
-
-// ── /career/: fuller, grouped timeline ───────────────────────────────────
+// ── The Work branch: the grouped career timeline ───────────────────────────────────
 export interface TimelineEntry {
   experience: ExperienceRecord;
   label: string;

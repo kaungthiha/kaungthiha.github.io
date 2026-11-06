@@ -12,8 +12,6 @@
   },
   "dependencies": {
     "@astrojs/sitemap": "^3.7.3",
-    "@dgreenheck/ez-tree": "^1.1.0",
-    "astro": "^6.4.4",
-    "three": "^0.184.0"
+    "astro": "^6.4.4"
   }
 }

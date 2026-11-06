@@ -1,7 +1,7 @@
 ---
 /**
  * Work, as a branch of the trunk: the full career timeline from the canonical
- * dataset (the same records as /career/). Each employer is a twig whose head
+ * dataset. Each employer is a twig whose head
  * is one line and opens to the detail; then earlier roles, education, skills.
  */
 import { existsSync } from 'node:fs';
@@ -54,7 +54,7 @@ let n = 0;
       <div class="ring-group">
         <p class="ring"><span>{g.label}</span></p>
         <ol class="twigs">
-          {g.entries.map((entry) => <CareerEntry entry={entry} class="twig twig--role" storyBase="" collapsible index={n++} />)}
+          {g.entries.map((entry) => <CareerEntry entry={entry} index={n++} />)}
         </ol>
       </div>
     ))}
@@ -63,7 +63,7 @@ let n = 0;
       <div class="ring-group">
         <p class="ring"><span>Earlier</span></p>
         <ol class="twigs">
-          {earlier.map((entry) => <CareerEntry entry={entry} class="twig twig--role twig--minor" storyBase="" collapsible index={n++} />)}
+          {earlier.map((entry) => <CareerEntry entry={entry} class="twig twig--role twig--minor" index={n++} />)}
           {leadership.map((l) => (
             <li class="twig twig--role twig--minor" id={l.id} style={`--i: ${n++}`}>
               <h3 class="timeline-org">{l.organization}</h3>

@@ -1,8 +1,8 @@
 ---
 /**
  * Base layout — replaces the Jekyll `default.html`.
- * Carries over: head/meta, weather backdrops, slim non-home nav,
- * and the deferred Three.js + asset scripts.
+ * Carries over: head/meta, weather backdrops, slim non-home nav, and the
+ * deferred weather script. Pages add their own head tags via slot="head".
  *
  * Real metadata (title, description, Open Graph, Twitter Card) replaces the
  * old `{% seo %}` tag and the placeholder "My Website" description.
@@ -14,16 +14,13 @@ export interface Props {
   slimNav?: boolean;
   /** Absolute path to the social-share image. */
   ogImage?: string;
-  /** Keep the page out of search results (unlinked previews). */
-  noindex?: boolean;
 }
 
 const {
   title = 'Kaung Thiha',
   description = 'Kaung Thiha works across product, data, and AI. Work, projects, a career timeline, and things he loves.',
   slimNav = true,
-  ogImage = '/assets/images/about.jpg',
-  noindex = false,
+  ogImage = '/assets/forest/dusk/master.jpg',
 } = Astro.props;
 
 const siteName = "KT's Portfolio";
@@ -43,7 +40,6 @@ const ogImageAbs = new URL(ogImage, Astro.site).toString();
   <title>{fullTitle}</title>
   <meta name="description" content={description} />
   <meta name="author" content="Kaung Thiha" />
-  {noindex && <meta name="robots" content="noindex, nofollow" />}
 
   <!-- Open Graph -->
   <meta property="og:type" content="website" />
@@ -144,9 +140,8 @@ const ogImageAbs = new URL(ogImage, Astro.site).toString();
     <slot />
   </main>
 
-  <!-- Weather (site-wide, deferred so it never blocks paint).
-       The WebGL forest is NOT loaded here — it's a code-split island loaded
-       only on the homepage, where #tree-canvas-host exists. -->
+  <!-- Weather (site-wide, deferred so it never blocks paint). The painted
+       forest is NOT loaded here — it's a code-split island on the homepage. -->
   <script src="/assets/js/weather.js" defer></script>
 
   <!-- GoatCounter — privacy-friendly, cookieless analytics (site-wide) -->

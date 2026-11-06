@@ -1,5 +1,5 @@
 /* ==========================================================================
-   Painted dusk forest — /lab/dusk/ preview.
+   Painted dusk forest — the homepage landing.
    The hero is the painting; below it the page descends into the forest:
    deep green-black, cream type, amber accents.
    ========================================================================== */
@@ -83,11 +83,9 @@ body.weather-cold #top .identity-weather-line { color: #dbe7f1; }
   --reading-divider: 239, 229, 204;
   --reading-wash: 14, 23, 20;
 }
-.dusk-content::before { display: none; }   /* the scene itself fades to the forest floor */
-.dusk-content .section-label { letter-spacing: 0.18em; text-transform: uppercase; font-size: 0.75rem; }
 .dusk-content .text-link:hover { color: var(--dusk-amber-hi); }
 
-/* ── Preview controls ─────────────────────────────────────────────────── */
+/* ── Preview controls (?preview only; see PreviewStates.astro) ───────────── */
 .dusk-preview {
   position: fixed;
   right: 1rem;

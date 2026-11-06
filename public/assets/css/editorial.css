@@ -1,8 +1,8 @@
 /* ==========================================================================
-   Kaung's Portfolio — nature is the environment, content is quiet.
-   - Hero: the forest at full presence (portrait, name, live weather)
-   - One scrolling document below: work → create → loves → say hi
-   - Two families: Plus Jakarta Sans (UI + body), Source Serif 4 (headings)
+   Kaung's Portfolio — base tokens, type, and shared content styles.
+   The homepage adds dusk.css (painted forest + hero) and grove.css (the
+   trunk and branches); inner pages use this file with the slim nav.
+   Two families: Plus Jakarta Sans (UI + body), Source Serif 4 (headings).
    ========================================================================== */
 
 @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,500;1,8..60,400&display=swap');
@@ -272,64 +272,9 @@ body:not(.layout-home) > #main {
 body:not(.layout-home) #ft-tool { padding: 1rem var(--gutter) 3rem; }
 
 /* ==========================================================================
-   Forest — immersive on the hero, quiet while reading.
-   homepage-observer.ts publishes --hero-progress (1 on the hero → 0 past it);
-   the forest's opacity eases between the two levels below.
-   ========================================================================== */
-
-:root {
-  --hero-progress: 1;
-  --forest-hero: 0.92;
-  --forest-read: 0.24;
-}
-.tree-canvas-host {
-  position: fixed;
-  inset: 0;
-  width: 100vw;
-  height: 100vh;
-  height: 100dvh;
-  z-index: -1;             /* above the weather backdrops (-2) and mood wash (-3) */
-  pointer-events: none;
-  opacity: calc(var(--forest-read) + (var(--forest-hero) - var(--forest-read)) * var(--hero-progress));
-  transition: opacity 0.4s ease;
-  /* Soft dip behind the centre so the hero text and reading column breathe;
-     the edges and horizon stay at full strength. */
-  mask-image: radial-gradient(ellipse 70% 90% at 50% 46%, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0.88) 50%, black 78%);
-  -webkit-mask-image: radial-gradient(ellipse 70% 90% at 50% 46%, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0.88) 50%, black 78%);
-}
-.tree-canvas-host canvas {
-  display: block;
-  width: 100% !important;
-  height: 100% !important;
-  background: transparent;
-}
-.tree-canvas-host .tree-fallback {
-  position: absolute;
-  bottom: 8%;
-  left: 50%;
-  transform: translateX(-50%);
-  width: clamp(180px, 28vw, 280px);
-  opacity: 0.5;
-}
-@media (max-width: 720px) {
-  :root { --forest-hero: 0.85; --forest-read: 0.16; }
-  .tree-canvas-host { mask-image: none; -webkit-mask-image: none; }
-}
-
-/* ==========================================================================
    Hero — the landscape leads; the UI stays small and still.
    ========================================================================== */
 
-.hero-intro {
-  position: relative;
-  min-height: 100vh;
-  min-height: 100dvh;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 3rem var(--gutter) 2.5rem;
-  text-align: center;
-}
 .hero-intro-inner {
   position: relative;
   display: flex;
@@ -337,20 +282,6 @@ body:not(.layout-home) #ft-tool { padding: 1rem var(--gutter) 3rem; }
   align-items: center;
   gap: 1.1rem;
   max-width: 40rem;
-}
-/* A little fog clearing behind the text, so it reads over the full forest
-   without a box. Lives on the full-bleed section (inset 0) so it can never
-   widen the page, and the ellipse fades to transparent well inside it. */
-.hero-intro::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  z-index: -1;             /* above the forest (earlier in the DOM), below the text */
-  pointer-events: none;
-  background: radial-gradient(ellipse min(92vw, 36rem) min(44vh, 24rem) at 50% 52%,
-    rgba(var(--reading-wash), 0.62) 0%,
-    rgba(var(--reading-wash), 0.34) 55%,
-    rgba(var(--reading-wash), 0) 100%);
 }
 @media (prefers-reduced-motion: no-preference) {
   .hero-intro-inner { animation: hero-fade 0.8s ease-out backwards; }
@@ -445,100 +376,7 @@ html[data-theme="dark"] body.weather-cold  .identity-weather-line { color: #a9c6
 }
 .hero-scroll-cue:hover { color: var(--primary); }
 
-/* ==========================================================================
-   Minimal nav — plain text, fades in after the hero. No pill, no border.
-   ========================================================================== */
-
-.minimal-nav {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  z-index: 50;
-  display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-  gap: 1rem;
-  padding: 1rem max(var(--gutter), calc((100vw - var(--project-max)) / 2)) 1.4rem;
-  /* A soft fade, not a bar: strongest at the very top, gone by its bottom. */
-  background: linear-gradient(to bottom,
-    rgba(var(--reading-wash), 0.97) 0%,
-    rgba(var(--reading-wash), 0.94) 62%,
-    rgba(var(--reading-wash), 0) 100%);
-  font-family: var(--font-sans);
-  font-size: 0.9375rem;
-  transition: opacity 0.3s ease;
-}
-.minimal-nav.is-hidden { opacity: 0; pointer-events: none; }
-.minimal-nav.is-hidden:focus-within { opacity: 1; pointer-events: auto; }
-.minimal-nav a {
-  color: var(--text-body);
-  text-decoration: none;
-  text-underline-offset: 6px;
-  text-decoration-thickness: 1px;
-}
-.minimal-nav a:hover { color: var(--text-strong); text-decoration-line: underline; }
-.minimal-nav-brand { font-weight: 700; color: var(--text-strong) !important; }
-.minimal-nav-links { display: flex; gap: clamp(1rem, 0.5rem + 2vw, 2rem); }
-.minimal-nav-links a[aria-current="true"] {
-  color: var(--text-strong);
-  text-decoration-line: underline;
-}
-@media (max-width: 560px) {
-  .minimal-nav-brand { display: none; }
-  .minimal-nav { justify-content: center; }
-}
-
-/* ==========================================================================
-   Reading zone — fog clearing around the text, no card.
-   A horizontal wash strongest behind the column that fades into the forest
-   on either side, and fades in from the hero at the top.
-   ========================================================================== */
-
-.home-content {
-  position: relative;
-  isolation: isolate;
-  padding: 0 var(--gutter);
-}
-.home-content::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  z-index: -1;
-  pointer-events: none;
-  background: linear-gradient(90deg,
-    rgba(var(--reading-wash), 0) calc(50% - 760px),
-    rgba(var(--reading-wash), 0.62) calc(50% - 560px),
-    rgba(var(--reading-wash), 0.86) calc(50% - 420px),
-    rgba(var(--reading-wash), 0.86) calc(50% + 420px),
-    rgba(var(--reading-wash), 0.62) calc(50% + 560px),
-    rgba(var(--reading-wash), 0) calc(50% + 760px));
-  -webkit-mask-image: linear-gradient(to bottom, transparent 0, #000 22vh);
-  mask-image: linear-gradient(to bottom, transparent 0, #000 22vh);
-}
-.home-inner {
-  max-width: var(--content-max);
-  margin: 0 auto;
-  padding-bottom: clamp(4rem, 3rem + 4vw, 7rem);
-  font-size: 1.0625rem;
-  line-height: 1.7;
-  color: var(--text-body);
-}
-
-/* ── Sections ───────────────────────────────────────────────────────────── */
-.home-section {
-  padding-top: var(--section-space);
-  scroll-margin-top: 1rem;
-}
-.home-section:first-child { padding-top: max(20vh, 7rem); }
-
-.section-label {
-  margin: 0 0 0.75rem;
-  font-size: 0.875rem;
-  font-weight: 600;
-  letter-spacing: 0.04em;
-  color: var(--primary);
-}
+/* ── Content: headings, links, and the pieces the grove's twigs reuse ───── */
 .section-heading {
   margin: 0 0 1.25rem;
   font-family: var(--font-serif);
@@ -564,48 +402,6 @@ html[data-theme="dark"] body.weather-cold  .identity-weather-line { color: #a9c6
 }
 .text-link:hover { text-decoration-line: underline; }
 
-/* ── Work: chronology ───────────────────────────────────────────────────── */
-.chronology { list-style: none; margin: 0; padding: 0; }
-.chapter {
-  display: grid;
-  grid-template-columns: 7.5rem 1fr;
-  gap: 1.5rem;
-  padding: 1.75rem 0;
-  border-top: 1px solid rgba(var(--reading-divider, 23, 32, 39), 0.1);
-}
-.chapter:first-child { border-top: none; padding-top: 0; }
-.chapter-dates {
-  margin: 0.35rem 0 0;
-  font-size: 0.8125rem;
-  font-variant-numeric: tabular-nums;
-  letter-spacing: 0.02em;
-  color: var(--text-muted);
-}
-.chapter-company {
-  margin: 0;
-  font-family: var(--font-serif);
-  font-size: 1.5rem;
-  font-weight: 500;
-  line-height: 1.2;
-  color: var(--text-strong);
-}
-.chapter-role { margin: 0.15rem 0 0.5rem; font-size: 0.9375rem; color: var(--text-muted); }
-.chapter-summary { margin: 0; }
-.chapter-result { margin: 0.4rem 0 0; color: var(--text-strong); }
-
-.earlier { margin-top: 1rem; }
-.earlier > summary {
-  cursor: pointer;
-  width: fit-content;
-  font-size: 0.9375rem;
-  font-weight: 600;
-  color: var(--primary);
-}
-.earlier > summary:hover { text-decoration: underline; text-underline-offset: 4px; }
-.chronology--compact { margin-top: 1rem; }
-.chronology--compact .chapter { padding: 1.1rem 0; }
-.chronology--compact .chapter-company { font-size: 1.1875rem; }
-
 .skills-line {
   display: flex;
   flex-direction: column;
@@ -619,7 +415,6 @@ html[data-theme="dark"] body.weather-cold  .identity-weather-line { color: #a9c6
 .section-cta { margin: 1.75rem 0 0; }
 
 /* ── Create: project stories ────────────────────────────────────────────── */
-.stories { display: flex; flex-direction: column; gap: clamp(4.5rem, 3.5rem + 4vw, 7rem); margin-top: clamp(2.5rem, 2rem + 2vw, 3.5rem); }
 .story-meta { margin: 0 0 0.5rem; font-size: 0.8125rem; letter-spacing: 0.02em; color: var(--text-muted); }
 .story-title {
   margin: 0 0 0.75rem;
@@ -648,16 +443,6 @@ html[data-theme="dark"] body.weather-cold  .identity-weather-line { color: #a9c6
   border-radius: var(--r-md);
 }
 
-.experiments { margin-top: clamp(5rem, 4rem + 4vw, 7.5rem); }
-.experiments-title {
-  margin: 0 0 1.25rem;
-  font-size: 0.875rem;
-  font-weight: 600;
-  letter-spacing: 0.04em;
-  color: var(--text-muted);
-}
-.experiments-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 0.9rem; }
-.experiments-list li { display: flex; flex-wrap: wrap; column-gap: 0.75rem; }
 .experiment-name {
   font-weight: 600;
   color: var(--text-strong);
@@ -669,17 +454,6 @@ a.experiment-name:hover { color: var(--primary); text-decoration-line: underline
 .experiment-blurb { color: var(--text-body); }
 
 /* ── Loves: field notes ─────────────────────────────────────────────────── */
-.field-notes { margin: clamp(2rem, 1.5rem + 1.5vw, 2.75rem) 0 0; display: flex; flex-direction: column; gap: 1.5rem; }
-.field-note { display: grid; grid-template-columns: 7.5rem 1fr; gap: 1.5rem; }
-.field-note dt {
-  margin: 0;
-  padding-top: 0.1rem;
-  font-size: 0.9375rem;
-  font-style: italic;
-  font-family: var(--font-serif);
-  color: var(--text-muted);
-}
-.field-note dd { margin: 0; }
 .field-lead { font-weight: 600; color: var(--text-strong); }
 a.field-lead {
   text-decoration: underline;
@@ -704,48 +478,7 @@ a.field-lead:hover { color: var(--primary); text-decoration-color: currentColor;
 .footer-links { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 0.5rem 1.75rem; }
 .footer-line { margin: 2.5rem 0 0; font-size: 0.875rem; color: var(--text-muted); }
 
-/* ── Work: homepage milestones (one line per role) ──────────────────────── */
-.chronology--milestones .chapter { padding: 1.1rem 0; }
-.chronology--milestones .chapter-dates { margin-top: 0.3rem; }
-.chronology--milestones .chapter-company { font-size: 1.25rem; }
-.chronology--milestones .chapter-role { margin: 0.1rem 0 0; }
-
-/* ==========================================================================
-   /career/ — a quiet vertical timeline: one thin line, small markers, no cards.
-   ========================================================================== */
-
-.career-intro { padding-top: clamp(1.5rem, 1rem + 3vw, 4rem); }
-.career-group { margin-top: clamp(3.5rem, 3rem + 3vw, 5.5rem); }
-.career-group-label {
-  margin: 0 0 1.5rem;
-  font-family: var(--font-sans);
-  font-size: 0.875rem;
-  font-weight: 600;
-  letter-spacing: 0.04em;
-  color: var(--primary);
-}
-.timeline {
-  list-style: none;
-  margin: 0;
-  padding: 0 0 0 1.75rem;
-  border-left: 1px solid rgba(var(--reading-divider, 23, 32, 39), 0.16);
-  display: flex;
-  flex-direction: column;
-  gap: clamp(2.5rem, 2rem + 2vw, 3.5rem);
-}
-.timeline-entry { position: relative; }
-.timeline-entry::before {
-  content: '';
-  position: absolute;
-  left: calc(-1.75rem - 4px);
-  top: 0.62rem;
-  width: 7px;
-  height: 7px;
-  border-radius: 50%;
-  background: var(--primary);
-  opacity: 0.75;
-}
-.timeline-entry--minor::before { opacity: 0.35; }
+/* ── Career timeline text (the Work branch's twigs) ─────────────────────── */
 .timeline-org {
   margin: 0;
   font-family: var(--font-serif);
@@ -754,7 +487,6 @@ a.field-lead:hover { color: var(--primary); text-decoration-color: currentColor;
   line-height: 1.2;
   color: var(--text-strong);
 }
-.timeline-entry--minor .timeline-org { font-size: 1.1875rem; }
 .timeline-meta { margin: 0.15rem 0 0; font-size: 0.875rem; color: var(--text-muted); }
 .timeline-role { margin-top: 1.1rem; }
 .timeline-role + .timeline-role { margin-top: 1.75rem; }
@@ -774,24 +506,7 @@ a.field-lead:hover { color: var(--primary); text-decoration-color: currentColor;
 .timeline-related { margin: 0.9rem 0 0; font-size: 0.9375rem; color: var(--text-muted); }
 .timeline-related .text-link { font-weight: 600; }
 
-.career-plain-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 1.5rem; }
-.career-plain-list .timeline-org { font-size: 1.25rem; }
-.career-plain-list .timeline-dates { margin-top: 0.2rem; }
-.career-page .skills-line { margin-top: 0; }
-
-@media (max-width: 640px) {
-  .timeline { padding-left: 1.1rem; }
-  .timeline-entry::before { left: calc(-1.1rem - 4px); }
-}
-
 html[data-theme="dark"] { --reading-divider: 200, 220, 245; }
-
-@media (max-width: 640px) {
-  .chapter,
-  .field-note { grid-template-columns: 1fr; gap: 0.35rem; }
-  .chapter-dates { margin-top: 0; }
-  .field-note dt { padding-top: 0; }
-}
 
 /* ==========================================================================
    Weather backdrops — the atmosphere changes; the UI doesn't.

@@ -2,7 +2,7 @@
 /**
  * Create, as a branch: each featured project is a twig whose head is its
  * title and one-line summary, opening to the rest; small experiments follow
- * as lighter twigs. Same canonical records as the homepage.
+ * as lighter twigs.
  */
 import BranchNode from './BranchNode.astro';
 import ProjectStory from '../portfolio/ProjectStory.astro';
@@ -22,7 +22,7 @@ let n = 0;
     <h2 class="section-heading">{create.heading}</h2>
 
     <ol class="twigs twigs--stories">
-      {featured.map((p) => <li class="twig" style={`--i: ${n++}`}><ProjectStory project={p} collapsible /></li>)}
+      {featured.map((p) => <li class="twig" style={`--i: ${n++}`}><ProjectStory project={p} /></li>)}
     </ol>
 
     {experiments.length > 0 && (

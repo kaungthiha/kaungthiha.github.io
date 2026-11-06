@@ -1,0 +1,46 @@
+---
+/**
+ * A review tool, not a feature: add ?preview to the URL to get a panel that
+ * cycles the painted forest through every daylight phase and weather without
+ * waiting for them. Hidden (and inert) for everyone else.
+ */
+const phases = ['dawn', 'day', 'dusk', 'night'];
+const weathers = ['clear', 'cloudy', 'windy', 'rainy', 'stormy', 'foggy', 'snowy'];
+---
+
+<details class="dusk-preview" id="dusk-preview" hidden>
+  <summary class="dusk-preview-label">Preview states</summary>
+  <div class="dusk-preview-row" data-kind="phase">
+    {phases.map((p) => <button type="button" data-value={p}>{p}</button>)}
+  </div>
+  <div class="dusk-preview-row" data-kind="mode">
+    {weathers.map((w) => <button type="button" data-value={w}>{w}</button>)}
+  </div>
+</details>
+
+<script>
+  const panel = document.getElementById('dusk-preview');
+  if (panel && new URLSearchParams(location.search).has('preview')) {
+    panel.hidden = false;
+    if (window.innerWidth > 720) panel.setAttribute('open', '');
+
+    // The buttons broadcast the same event weather.js does.
+    const state: Record<'mode' | 'phase', string> = { mode: 'clear', phase: 'dusk' };
+    const buttons = Array.from(panel.querySelectorAll<HTMLButtonElement>('button'));
+    const kindOf = (b: HTMLButtonElement) => b.parentElement?.dataset.kind as 'mode' | 'phase';
+    const sync = () => {
+      const live = (window as any).KTWeatherState;
+      if (live) { state.mode = live.mode; state.phase = live.phase; }
+      for (const b of buttons) b.setAttribute('aria-pressed', String(state[kindOf(b)] === b.dataset.value));
+    };
+    window.addEventListener('weather:change', sync);
+    sync();
+    for (const b of buttons) {
+      b.addEventListener('click', () => {
+        state[kindOf(b)] = b.dataset.value!;
+        (window as any).KTWeatherState = { ...((window as any).KTWeatherState || {}), ...state };
+        window.dispatchEvent(new CustomEvent('weather:change', { detail: { ...state } }));
+      });
+    }
+  }
+</script>
