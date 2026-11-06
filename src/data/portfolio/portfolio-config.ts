@@ -46,6 +46,10 @@ export const portfolioConfig = {
   ],
 
   create: {
+    /** The branch's name on the trunk (its anchor stays #create). */
+    label: 'Stuff',
+    /** The line under the heading while the branch is closed. */
+    subline: 'formal projects and random things',
     heading: "Things I've worked on and learned from.",
     featuredProjectIds: ['proj_sheepherder', 'proj_outbuild_learning', 'proj_askcyborg', 'proj_ease'],
     // Archived (hidden here; their records stay in the dataset):

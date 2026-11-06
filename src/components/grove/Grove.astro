@@ -1,7 +1,7 @@
 ---
 /**
  * The grove: everything after the landing, grown along one golden trunk.
- * Work, Create and Loves are branches (<details>); their items are twigs.
+ * Work, Stuff and Loves are branches (<details>); their items are twigs.
  * Without JS every branch is open: a plain, fully readable document. With
  * src/scripts/grove.ts it starts as an overview at the root; opening one
  * branch grows its twigs while the others zoom out, and the light travels
@@ -11,10 +11,11 @@ import WorkBranch from './WorkBranch.astro';
 import CreateBranch from './CreateBranch.astro';
 import LovesBranch from './LovesBranch.astro';
 import ContactFooter from '../portfolio/ContactFooter.astro';
+import { portfolioConfig } from '../../data/portfolio/portfolio-config';
 
 const sections = [
   { id: 'work', label: 'Work' },
-  { id: 'create', label: 'Create' },
+  { id: 'create', label: portfolioConfig.create.label },
   { id: 'loves', label: 'Loves' },
 ];
 ---

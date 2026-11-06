@@ -1,6 +1,6 @@
 ---
 /**
- * Create, as a branch: each featured project is a twig whose head is its
+ * Stuff (the create branch): each featured project is a twig whose head is its
  * title and one-line summary, opening to the rest; small experiments follow
  * as lighter twigs.
  */
@@ -12,12 +12,11 @@ import { getProjects } from '../../lib/career';
 const { create } = portfolioConfig;
 const featured = getProjects(create.featuredProjectIds);
 const experiments = getProjects(create.experimentProjectIds);
-const sub = `${featured.length} projects, ${experiments.length} small experiments.`;
 let n = 0;
 ---
 
 <details class="branch" id="create" open>
-  <BranchNode label="Create" icon="create" teaser={create.heading} sub={sub} />
+  <BranchNode label={create.label} icon="create" teaser={create.heading} sub={create.subline} />
   <div class="branch-body">
     <h2 class="section-heading">{create.heading}</h2>
 
