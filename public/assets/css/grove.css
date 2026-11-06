@@ -2,21 +2,24 @@
    The grove — content grown along one golden trunk.
    Geometry: the trunk sits at --trunk-x inside .grove-col; content starts at
    --trunk-pad. Every node, ring and twig positions itself from those two.
-   Without JS everything is drawn and lit; .is-live (grove.ts) adds the
-   scroll states, and twigs only "grow in" when motion is welcome.
+
+   States (set by grove.ts; without JS every branch is simply open):
+     overview   .is-live, no branch open: nodes + teasers, "pick a branch"
+     has-open   one branch open and zoomed in, the others zoomed out
    ========================================================================== */
 
 .grove {
   --trunk-x: 0.5rem;
   --trunk-pad: 3.75rem;
-  --trunk-c: calc(var(--trunk-x) + 1px);             /* trunk centre line */
-  --from-trunk: calc(var(--trunk-c) - var(--trunk-pad)); /* trunk, from content's left edge */
+  --trunk-c: calc(var(--trunk-x) + 1px);                  /* trunk centre line */
+  --from-trunk: calc(var(--trunk-c) - var(--trunk-pad));  /* trunk, from content's left edge */
   --gold: #e8c27f;
   --gold-deep: #d6a65f;
   --gold-dim: rgba(232, 194, 127, 0.5);
   --bud: #1a2a23;
   position: relative;
   padding: 0 var(--gutter);
+  scroll-margin-top: 1rem;
 }
 
 .grove-col,
@@ -41,7 +44,7 @@
   bottom: 0;
   width: 2px;
   border-radius: 2px;
-  background: linear-gradient(to bottom, rgba(214, 166, 95, 0), rgba(214, 166, 95, 0.2) 5rem);
+  background: linear-gradient(to bottom, rgba(214, 166, 95, 0), rgba(214, 166, 95, 0.22) 4rem);
 }
 .trunk-lit {
   position: absolute;
@@ -50,10 +53,11 @@
   width: 100%;
   height: 100%;                         /* no-JS: fully lit */
   border-radius: inherit;
-  background: linear-gradient(to bottom, rgba(232, 194, 127, 0), var(--gold) 4rem, var(--gold-deep));
+  background: linear-gradient(to bottom, rgba(232, 194, 127, 0), var(--gold) 3rem, var(--gold-deep));
   box-shadow: 0 0 6px rgba(232, 194, 127, 0.55), 0 0 18px rgba(214, 166, 95, 0.22);
 }
-/* The light's leading edge: a small spark travelling down the trunk. */
+.grove.is-live .trunk-lit { height: 0; transition: height 0.9s cubic-bezier(0.4, 0, 0.2, 1); }
+/* The light's leading edge: a small spark. */
 .grove.is-live .trunk-lit::after {
   content: '';
   position: absolute;
@@ -87,28 +91,44 @@
   width: 44px;
   height: 58px;
 }
+.grove-hint {
+  display: none;
+  margin: 3.4rem 0 0;
+  font-family: var(--font-sans);
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+.grove.is-live:not(.has-open) .grove-hint { display: block; }
 
 /* ── Branches ──────────────────────────────────────────────────────────── */
-.branch {
-  position: relative;
-  padding-top: clamp(6rem, 4rem + 6vw, 9rem);
-  scroll-margin-top: 3.5rem;
-  transition: opacity 0.6s ease, filter 0.6s ease;
-}
-.branch:first-of-type { padding-top: 5rem; }
-.grove.is-live.has-active .branch:not(.is-active) { opacity: 0.5; filter: saturate(0.6); }
-.grove .section-heading { margin-bottom: 1rem; }
-.grove .section-intro { margin-bottom: 0.5rem; }
+.branch { position: relative; padding-top: 2.75rem; }
+.branch:first-of-type { padding-top: 4.5rem; }
+.grove.is-live:not(.has-open) .branch:first-of-type { padding-top: 1.75rem; }
+.grove.is-live.has-open .branch:first-of-type { padding-top: 4.5rem; }
 
-/* Section node: glowing bud on the trunk, a short twig, then the pill. */
+/* The node (the branch's <summary>): bud on the trunk, twig, pill, teaser. */
 .branch-node {
+  display: block;
+  list-style: none;
+  cursor: pointer;
+  scroll-margin-top: 5rem;
+  -webkit-tap-highlight-color: transparent;
+}
+.branch-node::-webkit-details-marker { display: none; }
+.branch-node::marker { content: ''; }
+.branch-node:focus-visible { outline: none; }
+.branch-node:focus-visible .branch-pill { outline: 2px solid var(--gold); outline-offset: 4px; }
+
+.branch-node-row {
   position: relative;
   display: flex;
   align-items: center;
   min-height: 2.75rem;
-  margin: 0 0 1.75rem;
 }
-.branch-node::before {
+.branch-node-row::before {
   content: '';
   position: absolute;
   z-index: 1;
@@ -118,12 +138,11 @@
   height: 14px;
   margin-top: -7px;
   border-radius: 50%;
-  border: 2px solid #f3dca8;
-  background: var(--gold);
-  box-shadow: 0 0 10px rgba(232, 194, 127, 0.7), 0 0 24px rgba(214, 166, 95, 0.35);
+  border: 2px solid var(--gold-dim);
+  background: var(--bud);
   transition: background 0.5s ease, border-color 0.5s ease, box-shadow 0.5s ease;
 }
-.branch-node::after {
+.branch-node-row::after {
   content: '';
   position: absolute;
   left: calc(var(--from-trunk) + 7px);
@@ -141,7 +160,7 @@
   gap: 0.6rem;
   padding: 0.6rem 1.35rem 0.6rem 1.05rem;
   border-radius: 999px;
-  border: 1.5px solid rgba(232, 194, 127, 0.8);
+  border: 1.5px solid rgba(232, 194, 127, 0.6);
   background: rgba(16, 28, 24, 0.9);
   font-family: var(--font-sans);
   font-size: 1.0625rem;
@@ -149,37 +168,67 @@
   line-height: 1;
   letter-spacing: 0.02em;
   color: var(--dusk-cream);
-  box-shadow: 0 0 0 1px rgba(232, 194, 127, 0.14), 0 0 26px rgba(232, 194, 127, 0.22);
-  transition: border-color 0.5s ease, box-shadow 0.5s ease, color 0.5s ease;
+  transform-origin: left center;
+  transition: opacity 0.9s ease 0.15s, transform 0.5s cubic-bezier(0.2, 0.7, 0.2, 1), border-color 0.4s ease, box-shadow 0.4s ease, color 0.4s ease;
 }
 .branch-icon { width: 18px; height: 18px; color: var(--gold); }
-.grove.is-live .branch:not(.is-active) .branch-node::before {
-  background: var(--bud);
-  border-color: var(--gold-dim);
-  box-shadow: none;
+
+.branch-teaser { display: block; margin-top: 0.85rem; }
+.branch-teaser-title {
+  display: block;
+  font-family: var(--font-serif);
+  font-size: clamp(1.4rem, 1.2rem + 0.8vw, 1.75rem);
+  line-height: 1.2;
+  color: var(--dusk-cream);
+  transition: color 0.3s ease;
 }
-.grove.is-live .branch:not(.is-active) .branch-pill {
-  border-color: rgba(239, 229, 204, 0.24);
-  box-shadow: none;
-  color: var(--dusk-sage);
+.branch-teaser-sub {
+  display: block;
+  margin-top: 0.35rem;
+  font-size: 0.9375rem;
+  line-height: 1.5;
+  color: var(--text-muted);
 }
 
-/* A leaf sprig leaning out from the trunk beside each node. */
-.branch-sprig {
-  position: absolute;
-  z-index: 0;
-  left: calc(var(--from-trunk) - 21px);
-  bottom: calc(50% + 2px);
-  width: 40px;
-  height: 53px;
-  transform-origin: 47% 100%;
-  transform: scaleX(-1) rotate(16deg);
+/* Pointing at a closed node wakes it. */
+.branch-node:hover .branch-node-row::before,
+.branch-node:focus-visible .branch-node-row::before { background: var(--gold); border-color: #f3dca8; box-shadow: 0 0 10px rgba(232, 194, 127, 0.6); }
+.branch-node:hover .branch-pill { border-color: var(--gold); box-shadow: 0 0 22px rgba(232, 194, 127, 0.25); }
+.branch-node:hover .branch-teaser-title { color: var(--gold); }
+
+/* The open branch: zoomed in and glowing; its teaser gives way to the body. */
+.branch[open] > .branch-node .branch-teaser { display: none; }
+.branch[open] > .branch-node .branch-node-row::before {
+  background: var(--gold);
+  border-color: #f3dca8;
+  box-shadow: 0 0 10px rgba(232, 194, 127, 0.7), 0 0 24px rgba(214, 166, 95, 0.35);
 }
+.branch[open] > .branch-node .branch-pill {
+  transform: scale(1.06);
+  border-color: rgba(232, 194, 127, 0.9);
+  box-shadow: 0 0 0 1px rgba(232, 194, 127, 0.16), 0 0 26px rgba(232, 194, 127, 0.24);
+}
+
+/* The other branches: zoomed out and out of focus, still one click away. */
+.grove.has-open .branch:not([open]) { padding-top: 1.6rem; }
+.grove.has-open .branch:not([open]) .branch-teaser { display: none; }
+.grove.has-open .branch:not([open]) > .branch-node {
+  opacity: 0.5;
+  filter: blur(0.5px) saturate(0.6);
+  transition: opacity 0.4s ease, filter 0.4s ease;
+}
+.grove.has-open .branch:not([open]) .branch-pill { transform: scale(0.88); color: var(--dusk-sage); }
+.grove.has-open .branch:not([open]) > .branch-node:hover,
+.grove.has-open .branch:not([open]) > .branch-node:focus-visible { opacity: 0.95; filter: none; }
+
+.branch-body { padding: 1.5rem 0 2.5rem; }
+.branch-body > .section-heading { margin: 0 0 1rem; }
+.branch-body > .section-intro { margin-bottom: 0.5rem; }
 
 /* ── Year rings and twigs ─────────────────────────────────────────────── */
 .ring {
   position: relative;
-  margin: 3.75rem 0 1.4rem;
+  margin: 3.25rem 0 1.4rem;
   font-family: var(--font-sans);
   font-size: 0.75rem;
   font-weight: 600;
@@ -202,7 +251,7 @@
   background: var(--dusk-ink);
 }
 .section-intro + .ring-group .ring,
-.section-heading + .twigs { margin-top: 2.5rem; }
+.section-heading + .twigs { margin-top: 2.25rem; }
 
 .twigs {
   list-style: none;
@@ -210,15 +259,16 @@
   padding: 0;
   display: flex;
   flex-direction: column;
-  gap: clamp(2.25rem, 1.75rem + 1.5vw, 3rem);
+  gap: 1.6rem;
 }
-.twigs--stories { gap: clamp(4rem, 3rem + 3vw, 6rem); }
+.twigs--stories { gap: 2rem; }
 .twigs--notes { gap: 1.5rem; }
 
 .twig { position: relative; --twig-y: 0.9rem; }
 .twig--minor { --twig-y: 0.72rem; }
 .twig--note { --twig-y: 0.75rem; }
 .twig--experiment { --twig-y: 0.9rem; }
+.twig--skills { --twig-y: 0.7rem; }
 .twigs--stories .twig { --twig-y: 0.69rem; }
 
 /* The twig: an elbow curving off the trunk, ending in a small bud. */
@@ -245,11 +295,49 @@
   box-shadow: 0 0 6px rgba(232, 194, 127, 0.5);
 }
 
+/* A twig's head opens it (employers, projects). */
+.twig-head {
+  display: block;
+  list-style: none;
+  cursor: pointer;
+  border-radius: 0.5rem;
+  -webkit-tap-highlight-color: transparent;
+}
+.twig-head::-webkit-details-marker { display: none; }
+.twig-head::marker { content: ''; }
+.twig-head:focus-visible { outline: 2px solid var(--gold); outline-offset: 4px; }
+.twig-head .timeline-org,
+.twig-head .story-title { transition: color 0.25s ease; }
+.twig-head:hover .timeline-org,
+.twig-head:hover .story-title { color: var(--gold); }
+.twig-head .timeline-org::after,
+.twig-head .story-title::after {
+  content: '+';
+  display: inline-block;
+  margin-left: 0.55rem;
+  font-family: var(--font-sans);
+  font-size: 0.8em;
+  font-weight: 500;
+  color: var(--gold-deep);
+}
+.twig-details[open] > .twig-head .timeline-org::after,
+.twig-details[open] > .twig-head .story-title::after { content: '−'; }
+.twig-head .story-meta,
+.twig-head .story-title,
+.twig-head .story-summary { display: block; }
+.twig-head .story-title { margin: 0 0 0.35rem; }
+.twig-sub { display: block; margin: 0.15rem 0 0; font-size: 0.9375rem; line-height: 1.5; color: var(--text-muted); }
+.twig-body { padding-top: 0.15rem; }
+.twig-body > .timeline-meta:first-child { margin-top: 0.55rem; }
+.twig-body > .story-result:first-child,
+.twig-body > .story-stack:first-child { margin-top: 0.75rem; }
+
 /* Content inside twigs. */
 .twig--minor .timeline-org { font-size: 1.1875rem; }
 .twig .timeline-role:first-of-type { margin-top: 0.9rem; }
 .twig .skills-line { margin: 0; }
 .twig .section-cta { margin-top: 1.25rem; }
+.twig > .timeline-summary { margin-top: 0.35rem; }
 .note-category {
   display: block;
   margin-bottom: 0.1rem;
@@ -265,26 +353,52 @@
 .grove .story-figure img { border-radius: 0.75rem; box-shadow: 0 12px 40px rgba(0, 0, 0, 0.35); }
 .grove .field-photo { margin-top: 2.5rem; }
 
-/* ── Growth: twigs, rings and nodes grow in the first time they're seen ── */
+/* ── Motion: nodes grow in on arrival; a branch's twigs grow when it opens ── */
 @media (prefers-reduced-motion: no-preference) {
   .branch-sprig { animation: sprig-sway 7s ease-in-out infinite; }
   .trunk-crown { transform-origin: 53% 100%; animation: crown-sway 8s ease-in-out infinite; }
 
-  .grove.is-live .twig::before { transition: clip-path 0.8s cubic-bezier(0.3, 0.7, 0.2, 1); }
-  .grove.is-live .twig::after { transition: transform 0.45s cubic-bezier(0.3, 1.4, 0.5, 1) 0.5s; }
-  .grove.is-live .twig > *,
-  .grove.is-live .ring,
-  .grove.is-live .branch-pill { transition: opacity 0.8s ease 0.25s, transform 0.8s cubic-bezier(0.2, 0.7, 0.2, 1) 0.25s, border-color 0.5s ease, box-shadow 0.5s ease, color 0.5s ease; }
-
-  .grove.is-live .twig:not(.is-grown)::before { clip-path: inset(0 100% 0 0); }
-  .grove.is-live .twig.is-grown::before { clip-path: inset(0 0 0 0); }
-  .grove.is-live .twig:not(.is-grown)::after { transform: scale(0); }
-  .grove.is-live .twig:not(.is-grown) > * { opacity: 0; transform: translateY(10px); }
-  .grove.is-live .ring:not(.is-grown) { opacity: 0; transform: translateX(-6px); }
+  .grove.is-live .branch-teaser,
+  .grove.is-live .grove-hint,
+  .branch-sprig,
+  .trunk-crown { transition: opacity 0.9s ease 0.2s, transform 0.9s cubic-bezier(0.2, 0.7, 0.2, 1) 0.2s; }
   .grove.is-live .branch-node:not(.is-grown) .branch-pill { opacity: 0; transform: translateX(-10px); }
+  .grove.is-live .branch-node:not(.is-grown) .branch-teaser { opacity: 0; transform: translateY(8px); }
   .grove.is-live .branch-node:not(.is-grown) .branch-sprig,
-  .grove.is-live .trunk-crown:not(.is-grown) { opacity: 0; }
-  .branch-sprig, .trunk-crown { transition: opacity 1.2s ease 0.4s; }
+  .grove.is-live .trunk-crown:not(.is-grown),
+  .grove.is-live .grove-hint:not(.is-grown) { opacity: 0; }
+
+  .grove.is-live .branch[open] > .branch-body > .section-heading,
+  .grove.is-live .branch[open] > .branch-body > .section-intro,
+  .grove.is-live .branch[open] .ring { animation: grove-rise 0.6s cubic-bezier(0.2, 0.7, 0.2, 1) both; }
+  .grove.is-live .branch[open] .twig {
+    animation: grove-rise 0.6s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+    animation-delay: calc(140ms + var(--i, 0) * 60ms);
+  }
+  .grove.is-live .branch[open] .twig::before {
+    animation: twig-grow 0.8s cubic-bezier(0.3, 0.7, 0.2, 1) both;
+    animation-delay: calc(100ms + var(--i, 0) * 60ms);
+  }
+  .grove.is-live .branch[open] .twig::after {
+    animation: bud-pop 0.45s cubic-bezier(0.3, 1.4, 0.5, 1) both;
+    animation-delay: calc(420ms + var(--i, 0) * 60ms);
+  }
+  .grove.is-live .twig-details[open] > .twig-body { animation: grove-rise 0.45s ease both; }
+}
+@keyframes grove-rise { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
+@keyframes twig-grow { from { clip-path: inset(0 100% 0 0); } to { clip-path: inset(0 0 0 0); } }
+@keyframes bud-pop { from { transform: scale(0); } to { transform: scale(1); } }
+
+/* A leaf sprig leaning out from the trunk beside each node. */
+.branch-sprig {
+  position: absolute;
+  z-index: 0;
+  left: calc(var(--from-trunk) - 21px);
+  bottom: calc(50% + 2px);
+  width: 40px;
+  height: 53px;
+  transform-origin: 47% 100%;
+  transform: scaleX(-1) rotate(16deg);
 }
 @keyframes sprig-sway {
   0%, 100% { transform: scaleX(-1) rotate(13deg); }
@@ -295,7 +409,7 @@
   50% { transform: rotate(3deg); }
 }
 
-/* ── Mini-trunk ────────────────────────────────────────────────────────── */
+/* ── Mini-trunk: switch branches from anywhere ────────────────────────── */
 .mini-trunk {
   position: fixed;
   z-index: 40;
@@ -304,7 +418,7 @@
   transition: opacity 0.5s ease;
   font-family: var(--font-sans);
 }
-.grove.is-entered .mini-trunk { opacity: 1; pointer-events: auto; }
+.grove.is-entered.has-open .mini-trunk { opacity: 1; pointer-events: auto; }
 .mini-trunk ol { list-style: none; margin: 0; padding: 0; display: flex; }
 .mini-trunk a {
   display: flex;
@@ -335,7 +449,7 @@
   box-shadow: 0 0 8px rgba(232, 194, 127, 0.7);
 }
 .mini-line, .mini-lit { position: absolute; display: block; }
-.mini-lit { background: var(--gold); box-shadow: 0 0 6px rgba(232, 194, 127, 0.5); }
+.mini-lit { background: var(--gold); box-shadow: 0 0 6px rgba(232, 194, 127, 0.5); transition: height 0.6s ease; }
 
 /* Wide screens: a small vertical trunk in the left margin. */
 @media (min-width: 1240px) {
@@ -353,7 +467,7 @@
     width: 1.5px;
     background: rgba(239, 229, 204, 0.16);
   }
-  .mini-lit { top: 0; left: 0; width: 100%; height: calc(var(--grove-progress, 0) * 100%); }
+  .mini-lit { top: 0; left: 0; width: 100%; height: calc(var(--mini-progress, 0) * 100%); }
 }
 /* Narrow screens: a quiet bar along the top. */
 @media (max-width: 1239.98px) {

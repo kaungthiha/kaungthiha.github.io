@@ -1,8 +1,8 @@
 ---
 /**
  * Work, as a branch of the trunk: the full career timeline from the canonical
- * dataset (the same records as /career/), one twig per employer, grouped under
- * year rings, then earlier roles, education, and skills.
+ * dataset (the same records as /career/). Each employer is a twig whose head
+ * is one line and opens to the detail; then earlier roles, education, skills.
  */
 import { existsSync } from 'node:fs';
 import { join } from 'node:path';
@@ -36,76 +36,75 @@ const education = career.showEducation ? getCareerEducation() : [];
 const skills = career.showSkills ? getPublicSkills(skillGroups) : [];
 const current = getCurrentRole();
 const hasResume = existsSync(join(process.cwd(), 'public', work.resumeHref));
+
+const rightNow = current
+  ? `Right now: ${current.role.canonical_title}${current.role.team_or_scope ? `, ${current.role.team_or_scope}` : ''}, at ${current.experience.organization}.`
+  : '';
+// Twigs grow in order down the whole branch.
+let n = 0;
 ---
 
-<section class="branch" id="work" aria-labelledby="work-title">
-  <BranchNode label="Work" icon="work" />
-  <h2 class="section-heading" id="work-title">{work.heading}</h2>
-  <p class="section-intro">
-    {work.intro}
-    {current && (
-      <> Right now: {current.role.canonical_title}{current.role.team_or_scope && `, ${current.role.team_or_scope}`}, at {current.experience.organization}.</>
-    )}
-  </p>
+<details class="branch" id="work" open>
+  <BranchNode label="Work" icon="work" teaser={work.heading} sub={rightNow} />
+  <div class="branch-body">
+    <h2 class="section-heading">{work.heading}</h2>
+    {(work.intro || rightNow) && <p class="section-intro">{work.intro} {rightNow}</p>}
 
-  {groups.map((g) => (
-    <div class="ring-group">
-      <p class="ring"><span>{g.label}</span></p>
-      <ol class="twigs">
-        {g.entries.map((entry) => <CareerEntry entry={entry} class="twig twig--role" storyBase="" />)}
-      </ol>
-    </div>
-  ))}
+    {groups.map((g) => (
+      <div class="ring-group">
+        <p class="ring"><span>{g.label}</span></p>
+        <ol class="twigs">
+          {g.entries.map((entry) => <CareerEntry entry={entry} class="twig twig--role" storyBase="" collapsible index={n++} />)}
+        </ol>
+      </div>
+    ))}
 
-  {(earlier.length > 0 || leadership.length > 0) && (
-    <div class="ring-group">
-      <p class="ring"><span>Earlier</span></p>
-      <ol class="twigs">
-        {earlier.map((entry) => <CareerEntry entry={entry} class="twig twig--role twig--minor" storyBase="" />)}
-        {leadership.map((l) => (
-          <li class="twig twig--role twig--minor" id={l.id}>
-            <h3 class="timeline-org">{l.organization}</h3>
-            <div class="timeline-role">
-              <p class="timeline-dates">{yearRange({ start_date: l.start_date, end_date: l.end_date, current: false })}</p>
-              <p class="timeline-title">{l.canonical_title}</p>
+    {(earlier.length > 0 || leadership.length > 0) && (
+      <div class="ring-group">
+        <p class="ring"><span>Earlier</span></p>
+        <ol class="twigs">
+          {earlier.map((entry) => <CareerEntry entry={entry} class="twig twig--role twig--minor" storyBase="" collapsible index={n++} />)}
+          {leadership.map((l) => (
+            <li class="twig twig--role twig--minor" id={l.id} style={`--i: ${n++}`}>
+              <h3 class="timeline-org">{l.organization}</h3>
+              <p class="twig-sub">{l.canonical_title} · {yearRange({ start_date: l.start_date, end_date: l.end_date, current: false })}</p>
               {l.summary && <p class="timeline-summary">{l.summary}</p>}
-            </div>
-          </li>
-        ))}
-      </ol>
-    </div>
-  )}
+            </li>
+          ))}
+        </ol>
+      </div>
+    )}
 
-  {education.length > 0 && (
-    <div class="ring-group">
-      <p class="ring"><span>Education</span></p>
-      <ul class="twigs">
-        {education.map((e) => (
-          <li class="twig twig--minor">
-            <h3 class="timeline-org">{e.institution}</h3>
-            <p class="timeline-title">{e.credential}</p>
-            <p class="timeline-dates">{e.when}</p>
-          </li>
-        ))}
-      </ul>
-    </div>
-  )}
+    {education.length > 0 && (
+      <div class="ring-group">
+        <p class="ring"><span>Education</span></p>
+        <ul class="twigs">
+          {education.map((e) => (
+            <li class="twig twig--minor" style={`--i: ${n++}`}>
+              <h3 class="timeline-org">{e.institution}</h3>
+              <p class="twig-sub">{e.credential} · {e.when}</p>
+            </li>
+          ))}
+        </ul>
+      </div>
+    )}
 
-  {skills.length > 0 && (
-    <div class="ring-group">
-      <p class="ring"><span>Skills</span></p>
-      <ul class="twigs">
-        <li class="twig twig--minor">
-          <p class="skills-line">
-            {skills.map((g) => (
-              <span class="skills-group"><span class="skills-name">{g.label}</span> {g.items.join(' · ')}</span>
-            ))}
-          </p>
-          {hasResume && (
-            <p class="section-cta"><a class="text-link" href={work.resumeHref} target="_blank" rel="noopener">Résumé (PDF) →</a></p>
-          )}
-        </li>
-      </ul>
-    </div>
-  )}
-</section>
+    {skills.length > 0 && (
+      <div class="ring-group">
+        <p class="ring"><span>Skills</span></p>
+        <ul class="twigs">
+          <li class="twig twig--minor twig--skills" style={`--i: ${n++}`}>
+            <p class="skills-line">
+              {skills.map((g) => (
+                <span class="skills-group"><span class="skills-name">{g.label}</span> {g.items.join(' · ')}</span>
+              ))}
+            </p>
+            {hasResume && (
+              <p class="section-cta"><a class="text-link" href={work.resumeHref} target="_blank" rel="noopener">Résumé (PDF) →</a></p>
+            )}
+          </li>
+        </ul>
+      </div>
+    )}
+  </div>
+</details>

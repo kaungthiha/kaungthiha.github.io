@@ -1,9 +1,11 @@
 ---
 /**
  * The grove: everything after the landing, grown along one golden trunk.
- * Work, Create and Loves are branches; their items are twigs. Fully readable
- * as a plain document. src/scripts/grove.ts adds the scroll life (the trunk
- * filling with light, the active branch glowing, twigs growing in).
+ * Work, Create and Loves are branches (<details>); their items are twigs.
+ * Without JS every branch is open: a plain, fully readable document. With
+ * src/scripts/grove.ts it starts as an overview at the root; opening one
+ * branch grows its twigs while the others zoom out, and the light travels
+ * down the trunk to it.
  */
 import WorkBranch from './WorkBranch.astro';
 import CreateBranch from './CreateBranch.astro';
@@ -17,7 +19,7 @@ const sections = [
 ];
 ---
 
-<div class="grove" data-grove>
+<div class="grove" id="grove" data-grove>
   <!-- One leaf sprig, drawn once and reused beside every node. -->
   <svg class="grove-defs" width="0" height="0" aria-hidden="true" focusable="false">
     <defs>
@@ -54,6 +56,7 @@ const sections = [
       <span class="trunk-lit"></span>
     </div>
     <svg class="trunk-crown" viewBox="0 0 60 80" aria-hidden="true"><use href="#grove-sprig" /></svg>
+    <p class="grove-hint">Pick a branch</p>
 
     <WorkBranch />
     <CreateBranch />

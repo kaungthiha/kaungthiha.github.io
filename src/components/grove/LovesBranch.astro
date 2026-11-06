@@ -4,32 +4,36 @@
  */
 import BranchNode from './BranchNode.astro';
 import { loves, lovesHeading, fieldPhoto } from '../../data/loves';
+
+const sub = loves.map((item) => item.category).join(', ') + '.';
 ---
 
-<section class="branch" id="loves" aria-labelledby="loves-title">
-  <BranchNode label="Loves" icon="loves" />
-  <h2 class="section-heading" id="loves-title">{lovesHeading}</h2>
+<details class="branch" id="loves" open>
+  <BranchNode label="Loves" icon="loves" teaser={lovesHeading} sub={sub} />
+  <div class="branch-body">
+    <h2 class="section-heading">{lovesHeading}</h2>
 
-  <ul class="twigs twigs--notes">
-    {loves.map((item) => (
-      <li class="twig twig--minor twig--note">
-        <span class="note-category">{item.category}</span>
-        <p class="note-text">
-          {item.href ? (
-            <a class="field-lead" href={item.href} target="_blank" rel="noopener">{item.lead}</a>
-          ) : (
-            <span class="field-lead">{item.lead}</span>
-          )}{' '}
-          {item.note}
-        </p>
-      </li>
-    ))}
-  </ul>
+    <ul class="twigs twigs--notes">
+      {loves.map((item, i) => (
+        <li class="twig twig--minor twig--note" style={`--i: ${i}`}>
+          <span class="note-category">{item.category}</span>
+          <p class="note-text">
+            {item.href ? (
+              <a class="field-lead" href={item.href} target="_blank" rel="noopener">{item.lead}</a>
+            ) : (
+              <span class="field-lead">{item.lead}</span>
+            )}{' '}
+            {item.note}
+          </p>
+        </li>
+      ))}
+    </ul>
 
-  {fieldPhoto && (
-    <figure class="field-photo">
-      <img src={fieldPhoto.src} alt={fieldPhoto.alt} loading="lazy" decoding="async" />
-      {fieldPhoto.caption && <figcaption>{fieldPhoto.caption}</figcaption>}
-    </figure>
-  )}
-</section>
+    {fieldPhoto && (
+      <figure class="field-photo">
+        <img src={fieldPhoto.src} alt={fieldPhoto.alt} loading="lazy" decoding="async" />
+        {fieldPhoto.caption && <figcaption>{fieldPhoto.caption}</figcaption>}
+      </figure>
+    )}
+  </div>
+</details>
