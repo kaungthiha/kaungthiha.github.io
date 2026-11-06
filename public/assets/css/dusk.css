@@ -11,7 +11,6 @@
   --dusk-muted:   #8f9a8c;
   --dusk-amber:   #d6a65f;
   --dusk-amber-hi:#e8c27f;
-  --font-burmese: 'Noto Serif Myanmar', 'Myanmar Text', 'Padauk', serif;
 }
 
 body:has(.dusk-host) { background: var(--dusk-ink); }
@@ -38,89 +37,41 @@ body:has(.dusk-host) .weather-bg { display: none; }   /* the shader draws its ow
   .dusk-host { background-position: 40% 50%; }
 }
 
-/* ── Hero ──────────────────────────────────────────────────────────────── */
+/* ── Hero: the landing text, resting on the painting ──────────────────── */
 .dusk-hero {
   position: relative;
   min-height: 100vh;
   min-height: 100svh;
   display: grid;
   place-items: center;
-  padding: 2rem var(--gutter) 9rem;
+  padding: 3rem var(--gutter) 2.5rem;
   text-align: center;
+}
+#top .hero-intro-inner {
+  margin-top: -8vh;
+  text-shadow: 0 1px 26px rgba(18, 20, 38, 0.5), 0 0 2px rgba(18, 20, 38, 0.35);
+}
+#top .hero-name { color: var(--dusk-cream); }
+#top .hero-name .burmese { color: rgba(239, 229, 204, 0.88); }
+/* The weather line keeps its per-weather tint, re-keyed for the painting. */
+#top .identity-weather-line { color: rgba(239, 229, 204, 0.84); }
+body.weather-sunny #top .identity-weather-line,
+body.weather-clear #top .identity-weather-line,
+body.weather-hot #top .identity-weather-line { color: #f1d49c; }
+body.weather-rainy #top .identity-weather-line,
+body.weather-stormy #top .identity-weather-line,
+body.weather-foggy #top .identity-weather-line { color: #d3dce6; }
+body.weather-snowy #top .identity-weather-line,
+body.weather-cold #top .identity-weather-line { color: #dbe7f1; }
+#top .hero-socials a {
+  background: rgba(14, 23, 20, 0.42);
+  border-color: rgba(239, 229, 204, 0.28);
   color: var(--dusk-cream);
+  text-shadow: none;
 }
-.dusk-title {
-  margin-top: -14vh;
-  text-shadow: 0 1px 28px rgba(18, 20, 38, 0.45), 0 0 2px rgba(18, 20, 38, 0.35);
-}
-.dusk-name {
-  margin: 0;
-  font-family: var(--font-serif);
-  font-size: clamp(2.875rem, 1.75rem + 4.6vw, 5.25rem);
-  font-weight: 400;
-  line-height: 1.02;
-  letter-spacing: 0.005em;
-  color: var(--dusk-cream);
-}
-.dusk-burmese {
-  margin: 1.1rem 0 0;
-  font-family: var(--font-burmese);
-  font-size: clamp(1rem, 0.9rem + 0.45vw, 1.3rem);
-  font-weight: 300;
-  line-height: 1.9;
-  color: rgba(239, 229, 204, 0.86);
-}
-.dusk-roles {
-  margin: 1rem 0 0;
-  font-family: var(--font-sans);
-  font-size: 0.78rem;
-  font-weight: 600;
-  letter-spacing: 0.32em;
-  text-transform: uppercase;
-  color: rgba(239, 229, 204, 0.84);
-}
-.dusk-roles span { margin: 0 0.35em; }
-
-/* The live weather reads like a film caption near the bottom of the frame. */
-.dusk-weather {
-  position: absolute;
-  left: 50%;
-  bottom: 6.25rem;
-  transform: translateX(-50%);
-  width: min(90vw, 34rem);
-  margin: 0;
-  font-family: var(--font-serif);
-  font-style: italic;
-  font-size: 1rem;
-  color: rgba(239, 229, 204, 0.8);
-  text-shadow: 0 1px 14px rgba(10, 14, 20, 0.6);
-}
-
-.dusk-enter {
-  position: absolute;
-  left: 50%;
-  bottom: 1.75rem;
-  transform: translateX(-50%);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 0.15rem;
-  padding: 0.5rem 1rem;
-  font-family: var(--font-sans);
-  font-size: 0.9375rem;
-  font-weight: 500;
-  letter-spacing: 0.12em;
-  color: var(--dusk-cream);
-  text-shadow: 0 1px 12px rgba(10, 14, 20, 0.6);
-}
-.dusk-enter:hover { color: var(--dusk-amber-hi); }
-.dusk-enter svg { width: 22px; height: 22px; }
-@media (prefers-reduced-motion: no-preference) {
-  .dusk-enter svg { animation: dusk-bob 2.8s ease-in-out infinite; }
-  .dusk-title { animation: dusk-rise 1.6s cubic-bezier(0.2, 0.7, 0.2, 1) backwards; }
-}
-@keyframes dusk-bob { 0%, 100% { transform: translateY(0); opacity: 0.7; } 50% { transform: translateY(4px); opacity: 1; } }
-@keyframes dusk-rise { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
+#top .hero-socials a:hover { color: var(--dusk-amber-hi); }
+#top .hero-scroll-cue { color: rgba(239, 229, 204, 0.88); }
+#top .hero-scroll-cue:hover { color: var(--dusk-amber-hi); }
 
 /* ── Content: the forest floor ─────────────────────────────────────────── */
 .dusk-content {
@@ -183,3 +134,4 @@ body:has(.dusk-host) .weather-bg { display: none; }   /* the shader draws its ow
   .dusk-preview { right: 0.75rem; bottom: 0.75rem; }
   .dusk-preview[open] { left: 0.75rem; }
 }
+/* The grove's mini-trunk bar owns the top edge on narrow screens. */

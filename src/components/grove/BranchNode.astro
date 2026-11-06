@@ -1,0 +1,24 @@
+---
+/**
+ * A section's node on the trunk: a glowing dot on the trunk, a short twig,
+ * and a pill with the section's icon. A leaf sprig sprouts beside it.
+ */
+interface Props {
+  label: string;
+  icon: 'work' | 'create' | 'loves';
+}
+
+const { label, icon } = Astro.props;
+---
+
+<p class="branch-node">
+  <svg class="branch-sprig" viewBox="0 0 60 80" aria-hidden="true"><use href="#grove-sprig" /></svg>
+  <span class="branch-pill">
+    <svg class="branch-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+      {icon === 'work' && <><rect x="4" y="5" width="16" height="11" rx="1.5" /><path d="M2 19.5h20" /></>}
+      {icon === 'create' && <><path d="m12 3.5 8.5 4.75L12 13 3.5 8.25 12 3.5Z" /><path d="m3.5 12.5 8.5 4.75 8.5-4.75" /><path d="m3.5 16.5 8.5 4.75 8.5-4.75" /></>}
+      {icon === 'loves' && <path d="M12 20s-7.5-4.6-7.5-10.2A4.1 4.1 0 0 1 12 7.4a4.1 4.1 0 0 1 7.5 2.4C19.5 15.4 12 20 12 20Z" />}
+    </svg>
+    {label}
+  </span>
+</p>

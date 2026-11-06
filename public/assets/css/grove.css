@@ -1,0 +1,379 @@
+/* ==========================================================================
+   The grove — content grown along one golden trunk.
+   Geometry: the trunk sits at --trunk-x inside .grove-col; content starts at
+   --trunk-pad. Every node, ring and twig positions itself from those two.
+   Without JS everything is drawn and lit; .is-live (grove.ts) adds the
+   scroll states, and twigs only "grow in" when motion is welcome.
+   ========================================================================== */
+
+.grove {
+  --trunk-x: 0.5rem;
+  --trunk-pad: 3.75rem;
+  --trunk-c: calc(var(--trunk-x) + 1px);             /* trunk centre line */
+  --from-trunk: calc(var(--trunk-c) - var(--trunk-pad)); /* trunk, from content's left edge */
+  --gold: #e8c27f;
+  --gold-deep: #d6a65f;
+  --gold-dim: rgba(232, 194, 127, 0.5);
+  --bud: #1a2a23;
+  position: relative;
+  padding: 0 var(--gutter);
+}
+
+.grove-col,
+.grove-end {
+  position: relative;
+  max-width: calc(var(--content-max) + var(--trunk-pad));
+  margin: 0 auto;
+  padding-left: var(--trunk-pad);
+  font-size: 1.0625rem;
+  line-height: 1.7;
+  color: var(--text-body);
+}
+.grove-col { padding-top: 1rem; padding-bottom: 3rem; }
+.grove-end { padding-bottom: clamp(4rem, 3rem + 4vw, 7rem); }
+.grove-end .home-footer { padding-top: 2.5rem; }
+
+/* ── Trunk ─────────────────────────────────────────────────────────────── */
+.trunk {
+  position: absolute;
+  left: var(--trunk-x);
+  top: 3.4rem;
+  bottom: 0;
+  width: 2px;
+  border-radius: 2px;
+  background: linear-gradient(to bottom, rgba(214, 166, 95, 0), rgba(214, 166, 95, 0.2) 5rem);
+}
+.trunk-lit {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;                         /* no-JS: fully lit */
+  border-radius: inherit;
+  background: linear-gradient(to bottom, rgba(232, 194, 127, 0), var(--gold) 4rem, var(--gold-deep));
+  box-shadow: 0 0 6px rgba(232, 194, 127, 0.55), 0 0 18px rgba(214, 166, 95, 0.22);
+}
+/* The light's leading edge: a small spark travelling down the trunk. */
+.grove.is-live .trunk-lit::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  bottom: -4px;
+  width: 8px;
+  height: 8px;
+  margin-left: -4px;
+  border-radius: 50%;
+  background: #fff1cf;
+  box-shadow: 0 0 10px 3px rgba(232, 194, 127, 0.7), 0 0 26px 8px rgba(214, 166, 95, 0.28);
+}
+/* Root node where the trunk ends. */
+.trunk::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  bottom: -6px;
+  width: 12px;
+  height: 12px;
+  margin-left: -6px;
+  border-radius: 50%;
+  border: 1.5px solid var(--gold);
+  background: var(--bud);
+  box-shadow: 0 0 10px rgba(232, 194, 127, 0.35);
+}
+.trunk-crown {
+  position: absolute;
+  top: 0;
+  left: calc(var(--trunk-c) - 23px);
+  width: 44px;
+  height: 58px;
+}
+
+/* ── Branches ──────────────────────────────────────────────────────────── */
+.branch {
+  position: relative;
+  padding-top: clamp(6rem, 4rem + 6vw, 9rem);
+  scroll-margin-top: 3.5rem;
+  transition: opacity 0.6s ease, filter 0.6s ease;
+}
+.branch:first-of-type { padding-top: 5rem; }
+.grove.is-live.has-active .branch:not(.is-active) { opacity: 0.5; filter: saturate(0.6); }
+.grove .section-heading { margin-bottom: 1rem; }
+.grove .section-intro { margin-bottom: 0.5rem; }
+
+/* Section node: glowing bud on the trunk, a short twig, then the pill. */
+.branch-node {
+  position: relative;
+  display: flex;
+  align-items: center;
+  min-height: 2.75rem;
+  margin: 0 0 1.75rem;
+}
+.branch-node::before {
+  content: '';
+  position: absolute;
+  z-index: 1;
+  left: calc(var(--from-trunk) - 7px);
+  top: 50%;
+  width: 14px;
+  height: 14px;
+  margin-top: -7px;
+  border-radius: 50%;
+  border: 2px solid #f3dca8;
+  background: var(--gold);
+  box-shadow: 0 0 10px rgba(232, 194, 127, 0.7), 0 0 24px rgba(214, 166, 95, 0.35);
+  transition: background 0.5s ease, border-color 0.5s ease, box-shadow 0.5s ease;
+}
+.branch-node::after {
+  content: '';
+  position: absolute;
+  left: calc(var(--from-trunk) + 7px);
+  top: 50%;
+  width: calc(var(--trunk-pad) - var(--trunk-c) - 7px);
+  height: 1.5px;
+  margin-top: -0.75px;
+  background: var(--gold-dim);
+}
+.branch-pill {
+  position: relative;
+  z-index: 1;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.6rem 1.35rem 0.6rem 1.05rem;
+  border-radius: 999px;
+  border: 1.5px solid rgba(232, 194, 127, 0.8);
+  background: rgba(16, 28, 24, 0.9);
+  font-family: var(--font-sans);
+  font-size: 1.0625rem;
+  font-weight: 500;
+  line-height: 1;
+  letter-spacing: 0.02em;
+  color: var(--dusk-cream);
+  box-shadow: 0 0 0 1px rgba(232, 194, 127, 0.14), 0 0 26px rgba(232, 194, 127, 0.22);
+  transition: border-color 0.5s ease, box-shadow 0.5s ease, color 0.5s ease;
+}
+.branch-icon { width: 18px; height: 18px; color: var(--gold); }
+.grove.is-live .branch:not(.is-active) .branch-node::before {
+  background: var(--bud);
+  border-color: var(--gold-dim);
+  box-shadow: none;
+}
+.grove.is-live .branch:not(.is-active) .branch-pill {
+  border-color: rgba(239, 229, 204, 0.24);
+  box-shadow: none;
+  color: var(--dusk-sage);
+}
+
+/* A leaf sprig leaning out from the trunk beside each node. */
+.branch-sprig {
+  position: absolute;
+  z-index: 0;
+  left: calc(var(--from-trunk) - 21px);
+  bottom: calc(50% + 2px);
+  width: 40px;
+  height: 53px;
+  transform-origin: 47% 100%;
+  transform: scaleX(-1) rotate(16deg);
+}
+
+/* ── Year rings and twigs ─────────────────────────────────────────────── */
+.ring {
+  position: relative;
+  margin: 3.75rem 0 1.4rem;
+  font-family: var(--font-sans);
+  font-size: 0.75rem;
+  font-weight: 600;
+  line-height: 1.2;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--gold-deep);
+}
+.ring::before {
+  content: '';
+  position: absolute;
+  z-index: 1;
+  left: calc(var(--from-trunk) - 5.5px);
+  top: 50%;
+  width: 11px;
+  height: 11px;
+  margin-top: -5.5px;
+  border-radius: 50%;
+  border: 1.5px solid rgba(232, 194, 127, 0.85);
+  background: var(--dusk-ink);
+}
+.section-intro + .ring-group .ring,
+.section-heading + .twigs { margin-top: 2.5rem; }
+
+.twigs {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: clamp(2.25rem, 1.75rem + 1.5vw, 3rem);
+}
+.twigs--stories { gap: clamp(4rem, 3rem + 3vw, 6rem); }
+.twigs--notes { gap: 1.5rem; }
+
+.twig { position: relative; --twig-y: 0.9rem; }
+.twig--minor { --twig-y: 0.72rem; }
+.twig--note { --twig-y: 0.75rem; }
+.twig--experiment { --twig-y: 0.9rem; }
+.twigs--stories .twig { --twig-y: 0.69rem; }
+
+/* The twig: an elbow curving off the trunk, ending in a small bud. */
+.twig::before {
+  content: '';
+  position: absolute;
+  left: var(--from-trunk);
+  top: calc(var(--twig-y) - 1.1rem);
+  width: calc(var(--trunk-pad) - var(--trunk-c) - 14px);
+  height: 1.1rem;
+  border-left: 1.5px solid var(--gold-dim);
+  border-bottom: 1.5px solid var(--gold-dim);
+  border-bottom-left-radius: 0.9rem;
+}
+.twig::after {
+  content: '';
+  position: absolute;
+  left: -14px;
+  top: calc(var(--twig-y) - 3.5px);
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--gold);
+  box-shadow: 0 0 6px rgba(232, 194, 127, 0.5);
+}
+
+/* Content inside twigs. */
+.twig--minor .timeline-org { font-size: 1.1875rem; }
+.twig .timeline-role:first-of-type { margin-top: 0.9rem; }
+.twig .skills-line { margin: 0; }
+.twig .section-cta { margin-top: 1.25rem; }
+.note-category {
+  display: block;
+  margin-bottom: 0.1rem;
+  font-family: var(--font-serif);
+  font-size: 0.9375rem;
+  font-style: italic;
+  line-height: 1.6;
+  color: var(--text-muted);
+}
+.note-text { margin: 0; }
+.twig--experiment { display: flex; flex-wrap: wrap; column-gap: 0.75rem; }
+.grove .story-figure { margin: 1.75rem 0 0; text-align: left; }
+.grove .story-figure img { border-radius: 0.75rem; box-shadow: 0 12px 40px rgba(0, 0, 0, 0.35); }
+.grove .field-photo { margin-top: 2.5rem; }
+
+/* ── Growth: twigs, rings and nodes grow in the first time they're seen ── */
+@media (prefers-reduced-motion: no-preference) {
+  .branch-sprig { animation: sprig-sway 7s ease-in-out infinite; }
+  .trunk-crown { transform-origin: 53% 100%; animation: crown-sway 8s ease-in-out infinite; }
+
+  .grove.is-live .twig::before { transition: clip-path 0.8s cubic-bezier(0.3, 0.7, 0.2, 1); }
+  .grove.is-live .twig::after { transition: transform 0.45s cubic-bezier(0.3, 1.4, 0.5, 1) 0.5s; }
+  .grove.is-live .twig > *,
+  .grove.is-live .ring,
+  .grove.is-live .branch-pill { transition: opacity 0.8s ease 0.25s, transform 0.8s cubic-bezier(0.2, 0.7, 0.2, 1) 0.25s, border-color 0.5s ease, box-shadow 0.5s ease, color 0.5s ease; }
+
+  .grove.is-live .twig:not(.is-grown)::before { clip-path: inset(0 100% 0 0); }
+  .grove.is-live .twig.is-grown::before { clip-path: inset(0 0 0 0); }
+  .grove.is-live .twig:not(.is-grown)::after { transform: scale(0); }
+  .grove.is-live .twig:not(.is-grown) > * { opacity: 0; transform: translateY(10px); }
+  .grove.is-live .ring:not(.is-grown) { opacity: 0; transform: translateX(-6px); }
+  .grove.is-live .branch-node:not(.is-grown) .branch-pill { opacity: 0; transform: translateX(-10px); }
+  .grove.is-live .branch-node:not(.is-grown) .branch-sprig,
+  .grove.is-live .trunk-crown:not(.is-grown) { opacity: 0; }
+  .branch-sprig, .trunk-crown { transition: opacity 1.2s ease 0.4s; }
+}
+@keyframes sprig-sway {
+  0%, 100% { transform: scaleX(-1) rotate(13deg); }
+  50% { transform: scaleX(-1) rotate(20deg); }
+}
+@keyframes crown-sway {
+  0%, 100% { transform: rotate(-3deg); }
+  50% { transform: rotate(3deg); }
+}
+
+/* ── Mini-trunk ────────────────────────────────────────────────────────── */
+.mini-trunk {
+  position: fixed;
+  z-index: 40;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.5s ease;
+  font-family: var(--font-sans);
+}
+.grove.is-entered .mini-trunk { opacity: 1; pointer-events: auto; }
+.mini-trunk ol { list-style: none; margin: 0; padding: 0; display: flex; }
+.mini-trunk a {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  color: var(--dusk-muted);
+  text-decoration: none;
+}
+.mini-trunk a:hover { color: var(--dusk-cream); }
+.mini-trunk a[aria-current="true"] { color: var(--dusk-cream); }
+.mini-dot {
+  position: relative;
+  z-index: 1;
+  flex: none;
+  width: 11px;
+  height: 11px;
+  border-radius: 50%;
+  border: 1.5px solid rgba(239, 229, 204, 0.35);
+  background: var(--dusk-ink);
+  transition: background 0.4s ease, border-color 0.4s ease, box-shadow 0.4s ease;
+}
+.mini-trunk a[aria-current="true"] .mini-dot {
+  background: var(--gold);
+  border-color: #f3dca8;
+  box-shadow: 0 0 8px rgba(232, 194, 127, 0.7);
+}
+.mini-line, .mini-lit { position: absolute; display: block; }
+.mini-lit { background: var(--gold); box-shadow: 0 0 6px rgba(232, 194, 127, 0.5); }
+
+/* Wide screens: a small vertical trunk in the left margin. */
+@media (min-width: 1240px) {
+  .mini-trunk {
+    left: max(1.5rem, calc(50vw - (var(--content-max) + var(--trunk-pad)) / 2 - 12rem));
+    top: 50%;
+    transform: translateY(-50%);
+    padding: 0.35rem 0;
+  }
+  .mini-trunk ol { flex-direction: column; gap: 2.4rem; }
+  .mini-line {
+    left: 5px;
+    top: 0.75rem;
+    bottom: 0.75rem;
+    width: 1.5px;
+    background: rgba(239, 229, 204, 0.16);
+  }
+  .mini-lit { top: 0; left: 0; width: 100%; height: calc(var(--grove-progress, 0) * 100%); }
+}
+/* Narrow screens: a quiet bar along the top. */
+@media (max-width: 1239.98px) {
+  .mini-trunk {
+    left: 0;
+    right: 0;
+    top: 0;
+    padding: 0.85rem var(--gutter) 1.35rem;
+    background: linear-gradient(to bottom, rgba(14, 23, 20, 0.97), rgba(14, 23, 20, 0.9) 62%, rgba(14, 23, 20, 0));
+  }
+  .mini-trunk ol { justify-content: center; gap: clamp(1.5rem, 7vw, 3rem); }
+  .mini-trunk a { gap: 0.45rem; }
+  .mini-line { display: none; }
+}
+
+@media (max-width: 640px) {
+  .grove { --trunk-x: 0.2rem; --trunk-pad: 2.4rem; }
+  .branch-sprig { transform: rotate(14deg); left: calc(var(--from-trunk) - 19px); }
+  @keyframes sprig-sway {
+    0%, 100% { transform: rotate(10deg); }
+    50% { transform: rotate(17deg); }
+  }
+}

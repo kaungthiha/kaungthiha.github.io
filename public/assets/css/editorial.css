@@ -639,9 +639,10 @@ html[data-theme="dark"] body.weather-cold  .identity-weather-line { color: #a9c6
   margin: 2rem calc(50% - min(var(--project-max), 100vw - 2 * var(--gutter)) / 2) 0;
   text-align: center;
 }
+/* No `width: auto` here: the img's width/height attributes then reserve its
+   space before it lazy-loads, so nothing below it jumps. */
 .story-figure img {
   display: inline-block;
-  width: auto;
   max-width: 100%;
   height: auto;
   border-radius: var(--r-md);

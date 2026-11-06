@@ -8,14 +8,18 @@ import { organizationLabel, sentenceCase, type TimelineEntry } from '../../lib/c
 
 interface Props {
   entry: TimelineEntry;
+  /** List-item class: the /career/ timeline by default, a branch twig in the grove. */
+  class?: string;
+  /** Where project stories live: the homepage by default, '' for the same page. */
+  storyBase?: string;
 }
 
-const { entry } = Astro.props;
+const { entry, class: className = 'timeline-entry', storyBase = '/' } = Astro.props;
 const exp = entry.experience;
 const meta = [exp.location, exp.engagement_type && sentenceCase(exp.engagement_type)].filter(Boolean).join(' · ');
 ---
 
-<li class="timeline-entry" id={exp.id}>
+<li class={className} id={exp.id}>
   <h3 class="timeline-org">{organizationLabel(exp)}</h3>
   {meta && <p class="timeline-meta">{meta}</p>}
 
@@ -39,7 +43,7 @@ const meta = [exp.location, exp.engagement_type && sentenceCase(exp.engagement_t
     <p class="timeline-related">
       Related work:{' '}
       {entry.relatedProjects.map((p, i) => (
-        <>{i > 0 && ', '}<a class="text-link" href={`/#story-${p.id}`}>{p.title} →</a></>
+        <>{i > 0 && ', '}<a class="text-link" href={`${storyBase}#story-${p.id}`}>{p.title} →</a></>
       ))}
     </p>
   )}
