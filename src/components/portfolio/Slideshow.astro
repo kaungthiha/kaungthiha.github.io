@@ -1,0 +1,73 @@
+---
+/**
+ * Several figures as one slideshow. Without JS it's a strip you swipe or
+ * scroll sideways, each slide linking to its full-size image; with JS
+ * (src/scripts/slideshow.ts) it gains a counter, arrows and arrow keys, and a
+ * slide opens in a lightbox.
+ */
+import type { ProjectFigure } from '../../data/portfolio/portfolio-config';
+
+interface Props {
+  slides: ProjectFigure[];
+  /** Names the set, e.g. "Outbuild AI Learning System diagrams". */
+  label: string;
+}
+
+const { slides, label } = Astro.props;
+const total = slides.length;
+const slideLabel = (s: ProjectFigure, i: number) => `${i + 1} of ${total}${s.title ? `: ${s.title}` : ''}`;
+---
+
+<figure class="slideshow" data-slideshow>
+  <div class="slideshow-track" data-track tabindex="0" role="region" aria-roledescription="carousel" aria-label={label}>
+    {slides.map((s, i) => (
+      <div class="slide" role="group" aria-roledescription="slide" aria-label={slideLabel(s, i)} data-title={s.title}>
+        <a class="slide-link" href={s.src} target="_blank" rel="noopener">
+          <img src={s.src} alt={s.alt} width={s.width} height={s.height} loading="lazy" decoding="async" />
+          <span class="slide-zoom" aria-hidden="true">
+            <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M9.5 2.5h4v4M6.5 13.5h-4v-4M13.5 2.5 9 7M2.5 13.5 7 9" /></svg>
+          </span>
+        </a>
+      </div>
+    ))}
+  </div>
+
+  <figcaption class="slideshow-bar" data-bar hidden>
+    <span class="slideshow-count" aria-live="polite">
+      <span class="slideshow-num"><span data-count>1</span> / {total}</span>
+      <span class="slideshow-title" data-slide-title>{slides[0]?.title}</span>
+    </span>
+    <span class="slideshow-nav">
+      <button type="button" data-prev aria-label="Previous slide" disabled>←</button>
+      <button type="button" data-next aria-label="Next slide">→</button>
+    </span>
+  </figcaption>
+
+  <dialog class="lightbox" aria-label={label}>
+    <button type="button" class="lightbox-close" data-close aria-label="Close">
+      <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true"><path d="M3.5 3.5l9 9M12.5 3.5l-9 9" /></svg>
+    </button>
+    <div class="slideshow-track" data-track tabindex="0" role="region" aria-roledescription="carousel" aria-label={label}>
+      {slides.map((s, i) => (
+        <div class="slide" role="group" aria-roledescription="slide" aria-label={slideLabel(s, i)} data-title={s.title}>
+          <img src={s.src} alt={s.alt} width={s.width} height={s.height} loading="lazy" decoding="async" />
+        </div>
+      ))}
+    </div>
+    <div class="slideshow-bar" data-bar hidden>
+      <span class="slideshow-count" aria-live="polite">
+        <span class="slideshow-num"><span data-count>1</span> / {total}</span>
+        <span class="slideshow-title" data-slide-title>{slides[0]?.title}</span>
+      </span>
+      <span class="slideshow-nav">
+        <button type="button" data-prev aria-label="Previous slide" disabled>←</button>
+        <button type="button" data-next aria-label="Next slide">→</button>
+      </span>
+    </div>
+  </dialog>
+</figure>
+
+<script>
+  import { initSlideshow } from '../../scripts/slideshow';
+  document.querySelectorAll<HTMLElement>('[data-slideshow]').forEach(initSlideshow);
+</script>

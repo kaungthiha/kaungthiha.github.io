@@ -351,6 +351,106 @@
 .twig--experiment { display: flex; flex-wrap: wrap; column-gap: 0.75rem; }
 .grove .story-figure { margin: 1.75rem 0 0; text-align: left; }
 .grove .story-figure img { border-radius: 0.75rem; box-shadow: 0 12px 40px rgba(0, 0, 0, 0.35); }
+
+/* ── Slideshow: a strip of figures you swipe or scroll; slideshow.ts adds the
+      bar (counter + arrows) and the lightbox ─────────────────────────────── */
+.slideshow { margin: 1.75rem 0 0; }
+.slideshow-track {
+  display: flex;
+  gap: 1rem;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  overscroll-behavior-x: contain;
+  scrollbar-width: thin;
+  scrollbar-color: var(--gold-dim) transparent;
+  border-radius: 0.75rem;
+}
+.slideshow.is-live .slideshow-track { scrollbar-width: none; }
+.slideshow.is-live .slideshow-track::-webkit-scrollbar { display: none; }
+.slideshow-track:focus-visible { outline: 2px solid var(--gold); outline-offset: 4px; }
+.slide { flex: 0 0 100%; scroll-snap-align: start; scroll-snap-stop: always; }
+.slide img { display: block; width: 100%; height: auto; border-radius: 0.75rem; }
+.slide-link { position: relative; display: block; border-radius: 0.75rem; cursor: zoom-in; }
+.slide-link:focus-visible { outline: 2px solid var(--gold); outline-offset: -2px; }
+.slide-zoom {
+  position: absolute;
+  top: 0.6rem;
+  right: 0.6rem;
+  display: grid;
+  place-items: center;
+  width: 2rem;
+  height: 2rem;
+  border-radius: 50%;
+  background: rgba(14, 23, 20, 0.72);
+  color: var(--gold);
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+.slide-zoom svg { width: 0.85rem; height: 0.85rem; }
+.slide-link:hover .slide-zoom,
+.slide-link:focus-visible .slide-zoom { opacity: 1; }
+@media (hover: none) { .slide-zoom { opacity: 0.85; } }
+
+.slideshow-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-top: 0.85rem;
+  font-size: 0.875rem;
+  line-height: 1.4;
+  color: var(--text-muted);
+}
+.slideshow-bar[hidden] { display: none; }
+.slideshow-num { margin-right: 0.65rem; font-variant-numeric: tabular-nums; letter-spacing: 0.04em; color: var(--gold-deep); }
+.slideshow-title { font-family: var(--font-serif); font-size: 1rem; color: var(--text-strong); }
+.slideshow-nav { display: flex; flex: none; gap: 0.5rem; }
+.slideshow-nav button,
+.lightbox-close {
+  display: grid;
+  place-items: center;
+  width: 2.25rem;
+  height: 2.25rem;
+  padding: 0;
+  border: 1px solid rgba(232, 194, 127, 0.35);
+  border-radius: 50%;
+  background: transparent;
+  color: var(--gold);
+  font: inherit;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background-color 0.2s ease, border-color 0.2s ease, opacity 0.2s ease;
+}
+.slideshow-nav button:hover:not(:disabled),
+.lightbox-close:hover { background: rgba(232, 194, 127, 0.12); border-color: var(--gold); }
+.slideshow-nav button:disabled { opacity: 0.3; cursor: default; }
+.slideshow-nav button:focus-visible,
+.lightbox-close:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
+
+/* The lightbox: the same strip, as big as the screen allows. */
+.lightbox {
+  box-sizing: border-box;
+  width: 100vw;
+  height: 100dvh;
+  max-width: none;
+  max-height: none;
+  margin: 0;
+  padding: 3.75rem clamp(1rem, 3vw, 2.5rem) clamp(1rem, 3vw, 2rem);
+  border: 0;
+  background: transparent;
+  color: var(--text-body);
+}
+.lightbox[open] { display: flex; flex-direction: column; justify-content: center; gap: 1rem; }
+.lightbox::backdrop { background: rgba(9, 14, 12, 0.93); backdrop-filter: blur(6px); }
+.lightbox .slideshow-track,
+.lightbox .slideshow-bar { width: 100%; max-width: 1600px; margin: 0 auto; }
+.lightbox .slideshow-track { flex: 0 1 auto; min-height: 0; height: 100%; max-height: 900px; border-radius: 0; }
+.lightbox .slide { display: flex; align-items: center; justify-content: center; }
+.lightbox .slide img { width: auto; height: auto; max-width: 100%; max-height: 100%; }
+.lightbox .slideshow-bar { flex: none; }
+.lightbox-close { position: absolute; top: 1rem; right: clamp(1rem, 3vw, 2.5rem); }
+.lightbox-close svg { width: 0.9rem; height: 0.9rem; }
+html:has(.lightbox[open]) { overflow: hidden; }
 .grove .field-photo { margin-top: 2.5rem; }
 
 /* ── Motion: nodes grow in on arrival; a branch's twigs grow when it opens ── */

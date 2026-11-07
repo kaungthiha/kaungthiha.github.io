@@ -2,9 +2,11 @@
 /**
  * One featured project on the Create branch, as a twig: meta, title and a
  * one-line summary as the head, opening to the result, stack, CTA, note, and
- * image. Facts come from the canonical project record; the image, CTA label,
- * and note are presentation config.
+ * figures (one image, or a slideshow of several). Facts come from the
+ * canonical project record; the figures, CTA label, and note are
+ * presentation config.
  */
+import Slideshow from './Slideshow.astro';
 import { portfolioConfig } from '../../data/portfolio/portfolio-config';
 import { projectResult, projectYear, sentenceCase, type CareerProject } from '../../lib/career';
 
@@ -13,13 +15,13 @@ interface Props {
 }
 
 const { project: p } = Astro.props;
-const { ctaLabels, images, notes } = portfolioConfig.create;
+const { ctaLabels, figures: allFigures, notes } = portfolioConfig.create;
 const year = projectYear(p);
 const meta = `${sentenceCase(p.category)}${year ? ` · ${year}` : ''}`;
 const link = p.links?.[0];
 const external = link ? link.url.startsWith('http') || link.kind === 'pdf' : false;
 const result = projectResult(p);
-const image = images[p.id];
+const figures = allFigures[p.id];
 const note = notes[p.id];
 ---
 
@@ -44,9 +46,10 @@ const note = notes[p.id];
     )}
     {note && <p class="story-note">{note}</p>}
 
-    {image && (
+    {figures && figures.length > 1 && <Slideshow slides={figures} label={`${p.title} diagrams`} />}
+    {figures && figures.length === 1 && (
       <figure class="story-figure">
-        <img src={image.src} alt={image.alt} width={image.width} height={image.height} loading="lazy" decoding="async" />
+        <img src={figures[0].src} alt={figures[0].alt} width={figures[0].width} height={figures[0].height} loading="lazy" decoding="async" />
       </figure>
     )}
   </div>

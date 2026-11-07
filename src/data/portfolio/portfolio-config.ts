@@ -13,6 +13,15 @@
 
 import type { ProjectLink } from '../../lib/career';
 
+export interface ProjectFigure {
+  src: string;
+  alt: string;
+  /** Names the slide in a slideshow's counter. */
+  title?: string;
+  width: number;
+  height: number;
+}
+
 export const portfolioConfig = {
   work: {
     heading: 'I like solving problems.',
@@ -66,15 +75,40 @@ export const portfolioConfig = {
       github: 'View on GitHub',
       website: 'Visit the site',
     } satisfies Record<ProjectLink['kind'], string>,
-    /** Presentation-only images, keyed by canonical project ID. */
-    images: {
-      proj_outbuild_learning: {
-        src: '/assets/projects/outbuild_diagram.png',
-        alt: 'Diagram of the Outbuild learning system: V1 used hardcoded per-topic n8n branches; V2 uses unified pipelines for quiz generation, grading, and reporting with Claude.',
-        width: 650,
-        height: 669,
-      },
-    } as Record<string, { src: string; alt: string; width: number; height: number } | undefined>,
+    /** Presentation-only figures, keyed by canonical project ID: one image, or
+        several shown as a slideshow (each with a short title for its counter). */
+    figures: {
+      proj_outbuild_learning: [
+        {
+          src: '/assets/projects/outbuild/problem.webp',
+          title: 'Problem',
+          alt: 'Problem: the old onboarding took 3–4 weeks of reading Notion, shadowing calls, and asking questions. Its gaps (no assessment, no feedback, no visibility) map to three requirements: structured quizzes, rep feedback, and leader reporting.',
+          width: 2400,
+          height: 1350,
+        },
+        {
+          src: '/assets/projects/outbuild/final-system.webp',
+          title: 'Final system',
+          alt: 'Final system, three pipelines. Quiz generation: daily scan, Notion knowledge base, parse blocks, Claude writes questions, Forms API, answer keys. Response grading: form submit, Apps Script, webhook, key lookup, Claude grades, Notion results, rep email. Executive reporting: Monday trigger, fetch results, Claude summary, leader email.',
+          width: 2400,
+          height: 1350,
+        },
+        {
+          src: '/assets/projects/outbuild/implementation.webp',
+          title: 'Implementation',
+          alt: 'Implementation, six parts. Notion parsing turns knowledge-base headings, lists, and tables into clean text. A question schema has Claude return JSON quiz questions with answers, explanations, and difficulty. Form creation sends the quiz as one batch request to Google Forms. Stored rubrics keep each form ID and answer key in a Notion database. Response intake runs from Google Forms through Apps Script to an n8n webhook. Weekly reports turn quiz results into a Claude-written HTML email for leaders: pass rates, scores, and knowledge gaps.',
+          width: 2400,
+          height: 1350,
+        },
+        {
+          src: '/assets/projects/outbuild/outcomes.webp',
+          title: 'Outcomes',
+          alt: 'Outcomes: onboarding time fell from about 4 weeks to about 1 week, with capacity designed for 20+ concurrent users. Quizzes of 10–15 questions cover six domains: construction basics, scheduling and planning, project management, construction technology, product positioning, and the AE playbook. Quiz generation and grading are automatic; reps get feedback by email and leaders get a weekly report.',
+          width: 2400,
+          height: 1350,
+        },
+      ],
+    } as Record<string, ProjectFigure[] | undefined>,
     /** Conversational notes under a story (the facts behind them — no longer
         maintained, no public demo — are recorded in the dataset). */
     notes: {
