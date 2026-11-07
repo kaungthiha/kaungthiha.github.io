@@ -101,6 +101,13 @@ export const portfolioConfig = {
           height: 1350,
         },
         {
+          src: '/assets/projects/outbuild/v1-to-v2.webp',
+          title: 'V1 → V2',
+          alt: 'V1 to V2. V1 ran one trigger into six parallel, hardcoded topic branches (such as construction basics, scheduling, and positioning), each with its own Sheets sync and Notion update. V2 replaces them with three reusable flows: quiz generation (Notion scan, Claude generates, Forms API, Notion plus answer key), grading (webhook in, Claude grades, Notion results, email feedback), and reporting (Monday trigger, fetch results, Claude report, email to leadership). A table compares them: quiz source went from hardcoded to the Notion API, topics from six fixed to auto-discovered, forms from manual to API, grading from raw score to Claude, results from six branches to one pipeline, reporting from none to a weekly email, and maintenance from per topic to low.',
+          width: 1931,
+          height: 1086,
+        },
+        {
           src: '/assets/projects/outbuild/outcomes.webp',
           title: 'Outcomes',
           alt: 'Outcomes: onboarding time fell from about 4 weeks to about 1 week, with capacity designed for 20+ concurrent users. Quizzes of 10–15 questions cover six domains: construction basics, scheduling and planning, project management, construction technology, product positioning, and the AE playbook. Quiz generation and grading are automatic; reps get feedback by email and leaders get a weekly report.',
