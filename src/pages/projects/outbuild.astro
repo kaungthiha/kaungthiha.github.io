@@ -1,0 +1,201 @@
+---
+/**
+ * The Outbuild AI Learning System as a standalone case study: one page to
+ * link from a job application, in the homepage's dusk theme.
+ *
+ * Title, summary, problem, role, dates, stack, and the onboarding metric come
+ * from the career dataset; the diagrams from portfolio-config. The prose is
+ * condensed from the PDF write-up (public/assets/projects/), which stays the
+ * long version.
+ */
+import Base from '../../layouts/Base.astro';
+import CaseFigure from '../../components/portfolio/CaseFigure.astro';
+import Lightbox from '../../components/portfolio/Lightbox.astro';
+import ContactFooter from '../../components/portfolio/ContactFooter.astro';
+import { portfolioConfig } from '../../data/portfolio/portfolio-config';
+import { getAchievement, getExperience, getProject, getRoles, monthRange } from '../../lib/career';
+
+const p = getProject('proj_outbuild_learning');
+const exp = getExperience(p.related_experience_id!);
+const role = getRoles(exp)[0];
+const metric = (name: string) => getAchievement('outbuild_learning')?.metrics?.find((m) => m.name === name);
+const before = metric('onboarding_before');
+const after = metric('onboarding_after');
+const pdf = p.links?.find((l) => l.kind === 'pdf');
+const slides = portfolioConfig.create.figures[p.id] ?? [];
+const fig = 'outbuild';
+---
+
+<Base
+  title={`${p.title} · Case study`}
+  description={p.website_summary ?? p.summary}
+  slimNav={false}
+  ogImage="/assets/projects/outbuild/og.jpg"
+>
+  <Fragment slot="head">
+    <link rel="preload" as="image" href="/assets/forest/dusk/master.webp" />
+    <link href="/assets/css/dusk.css" rel="stylesheet" />
+    <link href="/assets/css/slideshow.css" rel="stylesheet" />
+    <link href="/assets/css/case.css" rel="stylesheet" />
+  </Fragment>
+
+  <article class="case dusk-content">
+    <header class="case-hero">
+      <nav class="case-nav" aria-label="Site">
+        <a class="case-brand" href="/">Kaung Thiha</a>
+        <a class="case-back" href="/#create"><span aria-hidden="true">←</span> More of my work</a>
+      </nav>
+      <div class="case-col case-hero-text">
+        <p class="case-eyebrow">Case study · {p.category}</p>
+        <h1 class="case-title">{p.title}</h1>
+        <p class="case-lede">{p.website_summary}</p>
+      </div>
+    </header>
+
+    <div class="case-col">
+      <dl class="case-facts">
+        <div><dt>Role</dt><dd>{role.canonical_title}{exp.engagement_type && <span> ({exp.engagement_type})</span>}</dd></div>
+        <div><dt>Company</dt><dd>{exp.organization}{exp.organization_description && <span class="case-fact-sub">{exp.organization_description}</span>}</dd></div>
+        <div><dt>Timeline</dt><dd>{monthRange(role)}</dd></div>
+        <div><dt>Stack</dt><dd>{p.technologies?.join(' · ')}</dd></div>
+      </dl>
+
+      <ul class="case-stats">
+        {before && after && (
+          <li><span class="case-stat">{before.value} <span class="case-stat-arrow" aria-label="to">→</span> {after.value}</span> weeks to onboard a new AE or SDR</li>
+        )}
+        <li><span class="case-stat">6</span> knowledge domains, 10–15 questions each</li>
+        <li><span class="case-stat">0</span> quizzes written or graded by hand after setup</li>
+      </ul>
+
+      <section class="case-section" aria-labelledby="problem">
+        <h2 id="problem">The problem</h2>
+        <p>{p.problem}</p>
+        <p>
+          I joined Outbuild to clean up HubSpot workflows and data hygiene, but onboarding looked like a problem
+          worth solving with AI. The founding team had already built a thorough Notion knowledge base: construction
+          fundamentals, scheduling methods, the competitive landscape, positioning, and sales playbooks.
+        </p>
+        <p>
+          But onboarding meant reading the wiki, sitting in on calls, and asking questions. There was no structured
+          assessment, no way to spot knowledge gaps, no feedback for the rep, and no visibility for leadership, who
+          didn't have time to coach every hire beyond 1:1s. New hires were "ramped" when they felt ready, which
+          varied wildly from person to person.
+        </p>
+        <h3>What it had to do</h3>
+        <ul>
+          <li>Scale to any number of reps without anyone writing or grading quizzes by hand.</li>
+          <li>Cover six domains: construction basics, scheduling and planning, project management solutions, other construction tech, Outbuild positioning and messaging, and the AE playbook.</li>
+          <li>Give reps immediate, specific feedback, so they know exactly what to review.</li>
+          <li>Show leadership team-wide progress and knowledge gaps.</li>
+          <li>Run on tools the team already used (Notion and Google Workspace), and keep working without an engineer as the knowledge base grows.</li>
+        </ul>
+      </section>
+    </div>
+
+    <CaseFigure slides={slides} title="Problem" lightbox={fig} />
+
+    <div class="case-col">
+      <section class="case-section" aria-labelledby="approach">
+        <h2 id="approach">The approach</h2>
+        <p>
+          My first instinct was a quiz tool like Typeform with hand-built quizzes. That fell apart quickly: writing
+          10–15 questions per topic across six domains is tedious, the questions go stale as the knowledge base
+          changes, and grading and feedback would still be manual.
+        </p>
+        <p>
+          The bigger win was automating the whole loop, from reading the knowledge base to delivering results, with
+          Claude as the intelligence layer and n8n orchestrating the flow. (I'd used Zapier before, but the team
+          already knew n8n.) The final system is three pipelines that run independently:
+        </p>
+        <ul>
+          <li><strong>Quiz generation.</strong> Every day, it finds knowledge-base pages without a quiz, pulls their content through the Notion API, and has Claude write 10–15 multiple-choice questions as structured JSON: options, correct answers, explanations, and difficulty. A code step turns that into a Google Forms API batch request to build the form, and the answer key is saved to Notion.</li>
+          <li><strong>Grading.</strong> When a rep submits, an Apps Script trigger calls an n8n webhook. The pipeline looks up the answer key, has Claude grade the responses, writes the score, pass/fail, weak areas, and recommendations to a Notion results database, and emails the rep their results.</li>
+          <li><strong>Reporting.</strong> Every Monday, Claude turns the week's results into an HTML email for leadership: completion and pass rates, average scores, individual progress, knowledge gaps, and recommendations for the onboarding team.</li>
+        </ul>
+      </section>
+    </div>
+
+    <CaseFigure slides={slides} title="Final system" lightbox={fig} />
+
+    <div class="case-col">
+      <section class="case-section" aria-labelledby="under-the-hood">
+        <h2 id="under-the-hood">Under the hood</h2>
+        <p>Claude does three jobs, each with its own system prompt:</p>
+        <ul>
+          <li><strong>Writing quizzes.</strong> The prompt asks for 10–15 questions with four options each, a mix of recall, applied, and scenario-based questions, and 2–3 questions per topic on where Outbuild fits in. Claude returns pure JSON, since it can't call the Forms API itself.</li>
+          <li><strong>Grading.</strong> One point per correct choice on multi-select questions and −0.5 per incorrect one, plus weak areas and learning recommendations.</li>
+          <li><strong>Reporting.</strong> An HTML email built from the raw results.</li>
+        </ul>
+        <p>
+          Three Notion databases tie it together: the knowledge base (which pages have quizzes), answer keys (the
+          rubric for each form), and quiz results. Google Forms won over other quiz tools because it plugs into
+          Google Sheets, which the team already used, and needs no new accounts for a team on Google Workspace.
+        </p>
+      </section>
+    </div>
+
+    <CaseFigure slides={slides} title="Implementation" lightbox={fig} />
+
+    <div class="case-col">
+      <section class="case-section" aria-labelledby="v1-v2">
+        <h2 id="v1-v2">V1 → V2</h2>
+        <p>
+          The first version proved the idea but didn't scale. It ran six parallel branches, one per topic, each with
+          its own trigger, filter, sync logic, and Notion update: about 36 nodes doing the same thing. Quiz content
+          was hardcoded into the Claude prompt, score denominators were hardcoded per topic (66, 46, 21…) so any
+          question change broke grading, and a manual "Synced At" column in Sheets tracked what had been processed.
+        </p>
+        <p>
+          V2 collapses all of that into one topic-agnostic pipeline of about 20 nodes. Content comes live from the
+          Notion API, so a new knowledge-base page gets a quiz automatically. Answer keys live in Notion as JSON,
+          webhooks replace the sync column, and grading moved from raw Forms scores to Claude, with partial credit
+          and explanations.
+        </p>
+      </section>
+    </div>
+
+    <CaseFigure slides={slides} title="V1 → V2" lightbox={fig} />
+
+    <div class="case-col">
+      <section class="case-section" aria-labelledby="outcomes">
+        <h2 id="outcomes">Outcomes</h2>
+        <ul>
+          <li>Onboarding went from about four weeks of unstructured learning to about one week of guided, assessment-driven learning.</li>
+          <li>Six domains covered at 10–15 questions each, with no manual quiz writing, grading, or reporting after setup. The system was designed for 20+ concurrent users.</li>
+          <li>Reps who failed a quiz knew exactly which Notion pages to revisit, retook it, and could show concrete progress.</li>
+          <li>Leadership could see which topics were hardest for new hires (consistently: lean construction terminology and competitive differentiation).</li>
+          <li>The knowledge base got better too. If Claude couldn't write good questions from a page, the page needed better content.</li>
+        </ul>
+      </section>
+    </div>
+
+    <CaseFigure slides={slides} title="Outcomes" lightbox={fig} />
+
+    <div class="case-col">
+      <section class="case-section" aria-labelledby="learned">
+        <h2 id="learned">What I learned</h2>
+        <ul>
+          <li><strong>Output quality lives in the prompt.</strong> The gap between "generate quiz questions" and the final prompt (difficulty tiers, Outbuild-specific questions, scenario formats) decided whether the quizzes were useful.</li>
+          <li><strong>Let n8n connect APIs and let Claude do the thinking.</strong> V1 had chunky code nodes for text extraction; V2 keeps nodes clean.</li>
+          <li><strong>Webhooks beat sync state.</strong> The "Synced At" column meant a full read-and-check cycle for every response.</li>
+          <li><strong>Hardcoded denominators stink.</strong> Storing the answer key and total points with the form ID let grading handle quiz updates gracefully.</li>
+          <li><strong>Start from the executive report and work backwards.</strong> Defining what leadership wanted to see (pass rates by topic, individual progress, knowledge gaps) clarified what the system needed to capture.</li>
+        </ul>
+      </section>
+
+      <div class="case-end">
+        {pdf && (
+          <p class="case-more">
+            The full write-up has the n8n workflows and the Notion schema.
+            <a class="text-link" href={pdf.url} target="_blank" rel="noopener">Read it (PDF) →</a>
+          </p>
+        )}
+        <p><a class="text-link" href="/#create"><span aria-hidden="true">←</span> More of my work</a></p>
+        <ContactFooter />
+      </div>
+    </div>
+
+    <Lightbox slides={slides} label={`${p.title} diagrams`} id={fig} />
+  </article>
+</Base>

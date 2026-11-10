@@ -1,0 +1,31 @@
+---
+/**
+ * One figure inside a case study, wider than the text. It links to its
+ * full-size image; with JS it opens the page's lightbox on that slide
+ * instead, so the reader can flip through the rest from there.
+ */
+import type { ProjectFigure } from '../../data/portfolio/portfolio-config';
+
+interface Props {
+  slides: ProjectFigure[];
+  /** Which slide, by its title (so reordering the config can't mismatch). */
+  title: string;
+  /** The Lightbox.astro id to open. */
+  lightbox: string;
+}
+
+const { slides, title, lightbox } = Astro.props;
+const index = slides.findIndex((s) => s.title === title);
+if (index < 0) throw new Error(`CaseFigure: no slide titled "${title}"`);
+const s = slides[index];
+---
+
+<figure class="case-figure">
+  <a class="slide-link" href={s.src} target="_blank" rel="noopener" data-opens={lightbox} data-index={index}>
+    <img src={s.src} alt={s.alt} width={s.width} height={s.height} loading="lazy" decoding="async" />
+    <span class="slide-zoom" aria-hidden="true">
+      <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M9.5 2.5h4v4M6.5 13.5h-4v-4M13.5 2.5 9 7M2.5 13.5 7 9" /></svg>
+    </span>
+  </a>
+  <figcaption><span class="slideshow-num">{String(index + 1).padStart(2, '0')}</span> {s.title}</figcaption>
+</figure>

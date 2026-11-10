@@ -1,11 +1,13 @@
 /**
- * Slideshows (src/components/portfolio/Slideshow.astro).
+ * Slideshows and lightboxes (src/components/portfolio/Slideshow.astro and
+ * Lightbox.astro).
  *
  * The markup is already a working strip: a scroll-snap row you swipe or
  * scroll, each slide linking to its full-size image. This adds the counter,
  * the arrows and arrow keys, and opens a slide in a lightbox, which is the
  * same strip again, bigger. Closing the lightbox leaves the inline strip on
- * the slide you ended on.
+ * the slide you ended on. Figures elsewhere on a page (a case study's) can
+ * open a lightbox too, via data-opens and data-index.
  */
 
 interface Strip {
@@ -81,10 +83,62 @@ function controls(bar: HTMLElement, titles: string[], s: () => Strip) {
   };
 }
 
+// The slides past the first sit outside the viewport sideways, so lazy
+// loading would leave them blank mid-swipe: fetch them all once they matter.
+const eager = (scope: Element) => scope.querySelectorAll('img').forEach((img) => { img.loading = 'eager'; });
+
+interface Lightbox {
+  open(i: number, onClose?: (i: number) => void): void;
+}
+
+/** Wires a Lightbox.astro dialog once; null where <dialog> isn't supported. */
+const lightboxes = new WeakMap<HTMLDialogElement, Lightbox>();
+function lightbox(dialog: HTMLDialogElement): Lightbox | null {
+  const known = lightboxes.get(dialog);
+  if (known) return known;
+  const track = dialog.querySelector<HTMLElement>('[data-track]');
+  const bar = dialog.querySelector<HTMLElement>('[data-bar]');
+  if (!track || !bar || typeof dialog.showModal !== 'function') return null;
+
+  const titles = Array.from(track.children, (el) => (el as HTMLElement).dataset.title ?? '');
+  let s: Strip;
+  const update = controls(bar, titles, () => s);
+  s = strip(track, update);
+  let closed: ((i: number) => void) | undefined;
+
+  dialog.querySelector('[data-close]')?.addEventListener('click', () => dialog.close());
+  // A click on the dimmed space around the slide (not the slide or the bar) closes.
+  dialog.addEventListener('click', (e) => {
+    const t = e.target as HTMLElement;
+    if (t === dialog || t.classList.contains('slide')) dialog.close();
+  });
+  dialog.addEventListener('close', () => closed?.(s.index()));
+
+  const box: Lightbox = {
+    open(i, onClose) {
+      closed = onClose;
+      eager(track);
+      dialog.showModal();
+      s.go(i, false);
+      track.focus({ preventScroll: true });
+    },
+  };
+  lightboxes.set(dialog, box);
+  return box;
+}
+
+/** A plain click opens the lightbox; modified clicks keep the link's own target. */
+function onPlainClick(a: HTMLAnchorElement, run: () => void) {
+  a.addEventListener('click', (e) => {
+    if (e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+    e.preventDefault();
+    run();
+  });
+}
+
 export function initSlideshow(root: HTMLElement) {
   const track = root.querySelector<HTMLElement>(':scope > [data-track]');
   const bar = root.querySelector<HTMLElement>(':scope > [data-bar]');
-  const dialog = root.querySelector<HTMLDialogElement>('dialog');
   if (!track || !bar) return;
 
   const titles = Array.from(track.children, (el) => (el as HTMLElement).dataset.title ?? '');
@@ -94,46 +148,29 @@ export function initSlideshow(root: HTMLElement) {
   const update = controls(bar, titles, () => inline);
   inline = strip(track, update);
 
-  // The slides past the first sit outside the viewport sideways, so lazy
-  // loading would leave them blank mid-swipe: once the strip shows, fetch all.
-  const eager = (scope: Element) => scope.querySelectorAll('img').forEach((img) => { img.loading = 'eager'; });
   const seen = new IntersectionObserver((entries) => {
     if (entries.some((e) => e.isIntersecting)) { eager(track); seen.disconnect(); }
   }, { rootMargin: '200px 0px' });
   seen.observe(track);
 
-  if (!dialog || typeof dialog.showModal !== 'function') return;
+  const dialog = root.querySelector<HTMLDialogElement>(':scope > dialog');
+  const box = dialog && lightbox(dialog);
+  if (!box) return;
+  const links = track.querySelectorAll<HTMLAnchorElement>('a');
+  // Closing leaves the strip on the slide the lightbox ended on.
+  links.forEach((a, i) => onPlainClick(a, () => box.open(i, (end) => {
+    inline.go(end, false);
+    links[end]?.focus({ preventScroll: true });
+  })));
+}
 
-  const bigTrack = dialog.querySelector<HTMLElement>('[data-track]');
-  const bigBar = dialog.querySelector<HTMLElement>('[data-bar]');
-  if (!bigTrack || !bigBar) return;
-  let big: Strip;
-  const bigUpdate = controls(bigBar, titles, () => big);
-  big = strip(bigTrack, bigUpdate);
-
-  const open = (i: number) => {
-    eager(bigTrack);
-    dialog.showModal();
-    big.go(i, false);
-    bigTrack.focus({ preventScroll: true });
-  };
-
-  track.querySelectorAll<HTMLAnchorElement>('a').forEach((a, i) => {
-    a.addEventListener('click', (e) => {
-      if (e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
-      e.preventDefault();
-      open(i);
-    });
-  });
-
-  dialog.querySelector('[data-close]')?.addEventListener('click', () => dialog.close());
-  // A click on the dimmed space around the slide (not the slide or the bar) closes.
-  dialog.addEventListener('click', (e) => {
-    const t = e.target as HTMLElement;
-    if (t === dialog || t.classList.contains('slide')) dialog.close();
-  });
-  dialog.addEventListener('close', () => {
-    inline.go(big.index(), false);
-    track.querySelectorAll('a')[big.index()]?.focus({ preventScroll: true });
+/** Links marked data-opens={lightbox id} data-index={n} open that slide. */
+export function initLightboxLinks() {
+  document.querySelectorAll<HTMLAnchorElement>('a[data-opens]').forEach((a) => {
+    const dialog = document.querySelector<HTMLDialogElement>(`dialog[data-lightbox="${a.dataset.opens}"]`);
+    const box = dialog && lightbox(dialog);
+    if (!box) return;
+    // On close the dialog hands focus back to this link by itself.
+    onPlainClick(a, () => box.open(Number(a.dataset.index) || 0));
   });
 }

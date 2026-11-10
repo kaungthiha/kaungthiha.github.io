@@ -15,7 +15,8 @@ interface Props {
 }
 
 const { project: p } = Astro.props;
-const { ctaLabels, figures: allFigures, notes } = portfolioConfig.create;
+const { ctaLabels, caseStudies, caseStudyLabel, figures: allFigures, notes } = portfolioConfig.create;
+const caseStudy = caseStudies[p.id];
 const year = projectYear(p);
 const meta = `${sentenceCase(p.category)}${year ? ` · ${year}` : ''}`;
 const link = p.links?.[0];
@@ -34,14 +35,17 @@ const note = notes[p.id];
   <div class="twig-body">
     {result && <p class="story-result">{result}</p>}
     {p.technologies && p.technologies.length > 0 && <p class="story-stack">{p.technologies.join(' · ')}</p>}
-    {link && (
+    {(caseStudy || link) && (
       <p class="story-cta">
-        <a
-          class="text-link"
-          href={link.url}
-          target={external ? '_blank' : undefined}
-          rel={external ? 'noopener' : undefined}
-        >{ctaLabels[link.kind]} →</a>
+        {caseStudy && <a class="text-link" href={caseStudy}>{caseStudyLabel} →</a>}
+        {link && (
+          <a
+            class="text-link"
+            href={link.url}
+            target={external ? '_blank' : undefined}
+            rel={external ? 'noopener' : undefined}
+          >{ctaLabels[link.kind]} →</a>
+        )}
       </p>
     )}
     {note && <p class="story-note">{note}</p>}

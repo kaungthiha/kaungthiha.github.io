@@ -1,0 +1,47 @@
+---
+/**
+ * A full-screen viewer for a set of figures: the same swipeable strip as a
+ * slideshow, as big as the screen allows. Closed (and unrendered) until
+ * slideshow.ts opens it, either from a Slideshow it sits in or from any link
+ * marked data-opens={id} data-index={n}.
+ */
+import type { ProjectFigure } from '../../data/portfolio/portfolio-config';
+
+interface Props {
+  slides: ProjectFigure[];
+  label: string;
+  /** Lets links elsewhere on the page open this lightbox. */
+  id?: string;
+}
+
+const { slides, label, id } = Astro.props;
+const total = slides.length;
+---
+
+<dialog class="lightbox" aria-label={label} data-lightbox={id}>
+  <button type="button" class="lightbox-close" data-close aria-label="Close">
+    <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true"><path d="M3.5 3.5l9 9M12.5 3.5l-9 9" /></svg>
+  </button>
+  <div class="slideshow-track" data-track tabindex="0" role="region" aria-roledescription="carousel" aria-label={label}>
+    {slides.map((s, i) => (
+      <div class="slide" role="group" aria-roledescription="slide" aria-label={`${i + 1} of ${total}${s.title ? `: ${s.title}` : ''}`} data-title={s.title}>
+        <img src={s.src} alt={s.alt} width={s.width} height={s.height} loading="lazy" decoding="async" />
+      </div>
+    ))}
+  </div>
+  <div class="slideshow-bar" data-bar hidden>
+    <span class="slideshow-count" aria-live="polite">
+      <span class="slideshow-num"><span data-count>1</span> / {total}</span>
+      <span class="slideshow-title" data-slide-title>{slides[0]?.title}</span>
+    </span>
+    <span class="slideshow-nav">
+      <button type="button" data-prev aria-label="Previous slide" disabled>←</button>
+      <button type="button" data-next aria-label="Next slide">→</button>
+    </span>
+  </div>
+</dialog>
+
+<script>
+  import { initLightboxLinks } from '../../scripts/slideshow';
+  initLightboxLinks();
+</script>

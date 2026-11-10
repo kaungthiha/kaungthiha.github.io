@@ -75,6 +75,12 @@ export const portfolioConfig = {
       github: 'View on GitHub',
       website: 'Visit the site',
     } satisfies Record<ProjectLink['kind'], string>,
+    /** Standalone case-study pages (shareable on their own), by project ID.
+        The story on the homepage links to it ahead of its other CTA. */
+    caseStudies: {
+      proj_outbuild_learning: '/projects/outbuild/',
+    } as Record<string, string | undefined>,
+    caseStudyLabel: 'Read the case study',
     /** Presentation-only figures, keyed by canonical project ID: one image, or
         several shown as a slideshow (each with a short title for its counter). */
     figures: {

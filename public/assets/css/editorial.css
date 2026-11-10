@@ -427,7 +427,7 @@ html[data-theme="dark"] body.weather-cold  .identity-weather-line { color: #a9c6
 .story-summary { margin: 0; max-width: 38em; }
 .story-result { margin: 0.6rem 0 0; color: var(--text-strong); max-width: 38em; }
 .story-stack { margin: 0.9rem 0 0; font-size: 0.875rem; color: var(--text-muted); }
-.story-cta { margin: 0.9rem 0 0; }
+.story-cta { display: flex; flex-wrap: wrap; gap: 0.35rem 1.5rem; margin: 0.9rem 0 0; }
 .story-note { margin: 0.9rem 0 0; font-size: 0.9375rem; font-style: italic; color: var(--text-muted); max-width: 38em; }
 /* Images may break out wider than the text column. */
 .story-figure {

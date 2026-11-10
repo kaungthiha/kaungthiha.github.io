@@ -16,6 +16,7 @@ import raw from '../data/career/career-history.json';
 export interface Achievement {
   id?: string;
   text: string;
+  metrics?: Array<{ name: string; value: number; unit: string }>;
   website_default?: boolean;
   public_safe?: boolean;
 }
@@ -34,6 +35,7 @@ export interface CareerRole {
 export interface ExperienceRecord {
   id: string;
   organization: string;
+  organization_description?: string;
   engagement_employer?: string;
   affiliation?: string;
   location?: string;
@@ -75,6 +77,7 @@ export interface CareerProject {
   date?: string | null;
   summary: string;
   website_summary?: string;
+  problem?: string;
   technologies?: string[];
   links?: ProjectLink[];
   related_experience_id?: string;
