@@ -52,7 +52,7 @@ export function initGrove(root: HTMLElement): void {
     const open = branches.find((b) => b.open) ?? null;
     const c = col!.getBoundingClientRect();
     const t = trunk!.getBoundingClientRect();
-    const x = t.left - c.left + t.width / 2, top = t.top - c.top, bottom = t.bottom - c.top;
+    const x = t.left - c.left + t.width / 2, top = t.top - c.top, bottom = t.bottom - c.top - 6;   // stop at the root node's rim
     // The light stops at the open branch's node (in the overview, the pointed one).
     const r = rowOf(open ?? pointed ?? branches[0]).getBoundingClientRect();
     const y = Math.min(bottom, Math.max(top, r.top + r.height / 2 - c.top));

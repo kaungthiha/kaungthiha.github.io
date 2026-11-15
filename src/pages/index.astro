@@ -10,6 +10,7 @@
 import Base from '../layouts/Base.astro';
 import Grove from '../components/grove/Grove.astro';
 import PreviewStates from '../components/portfolio/PreviewStates.astro';
+import Understory from '../components/portfolio/Understory.astro';
 import { getProfile } from '../lib/career';
 
 const linkedin = getProfile().public_links?.linkedin;
@@ -26,8 +27,8 @@ const linkedin = getProfile().public_links?.linkedin;
   <!-- The painting: a still CSS background first (and the no-WebGL fallback),
        then the live shader canvas fades in over it. -->
   <div class="dusk-host" id="dusk-host" aria-hidden="true"></div>
-  <!-- The forest continues behind the reading (dusk.css: the understory). -->
-  <div class="understory" aria-hidden="true"><span class="understory-light"></span></div>
+  <!-- The forest continues behind the reading. -->
+  <Understory />
 
   <section class="dusk-hero" id="top" aria-label="Introduction">
     <div class="hero-intro-inner">

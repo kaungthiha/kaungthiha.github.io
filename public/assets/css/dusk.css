@@ -187,6 +187,20 @@ body:has(.grove.is-entered) .understory { opacity: 1; }
 }
 body:has(.grove.has-open) .understory-light { opacity: 0.5; }
 
+/* A banyan bough at the top right, aerial roots down the margin
+   (Understory.astro). Wide screens only, where the margin is empty. */
+.understory-banyan {
+  position: absolute;
+  top: -6px;
+  right: -4px;
+  width: min(17vw, 270px);
+  height: auto;
+  color: rgba(7, 13, 14, 0.62);
+  transform-origin: 100% 0;
+  display: none;
+}
+@media (min-width: 1180px) { .understory-banyan { display: block; } }
+
 html[data-theme="light"] .understory { --mist-a: 0.2; --light: 150, 175, 200; --light-a: 0.085; }
 html[data-theme="dawn"] .understory { --light: 214, 172, 150; --light-a: 0.06; }
 html[data-theme="dark"] .understory { --mist: 96, 118, 160; --mist-a: 0.13; --light: 150, 165, 210; --light-a: 0.05; }
@@ -203,12 +217,15 @@ body.weather-cold .understory { --mist: 150, 168, 190; --mist-a: 0.2; --drift: 6
   .understory::before { animation: understory-mist var(--drift) ease-in-out infinite alternate; }
   .understory::after { animation: understory-shade 27s ease-in-out infinite alternate; }
   .understory-light { animation: understory-light 41s ease-in-out infinite alternate; }
+  .understory-banyan { animation: understory-banyan 31s ease-in-out infinite alternate; }
   .understory::before,
   .understory::after,
-  .understory-light { animation-play-state: paused; }
+  .understory-light,
+  .understory-banyan { animation-play-state: paused; }
   body:has(.grove.is-entered) .understory::before,
   body:has(.grove.is-entered) .understory::after,
-  body:has(.grove.is-entered) .understory-light { animation-play-state: running; }
+  body:has(.grove.is-entered) .understory-light,
+  body:has(.grove.is-entered) .understory-banyan { animation-play-state: running; }
 }
 @keyframes understory-mist {
   from { transform: translate3d(-3%, 1.5%, 0) scale(1); }
@@ -217,6 +234,10 @@ body.weather-cold .understory { --mist: 150, 168, 190; --mist-a: 0.2; --drift: 6
 @keyframes understory-shade {
   from { transform: translate3d(-1%, -0.6%, 0) rotate(-0.4deg); }
   to { transform: translate3d(1.2%, 0.7%, 0) rotate(0.5deg); }
+}
+@keyframes understory-banyan {
+  from { transform: rotate(-0.5deg); }
+  to { transform: rotate(0.7deg); }
 }
 @keyframes understory-light {
   from { transform: translate3d(-7%, 0, 0); }
