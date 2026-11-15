@@ -9,12 +9,15 @@
      colour by time of day, drifting clouds behind the leaves, stars and a
      moon in tonight's real phase, valley mist, fog, fireflies, rain, snow,
      lightning, film grain — all driven by the existing weather.js state
-     (`weather:change` → {mode, phase}).
+     (`weather:change` → {mode, phase}), with a light seasonal bias on
+     top (season.ts; `season:change`).
 
    One fullscreen WebGL2 pass; no 3D engine needed for a painted plate.
    Falls back to the static painting (CSS background) without WebGL2, and
    renders a single still frame under prefers-reduced-motion.
    ────────────────────────────────────────────────────────────────────── */
+
+import { currentSeason, type Season } from './season';
 
 type Mode = 'sunny' | 'clear' | 'cloudy' | 'rainy' | 'stormy' | 'snowy' | 'foggy' | 'windy' | 'hot' | 'cold';
 type Phase = 'day' | 'dawn' | 'dusk' | 'night';
@@ -91,11 +94,21 @@ const WEATHER: Record<Mode, Weather> = {
   foggy: { ...CALM, clouds: 0.4, satMul: 0.65, contrastMul: 0.85, skyGrey: 0.4, skyClarity: 0, mist: 1, fog: 0.7, fireflyMul: 0.3, wind: 0.6 },
 };
 
+// ── Season on top of both: a light bias on the land's colour and the air.
+// It never adds weather; overcast and storms mute it (see compose).
+interface SeasonLook { tint: Vec3; sat: number; mist: Vec3; wind: number }
+const SEASON_LOOK: Record<Season, SeasonLook> = {
+  spring: { tint: [0.98, 1.03, 0.98], sat: 1.03, mist: [0.96, 1, 1.04], wind: 1 },
+  summer: { tint: [1, 1.01, 0.96], sat: 1.04, mist: [0.97, 0.99, 1.03], wind: 1 },
+  autumn: { tint: [1.045, 1, 0.93], sat: 1, mist: [0.96, 0.98, 1.04], wind: 1 },
+  winter: { tint: [0.94, 0.985, 1.06], sat: 0.9, mist: [0.9, 0.97, 1.08], wind: 0.8 },
+};
+
 // The numeric uniforms that ease between states (scalars and colours).
 interface Params {
   exposure: number; sat: number; contrast: number; tint: Vec3; lift: Vec3;
   skyMix: number; skyTop: Vec3; skyBot: Vec3; skyDetail: number;
-  stars: number; moon: number; fireflies: number; mistColor: Vec3; cloudColor: Vec3;
+  stars: number; moon: number; fireflies: number; mistColor: Vec3; cloudColor: Vec3; seasonTint: Vec3;
   clouds: number; cloudSpeed: number; mist: number; fog: number; rain: number; snow: number; wind: number; pool: number;
 }
 
@@ -104,14 +117,16 @@ function mix3(a: Vec3, b: Vec3, t: number): Vec3 {
 }
 function mul3(a: Vec3, b: Vec3): Vec3 { return [a[0] * b[0], a[1] * b[1], a[2] * b[2]]; }
 
-function compose(mode: Mode, phase: Phase): Params {
+function compose(mode: Mode, phase: Phase, season: Season): Params {
   const L = PHASE_LOOK[phase];
   const w = WEATHER[mode];
+  const S = SEASON_LOOK[season];
+  const seasonal = 1 - 0.6 * w.skyGrey;
   // Overcast skies pull the phase's sky toward grey, darker at night.
   const grey = phase === 'night' ? mul3(w.greyTo, [0.25, 0.27, 0.32]) : w.greyTo;
   return {
     exposure: L.exposure * w.expMul,
-    sat: L.sat * w.satMul,
+    sat: L.sat * w.satMul * (1 + (S.sat - 1) * seasonal),
     contrast: L.contrast * w.contrastMul,
     tint: mul3(L.tint, w.tintMul),
     lift: L.lift,
@@ -122,15 +137,16 @@ function compose(mode: Mode, phase: Phase): Params {
     stars: L.stars * w.skyClarity,
     moon: L.moon * Math.max(w.skyClarity, 0.15),
     fireflies: L.fireflies * w.fireflyMul,
-    mistColor: L.mistColor,
+    mistColor: mul3(L.mistColor, S.mist),
     cloudColor: L.cloudColor.map((c) => c * w.cloudShade) as Vec3,
+    seasonTint: mix3([1, 1, 1], S.tint, seasonal),
     clouds: w.clouds,
     cloudSpeed: w.cloudSpeed,
     mist: w.mist,
     fog: w.fog,
     rain: w.rain,
     snow: w.snow,
-    wind: w.wind,
+    wind: w.wind * S.wind,
     pool: L.pool,
   };
 }
@@ -152,7 +168,7 @@ precision highp float;
 uniform sampler2D uTex, uMask;
 uniform vec2 uRes, uScale, uOffset, uCam, uMoonPos;
 uniform float uTime, uWind, uExposure, uSat, uContrast, uSkyMix, uSkyDetail;
-uniform vec3 uTint, uLift, uSkyTop, uSkyBot, uMistColor, uCloudColor, uFadeColor;
+uniform vec3 uTint, uLift, uSkyTop, uSkyBot, uMistColor, uCloudColor, uFadeColor, uSeason;
 uniform float uStars, uMoon, uMoonPhase, uMoonLit, uClouds, uCloudSpeed, uMist, uFog;
 uniform float uFireflies, uRain, uSnow, uFlash, uFade, uGrain, uPool;
 out vec4 outColor;
@@ -189,24 +205,29 @@ void main() {
   float aspect = uRes.x / uRes.y;
   float t = uTime;
 
-  // Painting coordinates (cover-fit + push-in), then parallax by depth.
+  // Painting coordinates (cover-fit + push-in), then parallax by depth: the
+  // far ridges and sky hold still, the near trees and meadow carry it.
   vec2 p = uv * uScale + uOffset;
   float d0 = texture(uMask, p).b;
-  vec2 pp = p + uCam * (d0 - 0.35);
+  vec2 pp = p + uCam * d0 * d0;
 
-  // Wind: coherent branch motion plus a finer leaf flutter, in gusts.
+  // Wind: gusts roll through as slow, uneven fronts with lulls between.
+  // Branches move together; the leaves flutter more as a gust passes, and
+  // near foliage answers more than far.
   float sway = texture(uMask, pp).g;
-  float gust = 0.6 + 0.4 * sin(t * 0.37 + pp.x * 2.0) * sin(t * 0.13 + 1.3);
+  float front = noise(vec2(pp.x * 1.6 - t * 0.09, pp.y * 0.7 + t * 0.045));
+  float gust = 0.3 + 0.85 * smoothstep(0.3, 0.75, front);
   vec2 w = vec2(noise(pp * vec2(9.0, 6.0) + vec2(t * 0.55, t * 0.21)) - 0.5,
                 noise(pp * vec2(7.0, 9.0) + vec2(-t * 0.37, t * 0.47)) - 0.5);
-  w += 0.35 * vec2(noise(pp * 34.0 + t * 1.6) - 0.5, noise(pp * 31.0 - t * 1.4) - 0.5);
-  vec2 s = pp + sway * uWind * gust * w * vec2(0.0045, 0.003);
+  w += (0.18 + 0.3 * gust) * vec2(noise(pp * 34.0 + t * 1.6) - 0.5, noise(pp * 31.0 - t * 1.4) - 0.5);
+  vec2 s = pp + sway * (0.45 + 0.75 * d0) * uWind * gust * w * vec2(0.0045, 0.003);
 
   vec3 raw = texture(uTex, s).rgb;
   vec3 m = texture(uMask, s).rgb;
   float sky = m.r, depth = m.b;
 
   vec3 col = grade(raw);
+  col *= mix(uSeason, vec3(1.0), sky);     // the season tints the land, not the sky
 
   // Re-paint the sky for the time of day, keeping the painting's brushwork.
   vec3 blurred = texture(uTex, s, 5.0).rgb;
@@ -261,9 +282,10 @@ void main() {
   if (uMist > 0.01 && s.y > 0.5) {
     float band = smoothstep(0.1, 0.22, depth) * (1.0 - smoothstep(0.48, 0.62, depth));
     if (band > 0.0) {
-      float f = fbm(vec2(s.x * 3.0 + t * 0.010, s.y * 9.0));
-      float f2 = fbm(vec2(s.x * 5.0 - t * 0.014, s.y * 14.0 + 3.0));
-      col = mix(col, uMistColor, uMist * band * smoothstep(0.45, 0.85, f * 0.6 + f2 * 0.5) * 0.6);
+      // Long, flat bands rather than billows: stretched wide, drifting slowly.
+      float f = fbm(vec2(s.x * 2.2 + t * 0.008, s.y * 10.0));
+      float f2 = fbm(vec2(s.x * 3.6 - t * 0.012, s.y * 15.0 + 3.0));
+      col = mix(col, uMistColor, uMist * band * smoothstep(0.42, 0.9, f * 0.6 + f2 * 0.5) * 0.6);
     }
   }
   // Fog veils the distance first.
@@ -395,7 +417,7 @@ export function initDusk(host: HTMLElement, opts: { masterUrl: string; maskUrl: 
   let phase: Phase = (initial?.phase in PHASE_LOOK
     ? initial.phase
     : themePhase[document.documentElement.dataset.theme || ''] ?? 'dusk') as Phase;
-  let target = compose(mode, phase);
+  let target = compose(mode, phase, currentSeason());
   const cur: Params = structuredClone(target);
   const moon = moonPhase();
   const moonLit = (1 - Math.cos(2 * Math.PI * moon)) / 2;
@@ -411,6 +433,8 @@ export function initDusk(host: HTMLElement, opts: { masterUrl: string; maskUrl: 
   // ── Layout: cover-fit with a small overscan for parallax ───────────
   let scale: [number, number] = [1, 1], offset: [number, number] = [0, 0];
   let progress = 0;
+  // Entering the grove (the Explore cue): a brief settle that rides on the scroll.
+  let enter = 0, enterAt = -1;
   const camTarget: [number, number] = [0, 0], cam: [number, number] = [0, 0];
 
   function layout(): void {
@@ -423,7 +447,7 @@ export function initDusk(host: HTMLElement, opts: { masterUrl: string; maskUrl: 
   function framing(): void {
     const A = canvas.width / canvas.height, P = PAINT_W / PAINT_H;
     // Push in toward the meadow as the visitor scrolls down.
-    const zoom = 1.025 + 0.09 * progress;
+    const zoom = 1.025 + 0.09 * progress + 0.012 * enter;
     let sx = 1, sy = 1;
     if (A > P) sy = P / A; else sx = A / P;
     sx /= zoom; sy /= zoom;
@@ -457,15 +481,21 @@ export function initDusk(host: HTMLElement, opts: { masterUrl: string; maskUrl: 
     cam[1] += (camTarget[1] - cam[1]) * Math.min(1, dt * 2.5);
     const drift = reduceMotion ? [0, 0] : [Math.sin(t * 0.05) * 0.0022, Math.cos(t * 0.037) * 0.0014];
     flash = lightning(t);
+    if (enterAt >= 0) {
+      const x = (now - enterAt) / 900;
+      enter = x < 1 ? Math.sin(Math.PI * x) ** 2 : 0;
+      if (x >= 1) enterAt = -1;
+    }
     framing();
 
     gl!.uniform2f(u('uRes'), canvas.width, canvas.height);
     gl!.uniform2f(u('uScale'), scale[0], scale[1]);
     gl!.uniform2f(u('uOffset'), offset[0], offset[1]);
-    gl!.uniform2f(u('uCam'), cam[0] + drift[0], cam[1] + drift[1]);
+    gl!.uniform2f(u('uCam'), cam[0] + drift[0], cam[1] + drift[1] + 0.004 * enter);
     gl!.uniform2f(u('uMoonPos'), MOON_POS[0], MOON_POS[1]);
     gl!.uniform1f(u('uTime'), t);
-    gl!.uniform1f(u('uWind'), reduceMotion ? 0 : cur.wind);
+    // The wind dies down as the visitor scrolls into the reading.
+    gl!.uniform1f(u('uWind'), reduceMotion ? 0 : cur.wind * (1 - 0.55 * progress));
     gl!.uniform1f(u('uExposure'), cur.exposure);
     gl!.uniform1f(u('uSat'), cur.sat);
     gl!.uniform1f(u('uContrast'), cur.contrast);
@@ -482,9 +512,10 @@ export function initDusk(host: HTMLElement, opts: { masterUrl: string; maskUrl: 
     gl!.uniform1f(u('uClouds'), cur.clouds);
     gl!.uniform1f(u('uCloudSpeed'), cur.cloudSpeed);
     gl!.uniform3fv(u('uCloudColor'), cur.cloudColor);
-    gl!.uniform1f(u('uMist'), cur.mist);
+    gl!.uniform1f(u('uMist'), cur.mist + 0.3 * enter);
     gl!.uniform1f(u('uFog'), cur.fog);
     gl!.uniform3fv(u('uMistColor'), cur.mistColor);
+    gl!.uniform3fv(u('uSeason'), cur.seasonTint);
     gl!.uniform1f(u('uFireflies'), cur.fireflies);
     gl!.uniform1f(u('uRain'), cur.rain);
     gl!.uniform1f(u('uSnow'), cur.snow);
@@ -526,9 +557,17 @@ export function initDusk(host: HTMLElement, opts: { masterUrl: string; maskUrl: 
     const d = (e as CustomEvent).detail || {};
     if (d.mode in WEATHER) mode = d.mode;
     if (d.phase in PHASE_LOOK) phase = d.phase;
-    target = compose(mode, phase);
+    target = compose(mode, phase, currentSeason());
     wake();
   });
+  window.addEventListener('season:change', () => { target = compose(mode, phase, currentSeason()); wake(); });
+  if (!reduceMotion) {
+    document.addEventListener('click', (e) => {
+      if (!(e.target as Element | null)?.closest?.('a[href="#grove"]') || progress >= 1) return;
+      enterAt = performance.now();
+      wake();
+    });
+  }
 
   // ── Boot ───────────────────────────────────────────────────────────
   Promise.all([

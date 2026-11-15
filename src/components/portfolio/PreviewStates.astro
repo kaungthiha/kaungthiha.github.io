@@ -1,10 +1,13 @@
 ---
 /**
  * A review tool, not a feature: add ?preview to the URL to get a panel that
- * cycles the painted forest through every daylight phase and weather without
- * waiting for them. Hidden (and inert) for everyone else.
+ * cycles the painted forest through every daylight phase, weather and season
+ * (and the April padauk accent) without waiting for them. Hidden (and inert)
+ * for everyone else.
  */
+
 const phases = ['dawn', 'day', 'dusk', 'night'];
+const seasons = ['spring', 'summer', 'autumn', 'winter'];
 const weathers = ['clear', 'cloudy', 'windy', 'rainy', 'stormy', 'foggy', 'snowy'];
 ---
 
@@ -16,9 +19,15 @@ const weathers = ['clear', 'cloudy', 'windy', 'rainy', 'stormy', 'foggy', 'snowy
   <div class="dusk-preview-row" data-kind="mode">
     {weathers.map((w) => <button type="button" data-value={w}>{w}</button>)}
   </div>
+  <div class="dusk-preview-row" data-kind="season">
+    {seasons.map((s) => <button type="button" data-value={s}>{s}</button>)}
+    <button type="button" data-padauk>padauk</button>
+  </div>
 </details>
 
 <script>
+  import { currentSeason, initSeason, padaukWanted, setPadauk, setSeason, type Season } from '../../scripts/season';
+
   const panel = document.getElementById('dusk-preview');
   if (panel && new URLSearchParams(location.search).has('preview')) {
     panel.hidden = false;
@@ -26,7 +35,7 @@ const weathers = ['clear', 'cloudy', 'windy', 'rainy', 'stormy', 'foggy', 'snowy
 
     // The buttons broadcast the same event weather.js does.
     const state: Record<'mode' | 'phase', string> = { mode: 'clear', phase: 'dusk' };
-    const buttons = Array.from(panel.querySelectorAll<HTMLButtonElement>('button'));
+    const buttons = Array.from(panel.querySelectorAll<HTMLButtonElement>('[data-kind="mode"] button, [data-kind="phase"] button'));
     const kindOf = (b: HTMLButtonElement) => b.parentElement?.dataset.kind as 'mode' | 'phase';
     const sync = () => {
       const live = (window as any).KTWeatherState;
@@ -35,6 +44,18 @@ const weathers = ['clear', 'cloudy', 'windy', 'rainy', 'stormy', 'foggy', 'snowy
     };
     window.addEventListener('weather:change', sync);
     sync();
+
+    // Season and the padauk accent are their own signal (season.ts).
+    initSeason();
+    const seasons = Array.from(panel.querySelectorAll<HTMLButtonElement>('[data-kind="season"] button[data-value]'));
+    const padauk = panel.querySelector<HTMLButtonElement>('[data-padauk]')!;
+    const syncSeason = () => {
+      for (const b of seasons) b.setAttribute('aria-pressed', String(b.dataset.value === currentSeason()));
+      padauk.setAttribute('aria-pressed', String(padaukWanted()));
+    };
+    for (const b of seasons) b.addEventListener('click', () => { setSeason(b.dataset.value as Season); syncSeason(); });
+    padauk.addEventListener('click', () => { setPadauk(!padaukWanted()); syncSeason(); });
+    syncSeason();
     for (const b of buttons) {
       b.addEventListener('click', () => {
         state[kindOf(b)] = b.dataset.value!;

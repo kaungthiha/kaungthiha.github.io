@@ -65,6 +65,9 @@ const linkedin = getProfile().public_links?.linkedin;
   <script>
     import { initDusk } from '../scripts/dusk';
     import { initGrove } from '../scripts/grove';
+    import { initSeason } from '../scripts/season';
+
+    initSeason();
 
     const grove = document.querySelector<HTMLElement>('[data-grove]');
     if (grove) initGrove(grove);

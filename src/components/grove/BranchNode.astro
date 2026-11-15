@@ -10,14 +10,22 @@ interface Props {
   icon: 'work' | 'create' | 'loves';
   teaser: string;
   sub?: string;
+  /** A second sprig that season.ts can swap in (see grove.css). */
+  accent?: 'padauk';
 }
 
-const { label, icon, teaser, sub } = Astro.props;
+const { label, icon, teaser, sub, accent } = Astro.props;
 ---
 
 <summary class="branch-node">
   <span class="branch-node-row">
-    <svg class="branch-sprig" viewBox="0 0 60 80" aria-hidden="true"><use href="#grove-sprig" /></svg>
+    <svg class:list={['branch-sprig', accent && 'branch-sprig--plain']} viewBox="0 0 60 80" aria-hidden="true"><use href="#grove-sprig" /></svg>
+    {accent === 'padauk' && (
+      <span class="branch-sprig branch-sprig--padauk" aria-hidden="true">
+        <svg viewBox="0 0 60 80"><use href="#grove-padauk" /></svg>
+        <i class="padauk-petal"></i><i class="padauk-petal"></i>
+      </span>
+    )}
     <span class="branch-pill">
       <svg class="branch-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
         {icon === 'work' && <><rect x="4" y="5" width="16" height="11" rx="1.5" /><path d="M2 19.5h20" /></>}
