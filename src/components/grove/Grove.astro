@@ -5,7 +5,8 @@
  * Without JS every branch is open: a plain, fully readable document. With
  * src/scripts/grove.ts it starts as an overview at the root; opening one
  * branch grows its twigs while the others zoom out, and the light travels
- * down the trunk to it.
+ * down the trunk to it. The script also draws the tree itself (.grove-tree):
+ * a gently uneven trunk, and the open branch's own spine growing off it.
  */
 import WorkBranch from './WorkBranch.astro';
 import CreateBranch from './CreateBranch.astro';
@@ -76,12 +77,30 @@ const sections = [
         <li><a href={`#${s.id}`} data-section={s.id}><span class="mini-dot" aria-hidden="true"></span><span class="mini-label">{s.label}</span></a></li>
       ))}
     </ol>
+    <a class="mini-back" href="#grove" aria-label="Back to all branches"><span aria-hidden="true">↑</span><span class="mini-back-label">All branches</span></a>
   </nav>
 
   <div class="grove-col">
     <div class="trunk" aria-hidden="true">
       <span class="trunk-lit"></span>
     </div>
+    <!-- The drawn tree (grove.ts sets the paths from where the nodes sit). -->
+    <svg class="grove-tree" aria-hidden="true" focusable="false">
+      <defs>
+        <linearGradient id="tree-dim" gradientUnits="userSpaceOnUse" x1="0" x2="0" y1="0" y2="64">
+          <stop offset="0" stop-color="#d6a65f" stop-opacity="0" />
+          <stop offset="1" stop-color="#d6a65f" stop-opacity="0.24" />
+        </linearGradient>
+        <linearGradient id="tree-gold" gradientUnits="userSpaceOnUse" x1="0" x2="0" y1="0" y2="48">
+          <stop offset="0" stop-color="#e8c27f" stop-opacity="0" />
+          <stop offset="1" stop-color="#e8c27f" />
+        </linearGradient>
+      </defs>
+      <path class="tree-trunk" />
+      <path class="tree-lit" pathLength="1" />
+      <path class="tree-spine" pathLength="1" />
+      <circle class="tree-spark" r="4" />
+    </svg>
     <svg class="trunk-crown" viewBox="0 0 60 80" aria-hidden="true"><use href="#grove-sprig" /></svg>
     <p class="grove-hint">Pick a branch</p>
 

@@ -277,7 +277,7 @@
   position: absolute;
   left: var(--from-trunk);
   top: calc(var(--twig-y) - 1.1rem);
-  width: calc(var(--trunk-pad) - var(--trunk-c) - 14px);
+  width: calc(-1 * var(--from-trunk) - 14px);
   height: 1.1rem;
   border-left: 1.5px solid var(--gold-dim);
   border-bottom: 1.5px solid var(--gold-dim);
@@ -294,6 +294,83 @@
   background: var(--gold);
   box-shadow: 0 0 6px rgba(232, 194, 127, 0.5);
 }
+
+/* Grown, not stamped: the elbows differ a little from twig to twig. */
+.twig:nth-child(3n + 2)::before { border-bottom-left-radius: 0.65rem; }
+.twig:nth-child(3n)::before { height: 1.3rem; top: calc(var(--twig-y) - 1.3rem); border-bottom-left-radius: 1.1rem; }
+
+/* ── The drawn tree (grove.ts): with JS the ruled trunk above gives way to an
+      SVG one, and the open branch grows a spine of its own beside its twigs ── */
+.grove { --spine-off: 18px; }
+.grove-tree { display: none; }
+.grove.is-live .grove-tree {
+  display: block;
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  pointer-events: none;
+}
+.grove.is-live .trunk { background: none; }
+.grove.is-live .trunk-lit { display: none; }
+.tree-trunk, .tree-lit, .tree-spine { fill: none; stroke-width: 2; stroke-linecap: round; }
+/* The ancestral trunk stays, quieter, while a branch is open. */
+.tree-trunk { stroke: url(#tree-dim); transition: opacity 0.6s ease; }
+.grove.has-open .tree-trunk { opacity: 0.7; }
+.tree-lit {
+  stroke: url(#tree-gold);
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+  filter: drop-shadow(0 0 4px rgba(232, 194, 127, 0.5));
+}
+.tree-spine {
+  stroke: var(--gold-deep);
+  stroke-dasharray: 1;
+  stroke-dashoffset: 0;
+  opacity: 0;
+  transition: opacity 0.35s ease;
+  filter: drop-shadow(0 0 3px rgba(232, 194, 127, 0.35));
+}
+.tree-spine.is-on { opacity: 1; }
+.tree-spark { fill: #fff1cf; filter: drop-shadow(0 0 5px rgba(232, 194, 127, 0.9)); }
+/* Inside the open branch, twigs and rings hang off its spine, not the trunk. */
+.grove.is-live .branch[open] > .branch-body { --from-trunk: calc(var(--trunk-c) - var(--trunk-pad) + var(--spine-off)); }
+
+/* An open twig runs on a little way beside what it opened. */
+.grove.is-live .twig-details[open]::before {
+  content: '';
+  position: absolute;
+  left: -11.25px;
+  top: calc(var(--twig-y) + 8px);
+  bottom: 0.25rem;
+  width: 1.5px;
+  border-radius: 1px;
+  background: linear-gradient(to bottom, var(--gold-dim), rgba(232, 194, 127, 0));
+  transform-origin: top;
+}
+
+/* Back to the overview, at the end of each branch (added by grove.ts). */
+.grove-back {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 2.75rem;
+  padding: 0.55rem 1.1rem 0.55rem 0.9rem;
+  border: 1.5px solid rgba(232, 194, 127, 0.35);
+  border-radius: 999px;
+  background: transparent;
+  font-family: var(--font-sans);
+  font-size: 0.875rem;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  color: var(--dusk-sage);
+  cursor: pointer;
+  transition: border-color 0.3s ease, color 0.3s ease;
+}
+.grove-back:hover { border-color: var(--gold); color: var(--dusk-cream); }
+.grove-back:focus-visible { outline: 2px solid var(--gold); outline-offset: 3px; }
 
 /* A twig's head opens it (employers, projects). */
 .twig-head {
@@ -406,21 +483,27 @@
   .grove.is-live .branch[open] .ring { animation: grove-rise 0.6s cubic-bezier(0.2, 0.7, 0.2, 1) both; }
   .grove.is-live .branch[open] .twig {
     animation: grove-rise 0.6s cubic-bezier(0.2, 0.7, 0.2, 1) both;
-    animation-delay: calc(140ms + var(--i, 0) * 60ms);
+    animation-delay: calc(140ms + min(var(--i, 0), 9) * 60ms);
   }
   .grove.is-live .branch[open] .twig::before {
     animation: twig-grow 0.8s cubic-bezier(0.3, 0.7, 0.2, 1) both;
-    animation-delay: calc(100ms + var(--i, 0) * 60ms);
+    animation-delay: calc(100ms + min(var(--i, 0), 9) * 60ms);
   }
   .grove.is-live .branch[open] .twig::after {
     animation: bud-pop 0.45s cubic-bezier(0.3, 1.4, 0.5, 1) both;
-    animation-delay: calc(420ms + var(--i, 0) * 60ms);
+    animation-delay: calc(420ms + min(var(--i, 0), 9) * 60ms);
   }
   .grove.is-live .twig-details[open] > .twig-body { animation: grove-rise 0.45s ease both; }
+  .grove.is-live .twig-details[open]::before { animation: twiglet-grow 0.5s cubic-bezier(0.3, 0.7, 0.2, 1) both; }
+  .tree-lit { transition: stroke-dashoffset 0.9s cubic-bezier(0.4, 0, 0.2, 1); }
+  .tree-spark { transition: transform 0.9s cubic-bezier(0.4, 0, 0.2, 1); }
+  .tree-spine.is-growing { animation: spine-grow 0.7s cubic-bezier(0.3, 0.7, 0.2, 1) both; }
   .grove.is-live .branch[open] .yangon-vignette { animation: grove-rise 0.9s ease 0.6s both; }
 }
 @keyframes grove-rise { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
 @keyframes twig-grow { from { clip-path: inset(0 100% 0 0); } to { clip-path: inset(0 0 0 0); } }
+@keyframes twiglet-grow { from { transform: scaleY(0); } to { transform: scaleY(1); } }
+@keyframes spine-grow { from { stroke-dashoffset: 1; } to { stroke-dashoffset: 0; } }
 @keyframes bud-pop { from { transform: scale(0); } to { transform: scale(1); } }
 
 /* A leaf sprig leaning out from the trunk beside each node. */
@@ -528,6 +611,7 @@
     padding: 0.35rem 0;
   }
   .mini-trunk ol { flex-direction: column; gap: 2.4rem; }
+  .mini-back { position: absolute; left: 1px; top: calc(100% + 1.75rem); white-space: nowrap; }
   .mini-line {
     left: 5px;
     top: 0.75rem;
@@ -547,11 +631,13 @@
     background: linear-gradient(to bottom, rgba(14, 23, 20, 0.97), rgba(14, 23, 20, 0.9) 62%, rgba(14, 23, 20, 0));
   }
   .mini-trunk ol { justify-content: center; gap: clamp(1.5rem, 7vw, 3rem); }
+  .mini-back { position: absolute; left: var(--gutter); top: 0.7rem; padding: 0.15rem 0.4rem; font-size: 1rem; }
+  .mini-back-label { display: none; }
   .mini-trunk a { gap: 0.45rem; }
   .mini-line { display: none; }
 }
 
 @media (max-width: 640px) {
-  .grove { --trunk-x: 0.2rem; --trunk-pad: 2.4rem; }
+  .grove { --trunk-x: 0.2rem; --trunk-pad: 2.4rem; --spine-off: 10px; }
   .branch-sprig { --sprig-flip: 1; --sprig-rest: 14deg; left: calc(var(--from-trunk) - 19px); }
 }
