@@ -133,3 +133,92 @@ body.weather-cold #top .identity-weather-line { color: #dbe7f1; }
   .dusk-preview[open] { left: 0.75rem; }
 }
 /* The grove's mini-trunk bar owns the top edge on narrow screens. */
+
+/* ==========================================================================
+   The understory: the same forest, continued behind the reading.
+   Once the painting has faded, three cheap layers keep the air alive at the
+   margins: a slate-blue wash with drifting mist, the canopy's shade, and one
+   slow pass of light. Transforms only (no shader, no blur, no JS loop). They
+   run only while the grove is on screen (grove.ts sets .is-entered), and hold
+   still under prefers-reduced-motion. Colour follows the daylight phase,
+   Arlington's weather, and the season through the custom properties below.
+   ========================================================================== */
+.understory {
+  --mist: 88, 115, 139;
+  --mist-a: 0.17;
+  --shade-a: 0.5;
+  --light: 112, 121, 166;
+  --light-a: 0.07;
+  --drift: 36s;
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  overflow: hidden;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 1.4s ease;
+  background: linear-gradient(to bottom, rgba(20, 36, 59, 0.26), rgba(20, 36, 59, 0.4));
+}
+body:has(.grove.is-entered) .understory { opacity: 1; }
+.understory::before,
+.understory::after,
+.understory-light { content: ''; position: absolute; will-change: transform; }
+/* Mist pooling at the edges, never across the reading column. */
+.understory::before {
+  inset: -12% -18%;
+  background:
+    radial-gradient(ellipse 36% 30% at 9% 68%, rgba(var(--mist), var(--mist-a)), transparent 70%),
+    radial-gradient(ellipse 32% 26% at 93% 30%, rgba(var(--mist), calc(var(--mist-a) * 0.85)), transparent 70%),
+    radial-gradient(ellipse 52% 18% at 62% 103%, rgba(var(--mist), calc(var(--mist-a) * 1.1)), transparent 72%);
+}
+/* The canopy's shade, leaning in from above. */
+.understory::after {
+  inset: -10% -14%;
+  background:
+    radial-gradient(ellipse 34% 26% at 4% 6%, rgba(8, 14, 13, var(--shade-a)), transparent 72%),
+    radial-gradient(ellipse 30% 22% at 97% 2%, rgba(8, 14, 13, calc(var(--shade-a) * 0.9)), transparent 72%),
+    radial-gradient(ellipse 16% 34% at 101% 62%, rgba(8, 14, 13, calc(var(--shade-a) * 0.7)), transparent 74%);
+}
+/* One soft band of light crossing slowly; it dims while a branch is being read. */
+.understory-light {
+  inset: -20%;
+  background: linear-gradient(115deg, transparent 38%, rgba(var(--light), var(--light-a)) 47%, transparent 58%);
+  transition: opacity 1.2s ease;
+}
+body:has(.grove.has-open) .understory-light { opacity: 0.5; }
+
+html[data-theme="light"] .understory { --mist-a: 0.2; --light: 150, 175, 200; --light-a: 0.085; }
+html[data-theme="dawn"] .understory { --light: 214, 172, 150; --light-a: 0.06; }
+html[data-theme="dark"] .understory { --mist: 96, 118, 160; --mist-a: 0.13; --light: 150, 165, 210; --light-a: 0.05; }
+html[data-season="autumn"] .understory { --mist-a: 0.15; }
+html[data-season="winter"] .understory { --mist: 120, 140, 168; --drift: 54s; }
+/* Real weather outranks the season. */
+body.weather-rainy .understory,
+body.weather-stormy .understory,
+body.weather-foggy .understory { --mist-a: 0.27; --shade-a: 0.62; --light-a: 0.02; }
+body.weather-snowy .understory,
+body.weather-cold .understory { --mist: 150, 168, 190; --mist-a: 0.2; --drift: 64s; }
+
+@media (prefers-reduced-motion: no-preference) {
+  .understory::before { animation: understory-mist var(--drift) ease-in-out infinite alternate; }
+  .understory::after { animation: understory-shade 27s ease-in-out infinite alternate; }
+  .understory-light { animation: understory-light 41s ease-in-out infinite alternate; }
+  .understory::before,
+  .understory::after,
+  .understory-light { animation-play-state: paused; }
+  body:has(.grove.is-entered) .understory::before,
+  body:has(.grove.is-entered) .understory::after,
+  body:has(.grove.is-entered) .understory-light { animation-play-state: running; }
+}
+@keyframes understory-mist {
+  from { transform: translate3d(-3%, 1.5%, 0) scale(1); }
+  to { transform: translate3d(3%, -1.5%, 0) scale(1.05); }
+}
+@keyframes understory-shade {
+  from { transform: translate3d(-1%, -0.6%, 0) rotate(-0.4deg); }
+  to { transform: translate3d(1.2%, 0.7%, 0) rotate(0.5deg); }
+}
+@keyframes understory-light {
+  from { transform: translate3d(-7%, 0, 0); }
+  to { transform: translate3d(7%, 0, 0); }
+}
