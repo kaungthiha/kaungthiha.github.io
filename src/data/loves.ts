@@ -58,5 +58,9 @@ export const loves: LoveNote[] = [
   },
 ];
 
+/** A small drawn memory of home at the end of the section: Shwedagon, far
+    off above the trees of Yangon (src/components/grove/YangonVignette.astro). */
+export const yangonVignette = true;
+
 /** Optional personal nature photo for the Loves section (see note above). */
 export const fieldPhoto: { src: string; alt: string; caption?: string } | null = null;

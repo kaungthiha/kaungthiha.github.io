@@ -3,7 +3,8 @@
  * Loves, as a branch: each field note is a small twig with its category.
  */
 import BranchNode from './BranchNode.astro';
-import { loves, lovesHeading, fieldPhoto } from '../../data/loves';
+import YangonVignette from './YangonVignette.astro';
+import { loves, lovesHeading, fieldPhoto, yangonVignette } from '../../data/loves';
 
 const sub = loves.map((item) => item.category).join(', ') + '.';
 ---
@@ -35,5 +36,7 @@ const sub = loves.map((item) => item.category).join(', ') + '.';
         {fieldPhoto.caption && <figcaption>{fieldPhoto.caption}</figcaption>}
       </figure>
     )}
+
+    {yangonVignette && <YangonVignette />}
   </div>
 </details>

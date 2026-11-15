@@ -1,0 +1,99 @@
+---
+/**
+ * A memory of Yangon at the end of the Loves branch: Shwedagon, small and
+ * far off, above the trees at twilight. It's a picture, nothing else: not a
+ * link or a control, it doesn't move, and it stays in this personal corner
+ * rather than in the Arlington landscape up top. Shwedagon is an active
+ * sacred site, so it's drawn once, quietly, and never reused as decoration.
+ *
+ * Drawn here as inline SVG (no asset, no text in the image). Switch it off
+ * with `yangonVignette` in src/data/loves.ts.
+ */
+const W = 720;
+const H = 220;
+
+// The stupa's profile, top to bottom: [height %, half-width %]. Finial and
+// umbrella, banana bud, lotus petals, the rings, the bell, then the terraces.
+const PROFILE: Array<[number, number]> = [
+  [0, 0.25], [5, 0.45], [6, 1.6], [7.5, 1.8], [8.5, 0.9],
+  [10, 1.1], [13, 2.6], [17, 3.3], [21, 2.7], [23, 2.2],
+  [24, 3.6], [26, 3.9], [27, 3.1],
+  [30, 3.5], [34, 4.3], [38, 5.3], [41, 6.4],
+  [45, 7.6], [49, 9.2], [53, 11.4], [56, 14], [58, 16.2],
+  [59, 17], [62, 17],
+  [62, 19.5], [67, 19.5], [67, 22.5], [72, 22.5], [72, 25.5], [77, 25.5],
+  [77, 29], [84, 29], [84, 33], [91, 33], [91, 37.5], [100, 37.5],
+];
+const CX = 432, TOP = 50, SCALE = 0.94;
+const pt = (x: number, y: number) => `${(CX + x * SCALE).toFixed(1)} ${(TOP + y * SCALE).toFixed(1)}`;
+const stupa =
+  'M' + PROFILE.map(([y, hw]) => pt(hw, y)).join('L') +
+  'L' + [...PROFILE].reverse().map(([y, hw]) => pt(-hw, y)).join('L') + 'Z';
+// The small stupas that ring the terrace.
+const lesser = [-44, -31, 31, 44]
+  .map((x) => `M${pt(x - 2.6, 100)}L${pt(x - 2, 91)}L${pt(x - 0.7, 88)}L${pt(x, 82)}L${pt(x + 0.7, 88)}L${pt(x + 2, 91)}L${pt(x + 2.6, 100)}Z`)
+  .join('');
+
+// A line of tree crowns: rounded domes of uneven size, closed along the bottom.
+function canopy(base: number, amp: number, seed: number, lift?: { x: number; h: number; w: number }): string {
+  let d = `M0 ${H + 14}`;
+  for (let x = 0; x <= W; x += 6) {
+    let y = base - amp * (0.6 * Math.abs(Math.sin(x * 0.035 + seed)) + 0.4 * Math.abs(Math.sin(x * 0.09 + seed * 1.7)));
+    if (lift) y -= lift.h * Math.exp(-((x - lift.x) ** 2) / (2 * lift.w ** 2));
+    d += `L${x} ${y.toFixed(1)}`;
+  }
+  return `${d}L${W} ${H + 14}Z`;
+}
+// A toddy palm: a leaning trunk and a round crown of fronds.
+function palm(x: number, y: number, h: number, lean: number): string {
+  const tx = x + lean, ty = y - h;
+  let d = `M${x} ${y}Q${x + lean * 0.2} ${y - h * 0.55} ${tx} ${ty}`;
+  for (let i = 0; i < 9; i++) {
+    const a = Math.PI * (1.08 + (i / 8) * 0.84) + (i % 2 ? 0.07 : -0.05);
+    const r = 13 + (i % 3) * 2.5;
+    d += `M${tx} ${ty}l${(Math.cos(a) * r).toFixed(1)} ${(Math.sin(a) * r * 0.9 + (i === 0 || i === 8 ? 5 : 0)).toFixed(1)}`;
+  }
+  return d;
+}
+---
+
+<figure class="yangon-vignette">
+  <svg viewBox={`0 0 ${W} ${H}`} role="img" aria-label="Shwedagon Pagoda, small in the distance above the trees of Yangon at twilight.">
+    <defs>
+      <linearGradient id="yv-sky" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0" stop-color="#27344f" stop-opacity="0" />
+        <stop offset="0.45" stop-color="#4a5a78" stop-opacity="0.55" />
+        <stop offset="0.72" stop-color="#7079a6" stop-opacity="0.5" />
+        <stop offset="0.9" stop-color="#c47f45" stop-opacity="0.3" />
+      </linearGradient>
+      <linearGradient id="yv-gold" x1="0" y1="0" x2="1" y2="0">
+        <stop offset="0" stop-color="#dcb571" />
+        <stop offset="1" stop-color="#a98249" />
+      </linearGradient>
+      <linearGradient id="yv-haze" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0" stop-color="#7079a6" stop-opacity="0" />
+        <stop offset="1" stop-color="#7079a6" stop-opacity="0.42" />
+      </linearGradient>
+      <!-- Roughens the edges a little, so the trees read as brushwork. -->
+      <filter id="yv-brush" x="-2%" y="-10%" width="104%" height="120%">
+        <feTurbulence type="fractalNoise" baseFrequency="0.035" numOctaves="2" seed="7" />
+        <feDisplacementMap in="SourceGraphic" scale="7" />
+      </filter>
+    </defs>
+
+    <rect width={W} height={H} fill="url(#yv-sky)" />
+    <g opacity="0.88">
+      <path d={stupa} fill="url(#yv-gold)" />
+      <path d={lesser} fill="#a98249" />
+    </g>
+    <rect y="108" width={W} height="42" fill="url(#yv-haze)" />
+    <g filter="url(#yv-brush)">
+      <path d={canopy(150, 16, 0.6)} fill="#3d4d63" />
+      <rect y="140" width={W} height="34" fill="url(#yv-haze)" opacity="0.7" />
+      <path d={canopy(170, 20, 2.1)} fill="#263a38" />
+      <path d={palm(610, 176, 52, 7) + palm(642, 180, 40, -4)} fill="none" stroke="#1a2a25" stroke-width="2.2" stroke-linecap="round" />
+      <path d={canopy(196, 22, 4.4, { x: 60, h: 62, w: 70 })} fill="#14201b" />
+    </g>
+  </svg>
+  <figcaption><span lang="my">ရန်ကုန်</span> · Yangon</figcaption>
+</figure>

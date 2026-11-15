@@ -354,6 +354,26 @@
 
 .grove .field-photo { margin-top: 2.5rem; }
 
+/* A memory of Yangon closing the Loves branch (YangonVignette.astro): a still
+   picture that fades out at its edges, like something half remembered. */
+.yangon-vignette { margin: 3rem 0 0; max-width: 34rem; }
+.yangon-vignette svg {
+  display: block;
+  width: 100%;
+  height: auto;
+  -webkit-mask-image: radial-gradient(ellipse 50% 80% at 50% 60%, #000 38%, transparent 97%);
+  mask-image: radial-gradient(ellipse 50% 80% at 50% 60%, #000 38%, transparent 97%);
+}
+.yangon-vignette figcaption {
+  margin-top: 0.35rem;
+  text-align: center;
+  font-family: var(--font-serif);
+  font-size: 0.9375rem;
+  font-style: italic;
+  color: var(--text-muted);
+}
+.yangon-vignette figcaption [lang="my"] { font-style: normal; }
+
 /* ── Motion: nodes grow in on arrival; a branch's twigs grow when it opens ── */
 @media (prefers-reduced-motion: no-preference) {
   /* The idle sway belongs to the overview. Once a branch is open and being
@@ -397,6 +417,7 @@
     animation-delay: calc(420ms + var(--i, 0) * 60ms);
   }
   .grove.is-live .twig-details[open] > .twig-body { animation: grove-rise 0.45s ease both; }
+  .grove.is-live .branch[open] .yangon-vignette { animation: grove-rise 0.9s ease 0.6s both; }
 }
 @keyframes grove-rise { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
 @keyframes twig-grow { from { clip-path: inset(0 100% 0 0); } to { clip-path: inset(0 0 0 0); } }
