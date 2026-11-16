@@ -118,13 +118,6 @@ export function initGrove(root: HTMLElement): void {
   }
 
   for (const b of branches) {
-    const back = document.createElement('button');
-    back.type = 'button';
-    back.className = 'grove-back';
-    back.innerHTML = '<span aria-hidden="true">←</span> Back to branches';
-    back.addEventListener('click', overview);
-    b.querySelector(':scope > .branch-body')?.append(back);
-
     const summary = summaryOf(b);
     summary.addEventListener('click', (e) => {
       e.preventDefault();

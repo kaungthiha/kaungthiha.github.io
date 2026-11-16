@@ -75,8 +75,9 @@ const sections = [
     </defs>
   </svg>
 
-  <!-- The mini-trunk: jump between branches. A vertical trunk in the left
-       margin on wide screens, a horizontal one along the top on narrow. -->
+  <!-- The mini-trunk: jump between branches, or back out to all of them. A
+       vertical trunk in the left margin on wide screens; on narrow ones a
+       bar along the top, where "All" leads the row of sections. -->
   <nav class="mini-trunk" aria-label="Sections">
     <span class="mini-line" aria-hidden="true"><span class="mini-lit"></span></span>
     <ol>
@@ -84,7 +85,7 @@ const sections = [
         <li><a href={`#${s.id}`} data-section={s.id}><span class="mini-dot" aria-hidden="true"></span><span class="mini-label">{s.label}</span></a></li>
       ))}
     </ol>
-    <a class="mini-back" href="#grove" aria-label="Back to all branches"><span aria-hidden="true">↑</span><span class="mini-back-label">All branches</span></a>
+    <a class="mini-back" href="#grove" aria-label="Back to all branches"><span class="mini-back-arrow" aria-hidden="true">↑</span><span class="mini-back-label">All<span class="mini-back-more"> branches</span></span></a>
   </nav>
 
   <div class="grove-col">

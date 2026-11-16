@@ -415,27 +415,6 @@
   transform-origin: top;
 }
 
-/* Back to the overview, at the end of each branch (added by grove.ts). */
-.grove-back {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.5rem;
-  margin-top: 2.75rem;
-  padding: 0.55rem 1.1rem 0.55rem 0.9rem;
-  border: 1.5px solid rgba(232, 194, 127, 0.35);
-  border-radius: 999px;
-  background: transparent;
-  font-family: var(--font-sans);
-  font-size: 0.875rem;
-  font-weight: 500;
-  letter-spacing: 0.02em;
-  color: var(--dusk-sage);
-  cursor: pointer;
-  transition: border-color 0.3s ease, color 0.3s ease;
-}
-.grove-back:hover { border-color: var(--gold); color: var(--dusk-cream); }
-.grove-back:focus-visible { outline: 2px solid var(--gold); outline-offset: 3px; }
-
 /* A twig's head opens it (employers, projects). */
 .twig-head {
   display: block;
@@ -700,18 +679,28 @@
   }
   .mini-lit { top: 0; left: 0; width: 100%; height: calc(var(--mini-progress, 0) * 100%); }
 }
-/* Narrow screens: a quiet bar along the top. */
+/* Narrow screens: a quiet bar along the top. "All" (back to every branch)
+   leads the row, set off from the sections by a hairline. */
 @media (max-width: 1239.98px) {
   .mini-trunk {
     left: 0;
     right: 0;
     top: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    --mini-gap: clamp(1rem, 5.5vw, 2.5rem);
+    gap: var(--mini-gap);
     padding: 0.85rem var(--gutter) 1.35rem;
     background: linear-gradient(to bottom, rgba(14, 23, 20, 0.97), rgba(14, 23, 20, 0.9) 62%, rgba(14, 23, 20, 0));
   }
-  .mini-trunk ol { justify-content: center; gap: clamp(1.5rem, 7vw, 3rem); }
-  .mini-back { position: absolute; left: var(--gutter); top: 0.7rem; padding: 0.15rem 0.4rem; font-size: 1rem; }
-  .mini-back-label { display: none; }
+  .mini-trunk ol { gap: var(--mini-gap); }
+  .mini-back {
+    order: -1;
+    padding-right: var(--mini-gap);
+    border-right: 1px solid rgba(239, 229, 204, 0.18);
+  }
+  .mini-back-more { display: none; }
   .mini-trunk a { gap: 0.45rem; }
   .mini-line { display: none; }
 }
