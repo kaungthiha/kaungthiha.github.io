@@ -1,16 +1,17 @@
 ---
 /**
  * A branch's node on the trunk, and the control that opens it: a glowing bud
- * on the trunk, a short twig, the pill with the section's icon, a leaf sprig,
- * and a one-line teaser shown while the branch is closed. Renders the
- * branch's <summary>.
+ * on the trunk, a painted limb growing out of it (grove.ts steps it from bud
+ * to full growth as the branch is chosen), the pill with the section's icon
+ * resting on that limb, and a one-line teaser shown while the branch is
+ * closed. Renders the branch's <summary>.
  */
 interface Props {
   label: string;
   icon: 'work' | 'create' | 'loves';
   teaser: string;
   sub?: string;
-  /** A second sprig that season.ts can swap in (see grove.css). */
+  /** A flowering sprig that season.ts can bring out beside the limb (see grove.css). */
   accent?: 'padauk';
 }
 
@@ -19,7 +20,7 @@ const { label, icon, teaser, sub, accent } = Astro.props;
 
 <summary class="branch-node">
   <span class="branch-node-row">
-    <svg class:list={['branch-sprig', accent && 'branch-sprig--plain']} viewBox="0 0 60 80" aria-hidden="true"><use href="#grove-sprig" /></svg>
+    <span class="branch-limb" aria-hidden="true"></span>
     {accent === 'padauk' && (
       <span class="branch-sprig branch-sprig--padauk" aria-hidden="true">
         <svg viewBox="0 0 60 80"><use href="#grove-padauk" /></svg>

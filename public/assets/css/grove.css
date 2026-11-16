@@ -1,5 +1,6 @@
 /* ==========================================================================
-   The grove — content grown along one golden trunk.
+   The grove — content grown from one banyan: a painted tree at the top, a
+   golden root running down from its foot, and a painted limb at each branch.
    Geometry: the trunk sits at --trunk-x inside .grove-col; content starts at
    --trunk-pad. Every node, ring and twig positions itself from those two.
 
@@ -40,7 +41,7 @@
 .trunk {
   position: absolute;
   left: var(--trunk-x);
-  top: 3.4rem;
+  top: calc(var(--banyan-h) + 3.6rem);
   bottom: 0;
   width: 2px;
   border-radius: 2px;
@@ -84,13 +85,29 @@
   background: var(--bud);
   box-shadow: 0 0 10px rgba(232, 194, 127, 0.35);
 }
-.trunk-crown {
-  position: absolute;
-  top: 0;
-  left: calc(var(--trunk-c) - 23px);
-  width: 44px;
-  height: 58px;
+/* The banyan: the tree all of this grows from. Painted once per season
+   (scripts/build-forest-sprites.mjs); season.ts sets data-season. The golden
+   trunk starts at its foot (grove.ts draws that root). --grove-tone settles
+   the paintings into the time of day. */
+.grove {
+  --banyan-w: min(22.5rem, 74vw);
+  --banyan-h: calc(var(--banyan-w) * 0.866);
+  --limb-w: 9.5rem;
+  --grove-tone: brightness(0.88) saturate(0.94);
 }
+html[data-theme="light"] .grove { --grove-tone: none; }
+html[data-theme="dark"] .grove { --grove-tone: brightness(0.6) saturate(0.72); }
+.grove-banyan {
+  width: var(--banyan-w);
+  height: var(--banyan-h);
+  margin: 0.5rem auto 0;
+  transform: translateX(calc(var(--trunk-pad) / -2));   /* centred on the column, not the text */
+  background: url('/assets/grove/banyan-summer.webp') 50% 100% / contain no-repeat;
+  filter: var(--grove-tone);
+}
+:root[data-season="spring"] .grove-banyan { background-image: url('/assets/grove/banyan-spring.webp'); }
+:root[data-season="autumn"] .grove-banyan { background-image: url('/assets/grove/banyan-autumn.webp'); }
+:root[data-season="winter"] .grove-banyan { background-image: url('/assets/grove/banyan-winter.webp'); }
 .grove-hint {
   display: none;
   margin: 3.4rem 0 0;
@@ -152,6 +169,24 @@
   margin-top: -0.75px;
   background: var(--gold-dim);
 }
+/* The limb: a painted branch growing out of the node, behind the pill, so
+   the label rests on it. Five frames in a strip, bud to full growth; --f is
+   the frame (grove.ts steps it; without JS every limb is fully grown). The
+   strip's butt end sits 65.5% down its cell: that point goes on the node. */
+.branch-limb {
+  position: absolute;
+  z-index: 0;
+  left: calc(var(--from-trunk) + 1px);
+  top: 50%;
+  width: var(--limb-w);
+  aspect-ratio: 265 / 150;
+  margin-top: calc(var(--limb-w) * -0.3708);
+  background: url('/assets/grove/limb.webp') 0 0 / 500% 100% no-repeat;
+  background-position-x: calc(var(--f, 4) * 25%);
+  filter: var(--grove-tone);
+  pointer-events: none;
+}
+.branch-node-row:has(.branch-limb)::after { opacity: 0; }   /* the limb is the twig now */
 .branch-pill {
   position: relative;
   z-index: 1;
@@ -455,11 +490,8 @@
 @media (prefers-reduced-motion: no-preference) {
   /* The idle sway belongs to the overview. Once a branch is open and being
      read, every sprig holds still; the open one unfurls once, then rests. */
-  .trunk-crown { transform-origin: 53% 100%; }
   .grove.is-live .branch-sprig { animation: sprig-sway 7s ease-in-out infinite; }
-  .grove.is-live .trunk-crown { animation: crown-sway 8s ease-in-out infinite; }
-  .grove.has-open .branch-sprig,
-  .grove.has-open .trunk-crown { animation-play-state: paused; }
+  .grove.has-open .branch-sprig { animation-play-state: paused; }
   .grove.is-live .branch[open] > .branch-node .branch-sprig {
     animation: sprig-unfurl 0.62s cubic-bezier(0.3, 0.7, 0.2, 1) 0.08s 1 backwards;
     animation-play-state: running;
@@ -470,12 +502,12 @@
 
   .grove.is-live .branch-teaser,
   .grove.is-live .grove-hint,
-  .branch-sprig,
-  .trunk-crown { transition: opacity 0.9s ease 0.2s, transform 0.9s cubic-bezier(0.2, 0.7, 0.2, 1) 0.2s; }
+  .branch-sprig { transition: opacity 0.9s ease 0.2s, transform 0.9s cubic-bezier(0.2, 0.7, 0.2, 1) 0.2s; }
+  .grove-banyan { transition: opacity 1.4s ease; }
   .grove.is-live .branch-node:not(.is-grown) .branch-pill { opacity: 0; transform: translateX(-10px); }
   .grove.is-live .branch-node:not(.is-grown) .branch-teaser { opacity: 0; transform: translateY(8px); }
   .grove.is-live .branch-node:not(.is-grown) .branch-sprig,
-  .grove.is-live .trunk-crown:not(.is-grown),
+  .grove.is-live .grove-banyan:not(.is-grown),
   .grove.is-live .grove-hint:not(.is-grown) { opacity: 0; }
 
   .grove.is-live .branch[open] > .branch-body > .section-heading,
@@ -536,7 +568,6 @@
 .branch-sprig svg { display: block; width: 100%; height: 100%; }
 .branch-sprig--padauk { display: none; }
 :root[data-padauk="on"] .branch-sprig--padauk { display: block; }
-:root[data-padauk="on"] .branch-sprig--plain { display: none; }
 .padauk-petal {
   position: absolute;
   left: 34%;
@@ -554,10 +585,6 @@
   55% { transform: translate(9px, 26px) rotate(140deg); }
   80% { opacity: 0.7; }
   100% { opacity: 0; transform: translate(3px, 58px) rotate(250deg); }
-}
-@keyframes crown-sway {
-  0%, 100% { transform: rotate(-3deg); }
-  50% { transform: rotate(3deg); }
 }
 
 /* ── Mini-trunk: switch branches from anywhere ────────────────────────── */
@@ -638,6 +665,6 @@
 }
 
 @media (max-width: 640px) {
-  .grove { --trunk-x: 0.2rem; --trunk-pad: 2.4rem; --spine-off: 10px; }
+  .grove { --trunk-x: 0.2rem; --trunk-pad: 2.4rem; --spine-off: 10px; --limb-w: 6.6rem; }
   .branch-sprig { --sprig-flip: 1; --sprig-rest: 14deg; left: calc(var(--from-trunk) - 19px); }
 }
