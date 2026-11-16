@@ -1,0 +1,136 @@
+---
+/**
+ * The career as a tree laid along time, left to right. The trunk is school
+ * (college, then the line simply carries on); every employer forks off it
+ * in the month it began and runs for as long as it lasted, so what happened
+ * during college, what overlapped, and what is still going can be read at a
+ * glance. Each fork is a link to that employer's entry below; with
+ * src/scripts/career-map.ts the entries become one panel and the map picks
+ * which one is shown, which is what keeps the Work branch short.
+ *
+ * Everything is derived from the canonical career dataset: dates place the
+ * forks, lanes are assigned so overlapping jobs don't collide. Only the
+ * short display names come from portfolio-config (presentation).
+ */
+import { getEducation, getExperience, getRoles, yearRange } from '../../lib/career';
+import { portfolioConfig } from '../../data/portfolio/portfolio-config';
+
+const { career } = portfolioConfig;
+const months = (ym: string) => { const [y, m] = ym.split('-').map(Number); return y * 12 + (m || 1) - 1; };
+const today = new Date();
+const now = today.getFullYear() * 12 + today.getMonth();
+
+const college = getEducation().find((e) => e.id === career.map.collegeId);
+const colStart = college?.start_date ? months(college.start_date) : null;
+const colEnd = college?.end_date ? months(college.end_date) : null;
+
+const jobs = [...career.experienceIds, ...career.earlierExperienceIds]
+  .map((id) => {
+    const exp = getExperience(id);
+    const roles = getRoles(exp);                      // newest first
+    const newest = roles[0], oldest = roles[roles.length - 1];
+    const start = months(oldest.start_date);
+    const current = roles.some((r) => r.current);
+    const end = current ? now : newest.end_date ? months(newest.end_date) : start;
+    return {
+      id,
+      label: (career.map.labels as Record<string, string>)[id] ?? exp.organization,
+      years: yearRange({ start_date: oldest.start_date, end_date: newest.end_date, current: newest.current }),
+      start, end, current,
+      // A change of role inside the same employer: a small knot on the branch.
+      knots: roles.slice(0, -1).map((r) => months(r.start_date)),
+      lane: 0,
+    };
+  })
+  .sort((a, b) => a.start - b.start);
+
+// Lanes: the lowest one whose last occupant (and its label) has cleared.
+const LABEL_MONTHS = 10;
+const free: number[] = [];
+for (const j of jobs) {
+  let k = free.findIndex((until) => until <= j.start);
+  if (k < 0) k = free.length;
+  free[k] = Math.max(j.end + 1, j.start + LABEL_MONTHS);
+  j.lane = k;
+}
+
+const W = 820, PAD_L = 16, PAD_R = 26, LANE = 44;
+const lanes = Math.max(1, free.length);
+const T = 44 + lanes * LANE;                          // the trunk's y
+const H = T + 48;
+const m0 = Math.min(colStart ?? Infinity, ...jobs.map((j) => j.start)) - 2;
+const m1 = now + 3;
+const x = (m: number) => +(PAD_L + ((m - m0) / (m1 - m0)) * (W - PAD_L - PAD_R)).toFixed(1);
+const laneY = (k: number) => T - (k + 1) * LANE;
+
+const drawn = jobs.map((j) => {
+  const xs = x(j.start), xe = Math.max(x(j.end), xs + 10), y = laneY(j.lane);
+  const fork = `${xs - 18} ${T}C${xs - 5} ${T} ${xs - 13} ${y} ${xs} ${y}L${xe} ${y}`;
+  return { ...j, xs, xe, y, branch: `M${fork}`, lit: `M${x(m0 + 1)} ${T}L${fork}` };
+});
+// A later job in a higher lane forks up through this one's label: start the
+// label just past that fork instead of under it.
+const labelled = drawn.map((j) => {
+  const through = drawn.filter((o) => o.lane > j.lane && o.xs > j.xs - 4 && o.xs < j.xs + Math.max(j.label.length * 7.6, j.years.length * 6) + 6).map((o) => o.xs);
+  return { ...j, lx: through.length ? Math.max(...through) + 7 : j.xs };
+});
+const years: number[] = [];
+for (let y = Math.ceil(m0 / 12); y * 12 <= m1; y++) years.push(y);
+const pick = drawn.find((j) => j.current) ?? drawn[drawn.length - 1];
+const pct = (v: number, of: number) => `${((v / of) * 100).toFixed(2)}%`;
+---
+
+<nav class="career-map" aria-label="Career timeline" data-default={pick?.id}>
+  <div class="career-map-scroll">
+    <div class="career-map-inner" style={`aspect-ratio: ${W} / ${H}`}>
+      <svg viewBox={`0 0 ${W} ${H}`} aria-hidden="true" focusable="false">
+        <defs>
+          <linearGradient id="map-fade" gradientUnits="userSpaceOnUse" x1={x(m0)} x2={x(m0 + 3)} y1="0" y2="0">
+            <stop offset="0" stop-color="#d6a65f" stop-opacity="0" />
+            <stop offset="1" stop-color="#d6a65f" stop-opacity="0.5" />
+          </linearGradient>
+        </defs>
+
+        <!-- Years along the trunk. -->
+        {years.map((y) => (
+          <g class="map-year">
+            <path d={`M${x(y * 12)} ${T - 4}V${T + 4}`} />
+            <text x={x(y * 12)} y={T + 40} text-anchor="middle">{y}</text>
+          </g>
+        ))}
+
+        <!-- The trunk: time. College is the stout stretch. -->
+        <path class="map-trunk" d={`M${x(m0)} ${T}H${x(m1)}`} stroke="url(#map-fade)" />
+        {colStart !== null && colEnd !== null && college && (
+          <g class="map-college">
+            <path d={`M${x(colStart)} ${T}H${x(colEnd)}`} />
+            <circle cx={x(colStart)} cy={T} r="4" />
+            <circle cx={x(colEnd)} cy={T} r="4" />
+            <text x={x(colStart) + 2} y={T + 19}>{college.institution} · {career.map.collegeNote}</text>
+          </g>
+        )}
+
+        {drawn.map((j) => (
+          <g class="map-job" data-for={j.id}>
+            <path class="map-branch" d={j.branch} />
+            <path class="map-lit" d={j.lit} pathLength="1" />
+            {j.knots.map((k) => <circle class="map-knot" cx={x(k)} cy={j.y} r="2.6" />)}
+            <circle class:list={['map-tip', j.current && 'map-tip--now']} cx={j.xe} cy={j.y} r={j.current ? 4.5 : 3.2} />
+          </g>
+        ))}
+      </svg>
+
+      <ol class="map-labels">
+        {labelled.map((j) => (
+          <li style={`left: ${pct(j.lx, W)}; top: ${pct(j.y, H)}`}>
+            <a href={`#${j.id}`} data-pick={j.id}>
+              <span class="map-name">{j.label}</span>
+              <span class="map-when">{j.years}</span>
+            </a>
+          </li>
+        ))}
+      </ol>
+    </div>
+  </div>
+  <p class="map-hint">Pick a point on the timeline to read about it.</p>
+</nav>

@@ -111,6 +111,7 @@ function mustFind<T extends { id: string }>(list: T[], id: string, kind: string)
 export const getProfile = () => career.profile;
 export const getExperience = (id: string) => mustFind(career.experience, id, 'experience');
 export const getProject = (id: string) => mustFind(career.projects, id, 'project');
+export const getEducation = () => career.education;
 export const getProjects = (ids: string[]) => ids.map(getProject);
 export const getLeadership = (ids: string[]) => ids.map((id) => mustFind(career.leadership ?? [], id, 'leadership'));
 

@@ -1,12 +1,15 @@
 ---
 /**
- * Work, as a branch of the trunk: the full career timeline from the canonical
- * dataset. Each employer is a twig whose head
- * is one line and opens to the detail; then earlier roles, education, skills.
+ * Work, as a branch of the trunk: the career from the canonical dataset.
+ * A timeline map (CareerMap) lays the employers out along time, forking off
+ * college; below it each employer is a twig. With JS the map picks which
+ * one twig is shown (career-map.ts), so the branch stays short; without it
+ * they are all listed. Then leadership, education, skills.
  */
 import { existsSync } from 'node:fs';
 import { join } from 'node:path';
 import CareerEntry from '../career/CareerEntry.astro';
+import CareerMap from '../career/CareerMap.astro';
 import BranchNode from './BranchNode.astro';
 import { portfolioConfig } from '../../data/portfolio/portfolio-config';
 import {
@@ -26,11 +29,7 @@ const all = getCareerTimeline({
   achievementsPerRole: career.achievementsPerRole,
   relatedProjectIds: create.featuredProjectIds,
 });
-const isMain = (id: string) => career.experienceIds.includes(id);
-const groups = all
-  .map((g) => ({ ...g, entries: g.entries.filter((e) => isMain(e.experience.id)) }))
-  .filter((g) => g.entries.length > 0);
-const earlier = all.flatMap((g) => g.entries).filter((e) => !isMain(e.experience.id));
+const entries = all.flatMap((g) => g.entries);
 const leadership = getLeadership(career.leadershipIds);
 const education = career.showEducation ? getCareerEducation() : [];
 const skills = career.showSkills ? getPublicSkills(skillGroups) : [];
@@ -50,20 +49,15 @@ let n = 0;
     <h2 class="section-heading">{work.heading}</h2>
     {(work.intro || rightNow) && <p class="section-intro">{work.intro} {rightNow}</p>}
 
-    {groups.map((g) => (
-      <div class="ring-group">
-        <p class="ring"><span>{g.label}</span></p>
-        <ol class="twigs">
-          {g.entries.map((entry) => <CareerEntry entry={entry} index={n++} />)}
-        </ol>
-      </div>
-    ))}
+    <CareerMap />
+    <ol class="twigs map-panels">
+      {entries.map((entry) => <CareerEntry entry={entry} index={n++} />)}
+    </ol>
 
-    {(earlier.length > 0 || leadership.length > 0) && (
+    {leadership.length > 0 && (
       <div class="ring-group">
-        <p class="ring"><span>Earlier</span></p>
+        <p class="ring"><span>Leadership</span></p>
         <ol class="twigs">
-          {earlier.map((entry) => <CareerEntry entry={entry} class="twig twig--role twig--minor" index={n++} />)}
           {leadership.map((l) => (
             <li class="twig twig--role twig--minor" id={l.id} style={`--i: ${n++}`}>
               <h3 class="timeline-org">{l.organization}</h3>

@@ -299,6 +299,70 @@
 .twig:nth-child(3n + 2)::before { border-bottom-left-radius: 0.65rem; }
 .twig:nth-child(3n)::before { height: 1.3rem; top: calc(var(--twig-y) - 1.3rem); border-bottom-left-radius: 1.1rem; }
 
+/* ── The career map (CareerMap.astro): the Work branch along time ─────────
+   A trunk for the years (college the stout stretch) and a fork for every
+   employer. With career-map.ts it picks which single entry is shown below
+   (.is-mapped); without it, it is a set of links into the full list. */
+.career-map { margin: 1.75rem 0 0; }
+.career-map-scroll { padding-top: 0.5rem; overflow-x: auto; overflow-y: hidden; scrollbar-width: thin; scrollbar-color: rgba(232, 194, 127, 0.3) transparent; }
+.career-map-inner { position: relative; min-width: 700px; }
+.career-map svg { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
+.map-trunk { fill: none; stroke-width: 1.5; }
+.map-college path { fill: none; stroke: var(--gold-deep); stroke-width: 3; stroke-linecap: round; opacity: 0.75; }
+.map-college circle { fill: var(--dusk-ink); stroke: var(--gold-deep); stroke-width: 1.5; }
+.map-college text,
+.map-year text { font-family: var(--font-sans); font-size: 11px; fill: var(--text-muted); }
+.map-college text { fill: var(--dusk-sage); letter-spacing: 0.02em; }
+.map-year text { font-size: 10.5px; letter-spacing: 0.08em; }
+.map-year path { stroke: rgba(232, 194, 127, 0.35); stroke-width: 1; }
+.map-branch { fill: none; stroke: var(--gold-dim); stroke-width: 1.5; stroke-linecap: round; transition: stroke 0.3s ease; }
+.map-lit {
+  fill: none;
+  stroke: var(--gold);
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+  filter: drop-shadow(0 0 4px rgba(232, 194, 127, 0.6));
+}
+.map-job.is-picked .map-lit { stroke-dashoffset: 0; }
+.map-knot { fill: var(--dusk-ink); stroke: var(--gold-dim); stroke-width: 1.2; }
+.map-tip { fill: var(--gold-dim); transition: fill 0.3s ease; }
+.map-tip--now { fill: var(--gold); filter: drop-shadow(0 0 5px rgba(232, 194, 127, 0.8)); }
+.map-job.is-picked .map-tip { fill: #fff1cf; }
+
+.map-labels { list-style: none; margin: 0; padding: 0; }
+.map-labels li { position: absolute; transform: translateY(-100%); margin-top: -5px; }
+.map-labels a {
+  display: block;
+  padding: 0.3rem 0.5rem 0.2rem 0;
+  font-family: var(--font-sans);
+  line-height: 1.15;
+  white-space: nowrap;
+  color: var(--dusk-cream);
+  text-decoration: none;
+  border-radius: 4px;
+}
+.map-name { display: block; font-size: 0.875rem; font-weight: 500; letter-spacing: 0.01em; transition: color 0.25s ease; }
+.map-when { display: block; margin-top: 0.1rem; font-size: 0.6875rem; letter-spacing: 0.04em; color: var(--text-muted); }
+.map-labels a:hover .map-name,
+.map-labels a[aria-current] .map-name { color: var(--gold); }
+.map-labels a:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
+.map-hint { display: none; margin: 0.4rem 0 0; font-family: var(--font-sans); font-size: 0.75rem; letter-spacing: 0.04em; color: var(--text-muted); }
+
+.map-panels { margin-top: 2rem; }
+.branch-body.is-mapped .map-hint { display: block; }
+.branch-body.is-mapped .map-panels { margin-top: 1.5rem; min-height: 9rem; }
+.branch-body.is-mapped .map-panels > .twig:not(.is-picked) { display: none; }
+/* The one panel is the map's readout: nothing to fold away. */
+.branch-body.is-mapped .map-panels .twig-head { cursor: default; pointer-events: none; }
+.branch-body.is-mapped .map-panels .twig-head .timeline-org::after { content: none; }
+@media (prefers-reduced-motion: no-preference) {
+  .map-lit { transition: stroke-dashoffset 0.75s cubic-bezier(0.4, 0, 0.2, 1); }
+  .map-job:not(.is-picked) .map-lit { transition-duration: 0.2s; }
+  .branch-body.is-mapped .map-panels > .twig.is-picked { animation: grove-rise 0.4s ease both; }
+}
+
 /* ── The drawn tree (grove.ts): with JS the ruled trunk above gives way to an
       SVG one, and the open branch grows a spine of its own beside its twigs ── */
 .grove { --spine-off: 18px; }

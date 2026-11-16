@@ -149,6 +149,8 @@ export function initGrove(root: HTMLElement): void {
 
   // ── Links into the grove open what they point into ─────────────────
   function reveal(el: HTMLElement): void {
+    // Anything that shows one item at a time (the career map) follows along.
+    window.dispatchEvent(new CustomEvent('grove:reveal', { detail: el }));
     const branch = el.closest<HTMLDetailsElement>('details.branch');
     if (branch && !branch.open) setBranch(branch);
     // Open every twig between the branch and the target (and a twig the
@@ -169,6 +171,7 @@ export function initGrove(root: HTMLElement): void {
   document.addEventListener('click', (e) => {
     const a = (e.target as Element | null)?.closest?.('a[href^="#"]') as HTMLAnchorElement | null;
     if (a?.classList.contains('mini-back')) { e.preventDefault(); overview(); return; }
+    if (a?.dataset.pick) return;                 // the career map switches panels itself
     const el = a ? target(a.hash) : null;
     if (!el) return;
     e.preventDefault();

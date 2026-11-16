@@ -40,6 +40,16 @@ export const portfolioConfig = {
       'exp_askcyborg',
     ],
     earlierExperienceIds: ['exp_usf_its'],
+    /** The timeline map at the top of Work (CareerMap.astro): which education
+        record is the trunk, and short names where the full one won't fit. */
+    map: {
+      collegeId: 'edu_usf_bs',
+      collegeNote: 'B.S. Business Analytics',
+      labels: {
+        exp_aws_keywords: 'AWS',
+        exp_usf_its: 'USF IT Services',
+      },
+    },
     /** Opted in explicitly; the dataset marks leadership as not website-default. */
     leadershipIds: ['lead_apo', 'lead_fiscal_affairs'],
     achievementsPerRole: 2,
