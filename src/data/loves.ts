@@ -59,12 +59,11 @@ export const loves: LoveNote[] = [
 ];
 
 /** The constants. The list above changes with the seasons of my life; these
-    two don't, so they close the section under their own heading: home (a
+    two don't, so they close the section, set apart from the list: home (a
     small drawn memory of Yangon, Shwedagon far off above the trees:
     src/components/grove/YangonVignette.astro) and my mom (a sprig of
     jasmine: src/components/grove/Jasmine.astro). */
 export const always = {
-  heading: 'Always',
   home: 'And of course, my home, Yangon',
   mom: 'And my mom.',
 };
