@@ -8,11 +8,10 @@
    node being pointed at). Links into the grove (#work, #story-…,
    related-work links, the mini-trunk) open whatever they point into.
 
-   It also draws the tree (.grove-tree, an SVG behind the content): a root
-   that leaves the foot of the painted banyan and becomes a gently uneven
-   trunk, and for the open branch a spine that leaves the trunk at its node
-   and runs down beside its twigs, so the branch reads as its own limb. The
-   painted limb at each node is stepped from bud to full growth here too. Geometry comes from where the nodes actually sit, re-measured only
+   It also draws the tree (.grove-tree, an SVG behind the content): a gently
+   uneven trunk, and for the open branch a spine that leaves the trunk at
+   its node and runs down beside its twigs, so the branch reads as its own
+   limb. Geometry comes from where the nodes actually sit, re-measured only
    when the layout changes (never per frame).
    ────────────────────────────────────────────────────────────────────── */
 
@@ -37,7 +36,6 @@ export function initGrove(root: HTMLElement): void {
   const pLit = tree?.querySelector<SVGPathElement>('.tree-lit');
   const pSpine = tree?.querySelector<SVGPathElement>('.tree-spine');
   const spark = tree?.querySelector<SVGCircleElement>('.tree-spark');
-  const banyan = root.querySelector<HTMLElement>('.grove-banyan');
   // Grown, not ruled: a slow wander of a couple of pixels, fixed for a given height.
   const wander = (y: number, k = 1) => k * (1.5 * Math.sin(y * 0.011 + 1.3) + 0.8 * Math.sin(y * 0.029 + 0.4));
   const run = (x: number, from: number, to: number, k: number) => {
@@ -61,22 +59,14 @@ export function initGrove(root: HTMLElement): void {
     lit!.style.height = `${y - top}px`;
     if (!tree || !pTrunk || !pLit || !pSpine || !spark) return;
 
-    // From the banyan's foot, along the ground, then down: the trunk is its root.
-    const by = banyan?.getBoundingClientRect();
-    const foot = by ? { x: by.left + by.width / 2 - c.left, y: by.bottom - c.top - by.height * 0.05 } : null;
-    const tx = (x + wander(top)).toFixed(1);
-    const start = foot && foot.y < top - 12
-      ? `M${foot.x.toFixed(1)} ${foot.y.toFixed(1)}C${(foot.x - (foot.x - x) * 0.55).toFixed(1)} ${(foot.y + (top - foot.y) * 0.55).toFixed(1)} ${tx} ${(top - (top - foot.y) * 0.9).toFixed(1)} ${tx} ${top.toFixed(1)}`
-      : `M${tx} ${top.toFixed(1)}`;
-    const d = `${start}${run(x, top, bottom, 1)}`;
+    const d = `M${(x + wander(top)).toFixed(1)} ${top.toFixed(1)}${run(x, top, bottom, 1)}`;
     pTrunk.setAttribute('d', d);
     pLit.setAttribute('d', d);
-    const fadeFrom = foot ? foot.y - 6 : top;
     for (const g of tree.querySelectorAll('linearGradient')) {
-      g.setAttribute('y1', String(fadeFrom));
-      g.setAttribute('y2', String(fadeFrom + (foot ? 34 : 64)));
+      g.setAttribute('y1', String(top));
+      g.setAttribute('y2', String(top + 64));
     }
-    pLit.style.strokeDashoffset = String(Math.min(1, (bottom - y) / Math.max(1, pTrunk.getTotalLength())));
+    pLit.style.strokeDashoffset = String(1 - (y - top) / Math.max(1, bottom - top));
     spark.style.transform = `translate(${x + wander(y)}px, ${y}px)`;
 
     // The open branch's spine: off the trunk below its node, then down beside
@@ -99,33 +89,6 @@ export function initGrove(root: HTMLElement): void {
   }
   const relight = () => { if (!frame) frame = requestAnimationFrame(light); };
 
-  // ── The painted limbs: bud → full growth, a frame at a time ────────
-  // Unseen: a bud. In the overview: most of the way out. The open branch:
-  // full growth, while the others draw back.
-  const limbs = branches.map((b) => ({ b, el: b.querySelector<HTMLElement>('.branch-limb'), f: 0, wait: 0 }));
-  let limbTimer = 0;
-  function growLimbs(): void {
-    const anyOpen = branches.some((b) => b.open);
-    const want = (b: HTMLDetailsElement) =>
-      !summaryOf(b).classList.contains('is-grown') ? 0 : b.open ? 4 : anyOpen ? 1 : 3;
-    const set = (l: (typeof limbs)[number]) => l.el?.style.setProperty('--f', String(l.f));
-    if (behavior === 'auto') { for (const l of limbs) { l.f = want(l.b); set(l); } return; }
-    if (limbTimer) return;
-    limbTimer = window.setInterval(() => {
-      let moving = false;
-      for (const l of limbs) {
-        const to = want(l.b);
-        if (l.f === to) continue;
-        moving = true;
-        if (l.wait > 0) { l.wait--; continue; }
-        l.f += Math.sign(to - l.f);
-        set(l);
-      }
-      if (!moving) { clearInterval(limbTimer); limbTimer = 0; }
-    }, 95);
-  }
-  limbs.forEach((l, i) => { l.el?.style.setProperty('--f', '0'); l.wait = 2 + i * 3; });
-
   // ── Open one branch (or none: back to the overview) ────────────────
   function setBranch(target: HTMLDetailsElement | null): void {
     for (const b of branches) b.open = b === target;
@@ -137,7 +100,6 @@ export function initGrove(root: HTMLElement): void {
       else a.removeAttribute('aria-current');
     }
     relight();
-    growLimbs();
   }
   // The address follows the tree, so the browser's Back retraces it.
   function remember(target: HTMLDetailsElement | null): void {
@@ -227,11 +189,10 @@ export function initGrove(root: HTMLElement): void {
         e.target.classList.add('is-grown');
         grow.unobserve(e.target);
       }
-      growLimbs();
     },
     { rootMargin: '0px 0px -8% 0px' },
   );
-  root.querySelectorAll('.branch-node, .grove-banyan, .grove-hint').forEach((el) => grow.observe(el));
+  root.querySelectorAll('.branch-node, .trunk-crown, .grove-hint').forEach((el) => grow.observe(el));
 
   // The mini-trunk appears once you're in the grove.
   const entered = () => {

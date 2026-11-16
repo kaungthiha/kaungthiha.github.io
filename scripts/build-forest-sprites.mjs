@@ -8,8 +8,6 @@
    Writes:
      public/assets/forest/dusk/sprites.webp   one atlas, straight alpha
      src/data/forest-sprites.json             where each frame sits in it
-     public/assets/grove/banyan-<season>.webp the grove's banyan, one per season
-     public/assets/grove/limb.webp            a branch growing, five frames in a strip
 
    The raw sheets come out of an image generator with dirty edges (opaque
    paper behind some, colour fringes and stray specks on others), so each
@@ -46,15 +44,6 @@ const CLIPS = [
   { name: 'bird', file: 'bird flying.png', frames: 4, h: 110, anchor: 'head' },
   { name: 'deer', file: 'deer.png', frames: 6, h: 150, anchor: 'box', harsh: true },
   { name: 'pagoda', file: 'Painterly Golden Shwedagon Pagoda-5.png', frames: 1, h: 380, anchor: 'box', glow: true },
-  // The grove (grove.css), written as files of their own (out), not into the
-  // atlas. The banyan sheets hold six near-identical frames that touch each
-  // other; one frame is cut out by its slot (span) and kept at its own size.
-  ...[['spring', 'tree 2.png'], ['summer', 'tree 3.png'], ['autumn', 'tree 4.png'], ['winter', 'tree 5.png']].map(([season, file]) => (
-    { name: `banyan-${season}`, file, frames: 1, span: [2 / 6, 3 / 6], h: null, anchor: 'box', out: `public/assets/grove/banyan-${season}.webp` }
-  )),
-  // The branch: bud to full growth (the sheet's last three frames shrink it
-  // again, and aren't needed). Anchored on its butt end, where it meets the trunk.
-  { name: 'limb', file: 'tree branch.png', frames: 8, take: 5, h: 150, paper: true, anchor: 'left', out: 'public/assets/grove/limb.webp' },
 ];
 
 async function load(file) {
@@ -196,7 +185,6 @@ for (const clip of CLIPS) {
     if (clip.anchor === 'body') { const [a, b] = clip.bodyBand || [0.05, 0.45]; ya = f.m.y0 + hgt * a; yb = f.m.y0 + hgt * b; }
     if (clip.anchor === 'head') xa = f.x1 - (f.x1 - f.x0) * 0.3;   // birds: the head leads, the wings flail
     if (clip.anchor === 'box') { f.ax = (f.x0 + f.x1) / 2; continue; }
-    if (clip.anchor === 'left') { f.ax = f.x0; continue; }
     let sx = 0, sn = 0;
     for (let y = Math.floor(ya); y < yb; y++) for (let x = Math.floor(xa); x < xb; x++) {
       const i = y * W + x;
@@ -208,15 +196,11 @@ for (const clip of CLIPS) {
   for (const f of fr) f.mine ??= ids(f);
   // One shared cell: the sheet's own vertical extent, widest half-span each side.
   const top = Math.min(...fr.map((f) => f.y0)), bottom = Math.max(...fr.map((f) => f.y1)) + 1;
-  if (clip.take) fr.length = clip.take;
-  let half = Math.ceil(Math.max(...fr.map((f) => Math.max(f.ax - f.x0, f.x1 + 1 - f.ax)))) + 2;
-  let cw = half * 2;
-  if (clip.anchor === 'left') { cw = half + 2; half = 2; }
-  const ch = bottom - top + 4;
-  const scale = clip.h ? clip.h / ch : 1;
-  const ow = Math.round(cw * scale), oh = clip.h || ch;
-  if (!clip.out) meta[clip.name] = { frames: [], w: ow, h: oh, aspect: ow / oh };
-  const strip = [];
+  const half = Math.ceil(Math.max(...fr.map((f) => Math.max(f.ax - f.x0, f.x1 + 1 - f.ax)))) + 2;
+  const cw = half * 2, ch = bottom - top + 4;
+  const scale = clip.h / ch;
+  const ow = Math.round(cw * scale), oh = clip.h;
+  meta[clip.name] = { frames: [], w: ow, h: oh, aspect: ow / oh };
   for (const [k, f] of fr.entries()) {
     const cell = Buffer.alloc(cw * ch * 4);
     for (let y = f.y0; y <= f.y1; y++) for (let x = f.x0; x <= f.x1; x++) {
@@ -235,18 +219,7 @@ for (const clip of CLIPS) {
     const rgba = await sharp(cell, { raw: { width: cw, height: ch, channels: 4, premultiplied: true } })
       .resize(ow, oh, { kernel: 'lanczos3', fit: 'fill' }).raw().toBuffer();
     bleed(rgba, ow, oh);
-    if (clip.out) strip.push(rgba); else cells.push({ clip: clip.name, frame: k, w: ow, h: oh, rgba });
-  }
-  if (clip.out) {
-    mkdirSync('public/assets/grove', { recursive: true });
-    const buf = Buffer.alloc(ow * strip.length * oh * 4);
-    strip.forEach((rgba, k) => { for (let r = 0; r < oh; r++) rgba.copy(buf, (r * ow * strip.length + k * ow) * 4, r * ow * 4, (r + 1) * ow * 4); });
-    await sharp(buf, { raw: { width: ow * strip.length, height: oh, channels: 4 } }).webp({ quality: 88, alphaQuality: 95, effort: 6, exact: true }).toFile(clip.out);
-    // Where the butt end sits in the cell, for placing it on the trunk.
-    const first = fr[fr.length - 1];
-    let sy = 0, sn = 0;
-    for (let y = first.y0; y <= first.y1; y++) for (let x = first.x0; x < first.x0 + 12; x++) if (A[y * W + x]) { sy += y; sn++; }
-    console.log(' ', clip.name.padEnd(14), `${ow}×${oh} ×${strip.length}`, clip.anchor === 'left' ? `butt at ${(((sy / sn) - top + 2) / ch * 100).toFixed(1)}% down` : '');
+    cells.push({ clip: clip.name, frame: k, w: ow, h: oh, rgba });
   }
 }
 
