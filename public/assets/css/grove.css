@@ -498,6 +498,21 @@
 /* A memory of Yangon closing the Loves branch (YangonVignette.astro): a still
    picture that fades out at its edges, like something half remembered. */
 .yangon-vignette { margin: 3rem 0 0; max-width: 34rem; }
+/* The constants that close Loves: home, then my mom (a sprig of jasmine). */
+.loves-always .yangon-vignette { margin-top: 0.25rem; }
+.loves-mom {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.7rem;
+  max-width: 34rem;
+  margin: 1.6rem 0 0;
+  font-family: var(--font-serif);
+  font-size: 1.0625rem;
+  font-style: italic;
+  color: var(--dusk-cream);
+}
+.loves-mom .jasmine { flex: none; width: 3.4rem; height: auto; }
 .yangon-vignette svg {
   display: block;
   width: 100%;
@@ -563,6 +578,7 @@
   .tree-spark { transition: transform 0.9s cubic-bezier(0.4, 0, 0.2, 1); }
   .tree-spine.is-growing { animation: spine-grow 0.7s cubic-bezier(0.3, 0.7, 0.2, 1) both; }
   .grove.is-live .branch[open] .yangon-vignette { animation: grove-rise 0.9s ease 0.6s both; }
+  .grove.is-live .branch[open] .loves-mom { animation: grove-rise 0.9s ease 0.9s both; }
 }
 @keyframes grove-rise { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
 @keyframes twig-grow { from { clip-path: inset(0 100% 0 0); } to { clip-path: inset(0 0 0 0); } }

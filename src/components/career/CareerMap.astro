@@ -1,7 +1,8 @@
 ---
 /**
- * The career as a tree laid along time, left to right. The trunk is school
- * (college, then the line simply carries on); every employer forks off it
+ * The career as a tree laid along time, left to right. The trunk is time,
+ * stout where school was (college, later the master's, still open at its
+ * far end); every employer forks off it
  * in the month it began and runs for as long as it lasted, so what happened
  * during college, what overlapped, and what is still going can be read at a
  * glance. Each fork is a link to that employer's entry below; with
@@ -20,9 +21,15 @@ const months = (ym: string) => { const [y, m] = ym.split('-').map(Number); retur
 const today = new Date();
 const now = today.getFullYear() * 12 + today.getMonth();
 
-const college = getEducation().find((e) => e.id === career.map.collegeId);
-const colStart = college?.start_date ? months(college.start_date) : null;
-const colEnd = college?.end_date ? months(college.end_date) : null;
+const schools = career.map.schools.flatMap((s) => {
+  const e = getEducation().find((r) => r.id === s.id);
+  if (!e?.start_date) return [];
+  const open = !e.end_date;                           // still studying
+  return [{
+    start: months(e.start_date), end: e.end_date ? months(e.end_date) : now, open,
+    text: `${s.label || e.institution} · ${s.note}`,
+  }];
+});
 
 const jobs = [...career.experienceIds, ...career.earlierExperienceIds]
   .map((id) => {
@@ -58,7 +65,7 @@ const W = 820, PAD_L = 16, PAD_R = 26, LANE = 44;
 const lanes = Math.max(1, free.length);
 const T = 44 + lanes * LANE;                          // the trunk's y
 const H = T + 48;
-const m0 = Math.min(colStart ?? Infinity, ...jobs.map((j) => j.start)) - 2;
+const m0 = Math.min(...schools.map((s) => s.start), ...jobs.map((j) => j.start)) - 2;
 const m1 = now + 3;
 const x = (m: number) => +(PAD_L + ((m - m0) / (m1 - m0)) * (W - PAD_L - PAD_R)).toFixed(1);
 const laneY = (k: number) => T - (k + 1) * LANE;
@@ -99,16 +106,17 @@ const pct = (v: number, of: number) => `${((v / of) * 100).toFixed(2)}%`;
           </g>
         ))}
 
-        <!-- The trunk: time. College is the stout stretch. -->
+        <!-- The trunk: time. School is the stout stretch; one still in
+             progress has no closing ring, and its note sits at the present. -->
         <path class="map-trunk" d={`M${x(m0)} ${T}H${x(m1)}`} stroke="url(#map-fade)" />
-        {colStart !== null && colEnd !== null && college && (
+        {schools.map((s) => (
           <g class="map-college">
-            <path d={`M${x(colStart)} ${T}H${x(colEnd)}`} />
-            <circle cx={x(colStart)} cy={T} r="4" />
-            <circle cx={x(colEnd)} cy={T} r="4" />
-            <text x={x(colStart) + 2} y={T + 19}>{college.institution} · {career.map.collegeNote}</text>
+            <path d={`M${x(s.start)} ${T}H${x(s.end)}`} />
+            <circle cx={x(s.start)} cy={T} r="4" />
+            {!s.open && <circle cx={x(s.end)} cy={T} r="4" />}
+            <text x={s.open ? x(m1) : x(s.start) + 2} y={T + 19} text-anchor={s.open ? 'end' : 'start'}>{s.text}</text>
           </g>
-        )}
+        ))}
 
         {drawn.map((j) => (
           <g class="map-job" data-for={j.id}>

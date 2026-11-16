@@ -1,10 +1,13 @@
 ---
 /**
  * Loves, as a branch: each field note is a small twig with its category.
+ * The notes change over time; the section closes on the two that don't
+ * (`always` in src/data/loves.ts): home, and my mom.
  */
 import BranchNode from './BranchNode.astro';
 import YangonVignette from './YangonVignette.astro';
-import { loves, lovesHeading, fieldPhoto, yangonVignette } from '../../data/loves';
+import Jasmine from './Jasmine.astro';
+import { always, loves, lovesHeading, fieldPhoto, yangonVignette } from '../../data/loves';
 
 const sub = loves.map((item) => item.category).join(', ') + '.';
 ---
@@ -37,6 +40,10 @@ const sub = loves.map((item) => item.category).join(', ') + '.';
       </figure>
     )}
 
-    {yangonVignette && <YangonVignette />}
+    <div class="loves-always">
+      <p class="ring"><span>{always.heading}</span></p>
+      {yangonVignette && <YangonVignette caption={always.home} />}
+      <p class="loves-mom"><Jasmine /><span>{always.mom}</span></p>
+    </div>
   </div>
 </details>

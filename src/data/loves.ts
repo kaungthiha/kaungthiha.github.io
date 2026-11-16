@@ -58,8 +58,16 @@ export const loves: LoveNote[] = [
   },
 ];
 
-/** A small drawn memory of home at the end of the section: Shwedagon, far
-    off above the trees of Yangon (src/components/grove/YangonVignette.astro). */
+/** The constants. The list above changes with the seasons of my life; these
+    two don't, so they close the section under their own heading: home (a
+    small drawn memory of Yangon, Shwedagon far off above the trees:
+    src/components/grove/YangonVignette.astro) and my mom (a sprig of
+    jasmine: src/components/grove/Jasmine.astro). */
+export const always = {
+  heading: 'Always',
+  home: 'And of course, my home, Yangon',
+  mom: 'And my mom.',
+};
 export const yangonVignette = true;
 
 /** Optional personal nature photo for the Loves section (see note above). */

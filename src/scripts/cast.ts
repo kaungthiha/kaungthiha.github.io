@@ -293,6 +293,8 @@ export function createCast() {
         stepRabbit(0, c, out);
         return out;
       }
+      // A frame can arrive stamped a hair before the clock we last read: never step backwards.
+      dt = Math.max(0, dt);
       now += dt;
       stepBirds(dt, c, out);
       stepDeer(dt, c, out);

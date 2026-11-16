@@ -4,7 +4,7 @@
  * A timeline map (CareerMap) lays the employers out along time, forking off
  * college; below it each employer is a twig. With JS the map picks which
  * one twig is shown (career-map.ts), so the branch stays short; without it
- * they are all listed. Then leadership, education, skills.
+ * they are all listed. Then extracurriculars, education, skills.
  */
 import { existsSync } from 'node:fs';
 import { join } from 'node:path';
@@ -18,7 +18,6 @@ import {
   getCurrentRole,
   getLeadership,
   getPublicSkills,
-  yearRange,
 } from '../../lib/career';
 
 const { work, career, create, skillGroups } = portfolioConfig;
@@ -56,12 +55,12 @@ let n = 0;
 
     {leadership.length > 0 && (
       <div class="ring-group">
-        <p class="ring"><span>Leadership</span></p>
+        <p class="ring"><span>Extracurriculars</span></p>
         <ol class="twigs">
           {leadership.map((l) => (
             <li class="twig twig--role twig--minor" id={l.id} style={`--i: ${n++}`}>
               <h3 class="timeline-org">{l.organization}</h3>
-              <p class="twig-sub">{l.canonical_title} · {yearRange({ start_date: l.start_date, end_date: l.end_date, current: false })}</p>
+              <p class="twig-sub">{l.canonical_title}</p>
               {l.summary && <p class="timeline-summary">{l.summary}</p>}
             </li>
           ))}

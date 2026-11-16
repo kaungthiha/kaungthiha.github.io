@@ -9,6 +9,9 @@
  * Drawn here as inline SVG (no asset, no text in the image). Switch it off
  * with `yangonVignette` in src/data/loves.ts.
  */
+interface Props { caption?: string }
+const { caption = 'Yangon' } = Astro.props;
+
 const W = 720;
 const H = 220;
 
@@ -95,5 +98,5 @@ function palm(x: number, y: number, h: number, lean: number): string {
       <path d={canopy(196, 22, 4.4, { x: 60, h: 62, w: 70 })} fill="#14201b" />
     </g>
   </svg>
-  <figcaption><span lang="my">ရန်ကုန်</span> · Yangon</figcaption>
+  <figcaption>{caption} · <span lang="my">ရန်ကုန်</span></figcaption>
 </figure>
