@@ -40,6 +40,7 @@ export interface Figure {
   glow: number;       // holds its own light when the scene darkens
   hideLeft: number;   // nearer things hide it only left of this (0…1 of the painting)
   tone: number;       // gamma: above 1 deepens a figure painted too pale for the scene
+  behindSkyline?: boolean;  // drawn only against the sky, so the ridge in front cuts it off
 }
 
 export interface CastContext {
@@ -53,6 +54,30 @@ export interface CastContext {
 const rand = (a: number, b: number) => a + Math.random() * (b - a);
 const pick = <T,>(xs: T[]): T => xs[Math.floor(Math.random() * xs.length)];
 const clamp = (v: number, a: number, b: number) => Math.min(b, Math.max(a, v));
+
+// ── The lie of the land, traced from the painting ───────────────────────
+// The meadow's brow (where the lit grass meets the misty valley), every 64px
+// across: high by the oak, dipping through the middle, rising to the young
+// tree. Everyone on foot follows it instead of walking a ruled line.
+const BROW = [836, 836, 836, 836, 836, 842, 854, 869, 882, 890, 897, 904, 910, 913, 913, 910, 903, 893, 887, 877, 868, 853, 848, 844, 842];
+function browY(x: number): number {
+  const t = clamp(x / 64, 0, BROW.length - 1.001), i = Math.floor(t), f = t - i;
+  const a = BROW[Math.max(0, i - 1)], b = BROW[i], c = BROW[i + 1], d = BROW[Math.min(BROW.length - 1, i + 2)];
+  // Catmull-Rom, so the path has no corners at the samples.
+  return 0.5 * (2 * b + (c - a) * f + (2 * a - 5 * b + 4 * c - d) * f * f + (3 * b - a - 3 * c + d) * f * f * f);
+}
+// The far skyline (same trace the sky mask is built from, build-dusk-assets.mjs).
+const RIDGE: Array<[number, number]> = [
+  [0, 628], [250, 627], [300, 619], [350, 627], [390, 634], [450, 620], [500, 607], [550, 595], [600, 582],
+  [650, 575], [700, 565], [715, 562], [750, 570], [800, 586], [850, 600], [900, 612], [950, 621], [990, 621],
+  [1025, 612], [1050, 605], [1100, 602], [1150, 600], [1180, 602], [1200, 607], [1536, 612],
+];
+function ridgeY(x: number): number {
+  let k = 0;
+  while (k < RIDGE.length - 2 && RIDGE[k + 1][0] < x) k++;
+  const [xa, ya] = RIDGE[k], [xb, yb] = RIDGE[k + 1];
+  return ya + ((yb - ya) * clamp((x - xa) / (xb - xa), 0, 1));
+}
 
 const OAK = 0.15;            // the oak's trunk ends here; walkers pass behind it
 const OAK_X = 150;
@@ -85,7 +110,9 @@ export function createCast() {
   let now = 0;
 
   // ── Walker ───────────────────────────────────────────────────────────
-  let walker: { g: Gait; x: number; y: number; dir: 1 | -1; gone: number; h: number } | null = null;
+  // off: how far in front of the brow they walk, drifting from one value to
+  // another over the crossing so the path isn't parallel to anything.
+  let walker: { g: Gait; x: number; from: number; to: number; x0: number; x1: number; dir: 1 | -1; gone: number } | null = null;
   let nextWalker = rand(5, 9);
 
   function stepWalker(dt: number, c: CastContext, out: Figure[]): void {
@@ -94,19 +121,22 @@ export function createCast() {
       const g = walkerFor(c);
       if (!g) { nextWalker = now + 20; return; }
       const dir = Math.random() < 0.6 ? 1 : -1;
-      const y = rand(904, 924);
-      const h = g.h * (1 + (y - 912) * 0.004);
-      const left = c.x0 < OAK_X + 40 ? OAK_X : c.x0 - 60;
-      walker = { g, y, h, dir, x: dir > 0 ? left : c.x1 + 60, gone: 0 };
+      const left = c.x0 < OAK_X + 40 ? OAK_X : c.x0 - 60, right = c.x1 + 60;
+      walker = { g, dir, x: dir > 0 ? left : right, x0: left, x1: right, from: rand(4, 30), to: rand(4, 30), gone: 0 };
     }
     const w = walker;
-    const speed = (w.h * w.g.stride) / w.g.cycle;
-    w.x += w.dir * speed * dt;
+    const across = clamp((w.x - w.x0) / (w.x1 - w.x0), 0, 1);
+    const off = w.dir > 0 ? w.from + (w.to - w.from) * across : w.to + (w.from - w.to) * across;
+    const h = w.g.h * (0.93 + off * 0.0045);          // a touch larger as they come nearer
+    const speed = (h * w.g.stride) / w.g.cycle;
+    // Along the slope, not along x: uphill takes as long as it should.
+    const rise = (browY(w.x + 8) - browY(w.x - 8)) / 16;
+    w.x += (w.dir * speed * dt) / Math.hypot(1, rise);
     w.gone += speed * dt;
     const n = atlas.clips[w.g.clip].frames.length;
     out.push({
-      clip: w.g.clip, frame: Math.floor((w.gone / (w.h * w.g.stride)) * n) % n,
-      x: w.x, y: w.y, h: w.h, flip: w.dir < 0,
+      clip: w.g.clip, frame: Math.floor((w.gone / (h * w.g.stride)) * n) % n,
+      x: w.x, y: browY(w.x) + off, h, flip: w.dir < 0,
       depth: 0.78, alpha: 1, haze: 0.06, foot: 0.07, glow: 0, hideLeft: OAK, tone: w.g.tone,
     });
     const leftEdge = c.x0 < OAK_X + 40 ? OAK_X - 20 : c.x0 - 70;
@@ -120,7 +150,7 @@ export function createCast() {
   // Sits, twitches an ear, hops a few times, sits again; after a while it
   // leaves. Bad weather sends it off at once.
   interface Rabbit {
-    x: number; y: number; dir: 1 | -1; state: 'sit' | 'hop';
+    x: number; y: number /* below the brow */; dir: 1 | -1; state: 'sit' | 'hop';
     until: number; twitchAt: number; hops: number; hopT: number; rounds: number; leaving: boolean;
   }
   const HOP = 0.44, HOP_LEN = 44;
@@ -135,7 +165,7 @@ export function createCast() {
       const dir: 1 | -1 = Math.random() < 0.5 ? 1 : -1;
       rabbit = {
         x: first ? lo + (hi - lo) * rand(0.55, 0.8) : dir > 0 ? c.x0 - 30 : c.x1 + 30,
-        y: rand(942, 962), dir, state: first ? 'sit' : 'hop',
+        y: rand(38, 74), dir, state: first ? 'sit' : 'hop',
         until: now + rand(2.5, 5), twitchAt: now + rand(1, 2.5),
         hops: first ? 0 : 99, hopT: 0, rounds: Math.round(rand(2, 4)), leaving: false,
       };
@@ -153,7 +183,7 @@ export function createCast() {
         frame = [1, 2, 3, 2, 1][Math.floor(e / 0.16)] ?? 0;
         if (e > 0.8) r.twitchAt = now + rand(1.6, 4.5);
       }
-      out.push({ clip: 'rabbitSit', frame, x: r.x, y: r.y, h: 31, flip: r.dir < 0, depth: 0.9, alpha: 1, haze: 0.04, foot: 0.16, glow: 0, hideLeft: 0, tone: 1.2 });
+      out.push({ clip: 'rabbitSit', frame, x: r.x, y: Math.min(962, browY(r.x) + r.y), h: 31, flip: r.dir < 0, depth: 0.9, alpha: 1, haze: 0.04, foot: 0.16, glow: 0, hideLeft: 0, tone: 1.2 });
       if (now > r.until && !c.still) {
         r.rounds--;
         r.leaving = r.rounds <= 0;
@@ -168,7 +198,7 @@ export function createCast() {
     r.hopT += dt;
     const k = Math.min(1, r.hopT / HOP);
     const travel = HOP_LEN * (r.leaving ? 1.25 : 1) * smooth(clamp((k - 0.12) / 0.7, 0, 1));
-    out.push({ clip: 'rabbitHop', frame: Math.min(5, Math.floor(k * 6)), x: r.x + r.dir * travel, y: r.y + 2, h: 39, flip: r.dir < 0, depth: 0.9, alpha: 1, haze: 0.04, foot: 0.12, glow: 0, hideLeft: 0, tone: 1.2 });
+    out.push({ clip: 'rabbitHop', frame: Math.min(5, Math.floor(k * 6)), x: r.x + r.dir * travel, y: Math.min(962, browY(r.x + r.dir * travel) + r.y) + 2, h: 39, flip: r.dir < 0, depth: 0.9, alpha: 1, haze: 0.04, foot: 0.12, glow: 0, hideLeft: 0, tone: 1.2 });
     if (k >= 1) {
       r.x += r.dir * HOP_LEN * (r.leaving ? 1.25 : 1);
       r.hopT = 0; r.hops--;
@@ -232,18 +262,25 @@ export function createCast() {
       d.beat = d.frame < 2 ? rand(0.7, 1.3) : d.frame === 5 ? 0.5 : 0.2;
     }
     const alpha = smooth(clamp((now - d.born) / 4, 0, 1)) * (1 - smooth(clamp((now - d.leave) / 4, 0, 1)));
-    out.push({ clip: 'deer', frame: d.frame, x: d.x, y: 872, h: 62, flip: d.flip, depth: 0.6, alpha, haze: 0.2, foot: 0.14, glow: 0, hideLeft: 0, tone: 1.2 });
+    out.push({ clip: 'deer', frame: d.frame, x: d.x, y: browY(d.x) + 5, h: 62, flip: d.flip, depth: 0.6, alpha, haze: 0.2, foot: 0.14, glow: 0, hideLeft: 0, tone: 1.2 });
     if (now > d.leave + 4) { deer = null; nextDeer = now + rand(25, 50); }
   }
 
   // ── Shwedagon, far off ───────────────────────────────────────────────
   // On the right-hand ridge when that part of the painting is in frame
-  // (wide screens), otherwise on the shoulder of the peak.
+  // (wide screens), otherwise on the shoulder of the peak. It stands just
+  // behind the skyline: its wooded base is sunk below the ridge and only
+  // drawn against sky, so the hill's own outline cuts across it and it
+  // reads as part of the land rather than something set on top.
   function pagoda(c: CastContext): Figure {
     const right = c.x0 < 1040 && c.x1 > 1200;
+    const x = right ? 1112 : 566, h = right ? 84 : 70;
+    // Sunk until the skyline covers the whole base, even where the ridge slopes.
+    const reach = h * 0.5;
+    const low = Math.max(ridgeY(x - reach), ridgeY(x), ridgeY(x + reach));
     return {
-      clip: 'pagoda', frame: 0, x: right ? 1112 : 522, y: right ? 615 : 614, h: 84, flip: false,
-      depth: 0.12, alpha: 0.96, haze: 0.2, foot: 0.24, glow: 0.8, hideLeft: 1, tone: 1,
+      clip: 'pagoda', frame: 0, x, y: low + h * 0.22, h, flip: false,
+      depth: 0.12, alpha: 0.96, haze: 0.22, foot: 0.02, glow: 0.8, hideLeft: 1, tone: 1, behindSkyline: true,
     };
   }
 

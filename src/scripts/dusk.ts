@@ -179,7 +179,7 @@ uniform float uStars, uMoon, uMoonPhase, uMoonLit, uClouds, uCloudSpeed, uMist, 
 uniform float uFireflies, uRain, uSnow, uFlash, uFade, uGrain, uPool;
 // The cast: per figure, its box in the painting (xy top-left, zw size), its
 // frame in the atlas (xy origin, zw size), then (depth, alpha, haze, glow)
-// and (foot fade, hide-left limit, flip, tone gamma).
+// and (foot fade, hide-left limit, flip + 2 if it stands behind the skyline, tone gamma).
 uniform sampler2D uCast;
 uniform int uCastN;
 uniform vec4 uCastBox[${MAX_FIGURES}], uCastUV[${MAX_FIGURES}], uCastFx[${MAX_FIGURES}], uCastMisc[${MAX_FIGURES}];
@@ -301,9 +301,10 @@ void main() {
     if (q.x <= 0.0 || q.x >= 1.0 || q.y <= 0.0 || q.y >= 1.0) continue;
     vec4 fr = uCastUV[i];
     vec2 g = fr.zw / box.zw;
-    vec4 sp = textureGrad(uCast, fr.xy + vec2(mi.z > 0.5 ? 1.0 - q.x : q.x, q.y) * fr.zw, pdx * g, pdy * g);
+    vec4 sp = textureGrad(uCast, fr.xy + vec2(mod(mi.z, 2.0) > 0.5 ? 1.0 - q.x : q.x, q.y) * fr.zw, pdx * g, pdy * g);
     float a = sp.a * fx.y * smoothstep(1.0, 1.0 - max(mi.x, 0.0001), q.y);
     if (s.x < mi.y) a *= 1.0 - smoothstep(fx.x + 0.03, fx.x + 0.1, depth);
+    if (mi.z > 1.5) a *= sky;                  // behind the ridge: the land itself cuts it off
     if (a < 0.004) continue;
     // The sheets are painted in flat studio light; deepen them to sit in the scene.
     vec3 c = pow(sp.rgb, vec3(mi.w));
@@ -511,7 +512,7 @@ export function initDusk(host: HTMLElement, opts: { masterUrl: string; maskUrl: 
       cBox.set([(f.x - w / 2) / PAINT_W, (f.y - f.h) / PAINT_H, w / PAINT_W, f.h / PAINT_H], i * 4);
       cUV.set([ax / ATLAS.width, ay / ATLAS.height, clip.w / ATLAS.width, clip.h / ATLAS.height], i * 4);
       cFx.set([f.depth, f.alpha, f.haze, f.glow], i * 4);
-      cMisc.set([f.foot, f.hideLeft, f.flip ? 1 : 0, f.tone], i * 4);
+      cMisc.set([f.foot, f.hideLeft, (f.flip ? 1 : 0) + (f.behindSkyline ? 2 : 0), f.tone], i * 4);
     });
     gl!.uniform1i(u('uCastN'), figures.length);
     gl!.uniform4fv(u('uCastBox'), cBox);
