@@ -12,12 +12,18 @@
      (`weather:change` → {mode, phase}), with a light seasonal bias on
      top (season.ts; `season:change`).
 
+   The meadow is inhabited too: painted figures (a walker, a rabbit, birds,
+   a deer, Shwedagon far off) are sampled from one atlas and composited
+   into the painting here, before the grade's weather, so they take the
+   same light, mist and rain as the land. Who is out is cast.ts's call.
+
    One fullscreen WebGL2 pass; no 3D engine needed for a painted plate.
    Falls back to the static painting (CSS background) without WebGL2, and
    renders a single still frame under prefers-reduced-motion.
    ────────────────────────────────────────────────────────────────────── */
 
 import { currentSeason, type Season } from './season';
+import { createCast, ATLAS, MAX_FIGURES } from './cast';
 
 type Mode = 'sunny' | 'clear' | 'cloudy' | 'rainy' | 'stormy' | 'snowy' | 'foggy' | 'windy' | 'hot' | 'cold';
 type Phase = 'day' | 'dawn' | 'dusk' | 'night';
@@ -171,6 +177,12 @@ uniform float uTime, uWind, uExposure, uSat, uContrast, uSkyMix, uSkyDetail;
 uniform vec3 uTint, uLift, uSkyTop, uSkyBot, uMistColor, uCloudColor, uFadeColor, uSeason;
 uniform float uStars, uMoon, uMoonPhase, uMoonLit, uClouds, uCloudSpeed, uMist, uFog;
 uniform float uFireflies, uRain, uSnow, uFlash, uFade, uGrain, uPool;
+// The cast: per figure, its box in the painting (xy top-left, zw size), its
+// frame in the atlas (xy origin, zw size), then (depth, alpha, haze, glow)
+// and (foot fade, hide-left limit, flip, tone gamma).
+uniform sampler2D uCast;
+uniform int uCastN;
+uniform vec4 uCastBox[${MAX_FIGURES}], uCastUV[${MAX_FIGURES}], uCastFx[${MAX_FIGURES}], uCastMisc[${MAX_FIGURES}];
 out vec4 outColor;
 
 const vec2 PAINT = vec2(${PAINT_W}.0, ${PAINT_H}.0);
@@ -208,6 +220,7 @@ void main() {
   // Painting coordinates (cover-fit + push-in), then parallax by depth: the
   // far ridges and sky hold still, the near trees and meadow carry it.
   vec2 p = uv * uScale + uOffset;
+  vec2 pdx = dFdx(p), pdy = dFdy(p);
   float d0 = texture(uMask, p).b;
   vec2 pp = p + uCam * d0 * d0;
 
@@ -276,6 +289,28 @@ void main() {
       col = mix(col, moonCol, disc * (lit + 0.02 * (1.0 - lit)) * uMoon * clear);
       col += vec3(0.85, 0.86, 0.95) * exp(-md * 0.55) * 0.1 * uMoon * (0.3 + uMoonLit) * clear * step(1.0, md);
     }
+  }
+
+  // The cast, far to near. Each figure is graded like the land, sinks a
+  // little into the air behind it, loses its feet in the grass, and passes
+  // behind anything nearer than itself (the oak's trunk, the canopy).
+  for (int i = 0; i < ${MAX_FIGURES}; i++) {
+    if (i >= uCastN) break;
+    vec4 box = uCastBox[i], fx = uCastFx[i], mi = uCastMisc[i];
+    vec2 q = (p + uCam * fx.x * fx.x - box.xy) / box.zw;
+    if (q.x <= 0.0 || q.x >= 1.0 || q.y <= 0.0 || q.y >= 1.0) continue;
+    vec4 fr = uCastUV[i];
+    vec2 g = fr.zw / box.zw;
+    vec4 sp = textureGrad(uCast, fr.xy + vec2(mi.z > 0.5 ? 1.0 - q.x : q.x, q.y) * fr.zw, pdx * g, pdy * g);
+    float a = sp.a * fx.y * smoothstep(1.0, 1.0 - max(mi.x, 0.0001), q.y);
+    if (s.x < mi.y) a *= 1.0 - smoothstep(fx.x + 0.03, fx.x + 0.1, depth);
+    if (a < 0.004) continue;
+    // The sheets are painted in flat studio light; deepen them to sit in the scene.
+    vec3 c = pow(sp.rgb, vec3(mi.w));
+    vec3 lit = grade(c);
+    lit = mix(lit, max(lit, c * 0.92), fx.w);
+    col = mix(col, mix(lit, col, fx.z), a);
+    depth = mix(depth, max(depth, fx.x), a);   // the valley mist stays behind a near figure
   }
 
   // Valley mist: two slow layers drifting opposite ways between the ridges.
@@ -352,7 +387,7 @@ void main() {
   outColor = vec4(col, 1.0);
 }`;
 
-export function initDusk(host: HTMLElement, opts: { masterUrl: string; maskUrl: string; fadeColor: Vec3 }): void {
+export function initDusk(host: HTMLElement, opts: { masterUrl: string; maskUrl: string; castUrl?: string; fadeColor: Vec3 }): void {
   const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   const finePointer = window.matchMedia('(pointer: fine)').matches;
 
@@ -457,6 +492,34 @@ export function initDusk(host: HTMLElement, opts: { masterUrl: string; maskUrl: 
     offset = [(1 - sx) * fx, (1 - sy) * fy];
   }
 
+  // ── The cast ───────────────────────────────────────────────────────
+  // Loaded after the painting is up; until then (or without it) uCastN is 0.
+  const cast = createCast();
+  let castReady = false;
+  const cBox = new Float32Array(MAX_FIGURES * 4), cUV = new Float32Array(MAX_FIGURES * 4);
+  const cFx = new Float32Array(MAX_FIGURES * 4), cMisc = new Float32Array(MAX_FIGURES * 4);
+  function castUniforms(dt: number): void {
+    gl!.uniform1i(u('uCast'), 2);
+    if (!castReady) { gl!.uniform1i(u('uCastN'), 0); return; }
+    const figures = cast.update(dt, {
+      mode, phase, still: reduceMotion,
+      x0: offset[0] * PAINT_W, x1: (offset[0] + scale[0]) * PAINT_W,
+    });
+    figures.forEach((f, i) => {
+      const clip = ATLAS.clips[f.clip], [ax, ay] = clip.frames[f.frame];
+      const w = f.h * clip.aspect;
+      cBox.set([(f.x - w / 2) / PAINT_W, (f.y - f.h) / PAINT_H, w / PAINT_W, f.h / PAINT_H], i * 4);
+      cUV.set([ax / ATLAS.width, ay / ATLAS.height, clip.w / ATLAS.width, clip.h / ATLAS.height], i * 4);
+      cFx.set([f.depth, f.alpha, f.haze, f.glow], i * 4);
+      cMisc.set([f.foot, f.hideLeft, f.flip ? 1 : 0, f.tone], i * 4);
+    });
+    gl!.uniform1i(u('uCastN'), figures.length);
+    gl!.uniform4fv(u('uCastBox'), cBox);
+    gl!.uniform4fv(u('uCastUV'), cUV);
+    gl!.uniform4fv(u('uCastFx'), cFx);
+    gl!.uniform4fv(u('uCastMisc'), cMisc);
+  }
+
   // ── Lightning ──────────────────────────────────────────────────────
   let flash = 0, nextFlash = 4 + Math.random() * 8, flashAt = -1;
   function lightning(t: number): number {
@@ -526,6 +589,7 @@ export function initDusk(host: HTMLElement, opts: { masterUrl: string; maskUrl: 
     gl!.uniform1f(u('uGrain'), 0.035);
     gl!.uniform1i(u('uTex'), 0);
     gl!.uniform1i(u('uMask'), 1);
+    castUniforms(dt);
     gl!.drawArrays(gl!.TRIANGLES, 0, 3);
   }
 
@@ -581,7 +645,12 @@ export function initDusk(host: HTMLElement, opts: { masterUrl: string; maskUrl: 
     draw(performance.now());
     requestAnimationFrame(() => host.classList.add('is-live'));
     wake();
+    if (opts.castUrl) {
+      loadTexture(opts.castUrl, 2, true, true)
+        .then(() => { castReady = true; wake(); })
+        .catch((err) => console.warn('[dusk] the cast stays home', err));
+    }
   }).catch((err) => console.warn('[dusk] could not load the painting textures', err));
 
-  (window as any).DuskScene = { setContext: (m: Mode, p: Phase) => window.dispatchEvent(new CustomEvent('weather:change', { detail: { mode: m, phase: p } })) };
+  (window as any).DuskScene = { summon: cast.summon, setContext: (m: Mode, p: Phase) => window.dispatchEvent(new CustomEvent('weather:change', { detail: { mode: m, phase: p } })) };
 }
